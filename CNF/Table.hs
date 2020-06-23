@@ -1,0 +1,52 @@
+
+module Table (Table, getTable, genGapTable, evalSolution) where
+
+import Formula
+import Data.List (transpose,nub,sort)
+import Data.Maybe
+import Test.QuickCheck
+
+
+
+
+data Table = Table {getLiterals :: [Literal], getEntries :: [Maybe Bool]}
+
+instance Show Table where
+ show t = header ++ "\n" ++ rows 
+  where literals = getLiterals t
+        formatLine [] _ = [] 
+        formatLine x y = foldr (\x y -> x ++ " | " ++ y) (if isJust y then show (fromJust y) else "---") (map show x) ++ "\n"
+        header = concat [show x ++ " | " | x <- literals] ++ "VALUES"  
+        rows = concat [formatLine x y | (x,y) <- zip (transpose $ comb (length literals) 1) $ getEntries t]  
+        comb 0 _ = []
+        comb len n = [concat $ replicate n $ replicate num 0 ++ replicate num 1] ++ comb (len-1) (n*2) 
+         where num = 2^(len -1)
+
+
+
+getTable :: CNF -> Table
+getTable cnf = Table literals values
+ where literals = sort $ nub $ map filterSign $ concatMap getLs $ getCs cnf 
+       filterSign = \x -> case x of Not y -> Literal y 
+                                    _     -> x   
+       values = map (\x -> evalCNF x cnf) $ transpose $ allCombinations literals 1
+
+allCombinations :: [Literal] -> Int ->  [Allocation]
+allCombinations [] _ = []
+allCombinations (x:xs) n = [concat $ replicate n $ replicate num (x,False) ++ replicate num (x,True)] ++ allCombinations xs (n*2) 
+         where num = 2^(length xs)
+
+
+genGapTable :: Table -> Int -> Gen Table
+genGapTable table = generateGaps []
+ where generateGaps indices 0 = do
+        let gapTable = Table (getLiterals table) [ if x `elem` indices then Nothing else (getEntries table) !! x | x <- [0..length (getEntries table)-1]]
+        return gapTable
+       generateGaps indices num = do
+        rInt <- suchThat (chooseInt (0, (length $ getEntries table)-1)) (\i -> not $ i `elem` indices)
+        generateGaps (rInt: indices) (num-1)
+
+
+evalSolution :: [Bool] -> Table -> Table -> Bool
+evalSolution solution t gapT = solution == correct
+ where correct = [ fromJust x | (x,y) <- zip (getEntries t) (getEntries gapT), y == Nothing] 
