@@ -1,7 +1,7 @@
 module Formula where
 
 import Test.QuickCheck
-import Data.List (nub)
+import Data.List (nub,nubBy,sort)
 
 
 type Allocation = [(Literal, Bool)]
@@ -29,6 +29,11 @@ genLiteral lits = do
  if even rInt then return (Literal rChar)
               else return (Not rChar)
 
+
+opposite :: Literal -> Literal
+opposite (Literal l) = Not l
+opposite (Not l) = Literal l 
+
 ---------------------------------------------------------------------------------------------------
 
 newtype Clause = Clause { getLs :: [Literal]} deriving (Eq,Ord)
@@ -53,14 +58,17 @@ genClause (minlen,maxlen) lits
    (\c -> not (or [Literal lit `elem` c && Not lit `elem` c | lit <- lits]) && length (nub [getC x | x <- c]) == len)
   return (Clause clause)
 
+
+removeDupesClauses :: [Clause] -> [Clause]
+removeDupesClauses = nubBy (\c1 c2 -> sort (getLs c1) ==  sort (getLs c2))  
 ---------------------------------------------------------------------------------------------------
 
 newtype CNF = CNF { getCs :: [Clause]} deriving (Eq,Ord)
 
 instance Show CNF where
  show (CNF []) = "False"
- show (CNF [x]) = show x 
- show (CNF (x:xs)) = "(" ++ show x ++ ") AND (" ++ show (CNF xs)++ ")" 
+ show (CNF [x]) = show x ++ ")"
+ show (CNF (x:xs)) = "(" ++ show x ++ ") AND (" ++ show (CNF xs) 
 
 
 evalCNF :: Allocation -> CNF -> Maybe Bool
@@ -72,5 +80,10 @@ genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
 genCNF (minNum,maxNum) (minLen,maxLen) lits = do
  num <- choose (minNum,maxNum)
  cnf <- suchThat (vectorOf num (genClause (minLen,maxLen) lits)) 
-  (\c -> length c == length (nub c)  )
+  (\c -> length c == length (nub c))
  return (CNF cnf)
+
+
+removeDupesCNFs :: [CNF] -> [CNF]
+removeDupesCNFs = nubBy (\c1 c2 -> map sort (map getLs (getCs c1)) ==  map sort (map getLs (getCs c2)))  
+  
