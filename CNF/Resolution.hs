@@ -1,5 +1,7 @@
 import Formula
 import Data.List (delete,nub,sort,(\\))
+import Test.QuickCheck
+import Data.Maybe
 
 
 
@@ -10,8 +12,7 @@ resolve (Clause x) (Clause y) = if any (\x-> x `elem` oppositesX) y then Just $ 
        removeOpposites xs ys = (y \\ oppositesX) ++ (x \\ oppositesY)
        
 
-canResolve :: Clause -> Clause -> Bool
-canResolve c1 c2 = not $ null [x | x <- getLs c1, opposite x `elem` getLs c2]
+
 
 
 doResolutionStep :: CNF -> (Clause,Clause) -> CNF
@@ -32,14 +33,18 @@ tryResolution cnf = resolve [cnf]
         where nextStep = removeDupesCNFs [new | xs <- cnf, x <- getCs xs, y <- getCs xs, y /=x, let new = doResolutionStep xs (x,y), new /= xs]
 
 
+genRes :: (Int,Int) -> (Int,Int) -> [Char] -> Int -> Gen CNF
+genRes (minNum,maxNum) (minLen,maxLen) lits minsteps = suchThat (genCNF (minNum,maxNum) (minLen,maxLen) lits) (\x -> let result = tryResolution x in isJust result  && length (getCs (head(fromJust result))) - length (getCs x) >= minsteps)
+ 
+
+
 test = CNF [Clause [Literal 'A',Not 'B'], Clause [Not 'A', Literal 'C'], Clause [Literal 'B', Not 'C']]
 
-printList :: Show a => [a] -> IO ()
-printList [] = putStrLn "nope" 
-printList (x:xs) = do {print x; printList xs} 
+
 
 
 main = do
- print test
+ cnf <- generate (genRes (6,6) (1,2) "ABCDEFGI" 2)
+ print cnf
  putStrLn "\n"
- print $ tryResolution test
+ print $ tryResolution cnf
