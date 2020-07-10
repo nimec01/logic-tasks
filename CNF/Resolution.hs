@@ -1,3 +1,4 @@
+module Resolution where
 import Formula
 import Data.List (delete,nub,sort,(\\))
 import Test.QuickCheck

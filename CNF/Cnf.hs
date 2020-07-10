@@ -1,3 +1,4 @@
+module Cnf where
 import Test.QuickCheck (generate)
 import Formula
 import Table

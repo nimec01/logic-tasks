@@ -1,0 +1,12 @@
+name:                ba-patrick-ritzenfeld
+version:             0.1.0.0
+
+dependencies:
+- base >= 4.7 && < 5
+- QuickCheck >= 2.14
+- random
+
+library:
+  source-dirs: CNF
+  ghc-options:
+  - -Wall
