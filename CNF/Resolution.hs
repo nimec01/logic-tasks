@@ -33,18 +33,22 @@ tryResolution cnf = resolve [cnf]
         where nextStep = removeDupesCNFs [new | xs <- cnf, x <- getCs xs, y <- getCs xs, y /=x, let new = doResolutionStep xs (x,y), new /= xs]
 
 
-genRes :: (Int,Int) -> (Int,Int) -> [Char] -> Int -> Gen CNF
-genRes (minNum,maxNum) (minLen,maxLen) lits minsteps = suchThat (genCNF (minNum,maxNum) (minLen,maxLen) lits) (\x -> let result = tryResolution x in isJust result  && length (getCs (head(fromJust result))) - length (getCs x) >= minsteps)
+genRes :: (Int,Int) -> (Int,Int) -> [Char] -> Int -> Int ->  Gen CNF
+genRes (minNum,maxNum) (minLen,maxLen) lits minSteps maxSteps = 
+ suchThat (genCNF (minNum,maxNum) (minLen,maxLen) lits) 
+ (\x -> let (result,steps) = (tryResolution x, length (getCs (head(fromJust result))) - length (getCs x)) in isJust result  && 
+ steps >= minSteps && steps <= maxSteps)
  
 
 
-test = CNF [Clause [Literal 'A',Not 'B'], Clause [Not 'A', Literal 'C'], Clause [Literal 'B', Not 'C']]
-
-
-
+validateSteps :: [(Int,Int)] -> CNF -> Bool
+validateSteps [] cnf = Clause [] `elem` (getCs cnf)
+validateSteps ((i1,i2):xs) cnf = case (resolve (clauses !! i1 ) (clauses !! i2 )) of Nothing   -> False
+                                                                                     Just step -> validateSteps xs (CNF (getCs cnf ++ [step])) 
+ where clauses = getCs cnf
 
 main = do
- cnf <- generate (genRes (6,6) (1,2) "ABCDEFGI" 2)
+ cnf <- generate (genRes (6,6) (1,2) "ABCDEFGI" 2 2)
  print cnf
  putStrLn "\n"
  print $ tryResolution cnf
