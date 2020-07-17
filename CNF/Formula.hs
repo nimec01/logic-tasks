@@ -8,12 +8,12 @@ type Allocation = [(Literal, Bool)]
 
 ---------------------------------------------------------------------------------------------------
 
-data Literal = Literal { getC :: Char} | Not { getC :: Char} deriving (Eq,Ord)
+data Literal = Literal { getC :: Char} | Not { getC :: Char} deriving (Eq,Ord,Read)
 
 instance Show Literal where
  show (Literal x) = [x]
  show (Not x) = "not(" ++ [x] ++ ")" 
-
+ 
 
 evalLiteral :: Allocation -> Literal -> Maybe Bool
 evalLiteral [] _ = Nothing
@@ -82,6 +82,9 @@ genCNF (minNum,maxNum) (minLen,maxLen) lits = do
  cnf <- suchThat (vectorOf num (genClause (minLen,maxLen) lits)) 
   (\c -> length c == length (nub c))
  return (CNF cnf)
+ 
+ 
+ 
 
 
 removeDupesCNFs :: [CNF] -> [CNF]

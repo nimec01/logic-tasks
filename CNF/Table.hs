@@ -9,7 +9,7 @@ import Test.QuickCheck
 
 
 
-data Table = Table {getLiterals :: [Literal], getEntries :: [Maybe Bool]}
+data Table = Table {getLiterals :: [Literal], getEntries :: [Maybe Bool]} deriving Eq
 
 instance Show Table where
  show t = header ++ "\n" ++ rows 
