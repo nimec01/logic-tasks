@@ -1,19 +1,26 @@
 module Formula where
 
 import Test.QuickCheck
-import Data.List (nub,nubBy,sort)
+import Data.List (nub,nubBy,sort,stripPrefix)
 
 
 type Allocation = [(Literal, Bool)]
 
 ---------------------------------------------------------------------------------------------------
 
-data Literal = Literal { getC :: Char} | Not { getC :: Char} deriving (Eq,Ord,Read)
+data Literal = Literal { getC :: Char} | Not { getC :: Char} deriving (Eq,Ord)
 
 instance Show Literal where
  show (Literal x) = [x]
  show (Not x) = "not(" ++ [x] ++ ")" 
- 
+
+instance Read Literal where
+  readsPrec _ ('n':'o':'t':'(':x:')':rest) = [(Not x, rest) | x `elem` ['A' .. 'Z']]
+  readsPrec _ (x:rest) = [(Literal x, rest) | x `elem` ['A' .. 'Z']]
+  readsPrec _ _ = []  
+   
+                                                  
+
 
 evalLiteral :: Allocation -> Literal -> Maybe Bool
 evalLiteral [] _ = Nothing
@@ -82,11 +89,10 @@ genCNF (minNum,maxNum) (minLen,maxLen) lits = do
  cnf <- suchThat (vectorOf num (genClause (minLen,maxLen) lits)) 
   (\c -> length c == length (nub c))
  return (CNF cnf)
- 
- 
+  
  
 
 
 removeDupesCNFs :: [CNF] -> [CNF]
-removeDupesCNFs = nubBy (\c1 c2 -> map sort (map getLs (getCs c1)) ==  map sort (map getLs (getCs c2)))  
+removeDupesCNFs = nubBy (\c1 c2 -> map (sort . getLs) (getCs c1) ==  map (sort . getLs) (getCs c2))  
   
