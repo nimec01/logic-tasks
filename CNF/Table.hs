@@ -27,8 +27,8 @@ instance Show Table where
 getTable :: CNF -> Table
 getTable cnf = Table literals values
  where literals = sort $ nub $ map filterSign $ concatMap getLs $ getCs cnf 
-       filterSign = \x -> case x of Not y -> Literal y 
-                                    _     -> x   
+       filterSign x = case x of Not y -> Literal y 
+                                _     -> x   
        values = map (`evalCNF` cnf) $ transpose $ allCombinations literals 1
 
 allCombinations :: [Literal] -> Int ->  [Allocation]
