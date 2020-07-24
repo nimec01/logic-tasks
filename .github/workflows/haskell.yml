@@ -10,10 +10,10 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
         plan:
           - { build: stack }
-          - { build: cabal, ghc: "8.8.2", cabal-install: "latest" }
+
 
     runs-on: ${{ matrix.os }}
 
