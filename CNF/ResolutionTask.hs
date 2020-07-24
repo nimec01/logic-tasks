@@ -28,8 +28,8 @@ evaluateResolve :: [(Int,Clause)] -> IO()
 evaluateResolve clauses = do
  solution <- try readLn :: IO (Either SomeException [(Int,Int,Literal)])
  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form" 
-                  Right s -> case applySteps clauses s of Just result -> if Clause [] `elem` (map snd result) then putStrLn "Richtige Lösung"
-                                                                                                              else putStrLn "Falsche Lösung"
+                  Right s -> case applySteps clauses s of Just result -> if Clause [] `elem` map snd result then putStrLn "Richtige Lösung"
+                                                                                                            else putStrLn "Falsche Lösung"
                                                           _           -> error "Falsches Ergebnis, die leere Klausel wurde nicht resolviert."
  
  

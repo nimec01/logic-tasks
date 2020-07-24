@@ -1,0 +1,55 @@
+KNF:
+
+erledigt:
+
+- Wahrheitstafel füllen (Lücken, komplett)   
+- KNF zu Wahrheitstafel angeben
+- Multiple Choice KNF -> Tafel
+
+toDo:
+
+- Multiple Choice Tafel -> KNF
+- gehört diese Tafel zu dieser KNF, ja-nein-Frage, beide Richtungen
+- Falsche Einträge in einer Wahrheitstafel finden
+
+
+
+
+Resolution:
+
+erledigt:
+
+- einen Resolutionsschritt durchführen
+- Resolution komplett durchführen, Schritte angeben 
+
+
+toDo:
+
+- angeben ob Resolution möglich ist, ja-nein-Frage
+- Resolution bis zu einem bestimmten Punkt durchführen, Schritte angeben
+- Zuerst negieren, dann Resolution durchführen, negierte Formel und Schritte angeben
+- Beispielhafte Resolution wird angegeben, Lücken füllen
+
+
+
+
+
+Formeln generell:
+
+- Kontraposition
+- Wahrheitstafeln
+- Belegungen angeben
+- Formeln in KNF / DNF umformen, Äquivalente Formel angeben
+
+
+Hornformel: 
+
+- Markierungsalgorithmus durchführen
+
+
+Unifikation: 
+
+- MGU angeben 
+
+
+
