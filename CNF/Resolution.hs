@@ -6,34 +6,13 @@ import Data.Maybe
 
 
 
-resolve :: Clause -> Clause -> Maybe Clause
-resolve (Clause x) (Clause y) = if any (`elem` oppositesX) y then Just $ Clause $ removeOpposites x y else Nothing
- where oppositesX = map opposite x
-       oppositesY = map opposite y
-       removeOpposites xs ys = (y \\ oppositesX) ++ (x \\ oppositesY)
+resolve :: Clause -> Clause -> Literal -> Maybe Clause
+resolve (Clause x) (Clause y) literal
+  | literal `elem` x = if opposite literal `elem` y then Just (Clause ((x ++ y) \\ [literal,opposite literal])) else Nothing
+  | literal `elem` y = resolve (Clause y) (Clause x) literal
+  | otherwise = Nothing  
        
 
-
-
-
-doResolutionStep :: CNF -> (Clause,Clause) -> CNF
-doResolutionStep cnf (c1,c2) = case resolve c1 c2 of Nothing  -> cnf
-                                                     Just new -> if sort (getLs new) `notElem` map (sort . getLs) oldClauses  then CNF (oldClauses ++ [new]) else cnf 
- where oldClauses = getCs cnf
-
-
-applySteps :: CNF -> [(Clause,Clause)] -> CNF
-applySteps = foldl doResolutionStep
-
-
-tryResolution :: CNF -> Maybe [CNF]
-tryResolution (CNF []) = Just [CNF []]
-tryResolution cnf = resolve [cnf]
- where resolve cnf  
-        | null cnf = Nothing 
-        | any (\cnf -> Clause [] `elem` getCs cnf) nextStep = Just nextStep 
-        | otherwise = resolve nextStep
-         where nextStep = removeDupesCNFs [new | xs <- cnf, x <- getCs xs, y <- getCs xs, y /=x, let new = doResolutionStep xs (x,y), new /= xs]
 
 
 genRes :: Int -> Int -> Int -> [Char] -> Gen [Clause]
@@ -76,10 +55,27 @@ genRes amount len steps lits
 
 
 
-validateSteps :: [(Int,Int)] -> CNF -> Bool
-validateSteps [] cnf = Clause [] `elem` getCs cnf
-validateSteps ((i1,i2):xs) cnf = case resolve (clauses !! i1 ) (clauses !! i2 ) of Nothing   -> False
-                                                                                   Just step -> validateSteps xs (CNF (getCs cnf ++ [step])) 
- where clauses = getCs cnf
+applyStep :: [(Int,Clause)] -> (Int,Int,Literal) -> Maybe [(Int,Clause)]
+applyStep [] _ = Just []
+applyStep xs (i1,i2,literal) = case lookup i1 xs of 
+                                 Just c1 -> case lookup i2 xs of 
+                                              Just c2 -> case resolve c1 c2 literal of 
+                                                          Just newClause -> Just ((newIndex, newClause) : xs)
+                                                          Nothing        -> Nothing
+                                              Nothing -> Nothing
+                                 Nothing -> Nothing
+ where newIndex = maximum (map fst xs) +1                                                          
 
+
+applySteps :: [(Int,Clause)] -> [(Int,Int,Literal)] -> Maybe [(Int,Clause)]
+applySteps [] _ = Just []
+applySteps xs [] = Just xs
+applySteps xs (y:ys) = case applyStep xs y of Just result -> applySteps result ys
+                                              Nothing     -> Nothing
+
+
+
+showResClauses :: [(Int,Clause)] -> String
+showResClauses [] = ""
+showResClauses ((index,clause):xs) = show index ++ " " ++ show (getLs clause) ++ "   " ++ showResClauses xs   
 
