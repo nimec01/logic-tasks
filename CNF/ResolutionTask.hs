@@ -8,20 +8,16 @@ import Test.QuickCheck
 
 
 
-exerciseDescStep :: Clause -> Clause -> IO()
-exerciseDescStep c1 c2 = do
- putStrLn "Resolvieren Sie die folgenden Klauseln:"
- print c1
- print c2 
- putStrLn "Geben Sie das in der Resolution genutzte Literal und das Ergebnis in Form eines Tupels an: (Literal, Liste der Literale in der neuen Klausel)."
+exerciseDescStep :: Clause -> Clause -> String
+exerciseDescStep c1 c2 = "Resolvieren Sie die folgenden Klauseln:\n" ++ show c1 ++ "\n" ++ show c2 ++ "\n" ++
+ "Geben Sie das in der Resolution genutzte Literal und das Ergebnis in Form eines Tupels an: (Literal, Liste der Literale in der neuen Klausel)."
  
  
-exerciseDescResolve ::  [(Int,Clause)] -> IO() 
-exerciseDescResolve clauses = do
- putStrLn "Führen Sie das Resolutionsverfahren mit der folgenden Klauselmenge durch."
- putStrLn (showResClauses clauses)
- putStrLn "Geben Sie die Lösung als eine Liste von Tripeln an, wobei die Tripel nach dem Muster (Erster Index, Zweiter Index, ausgewähltes Literal) aufgebaut sind."
- putStrLn "Neu resolvierte Klauseln erhalten dabei fortlaufend den nächst höheren Index."
+exerciseDescResolve ::  [(Int,Clause)] -> String
+exerciseDescResolve clauses = "Fuehren Sie das Resolutionsverfahren mit der folgenden Klauselmenge durch.\n" ++
+ showResClauses clauses ++ "\n" ++ 
+ "Geben Sie die Loesung als eine Liste von Tripeln an, wobei die Tripel nach dem Muster (Erster Index, Zweiter Index, ausgewähltes Literal) aufgebaut sind.\n" ++
+ "Neu resolvierte Klauseln erhalten dabei fortlaufend den naechst hoeheren Index.\n"
  
  
 evaluateResolve :: [(Int,Clause)] -> IO()
@@ -44,12 +40,34 @@ evaluateStep c1 c2 = do
                                                                           Nothing  -> error "Klauseln sind nicht resolvierbar "
 test:: [(Int,Clause)]           
 test = zip [1..] [Clause [Not 'A'], Clause [Literal 'A',Not 'C'], Clause [Literal 'C']]
-           
-                                                   
-                                                   
-main = do
- clauses <- generate (genRes 3 3 3 "ABCD")
+     
+resolveMain :: Int -> Int -> Int -> [Char] -> IO()     
+resolveMain amount len steps lits = do
+ clauses <- generate (genRes amount len steps lits)
  let numberedClauses = zip [1..] clauses
- exerciseDescResolve numberedClauses 
+ putStr (exerciseDescResolve numberedClauses) 
  evaluateResolve numberedClauses
+          
+        
+        
+writeExercises :: Int -> Int -> Int -> Int -> [Char] -> IO()                                                  
+writeExercises count amount len steps lits = write 1
+ 
+ where write current 
+        | current > count = return ()
+        | otherwise = do
+         --amount <- generate $ chooseInt (1,maxAmount)
+         --len <- generate $ chooseInt (1,maxLen)
+         --steps <- generate $ chooseInt (1,maxSteps)
+         --litAmount <- generate $ chooseInt (steps,maxLits)  
+         --let lits = take litAmount ['A'..'Z']
+         if len > length lits || amount * len > product [1..length lits] 
+          then write current 
+          else do clauses <- generate (genRes amount len steps lits)
+                  let numberedClauses = zip [1..] clauses
+                  appendFile "exercisetest.txt" (show (current) ++"\n" ++ exerciseDescResolve numberedClauses ++"\n")
+                  write (current+1)
+ 
+ 
+   
    
