@@ -154,16 +154,33 @@ evaluatePick tables cnf = do
                                                                Nothing    -> "Die angegebene Tabelle existiert nicht.")
 
 
+checkFillConfig :: FillConfig -> Maybe String
+checkFillConfig FillConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfGaps} 
+ | any (<0) [minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength,amountOfGaps] = Just "At least one of your integer parameters is negative."
+ | null usedLiterals = Just "You did not specify which literals should be used."
+ | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
+ | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum."
+ | lengthLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
+ | amountOfGaps >  2^lengthLiterals = Just "There's not enough literals for this amount of gaps."
+ | amountOfGaps > 2^(maxClauseAmount*maxClauseLength) = Just "This amount of gaps is not possible with your Clause length and amount settings."
+ | otherwise = Nothing
+  where lengthLiterals = length usedLiterals
 
-exercise :: (Int,Int) -> (Int,Int) -> Int -> [Char] -> IO ()
-exercise (cnfMinLen, cnfMaxLen) (clauseMinLen,clauseMaxLen) gaps literals = do
- cnf <- generate (genCNF (clauseMinLen,clauseMaxLen) (cnfMinLen,cnfMaxLen) literals)
- let table = getTable cnf
- --gapTable <- generate (genGapTable table gaps)
- exerciseDescPick [(1,table)] cnf
- evaluatePick [(1,table)] cnf
+checkCnfConfig :: CnfConfig -> Maybe String
+checkCnfConfig CnfConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals}
+ | any (<0) [minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength] = Just "At least one of your integer parameters is negative."
+ | null usedLiterals = Just "You did not specify which literals should be used."
+ | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
+ | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum."
+ | length usedLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
+ | otherwise = Nothing
 
 
-
-main :: IO ()
-main = exercise (1,2) (2,3) 3 "ABCD"
+checkPickConfig :: PickConfig -> Maybe String
+checkPickConfig PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfOptions}
+ | any (<0) [minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength,amountOfOptions] = Just "At least one of your integer parameters is negative."
+ | null usedLiterals = Just "You did not specify which literals should be used."
+ | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
+ | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum."
+ | length usedLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
+ | otherwise = Nothing

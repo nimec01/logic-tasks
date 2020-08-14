@@ -94,17 +94,33 @@ evaluateStep c1 c2 = do
                                                                           Nothing  -> error "Klauseln sind nicht resolvierbar "
 
 
-writeExercises :: Int -> Int -> (Int,Int) -> Int -> [Char] -> IO()                                         
-writeExercises count amount (minLen,maxLen) steps lits = write 1
+checkStepConfig :: StepConfig -> Maybe String
+checkStepConfig StepConfig {minClauseLength, maxClauseLength, usedLiterals} 
+ | any (<0) [minClauseLength, maxClauseLength] = Just "At least one of your integer parameters is negative."
+ | null usedLiterals = Just "You did not specify which literals should be used."
+ | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum." 
+ | length usedLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
+ | otherwise = Nothing
+
+
+checkResolutionConfig :: ResolutionConfig -> Maybe String
+checkResolutionConfig ResolutionConfig {minClauseLength, maxClauseLength, steps, usedLiterals}
+ | any (<0) [minClauseLength, maxClauseLength,steps] = Just "At least one of your integer parameters is negative."
+ | null usedLiterals = Just "You did not specify which literals should be used."
+ | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum." 
+ | lengthLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
+ | maxClauseLength == 1 && steps > 1 = Just "More than one step using only length 1 clauses is not possible."
+ | steps > 2* lengthLiterals = Just "This amount of steps is impossible with the given amount of literals."
+ | otherwise = Nothing
+  where lengthLiterals = length usedLiterals 
+
+
+writeExercises :: Int -> (Int,Int) -> Int -> [Char] -> IO()                                         
+writeExercises count (minLen,maxLen) steps lits = write 1
 
  where write current
         | current > count = return ()
         | otherwise = do
-         --amount <- generate $ chooseInt (1,maxAmount)
-         --len <- generate $ chooseInt (1,maxLen)
-         --steps <- generate $ chooseInt (1,maxSteps)
-         --litAmount <- generate $ chooseInt (steps,maxLits)  
-         --let lits = take litAmount ['A'..'Z']
                   clauses <- generate (genRes (minLen,maxLen) steps lits)
                   let numberedClauses = zip [1..] clauses
                   appendFile "exercisetest.txt" (show (current) ++"\n" ++ exerciseDescResolve numberedClauses ++"\n")
