@@ -18,7 +18,7 @@ import Formula (Clause(..),Literal(..),opposite)
 
 resolve :: Clause -> Clause -> Literal -> Maybe Clause
 resolve (Clause x) (Clause y) literal
-  | literal `elem` x = if opposite literal `elem` y then Just (Clause ((x ++ y) \\ [literal,opposite literal])) else Nothing
+  | literal `elem` x = if opposite literal `elem` y then Just (Clause (nub (x ++ y) \\ [literal,opposite literal])) else Nothing
   | literal `elem` y = resolve (Clause y) (Clause x) literal
   | otherwise = Nothing
 
