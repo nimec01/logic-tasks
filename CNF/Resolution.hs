@@ -13,51 +13,30 @@ resolve (Clause x) (Clause y) literal
   | otherwise = Nothing  
        
 
-genRes :: Int -> Int -> Int -> [Char] -> Gen [Clause]
-genRes amount len steps lits 
-  | len > length lits = error "The length of a Clause exceeds the amount of Literals." 
-  | amount * len > product [1..length lits] = error "Your parameters do not provide enough variations."
-  | otherwise = do
-      choice <- if steps <= 2 then return 1 else chooseInteger (1,2)
-      case choice of 1 -> do clauses <- buildClauses lits []
-                             let used = nub (concat clauses) 
-                              -- filledClauses <- fill clauses
-                             return (map Clause clauses)
-                     2 -> do firstLen <- elements [1..steps-2]
-                             let secLen = (steps-1)-firstLen
-                             shuffledLits <- shuffle lits 
-                             let lits1 = take firstLen shuffledLits
-                             let lits2 = take secLen (drop firstLen shuffledLits)
-                             clauses1 <- genRes 1 firstLen  firstLen lits1
-                             clauses2 <- genRes 1 secLen secLen lits2
-                             chosenChar <- elements (drop (secLen + firstLen) shuffledLits)                              
-                             chosenSign <- elements [Literal chosenChar, Not chosenChar]
-                             chosenClause1 <- elements clauses1
-                             chosenClause2 <- elements clauses2
-                             let litAdded1 = [y |x <- clauses1, let y = if x == chosenClause1 then Clause (chosenSign : getLs x) else x]
-                             let litAdded2 = [y |x <- clauses2, let y = if x == chosenClause2 then Clause (opposite chosenSign : getLs x) else x]  
-                             return (litAdded1 ++ litAdded2)  
-               
+
+          
 
 
-                     
+          
+genRes :: (Int,Int) -> Int -> [Char] -> Gen [Clause]
+genRes (minLen,maxLen) steps lits = do
+  clauses <- buildClauses lits []                         
+  return (map Clause (nub (map sort clauses)))
+                 
+ 
  where buildClauses xs ys 
         | length ys >= steps +1 = return ys 
-        | otherwise =       do chosenChar <- elements xs
-                               chosenLit <- elements [Literal chosenChar, Not chosenChar]
-                               let xs' = delete chosenChar xs
-                               case ys of []     -> buildClauses xs' ([Literal chosenChar] : [[Not chosenChar]])
-                                          _      -> do chosenClause <- elements (filter (\x -> length x < len) ys) 
-                                                       buildClauses xs' ([opposite chosenLit] : [ y | x <- ys, let y = if x == chosenClause then chosenLit : x else x])
-           
-
-       fill [] = return []
-       fill xs 
-        | length xs >= amount = return xs        
-        | otherwise = do newClause <- resize len (listOf1 (genLiteral lits))
-                         if newClause `notElem` xs && nub newClause == newClause && all (\x -> opposite x `notElem` newClause) newClause then fill (newClause : xs)
-                                                                                                                                         else fill xs                         
-                                                  
+        | otherwise =       do case ys of []     -> do chosenChar <- elements xs
+                                                       buildClauses xs ([Literal chosenChar] : [[Not chosenChar]])
+                                          _      -> do let underMin = filter (\clause -> length clause < minLen) ys
+                                                       let underMax = filter (\clause -> length clause < maxLen) ys 
+                                                       chosenClause <- elements (if null underMin then underMax else underMin)  
+                                                       chosenChar <- elements (filter (\lit -> Literal lit `notElem` chosenClause && Not lit `notElem` chosenClause) xs) 
+                                                       choice <- if length chosenClause == 1 then return 1 else chooseInteger (1,2)
+                                                       if choice == 1 then buildClauses xs ((Literal chosenChar : chosenClause) : (Not chosenChar : chosenClause) : delete chosenClause ys)
+                                                                      else do firstAmount <- chooseInt (1,length chosenClause-1)
+                                                                              chosenSign <- elements [Literal chosenChar, Not chosenChar]
+                                                                              buildClauses xs ((chosenSign : take firstAmount chosenClause) : (opposite chosenSign : drop firstAmount chosenClause) : delete chosenClause ys)
 
 
 

@@ -41,17 +41,17 @@ evaluateStep c1 c2 = do
 test:: [(Int,Clause)]           
 test = zip [1..] [Clause [Not 'A'], Clause [Literal 'A',Not 'C'], Clause [Literal 'C']]
      
-resolveMain :: Int -> Int -> Int -> [Char] -> IO()     
-resolveMain amount len steps lits = do
- clauses <- generate (genRes amount len steps lits)
+resolveMain :: (Int,Int) -> Int -> [Char] -> IO()     
+resolveMain (minLen,maxLen) steps lits = do
+ clauses <- generate (genRes (minLen,maxLen) steps lits)
  let numberedClauses = zip [1..] clauses
  putStr (exerciseDescResolve numberedClauses) 
  evaluateResolve numberedClauses
           
         
         
-writeExercises :: Int -> Int -> Int -> Int -> [Char] -> IO()                                                  
-writeExercises count amount len steps lits = write 1
+writeExercises :: Int -> Int -> (Int,Int) -> Int -> [Char] -> IO()                                                  
+writeExercises count amount (minLen,maxLen) steps lits = write 1
  
  where write current 
         | current > count = return ()
@@ -61,9 +61,7 @@ writeExercises count amount len steps lits = write 1
          --steps <- generate $ chooseInt (1,maxSteps)
          --litAmount <- generate $ chooseInt (steps,maxLits)  
          --let lits = take litAmount ['A'..'Z']
-         if len > length lits || amount * len > product [1..length lits] 
-          then write current 
-          else do clauses <- generate (genRes amount len steps lits)
+                  clauses <- generate (genRes (minLen,maxLen) steps lits)
                   let numberedClauses = zip [1..] clauses
                   appendFile "exercisetest.txt" (show (current) ++"\n" ++ exerciseDescResolve numberedClauses ++"\n")
                   write (current+1)
