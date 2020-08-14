@@ -1,9 +1,10 @@
 module Cnf where
-import Test.QuickCheck (generate)
-import Formula
-import Table
-import System.IO
+
 import Control.Exception (try,SomeException)
+import Test.QuickCheck (generate)
+import Formula (Literal,CNF(..),Clause(..),genCNF)
+import Table (Table,getTable,evalSolution)
+
 
 
 
@@ -32,49 +33,42 @@ exerciseDescPick tables cnf = do
  showTables tables
  putStrLn "\nGeben Sie die richtige Tafel durch ihre Nummer an."
   where showTables [] = return ()
-        showTables (x:xs) = do putStrLn (show (fst x) ++ "\n" ++ show (snd x)) 
+        showTables (x:xs) = do putStrLn (show (fst x) ++ "\n" ++ show (snd x))
                                showTables xs
 
 
 evaluateFill :: Table -> Table -> IO ()
 evaluateFill table gapTable = do
  solution <- try readLn :: IO (Either SomeException [Bool])
- case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form" 
+ case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
                   Right s ->   putStr (if evalSolution s table gapTable then "Richtige Lösung" else "Falsche Lösung")
 
 
 evaluateCNF :: Table -> IO ()
 evaluateCNF table = do
   solution <- try readLn :: IO (Either SomeException [[Literal]])
-  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form" 
+  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
                    Right s ->   putStr (if table == getTable (CNF (map Clause s)) then "Richtige Lösung" else "Falsche Lösung")
 
 
 evaluatePick :: [(Int,Table)] -> CNF -> IO ()
 evaluatePick tables cnf = do
  solution <- try readLn :: IO (Either SomeException Int)
- case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form" 
+ case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
                   Right s ->   putStr (case lookup s tables of Just table -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
                                                                Nothing    -> "Die angegebene Tabelle existiert nicht.")
-                                        
+
 
 
 exercise :: (Int,Int) -> (Int,Int) -> Int -> [Char] -> IO ()
 exercise (cnfMinLen, cnfMaxLen) (clauseMinLen,clauseMaxLen) gaps literals = do
- cnf <- generate (genCNF (clauseMinLen,clauseMaxLen) (cnfMinLen,cnfMaxLen) literals) 
+ cnf <- generate (genCNF (clauseMinLen,clauseMaxLen) (cnfMinLen,cnfMaxLen) literals)
  let table = getTable cnf
  --gapTable <- generate (genGapTable table gaps)
  exerciseDescPick [(1,table)] cnf
  evaluatePick [(1,table)] cnf
 
 
-  
+
 main :: IO ()
 main = exercise (1,2) (2,3) 3 "ABCD"
-
- 
-    
-
-
-
-
