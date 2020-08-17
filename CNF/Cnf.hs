@@ -1,10 +1,23 @@
 {-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
-module Cnf where
+module Cnf 
+      ( FillConfig
+      , CnfConfig
+      , PickConfig
+      , defaultFillConfig
+      , defaultCnfConfig
+      , defaultPickConfig
+      , fillExercise
+      , cnfExercise
+      , pickExercise
+      , checkFillConfig
+      , checkCnfConfig
+      , checkPickConfig
+      ) where
 
 import Control.Exception (try,SomeException)
 import Test.QuickCheck (generate,vectorOf,elements)
 import Formula (Literal,CNF(..),Clause(..),genCNF)
-import Table (Table,getTable,evalSolution,genGapTable)
+import Table (Table,getTable,evalSolution,genGapTable,genWrongTable)
 
 
 data FillConfig = FillConfig
@@ -37,6 +50,15 @@ data PickConfig = PickConfig
     , amountOfOptions :: Int
     } deriving Show
 
+
+data DecideConfig = DecideConfig
+    { minClauseAmount :: Int
+    , maxClauseAmount :: Int
+    , minClauseLength :: Int
+    , maxClauseLength :: Int
+    , usedLiterals :: [Char]
+    , changes :: Int
+    } deriving Show
 
 
 defaultFillConfig :: FillConfig
@@ -72,7 +94,15 @@ defaultPickConfig = PickConfig
   , amountOfOptions = 5
   }
 
-
+defaultDecideConfig :: DecideConfig
+defaultDecideConfig = DecideConfig
+  { minClauseAmount = 2
+  , maxClauseAmount = 3
+  , minClauseLength = 2
+  , maxClauseLength = 3
+  , usedLiterals = "ABCD"
+  , changes = 2
+  }
 
 fillExercise :: FillConfig -> IO()
 fillExercise FillConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfGaps} = do
@@ -102,6 +132,14 @@ pickExercise PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxC
  evaluatePick tables rightCnf
  
 
+decideExercise :: DecideConfig -> IO()
+decideExercise DecideConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, changes} = do
+ cnf <- generate (genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
+ let rightTable = getTable cnf
+ wrongTable <- generate $ genWrongTable rightTable changes
+ displayTable <- generate $ elements [rightTable,wrongTable]
+ exerciseDescDecide cnf displayTable
+ evaluateDecide (if displayTable == rightTable then True else False)
 
 exerciseDescFill :: CNF -> Table -> IO ()
 exerciseDescFill cnf table = do
@@ -132,6 +170,14 @@ exerciseDescPick tables cnf = do
                                showTables xs
 
 
+exerciseDescDecide :: CNF -> Table -> IO ()
+exerciseDescDecide cnf table = do
+ putStrLn "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n"
+ print cnf
+ putStrLn "\n Gehört die folgende Wahrheitstabelle zu der Formel?\n"
+ print table
+ putStrLn "\nGeben Sie als Lösung die Antwort 'ja' oder 'nein' an."
+
 evaluateFill :: Table -> Table -> IO ()
 evaluateFill table gapTable = do
  solution <- try readLn :: IO (Either SomeException [Bool])
@@ -153,6 +199,13 @@ evaluatePick tables cnf = do
                   Right s ->   putStr (case lookup s tables of Just table -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
                                                                Nothing    -> "Die angegebene Tabelle existiert nicht.")
 
+evaluateDecide :: Bool -> IO ()
+evaluateDecide bool = do
+ solution <- try readLn :: IO (Either SomeException String)
+ case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+                  Right s -> case s of "ja"   -> putStrLn (if bool then "Richtige Antwort" else "Falsche Antwort")  
+                                       "nein" -> putStrLn (if not bool then "Richtige Antwort" else "Falsche Antwort")
+                                       _      -> putStrLn "keine Lösung der Aufgabe."
 
 checkFillConfig :: FillConfig -> Maybe String
 checkFillConfig FillConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfGaps} 

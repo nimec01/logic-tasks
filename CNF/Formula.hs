@@ -7,10 +7,12 @@ module Formula
        , opposite
        , evalCNF
        , genCNF
+       , removeDupesClauses
+       , isElem
        ) where
 
-import Test.QuickCheck (Gen,elements, chooseInt, vectorOf, suchThat)
-import Data.List (nub,nubBy,sort,stripPrefix)
+import Test.QuickCheck (Gen,elements, chooseInt, vectorOf, suchThat, generate)
+import Data.List (nub,nubBy,sort,stripPrefix, delete)
 
 
 type Allocation = [(Literal, Bool)]
@@ -69,16 +71,23 @@ evalClause xs ys = or <$> sequence literals
 
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
- | null lits || minlen < 0 || maxlen > length lits = return (Clause [])
+ | null lits || minlen < 0 || minlen > length lits = return (Clause [])
  | otherwise = do
-  len <- chooseInt (minlen,maxlen)
-  clause <- suchThat (vectorOf len (genLiteral lits))
-   (\c -> not (or [Literal lit `elem` c && Not lit `elem` c | lit <- lits]) && length (nub [getC x | x <- c]) == len)
-  return (Clause clause)
-
+  len <- chooseInt (minlen,minimum [length lits, maxlen])
+  literals <- generateLiterals lits [] len
+  return (Clause literals)
+   where generateLiterals lits xs len
+           | length xs == len = return xs
+           | otherwise = do
+              literal <- genLiteral lits
+              generateLiterals (delete (getC literal) lits) (literal:xs) len 
 
 removeDupesClauses :: [Clause] -> [Clause]
 removeDupesClauses = nubBy (\c1 c2 -> sort (getLs c1) ==  sort (getLs c2))
+
+isElem :: Clause -> [Clause] -> Bool
+isElem _ [] = False
+isElem y (x:xs) = if getLs y == getLs x then True else isElem y xs 
 
 ---------------------------------------------------------------------------------------------------
 
@@ -87,8 +96,8 @@ newtype CNF = CNF { getCs :: [Clause]}
 
 instance Show CNF where
  show (CNF []) = "False"
- show (CNF [x]) = show x ++ ")"
- show (CNF (x:xs)) = "(" ++ show x ++ ") AND (" ++ show (CNF xs)
+ show (CNF [x]) = show x
+ show (CNF (x:xs)) = "(" ++ show x ++ ") AND (" ++ show (CNF xs) ++ ")"
 
 
 evalCNF :: Allocation -> CNF -> Maybe Bool
@@ -99,10 +108,13 @@ evalCNF xs ys = and <$> sequence clauses
 genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
 genCNF (minNum,maxNum) (minLen,maxLen) lits = do
  num <- chooseInt (minNum,maxNum)
- cnf <- suchThat (vectorOf num (genClause (minLen,maxLen) lits))
-  (\c -> length c == length (nub c))
+ cnf <- generateClauses lits [] num
  return (CNF cnf)
-
+  where generateClauses lits xs num
+           | length xs == num = return xs
+           | otherwise = do
+              clause <- genClause (minLen,maxLen) lits
+              generateClauses lits (if isElem clause xs then xs else clause:xs) num
 
 
 removeDupesCNFs :: [CNF] -> [CNF]

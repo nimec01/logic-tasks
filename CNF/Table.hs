@@ -4,6 +4,7 @@ module Table
          Table
        , getTable
        , genGapTable
+       , genWrongTable
        , evalSolution
        ) where
 
@@ -54,6 +55,14 @@ genGapTable table = generateGaps []
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateGaps (rInt: indices) (num-1)
 
+genWrongTable :: Table -> Int -> Gen Table
+genWrongTable table = generateChanges []
+ where generateChanges indices 0 = do
+        let newTable = Table (getLiterals table) [ if x `elem` indices then not <$> (getEntries table !! x) else getEntries table !! x | x <- [0..length (getEntries table)-1]]
+        return newTable
+       generateChanges indices num = do
+        rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
+        generateChanges (rInt: indices) (num-1)
 
 evalSolution :: [Bool] -> Table -> Table -> Bool
 evalSolution solution t gapT = solution == correct
