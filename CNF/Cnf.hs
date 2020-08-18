@@ -17,7 +17,7 @@ module Cnf
 import Control.Exception (try,SomeException)
 import Test.QuickCheck (generate,vectorOf,elements)
 import Formula (Literal,CNF(..),Clause(..),genCNF)
-import Table (Table,getTable,evalSolution,genGapTable,genWrongTable)
+import Table (Table,getTable,evalSolution,genGapTable,genWrongTable,readEntries)
 
 
 data FillConfig = FillConfig
@@ -48,6 +48,7 @@ data PickConfig = PickConfig
     , maxClauseLength :: Int
     , usedLiterals :: [Char]
     , amountOfOptions :: Int
+    , pickCnf :: Bool
     } deriving Show
 
 
@@ -57,8 +58,10 @@ data DecideConfig = DecideConfig
     , minClauseLength :: Int
     , maxClauseLength :: Int
     , usedLiterals :: [Char]
-    , changes :: Int
+    , amountOfChanges :: Int
+    , findMistakes :: Bool
     } deriving Show
+
 
 
 defaultFillConfig :: FillConfig
@@ -92,6 +95,7 @@ defaultPickConfig = PickConfig
   , maxClauseLength = 3
   , usedLiterals = "ABCD"
   , amountOfOptions = 5
+  , pickCnf = False
   }
 
 defaultDecideConfig :: DecideConfig
@@ -101,7 +105,8 @@ defaultDecideConfig = DecideConfig
   , minClauseLength = 2
   , maxClauseLength = 3
   , usedLiterals = "ABCD"
-  , changes = 2
+  , amountOfChanges = 2
+  , findMistakes = True
   }
 
 fillExercise :: FillConfig -> IO()
@@ -124,22 +129,28 @@ cnfExercise CnfConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxCla
 
 
 pickExercise :: PickConfig -> IO()
-pickExercise PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfOptions} = do
+pickExercise PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfOptions, pickCnf} = do
  cnfs <- generate (vectorOf amountOfOptions (genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals))
- let tables = zip [1..] (map getTable cnfs)
  rightCnf <- generate (elements cnfs)
- exerciseDescPick tables rightCnf
- evaluatePick tables rightCnf
- 
+ if pickCnf 
+   then do let table = getTable rightCnf
+           let zippedCnfs = zip [1..] cnfs
+           exerciseDescPick2 zippedCnfs table
+           evaluatePick2 zippedCnfs table
+   else do let tables = zip [1..] (map getTable cnfs)
+           exerciseDescPick tables rightCnf
+           evaluatePick tables rightCnf
 
 decideExercise :: DecideConfig -> IO()
-decideExercise DecideConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, changes} = do
+decideExercise DecideConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfChanges, findMistakes} = do
  cnf <- generate (genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
  let rightTable = getTable cnf
- wrongTable <- generate $ genWrongTable rightTable changes
- displayTable <- generate $ elements [rightTable,wrongTable]
- exerciseDescDecide cnf displayTable
- evaluateDecide (if displayTable == rightTable then True else False)
+ (indices,wrongTable) <- generate $ genWrongTable rightTable amountOfChanges
+ displayTable <- if findMistakes then return wrongTable else generate $ elements [rightTable,wrongTable]
+ exerciseDescDecide cnf displayTable findMistakes
+ if findMistakes 
+   then evaluateDecide2 indices
+   else evaluateDecide (if displayTable == rightTable then True else False)
 
 exerciseDescFill :: CNF -> Table -> IO ()
 exerciseDescFill cnf table = do
@@ -169,14 +180,28 @@ exerciseDescPick tables cnf = do
         showTables (x:xs) = do putStrLn (show (fst x) ++ "\n" ++ show (snd x))
                                showTables xs
 
+exerciseDescPick2 :: [(Int,CNF)] -> Table -> IO ()
+exerciseDescPick2 cnfs table = do
+ putStrLn "Betrachten Sie die folgende Wahrheitstafel: \n"
+ print table
+ putStrLn "\n Welche der folgenden Formeln in konjunktiver Normalform passt zu der Formel?\n"
+ showCnfs cnfs
+ putStrLn "\nGeben Sie die richtige Tafel durch ihre Nummer an."
+  where showCnfs [] = return ()
+        showCnfs (x:xs) = do putStrLn (show (fst x) ++ "\n" ++ show (snd x))
+                             showCnfs xs
 
-exerciseDescDecide :: CNF -> Table -> IO ()
-exerciseDescDecide cnf table = do
+exerciseDescDecide :: CNF -> Table -> Bool -> IO ()
+exerciseDescDecide cnf table mode = do
  putStrLn "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n"
  print cnf
- putStrLn "\n Gehört die folgende Wahrheitstabelle zu der Formel?\n"
+ if mode 
+   then putStrLn "\n Finden Sie alle Fehlerhaften Wahrheitswerte in der folgenden Tabelle.\n"
+   else putStrLn "\n Gehört die folgende Wahrheitstabelle zu der Formel?\n"
  print table
- putStrLn "\nGeben Sie als Lösung die Antwort 'ja' oder 'nein' an."
+ if mode 
+   then putStrLn "\nGeben Sie die Lösung als eine Liste der fehlerhaften Indices an."
+   else putStrLn "\nGeben Sie als Lösung die Antwort 'ja' oder 'nein' an."
 
 evaluateFill :: Table -> Table -> IO ()
 evaluateFill table gapTable = do
@@ -199,6 +224,13 @@ evaluatePick tables cnf = do
                   Right s ->   putStr (case lookup s tables of Just table -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
                                                                Nothing    -> "Die angegebene Tabelle existiert nicht.")
 
+evaluatePick2 :: [(Int,CNF)] -> Table -> IO ()
+evaluatePick2 cnfs table = do
+ solution <- try readLn :: IO (Either SomeException Int)
+ case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+                  Right s ->   putStr (case lookup s cnfs of Just cnf -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
+                                                             Nothing    -> "Die angegebene Tabelle existiert nicht.")
+
 evaluateDecide :: Bool -> IO ()
 evaluateDecide bool = do
  solution <- try readLn :: IO (Either SomeException String)
@@ -206,6 +238,14 @@ evaluateDecide bool = do
                   Right s -> case s of "ja"   -> putStrLn (if bool then "Richtige Antwort" else "Falsche Antwort")  
                                        "nein" -> putStrLn (if not bool then "Richtige Antwort" else "Falsche Antwort")
                                        _      -> putStrLn "keine Lösung der Aufgabe."
+
+evaluateDecide2 :: [Int] -> IO ()
+evaluateDecide2 indices = do
+ solution <- try readLn :: IO (Either SomeException [Int])
+ case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+                  Right s -> if indices == s then putStrLn "Richtige Antwort"
+                                             else putStrLn "Falsche Antwort"  
+
 
 checkFillConfig :: FillConfig -> Maybe String
 checkFillConfig FillConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfGaps} 
@@ -230,10 +270,22 @@ checkCnfConfig CnfConfig {minClauseAmount, maxClauseAmount, minClauseLength, max
 
 
 checkPickConfig :: PickConfig -> Maybe String
-checkPickConfig PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfOptions}
+checkPickConfig PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfOptions, pickCnf}
  | any (<0) [minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength,amountOfOptions] = Just "At least one of your integer parameters is negative."
  | null usedLiterals = Just "You did not specify which literals should be used."
  | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
  | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum."
  | length usedLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
  | otherwise = Nothing
+
+
+checkDecideConfig :: DecideConfig -> Maybe String
+checkDecideConfig DecideConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfChanges}
+ | any (<0) [minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength,amountOfChanges] = Just "At least one of your integer parameters is negative."
+ | null usedLiterals = Just "You did not specify which literals should be used."
+ | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
+ | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum."
+ | lengthLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
+ | amountOfChanges >  2^lengthLiterals = Just "The table does not have enough entries to support this samount of changes."
+ | amountOfChanges > 2^(maxClauseAmount*maxClauseLength) = Just "This amount of changes is not possible with your Clause length and amount settings."
+  where lengthLiterals = length usedLiterals

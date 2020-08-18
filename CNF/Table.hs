@@ -6,6 +6,7 @@ module Table
        , genGapTable
        , genWrongTable
        , evalSolution
+       , readEntries
        ) where
 
 import Data.List (transpose,nub,sort)
@@ -55,11 +56,11 @@ genGapTable table = generateGaps []
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateGaps (rInt: indices) (num-1)
 
-genWrongTable :: Table -> Int -> Gen Table
+genWrongTable :: Table -> Int -> Gen ([Int],Table)
 genWrongTable table = generateChanges []
  where generateChanges indices 0 = do
         let newTable = Table (getLiterals table) [ if x `elem` indices then not <$> (getEntries table !! x) else getEntries table !! x | x <- [0..length (getEntries table)-1]]
-        return newTable
+        return (indices,newTable)
        generateChanges indices num = do
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateChanges (rInt: indices) (num-1)
@@ -67,3 +68,7 @@ genWrongTable table = generateChanges []
 evalSolution :: [Bool] -> Table -> Table -> Bool
 evalSolution solution t gapT = solution == correct
  where correct = [ fromJust x | (x,y) <- zip (getEntries t) (getEntries gapT), isNothing y]
+
+
+readEntries :: Table -> [Maybe Bool]
+readEntries = getEntries

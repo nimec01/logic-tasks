@@ -5,14 +5,9 @@ erledigt:
 - Wahrheitstafel füllen (Lücken, komplett)   
 - KNF zu Wahrheitstafel angeben
 - Multiple Choice KNF -> Tafel
-
-toDo:
-
-- Multiple Choice Tafel -> KNF
 - gehört diese Tafel zu dieser KNF, ja-nein-Frage, beide Richtungen
 - Falsche Einträge in einer Wahrheitstafel finden
-
-
+- Multiple Choice Tafel -> KNF 
 
 
 Resolution:
