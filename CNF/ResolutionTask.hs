@@ -3,26 +3,12 @@ module ResolutionTask where
 
 
 import Control.Exception (try,SomeException)
-import Data.List (sort)
-import Test.QuickCheck (generate, elements)
-import Formula (Clause(..),Literal(..))
-import Resolution (genRes,resolve,applySteps,showResClauses)
-
-
-data StepConfig = StepConfig
-    { minClauseLength :: Int
-    , maxClauseLength :: Int
-    , usedLiterals :: [Char]
-    } deriving Show
+import Data.List (sort, delete)
+import Test.QuickCheck (generate, elements,suchThat)
+import Formula (Clause(..),Literal(..),genClause,opposite)
 
 
 
-data ResolutionConfig = ResolutionConfig
-    { minClauseLength :: Int
-    , maxClauseLength :: Int
-    , steps :: Int
-    , usedLiterals :: [Char]
-    } deriving Show
 
 
 
@@ -36,21 +22,25 @@ defaultResolutionConfig = ResolutionConfig
 
 defaultStepConfig :: StepConfig
 defaultStepConfig = StepConfig 
-  { minClauseLength = 1
-  , maxClauseLength = 4
-  , usedLiterals = "ABCDE"
+  { minClauseLength = 2
+  , maxClauseLength = 3
+  , usedLiterals = "ABCD"
   }
 
 
 
 stepExercise :: StepConfig -> IO()
 stepExercise StepConfig { minClauseLength, maxClauseLength, usedLiterals} = do
- clauses <- generate (genRes (minClauseLength, maxClauseLength) (maxClauseLength+1) usedLiterals)
- clause1 <- generate (elements clauses)
- let resolvable = filter (\x -> any (/=Nothing) [resolve clause1 x z | z <- getLs clause1]) clauses 
- clause2 <- generate (elements resolvable)
- putStrLn (exerciseDescStep clause1 clause2)
- evaluateStep clause1 clause2
+ rChar <- generate $ elements usedLiterals
+ rLit <- generate $ elements [Literal rChar, Not rChar]
+ let restLits = delete rChar usedLiterals
+ clause1 <- generate (genClause (minClauseLength-1,maxClauseLength-1) restLits)
+ clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
+                     (\c -> not $ any (\lit -> opposite lit `elem` getLs clause1) (getLs c)))
+ let litAddedClause1 = Clause (rLit : getLs clause1)
+ let litAddedClause2 = Clause (opposite rLit : getLs clause2) 
+ putStrLn (exerciseDescStep litAddedClause1 litAddedClause2)
+ evaluateStep litAddedClause1 litAddedClause2
 
 
 
@@ -70,7 +60,7 @@ exerciseDescStep c1 c2 = "Resolvieren Sie die folgenden Klauseln:\n" ++ show c1 
 
 exerciseDescResolve ::  [(Int,Clause)] -> String
 exerciseDescResolve clauses = "Fuehren Sie das Resolutionsverfahren mit der folgenden Klauselmenge durch.\n" ++
- showResClauses clauses ++ "\n" ++
+ showResClauses clauses ++ "\n\n" ++
  "Geben Sie die Loesung als eine Liste von Tripeln an, wobei die Tripel nach dem Muster (Erster Index, Zweiter Index, ausgewähltes Literal) aufgebaut sind.\n" ++
  "Neu resolvierte Klauseln erhalten dabei fortlaufend den naechst hoeheren Index.\n"
 
@@ -91,7 +81,7 @@ evaluateStep c1 c2 = do
  case solution of Left e                 -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
                   Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if sort res == sort result then putStrLn "Richtige Lösung"
                                                                                                        else putStrLn "Falsche Lösung"
-                                                                          Nothing  -> error "Klauseln sind nicht resolvierbar "
+                                                                          Nothing  -> error "Die angegebene Lösung führt nicht zu einer Resolvenz"
 
 
 checkStepConfig :: StepConfig -> Maybe String

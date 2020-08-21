@@ -7,6 +7,7 @@ module Formula
        , opposite
        , evalCNF
        , genCNF
+       , genClause
        , removeDupesClauses
        , isElem
        ) where
