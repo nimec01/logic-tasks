@@ -1,5 +1,5 @@
 {-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
-module Cnf 
+module Tasks 
       ( FillConfig
       , CnfConfig
       , PickConfig
