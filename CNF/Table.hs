@@ -38,7 +38,7 @@ instance Show Table where
 
 getTable :: CNF -> Table
 getTable cnf = Table literals values
- where literals = toList $ unions $ map (Set.map filterSign) $ map getLs $ toList (getCs cnf)
+ where literals = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
        filterSign x = case x of Not y -> Literal y
                                 _     -> x
        values = map (`evalCNF` cnf) $ transpose $ allCombinations literals 1

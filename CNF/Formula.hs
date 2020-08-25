@@ -46,8 +46,7 @@ genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Can not construct Literal from empty list."
 genLiteral lits = do
  rChar <- elements lits
- rLit <- elements [Literal rChar, Not rChar]
- return rLit
+ elements [Literal rChar, Not rChar]
 
 
 opposite :: Literal -> Literal

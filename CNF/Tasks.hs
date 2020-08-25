@@ -196,7 +196,7 @@ decideExercise = ensureChecksAndExecute checkDecideConfig executeDecideExercise
           putStrLn desc        
           if mistakes 
            then evaluateDecide2 indices
-           else evaluateDecide (if displayTable == rightTable then True else False)
+           else evaluateDecide (displayTable == rightTable)
             where mistakes = findMistakes decideConfig
 
 
@@ -295,7 +295,7 @@ genStepExercise StepConfig { minClauseLength, maxClauseLength, usedLiterals} = d
  let restLits = delete rChar usedLiterals
  clause1 <- generate (genClause (minClauseLength-1,maxClauseLength-1) restLits)
  clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
-                     (\c -> not $ any (\lit -> opposite lit `elem` getLs clause1) (getLs c)))
+                     (not . any (\lit -> opposite lit `elem` getLs clause1) .  getLs))
  let litAddedClause1 = Clause (insert rLit (getLs clause1))
  let litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2)) 
  let desc = exerciseDescStep litAddedClause1 litAddedClause2
@@ -513,8 +513,8 @@ checkResolutionConfig ResolutionConfig {minClauseLength, maxClauseLength, steps,
 
 withRatio :: Int -> (CNF -> Bool)
 withRatio percentage = 
- (\c -> let tableEntries = readEntries (getTable c) in 
-         length (filter (==Just True) tableEntries) == (length tableEntries *percentage `div` 100))
+ \c -> let tableEntries = readEntries (getTable c) in 
+         length (filter (==Just True) tableEntries) == (length tableEntries *percentage `div` 100)
 
 ensureChecksAndExecute :: (a -> Maybe String) -> (a -> IO()) -> a -> IO()
 ensureChecksAndExecute checker exercise config = case checker config of Just message -> putStrLn message
@@ -528,5 +528,5 @@ writeExercises amount config exercise = write 1
         | current > amount = return ()
         | otherwise = do
                   (desc,_) <- exercise config
-                  appendFile "exercisetest.txt" (show (current) ++"\n" ++ desc ++"\n")
+                  appendFile "exercisetest.txt" (show current ++"\n" ++ desc ++"\n")
                   write (current+1)
