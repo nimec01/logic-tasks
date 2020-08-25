@@ -11,8 +11,10 @@ module Table
 
 import Data.List (transpose,nub,sort)
 import Data.Maybe (fromJust, isNothing)
+import Data.Set (toList,unions)
 import Test.QuickCheck (Gen, suchThat, chooseInt)
 import Formula (Allocation,Literal(..),Clause(..),CNF(..),evalCNF)
+import qualified Data.Set as Set (map)
 
 
 
@@ -36,7 +38,7 @@ instance Show Table where
 
 getTable :: CNF -> Table
 getTable cnf = Table literals values
- where literals = sort $ nub $ map filterSign $ concatMap getLs $ getCs cnf
+ where literals = toList $ unions $ map (Set.map filterSign) $ map getLs $ toList (getCs cnf)
        filterSign x = case x of Not y -> Literal y
                                 _     -> x
        values = map (`evalCNF` cnf) $ transpose $ allCombinations literals 1

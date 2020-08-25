@@ -15,7 +15,8 @@ module Tasks
       ) where
 
 import Control.Exception (try,SomeException)
-import Data.List(sort,delete)
+import Data.List(delete)
+import Data.Set (empty,toList,fromList,insert)
 import Test.QuickCheck (generate,vectorOf,elements, suchThat, chooseInt)
 import Formula (Literal(..),CNF(..),Clause(..),genClause,genCNF,opposite)
 import Table (Table,getTable,evalSolution,genGapTable,genWrongTable,readEntries)
@@ -127,9 +128,9 @@ defaultPickConfig = PickConfig
 defaultDecideConfig :: DecideConfig
 defaultDecideConfig = DecideConfig
   { minClauseAmount = 2
-  , maxClauseAmount = 3
-  , minClauseLength = 2
-  , maxClauseLength = 3
+  , maxClauseAmount = 2
+  , minClauseLength = 1
+  , maxClauseLength = 2
   , usedLiterals = "ABCD"
   , amountOfChanges = 2
   , findMistakes = True
@@ -269,10 +270,10 @@ genPickExercise PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, m
 
   where getCnf = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
         getWithSameLiterals x = suchThat getCnf 
-            (\c -> let cLits = concatMap getLs (getCs c) 
-                       xLits = concatMap getLs (getCs x) in 
-                               all (\lit -> lit `elem` cLits || opposite lit `elem` cLits) (concatMap getLs (getCs x)) &&
-                               all (\lit -> lit `elem` xLits || opposite lit `elem` xLits) (concatMap getLs (getCs c)))
+            (\c -> let cLits = concatMap (toList . getLs) (toList (getCs c)) 
+                       xLits = concatMap (toList . getLs) (toList (getCs x)) in 
+                               all (\lit -> lit `elem` cLits || opposite lit `elem` cLits) xLits &&
+                               all (\lit -> lit `elem` xLits || opposite lit `elem` xLits) cLits)
  
 
 
@@ -295,8 +296,8 @@ genStepExercise StepConfig { minClauseLength, maxClauseLength, usedLiterals} = d
  clause1 <- generate (genClause (minClauseLength-1,maxClauseLength-1) restLits)
  clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
                      (\c -> not $ any (\lit -> opposite lit `elem` getLs clause1) (getLs c)))
- let litAddedClause1 = Clause (rLit : getLs clause1)
- let litAddedClause2 = Clause (opposite rLit : getLs clause2) 
+ let litAddedClause1 = Clause (insert rLit (getLs clause1))
+ let litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2)) 
  let desc = exerciseDescStep litAddedClause1 litAddedClause2
  return (desc,(litAddedClause1,litAddedClause2))
 
@@ -386,7 +387,7 @@ evaluateCnf :: Table -> IO ()
 evaluateCnf table = do
   solution <- try readLn :: IO (Either SomeException [[Literal]])
   case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                   Right s ->   putStr (if table == getTable (CNF (map Clause s)) then "Richtige Lösung" else "Falsche Lösung")
+                   Right s ->   putStr (if table == getTable (CNF (fromList (map (Clause . fromList) s))) then "Richtige Lösung" else "Falsche Lösung")
 
 
 evaluatePick :: [(Int,Table)] -> CNF -> IO ()
@@ -415,8 +416,8 @@ evaluateDecide2 :: [Int] -> IO ()
 evaluateDecide2 indices = do
  solution <- try readLn :: IO (Either SomeException [Int])
  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right s -> if indices == s then putStrLn "Richtige Antwort"
-                                             else putStrLn "Falsche Antwort"  
+                  Right s -> if fromList (map (+1) indices) == fromList s then putStrLn "Richtige Antwort"
+                                                                          else putStrLn "Falsche Antwort"  
 
 
 
@@ -424,7 +425,7 @@ evaluateResolve :: [(Int,Clause)] -> IO()
 evaluateResolve clauses = do
  solution <- try readLn :: IO (Either SomeException [(Int,Int,Literal)])
  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right s -> case applySteps clauses s of Just result -> if Clause [] `elem` map snd result then putStrLn "Richtige Lösung"
+                  Right s -> case applySteps clauses s of Just result -> if Clause empty `elem` map snd result then putStrLn "Richtige Lösung"
                                                                                                             else putStrLn "Falsche Lösung"
                                                           _           -> error "Falsches Ergebnis, die leere Klausel wurde nicht resolviert."
 
@@ -434,7 +435,7 @@ evaluateStep :: Clause -> Clause -> IO()
 evaluateStep c1 c2 = do
  solution <- try readLn :: IO (Either SomeException (Literal,[Literal]))
  case solution of Left e                 -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if sort res == sort result then putStrLn "Richtige Lösung"
+                  Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if res == fromList result then putStrLn "Richtige Lösung"
                                                                                                        else putStrLn "Falsche Lösung"
                                                                           Nothing  -> error "Die angegebene Lösung führt nicht zu einer Resolvenz"
 

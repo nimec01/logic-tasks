@@ -8,12 +8,12 @@ module Formula
        , evalCNF
        , genCNF
        , genClause
-       , removeDupesClauses
-       , isElem
        ) where
 
-import Test.QuickCheck (Gen,elements, chooseInt, vectorOf, suchThat, generate)
-import Data.List (nub,nubBy,sort,stripPrefix, delete)
+
+import Data.List (delete)
+import Data.Set (Set,member,size,fromList,toList,empty,insert)
+import Test.QuickCheck (Gen,elements,chooseInt,vectorOf,suchThat)
 
 
 type Allocation = [(Literal, Bool)]
@@ -56,67 +56,65 @@ opposite (Not l) = Literal l
 
 ---------------------------------------------------------------------------------------------------
 
-newtype Clause = Clause { getLs :: [Literal]}
+newtype Clause = Clause { getLs :: Set Literal}
     deriving (Eq,Ord)
 
 instance Show Clause where
- show (Clause []) = "False"
- show (Clause [x]) = show x
- show (Clause (x:xs)) = show x ++ " OR " ++ show (Clause xs)
+ show (Clause set) = listShow (toList set)
+
+  where listShow [] = "False"
+        listShow [x] = show x
+        listShow (x:xs) = show x ++ " OR " ++ listShow xs
+
 
 
 evalClause :: Allocation -> Clause -> Maybe Bool
 evalClause xs ys = or <$> sequence literals
- where literals = map (evalLiteral xs) (getLs ys)
+ where literals = map (evalLiteral xs) (toList (getLs ys))
 
 
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
- | null lits || minlen < 0 || minlen > length lits = return (Clause [])
+ | null lits || minlen < 0 || minlen > length lits = return (Clause empty)
  | otherwise = do
   len <- chooseInt (minlen,minimum [length lits, maxlen])
   literals <- generateLiterals lits [] len
-  return (Clause literals)
+  return (Clause (fromList literals))
    where generateLiterals lits xs len
            | length xs == len = return xs
            | otherwise = do
               literal <- genLiteral lits
               generateLiterals (delete (getC literal) lits) (literal:xs) len 
 
-removeDupesClauses :: [Clause] -> [Clause]
-removeDupesClauses = nubBy (\c1 c2 -> sort (getLs c1) ==  sort (getLs c2))
 
-isElem :: Clause -> [Clause] -> Bool
-isElem _ [] = False
-isElem y (x:xs) = if getLs y == getLs x then True else isElem y xs 
 
 ---------------------------------------------------------------------------------------------------
 
-newtype CNF = CNF { getCs :: [Clause]}
+newtype CNF = CNF { getCs :: Set Clause}
      deriving (Eq,Ord)
 
 instance Show CNF where
- show (CNF []) = "False"
- show (CNF [x]) = show x
- show (CNF (x:xs)) = "(" ++ show x ++ ") AND (" ++ show (CNF xs) ++ ")"
+ show (CNF set) = listShow (toList set)
+
+   where listShow [] = "False"
+         listShow [x] = show x
+         listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
 
 
 evalCNF :: Allocation -> CNF -> Maybe Bool
 evalCNF xs ys = and <$> sequence clauses
- where clauses = map (evalClause xs) (getCs ys)
+ where clauses = map (evalClause xs) (toList (getCs ys))
 
 
 genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
 genCNF (minNum,maxNum) (minLen,maxLen) lits = do
  num <- chooseInt (minNum,maxNum)
- cnf <- generateClauses lits [] num
+ cnf <- generateClauses lits empty num
  return (CNF cnf)
-  where generateClauses lits xs num
-           | length xs == num = return xs
+  where generateClauses lits set num
+           | size set == num = return set
            | otherwise = do
               clause <- genClause (minLen,maxLen) lits
-              generateClauses lits (if isElem clause xs then xs else clause:xs) num
+              generateClauses lits (if clause `member` set then set else insert clause set) num
 
 
-removeDupesCNFs :: [CNF] -> [CNF]
-removeDupesCNFs = nubBy (\c1 c2 -> map (sort . getLs) (getCs c1) ==  map (sort . getLs) (getCs c2))
