@@ -8,6 +8,38 @@ dependencies:
 - containers
 
 library:
-  source-dirs: CNF
+  source-dirs: src
   ghc-options:
   - -Wall
+
+executables:
+  Fill: 
+    main:                fill.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Cnf: 
+    main:                giveCnf.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Pick: 
+    main:                pick.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Decide: 
+    main:                decide.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Resolve: 
+    main:                resolve.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Step: 
+    main:                step.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
