@@ -25,8 +25,8 @@ resolutionExercise = ensureChecksAndExecute checkResolutionConfig executeResolut
 
 
 genResolutionExercise :: ResolutionConfig -> IO (String,[(Int,Clause)])
-genResolutionExercise ResolutionConfig { minClauseLength, maxClauseLength, steps, usedLiterals} = do
- clauses <- generate (genRes (minClauseLength,maxClauseLength) steps usedLiterals)
+genResolutionExercise ResolutionConfig { clauseConfig, steps} = do
+ clauses <- generate (genRes (minClauseLength clauseConfig, maxClauseLength clauseConfig) steps (usedLiterals clauseConfig))
  let numberedClauses = zip [1..] clauses
  let desc = exerciseDescResolve numberedClauses
  return (desc,numberedClauses)

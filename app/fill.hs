@@ -26,11 +26,7 @@ fillExercise = ensureChecksAndExecute checkFillConfig executeFillExercise
 
 genFillExercise :: FillConfig -> IO (String,(Table,Table))
 genFillExercise FillConfig
-  { minClauseAmount
-  , maxClauseAmount
-  , minClauseLength
-  , maxClauseLength
-  , usedLiterals
+  { cnfConfig
   , amountOfGaps
   , percentTrueEntries
   }  = do 
@@ -41,7 +37,8 @@ genFillExercise FillConfig
  gapTable <- generate (genGapTable table amountOfGaps)
  let desc = exerciseDescFill cnf gapTable  
  return (desc,(table,gapTable))
-  where getCNF = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals      
+  where clConfig = clauseConf cnfConfig
+        getCNF = genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig)     
 
 
 

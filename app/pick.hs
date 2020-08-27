@@ -23,7 +23,7 @@ pickExercise = ensureChecksAndExecute checkPickConfig executePickExercise
 
 
 genPickExercise :: PickConfig -> IO (String,Either ([(Int,CNF)],Table) ([(Int,Table)],CNF))
-genPickExercise PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfOptions, pickCnf} = do
+genPickExercise PickConfig {cnfConfig, amountOfOptions, pickCnf} = do
  first <- generate getCnf
  rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first))
  let cnfs = first : rest
@@ -37,15 +37,16 @@ genPickExercise PickConfig {minClauseAmount, maxClauseAmount, minClauseLength, m
            let desc = exerciseDescPick tables rightCnf
            return (desc,Right (tables,rightCnf))
 
-  where getCnf = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+  where clConfig = clauseConf cnfConfig
+        getCnf = genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig)
         getWithSameLiterals x = suchThat getCnf 
             (\c -> let cLits = concatMap (toList . getLs) (toList (getCs c)) 
                        xLits = concatMap (toList . getLs) (toList (getCs x)) in 
                                all (\lit -> lit `elem` cLits || opposite lit `elem` cLits) xLits &&
                                all (\lit -> lit `elem` xLits || opposite lit `elem` xLits) cLits)
  
- 
- 
+
+
 exerciseDescPick :: [(Int,Table)] -> CNF -> String
 exerciseDescPick tables cnf =
  "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n\n" ++

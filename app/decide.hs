@@ -26,14 +26,14 @@ decideExercise = ensureChecksAndExecute checkDecideConfig executeDecideExercise
 
 
 genDecideExercise :: DecideConfig -> IO (String,(Table,Table,[Int]))
-genDecideExercise DecideConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, amountOfChanges, findMistakes} = do
- cnf <- generate (genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
+genDecideExercise DecideConfig {cnfConfig, amountOfChanges, findMistakes} = do
+ cnf <- generate (genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig))
  let rightTable = getTable cnf
  (indices,wrongTable) <- generate $ genWrongTable rightTable amountOfChanges
  displayTable <- if findMistakes then return wrongTable else generate $ elements [rightTable,wrongTable]
  let desc = exerciseDescDecide cnf displayTable findMistakes
  return (desc,(rightTable,displayTable,indices))
-
+  where clConfig = clauseConf cnfConfig
 
 
 exerciseDescDecide :: CNF -> Table -> Bool -> String

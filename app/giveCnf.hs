@@ -9,25 +9,26 @@ import TaskUtility
 import Types
 import Table(Table,getTable)
 
-cnfExercise :: CnfConfig -> IO()
-cnfExercise = ensureChecksAndExecute checkCnfConfig executeCnfExercise
+giveCnfExercise :: GiveCnfConfig -> IO()
+giveCnfExercise = ensureChecksAndExecute checkGiveCnfConfig executeCnfExercise
 
   where executeCnfExercise cnfConfig = do
-          (desc,table) <- genCnfExercise cnfConfig
+          (desc,table) <- genGiveCnfExercise cnfConfig
           putStrLn desc
           evaluateCnf table
 
 
 
-genCnfExercise :: CnfConfig -> IO (String,Table)
-genCnfExercise CnfConfig {minClauseAmount, maxClauseAmount, minClauseLength, maxClauseLength, usedLiterals, percentTrueEntries} = do
+genGiveCnfExercise :: GiveCnfConfig -> IO (String,Table)
+genGiveCnfExercise GiveCnfConfig {cnfConfig, percentTrueEntries} = do
  cnf <- generate (case percentTrueEntries of Just (lower,upper) -> do ratio <- chooseInt (lower,upper)
                                                                       suchThat getCNF (withRatio ratio)
                                              Nothing            -> getCNF)
  let table = getTable cnf
  let desc = exerciseDescCnf table
  return (desc,table)
-  where getCNF = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+  where clConfig = clauseConf cnfConfig
+        getCNF = genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig)
 
 
 
@@ -48,4 +49,4 @@ evaluateCnf table = do
 
 
 
-main = cnfExercise defaultCnfConfig
+main = giveCnfExercise defaultGiveCnfConfig

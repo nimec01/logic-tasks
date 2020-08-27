@@ -29,19 +29,21 @@ stepExercise = ensureChecksAndExecute checkStepConfig executeStepExercise
 
 
 genStepExercise :: StepConfig -> IO (String,(Clause,Clause))
-genStepExercise StepConfig { minClauseLength, maxClauseLength, usedLiterals} = do
- rChar <- generate $ elements usedLiterals
+genStepExercise StepConfig {clauseConfig} = do
+ rChar <- generate $ elements literals
  rLit <- generate $ elements [Literal rChar, Not rChar]
- let restLits = delete rChar usedLiterals
- clause1 <- generate (genClause (minClauseLength-1,maxClauseLength-1) restLits)
- clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
+ let restLits = delete rChar literals
+ clause1 <- generate (genClause (minLen-1,maxLen-1) restLits)
+ clause2 <- generate (suchThat (genClause (minLen-1,maxLen-1) restLits)
                      (not . any (\lit -> opposite lit `elem` getLs clause1) .  getLs))
  let litAddedClause1 = Clause (insert rLit (getLs clause1))
  let litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2)) 
  let desc = exerciseDescStep litAddedClause1 litAddedClause2
  return (desc,(litAddedClause1,litAddedClause2))
-
-
+  where literals = usedLiterals clauseConfig
+        minLen = minClauseLength clauseConfig
+        maxLen = maxClauseLength clauseConfig
+  
 
 exerciseDescStep :: Clause -> Clause -> String
 exerciseDescStep c1 c2 = "Resolvieren Sie die folgenden Klauseln:\n" ++ show c1 ++ "\n" ++ show c2 ++ "\n" ++
