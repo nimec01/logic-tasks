@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
 module Main where
 
 import Control.Exception (try,SomeException)
@@ -20,15 +20,14 @@ giveCnfExercise = ensureChecksAndExecute checkGiveCnfConfig executeCnfExercise
 
 
 genGiveCnfExercise :: GiveCnfConfig -> IO (String,Table)
-genGiveCnfExercise GiveCnfConfig {cnfConfig, percentTrueEntries} = do
+genGiveCnfExercise GiveCnfConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..} = do
  cnf <- generate (case percentTrueEntries of Just (lower,upper) -> do ratio <- chooseInt (lower,upper)
                                                                       suchThat getCNF (withRatio ratio)
                                              Nothing            -> getCNF)
  let table = getTable cnf
  let desc = exerciseDescCnf table
  return (desc,table)
-  where clConfig = clauseConf cnfConfig
-        getCNF = genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig)
+  where getCNF = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
 module Types where
 
 import Data.Maybe (isJust,fromJust)
@@ -51,7 +51,7 @@ data DecideConfig = DecideConfig
 
 
 
-data StepConfig = StepConfig
+newtype StepConfig = StepConfig
     { clauseConfig :: ClauseConfig
     } deriving Show
 
@@ -131,7 +131,7 @@ defaultStepConfig = StepConfig { clauseConfig = defaultClauseConfig}
 
 
 checkClauseConfig :: ClauseConfig -> Maybe String
-checkClauseConfig ClauseConfig {minClauseLength, maxClauseLength, usedLiterals}
+checkClauseConfig ClauseConfig {..}
  | any (<0) [minClauseLength, maxClauseLength] = Just "At least one of your clause length parameters is negative."
  | minClauseLength > maxClauseLength = Just "The minimum clause length is greater than the maximum."
  | length usedLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
@@ -140,7 +140,7 @@ checkClauseConfig ClauseConfig {minClauseLength, maxClauseLength, usedLiterals}
  
  
 checkCnfConfig :: CnfConfig -> Maybe String
-checkCnfConfig CnfConfig {clauseConf, minClauseAmount, maxClauseAmount}
+checkCnfConfig CnfConfig {..}
  | any (<0) [minClauseAmount, maxClauseAmount] = Just "At least one of your clause amount parameters is negative."
  | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
  | otherwise = checkClauseConfig clauseConf 
@@ -148,7 +148,7 @@ checkCnfConfig CnfConfig {clauseConf, minClauseAmount, maxClauseAmount}
 
 
 checkFillConfig :: FillConfig -> Maybe String
-checkFillConfig FillConfig {cnfConfig, amountOfGaps} 
+checkFillConfig FillConfig {..} 
  | amountOfGaps < 0 = Just "The amount of gaps can not be negative."
  | amountOfGaps >  2^length (usedLiterals clConfig) = Just "There's not enough literals for this amount of gaps."
  | amountOfGaps > 2^(maxClauseAmount cnfConfig *maxClauseLength clConfig) = Just "This amount of gaps is not possible with your Clause length and amount settings."
@@ -158,7 +158,7 @@ checkFillConfig FillConfig {cnfConfig, amountOfGaps}
 
 
 checkGiveCnfConfig :: GiveCnfConfig -> Maybe String
-checkGiveCnfConfig GiveCnfConfig {cnfConfig, percentTrueEntries}
+checkGiveCnfConfig GiveCnfConfig {..}
  | isJust percentTrueEntries = if lower > upper 
                                   then Just "The minimum percentage of true rows is greater than the maximum."
                                   else if any (<0) [lower,upper] 
@@ -170,13 +170,13 @@ checkGiveCnfConfig GiveCnfConfig {cnfConfig, percentTrueEntries}
 
 
 checkPickConfig :: PickConfig -> Maybe String
-checkPickConfig PickConfig {cnfConfig, amountOfOptions, pickCnf}
+checkPickConfig PickConfig {..}
  | amountOfOptions < 0 = Just "The amount of options is negative."
- | otherwise = Nothing
+ | otherwise = checkCnfConfig cnfConfig
 
 
 checkDecideConfig :: DecideConfig -> Maybe String
-checkDecideConfig DecideConfig {cnfConfig, amountOfChanges}
+checkDecideConfig DecideConfig {..}
  | amountOfChanges < 0 = Just "The amount of changes is negative."
  | amountOfChanges >  2^length (usedLiterals clConfig) = Just "The table does not have enough entries to support this samount of changes."
  | amountOfChanges > 2^(maxClauseAmount cnfConfig * maxClauseLength clConfig) = Just "This amount of changes is not possible with your Clause length and amount settings."
@@ -185,11 +185,11 @@ checkDecideConfig DecideConfig {cnfConfig, amountOfChanges}
 
 
 checkStepConfig :: StepConfig -> Maybe String
-checkStepConfig StepConfig {clauseConfig} = checkClauseConfig clauseConfig
+checkStepConfig StepConfig {..} = checkClauseConfig clauseConfig
 
 
 checkResolutionConfig :: ResolutionConfig -> Maybe String
-checkResolutionConfig ResolutionConfig {clauseConfig, steps}
+checkResolutionConfig ResolutionConfig {..}
  | steps < 0 = Just "The amount of steps is negative."
  | maxClauseLength clauseConfig  == 1 && steps > 1 = Just "More than one step using only length 1 clauses is not possible."
  | steps > 2 * length (usedLiterals clauseConfig) = Just "This amount of steps is impossible with the given amount of literals."

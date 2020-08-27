@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
 module Main where
 
 import Control.Exception(try,SomeException)
@@ -23,7 +23,7 @@ pickExercise = ensureChecksAndExecute checkPickConfig executePickExercise
 
 
 genPickExercise :: PickConfig -> IO (String,Either ([(Int,CNF)],Table) ([(Int,Table)],CNF))
-genPickExercise PickConfig {cnfConfig, amountOfOptions, pickCnf} = do
+genPickExercise PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..} = do
  first <- generate getCnf
  rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first))
  let cnfs = first : rest
@@ -37,8 +37,7 @@ genPickExercise PickConfig {cnfConfig, amountOfOptions, pickCnf} = do
            let desc = exerciseDescPick tables rightCnf
            return (desc,Right (tables,rightCnf))
 
-  where clConfig = clauseConf cnfConfig
-        getCnf = genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig)
+  where getCnf = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
         getWithSameLiterals x = suchThat getCnf 
             (\c -> let cLits = concatMap (toList . getLs) (toList (getCs c)) 
                        xLits = concatMap (toList . getLs) (toList (getCs x)) in 

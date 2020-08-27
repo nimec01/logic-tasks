@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
 module Main where
 
 import Control.Exception (try,SomeException)
@@ -26,10 +26,7 @@ fillExercise = ensureChecksAndExecute checkFillConfig executeFillExercise
 
 genFillExercise :: FillConfig -> IO (String,(Table,Table))
 genFillExercise FillConfig
-  { cnfConfig
-  , amountOfGaps
-  , percentTrueEntries
-  }  = do 
+  { cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..} = do 
  cnf <- generate (case percentTrueEntries of Just (lower,upper) -> do ratio <- chooseInt (lower,upper)
                                                                       suchThat getCNF (withRatio ratio)
                                              Nothing            -> getCNF)
@@ -37,8 +34,7 @@ genFillExercise FillConfig
  gapTable <- generate (genGapTable table amountOfGaps)
  let desc = exerciseDescFill cnf gapTable  
  return (desc,(table,gapTable))
-  where clConfig = clauseConf cnfConfig
-        getCNF = genCNF (minClauseAmount cnfConfig, maxClauseAmount cnfConfig) (minClauseLength clConfig, maxClauseLength clConfig) (usedLiterals clConfig)     
+  where getCNF = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals   
 
 
 

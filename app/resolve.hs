@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
 module Main where
 
 
@@ -25,8 +25,8 @@ resolutionExercise = ensureChecksAndExecute checkResolutionConfig executeResolut
 
 
 genResolutionExercise :: ResolutionConfig -> IO (String,[(Int,Clause)])
-genResolutionExercise ResolutionConfig { clauseConfig, steps} = do
- clauses <- generate (genRes (minClauseLength clauseConfig, maxClauseLength clauseConfig) steps (usedLiterals clauseConfig))
+genResolutionExercise ResolutionConfig { clauseConfig = ClauseConfig {..}, ..} = do
+ clauses <- generate (genRes (minClauseLength, maxClauseLength) steps usedLiterals)
  let numberedClauses = zip [1..] clauses
  let desc = exerciseDescResolve numberedClauses
  return (desc,numberedClauses)
