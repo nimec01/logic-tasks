@@ -2,14 +2,11 @@
 module Main where
 
 import Control.Exception (try,SomeException)
-import Data.List(delete)
-import Data.Set (empty,toList,fromList,insert)
-import Test.QuickCheck (generate,vectorOf,elements, suchThat, chooseInt)
-import Formula (Literal(..),CNF(..),Clause(..),genClause,genCNF,opposite)
-import Table (Table,getTable,evalSolution,genGapTable,genWrongTable,readEntries)
+import Test.QuickCheck (generate,suchThat,chooseInt)
+import Formula (CNF,genCNF)
+import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries)
 import TaskUtility
 import Types
-import Resolution (genRes,resolve,applySteps,showResClauses)
 
 
 
@@ -52,8 +49,9 @@ evaluateFill :: Table -> Table -> IO ()
 evaluateFill table gapTable = do
  solution <- try readLn :: IO (Either SomeException [Bool])
  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right s ->   putStr (if evalSolution s table gapTable then "Richtige Lösung" else "Falsche Lösung")
-
+                  Right s ->   let filledTable = fillGaps s gapTable
+                                   diffCount = countDiffEntries filledTable table  in 
+                    putStr (if filledTable == table then "Richtige Lösung" else "Die Lösung enthält " ++ show diffCount ++ if diffCount == 1 then " falschen Eintrag" else " falsche Eintraege" )
 
 
 main :: IO()

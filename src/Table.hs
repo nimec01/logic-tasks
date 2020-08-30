@@ -5,14 +5,15 @@ module Table
        , getTable
        , genGapTable
        , genWrongTable
-       , evalSolution
+       , fillGaps
        , readEntries
+       , countDiffEntries
        ) where
 
-import Data.List (transpose,nub,sort)
-import Data.Maybe (fromJust, isNothing)
+import Data.List (transpose)
+import Data.Maybe (isNothing)
 import Data.Set (toList,unions)
-import Test.QuickCheck (Gen, suchThat, chooseInt)
+import Test.QuickCheck (Gen,suchThat,chooseInt)
 import Formula (Allocation,Literal(..),Clause(..),CNF(..),evalCNF)
 import qualified Data.Set as Set (map)
 
@@ -67,10 +68,20 @@ genWrongTable table = generateChanges []
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateChanges (rInt: indices) (num-1)
 
-evalSolution :: [Bool] -> Table -> Table -> Bool
-evalSolution solution t gapT = solution == correct
- where correct = [ fromJust x | (x,y) <- zip (getEntries t) (getEntries gapT), isNothing y]
-
+fillGaps :: [Bool] -> Table -> Table
+fillGaps solution table = Table (getLiterals table) (filledIn solution (getEntries table))
+  where filledIn [] ys = ys
+        filledIn _ [] = []
+        filledIn (x:xs) (y:ys) = if isNothing y then Just x : filledIn xs ys else y : filledIn (x:xs) ys   
+  
 
 readEntries :: Table -> [Maybe Bool]
 readEntries = getEntries
+
+
+
+countDiffEntries :: Table -> Table -> Int
+countDiffEntries t1 t2 = diffs (getEntries t1) (getEntries t2)
+  where diffs [] ys = length ys
+        diffs xs [] = length xs   
+        diffs (x:xs) (y:ys) = (if x == y then 0 else 1) + diffs xs ys
