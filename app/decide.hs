@@ -3,7 +3,7 @@ module Main where
 
 
 import Control.Exception (try,SomeException)
-import Data.Set (fromList)
+import Data.Set (fromList,toList)
 import Test.QuickCheck (generate,elements)
 import Formula (CNF,genCNF)
 import Table (Table,getTable,genWrongTable)
@@ -62,8 +62,13 @@ evaluateDecide2 :: [Int] -> IO ()
 evaluateDecide2 indices = do
  solution <- try readLn :: IO (Either SomeException [Int])
  case solution of Left e -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right s -> if fromList (map (+1) indices) == fromList s then putStrLn "Richtige Antwort"
-                                                                          else putStrLn "Falsche Antwort"  
+                  Right s -> let correct = fromList (map (+1) indices)
+                                 solution = fromList s in 
+                                   if correct == solution then putStrLn "Richtige Antwort"
+                                                          else putStrLn ("Ihre Loesung beinhaltet " ++ show (mistakes (toList solution) (toList correct)) ++ " Fehler.")
+  where mistakes [] ys = length ys
+        mistakes xs [] = length xs
+        mistakes (x:xs) (y:ys) = (if x == y then 0 else 1) + mistakes xs ys        
 
 
 
