@@ -6,6 +6,7 @@ dependencies:
 - QuickCheck >= 2.14
 - random
 - containers
+- hspec 
 
 library:
   source-dirs: src
@@ -41,5 +42,17 @@ executables:
   Step: 
     main:                step.hs
     source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
+    
+    
+tests:
+  src-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
     dependencies:
     - ba-patrick-ritzenfeld

@@ -8,6 +8,7 @@ module Table
        , fillGaps
        , readEntries
        , countDiffEntries
+       , possibleAllocations
        ) where
 
 import Data.List (transpose)
@@ -42,12 +43,16 @@ getTable cnf = Table literals values
  where literals = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
        filterSign x = case x of Not y -> Literal y
                                 _     -> x
-       values = map (`evalCNF` cnf) $ transpose $ allCombinations literals 1
+       values = map (`evalCNF` cnf) $ possibleAllocations literals
 
 allCombinations :: [Literal] -> Int ->  [Allocation]
 allCombinations [] _ = []
 allCombinations (x:xs) n = concat (replicate n $ replicate num (x,False) ++ replicate num (x,True)) : allCombinations xs (n*2)
          where num = 2^ length xs
+
+
+possibleAllocations :: [Literal] -> [Allocation]
+possibleAllocations xs = transpose (allCombinations xs 1)
 
 
 genGapTable :: Table -> Int -> Gen Table

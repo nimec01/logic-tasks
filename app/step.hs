@@ -52,9 +52,10 @@ evaluateStep :: Clause -> Clause -> IO()
 evaluateStep c1 c2 = do
  solution <- try readLn :: IO (Either SomeException (Literal,[Literal]))
  case solution of Left e                 -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if res == fromList result then putStrLn "Richtige Lösung"
-                                                                                                       else putStrLn "Falsche Lösung"
-                                                                          Nothing  -> error "Die angegebene Lösung führt nicht zu einer Resolvenz"
+                  Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if res == fromList result 
+                                                                                                 then putStrLn "Richtige Lösung"
+                                                                                                 else putStrLn "Falsche Lösung"
+                                                                          Nothing  -> putStrLn "Das angegebene Literal kann nicht zur Resolvenz genutz werden."
 
 
 main :: IO()

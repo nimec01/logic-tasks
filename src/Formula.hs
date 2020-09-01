@@ -8,12 +8,15 @@ module Formula
        , evalCNF
        , genCNF
        , genClause
+       , getLiterals
+       , genLiteral
        ) where
 
 
 import Data.List (delete)
-import Data.Set (Set,member,size,fromList,toList,empty,insert)
-import Test.QuickCheck (Gen,elements,chooseInt,vectorOf,suchThat)
+import Data.Set (Set,member,size,fromList,toList,empty,insert,unions)
+import Test.QuickCheck (generate,Gen,elements,chooseInt,vectorOf,suchThat,Arbitrary(..))
+import qualified Data.Set as Set (map)
 
 
 type Allocation = [(Literal, Bool)]
@@ -34,7 +37,8 @@ instance Read Literal where
   readsPrec _ (x:rest) = [(Literal x, rest) | x `elem` ['A' .. 'Z']]
   readsPrec _ _ = []
 
-
+instance Arbitrary Literal where
+  arbitrary = genLiteral ['A'..'Z']
 
 evalLiteral :: Allocation -> Literal -> Maybe Bool
 evalLiteral [] _ = Nothing
@@ -91,6 +95,10 @@ genClause (minlen,maxlen) lits
 
 newtype CNF = CNF { getCs :: Set Clause}
      deriving (Eq,Ord)
+     
+instance Arbitrary CNF where
+  arbitrary = genCNF (1,5) (1,5) ['A'..'Z']
+  
 
 instance Show CNF where
  show (CNF set) = listShow (toList set)
@@ -105,6 +113,14 @@ evalCNF xs ys = and <$> sequence clauses
  where clauses = map (evalClause xs) (toList (getCs ys))
 
 
+
+getLiterals :: CNF -> [Literal]
+getLiterals cnf = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
+  where filterSign x = case x of Not y -> Literal y
+                                 _     -> x
+
+
+
 genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
 genCNF (minNum,maxNum) (minLen,maxLen) lits = do
  num <- chooseInt (minNum,maxNum)
@@ -115,5 +131,4 @@ genCNF (minNum,maxNum) (minLen,maxLen) lits = do
            | otherwise = do
               clause <- genClause (minLen,maxLen) lits
               generateClauses lits (if clause `member` set then set else insert clause set) num
-
 
