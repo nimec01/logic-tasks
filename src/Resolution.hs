@@ -64,21 +64,21 @@ genRes (minLen,maxLen) steps lits = do
 
 applyStep :: [(Int,Clause)] -> (Int,Int,Literal) -> Maybe [(Int,Clause)]
 applyStep [] _ = Just []
-applyStep xs (i1,i2,literal) = case lookup i1 xs of
-                                 Just c1 -> case lookup i2 xs of
-                                              Just c2 -> case resolve c1 c2 literal of
-                                                          Just newClause -> Just ((newIndex, newClause) : xs)
-                                                          Nothing        -> Nothing
-                                              Nothing -> Nothing
-                                 Nothing -> Nothing
- where newIndex = maximum (map fst xs) +1                                                        
+applyStep xs (i1,i2,literal) = do
+ c1 <- lookup i1 xs
+ c2 <- lookup i2 xs
+ newClause <- resolve c1 c2 literal
+ pure ((newIndex, newClause) : xs)
+  where newIndex = maximum (map fst xs) +1                                                        
+
 
 
 applySteps :: [(Int,Clause)] -> [(Int,Int,Literal)] -> Maybe [(Int,Clause)]
 applySteps [] _ = Just []
 applySteps xs [] = Just xs
-applySteps xs (y:ys) = case applyStep xs y of Just result -> applySteps result ys
-                                              Nothing     -> Nothing
+applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
+                                            
+
 
 
 
