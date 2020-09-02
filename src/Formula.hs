@@ -10,6 +10,8 @@ module Formula
        , genClause
        , getLiterals
        , genLiteral
+       , evalLiteral
+       , turnPositive
        ) where
 
 
@@ -56,6 +58,12 @@ genLiteral lits = do
 opposite :: Literal -> Literal
 opposite (Literal l) = Not l
 opposite (Not l) = Literal l
+
+
+
+turnPositive :: Literal -> Literal
+turnPositive (Not x) = Literal x
+turnPositive (Literal x) = Literal x
 
 ---------------------------------------------------------------------------------------------------
 

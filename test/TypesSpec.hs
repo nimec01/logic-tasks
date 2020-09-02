@@ -5,32 +5,32 @@ import Types
 
 spec :: Spec
 spec = do
-  describe "checkFillConfig" $ do
-    context "when used with defaultFillConfig" $ do 
-      it "returns Nothing" $ do
+  describe "checkFillConfig" $
+    context "when used with defaultFillConfig" $ 
+      it "returns Nothing" $
         checkFillConfig defaultFillConfig `shouldBe` Nothing
 
-  describe "checkGiveCnfConfig" $ do
-    context "when used with defaultGiveCnfConfig" $ do 
-      it "returns Nothing" $ do
+  describe "checkGiveCnfConfig" $
+    context "when used with defaultGiveCnfConfig" $
+      it "returns Nothing" $
         checkGiveCnfConfig defaultGiveCnfConfig `shouldBe` Nothing
 
-  describe "checkPickConfig" $ do
-    context "when used with defaultPickConfig" $ do 
-      it "returns Nothing" $ do
+  describe "checkPickConfig" $
+    context "when used with defaultPickConfig" $ 
+      it "returns Nothing" $
         checkPickConfig defaultPickConfig `shouldBe` Nothing
 
-  describe "checkDecideConfig" $ do
-    context "when used with defaultDecideConfig" $ do 
-      it "returns Nothing" $ do
+  describe "checkDecideConfig" $
+    context "when used with defaultDecideConfig" $ 
+      it "returns Nothing" $
         checkDecideConfig defaultDecideConfig `shouldBe` Nothing
 
-  describe "checkStepConfig" $ do
-    context "when used with defaultStepConfig" $ do 
-      it "returns Nothing" $ do
+  describe "checkStepConfig" $
+    context "when used with defaultStepConfig" $
+      it "returns Nothing" $
         checkStepConfig defaultStepConfig `shouldBe` Nothing
 
-  describe "checkResolutionConfig" $ do
-    context "when used with defaultResolutionConfig" $ do 
-      it "returns Nothing" $ do
+  describe "checkResolutionConfig" $
+    context "when used with defaultResolutionConfig" $ 
+      it "returns Nothing" $
         checkResolutionConfig defaultResolutionConfig `shouldBe` Nothing

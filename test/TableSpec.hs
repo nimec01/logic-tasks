@@ -27,16 +27,16 @@ equivGen = do cnf1 <- arbitrary
 
 
 spec :: Spec 
-spec = do 
+spec = 
   describe "getTable" $ do 
-    context "When generating different tables" $ do
-      it "should have used different formulae" $ do
+    context "When generating different tables" $
+      it "should have used different formulae" $
         property $ \x y -> getTable x /= getTable y ==> x /= y 
     
-    context "When using equivalent formulae" $ do
-      it "should produce the same table twice" $ do
+    context "When using equivalent formulae" $
+      it "should produce the same table twice" $
         forAll equivGen $ \(x,y) -> getTable x == getTable y 
 
-    context "When looking at each row of the generated table" $ do
-      it "should have truth values equal to the formula being evaluated with the row's allocation" $ do
+    context "When looking at each row of the generated table" $
+      it "should have truth values equal to the formula being evaluated with the row's allocation" $
         property $ \x -> map (`evalCNF` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x) 
