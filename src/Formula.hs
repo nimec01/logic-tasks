@@ -11,6 +11,7 @@ module Formula
        , getLiterals
        , genLiteral
        , evalLiteral
+       , evalClause
        , turnPositive
        ) where
 
@@ -43,9 +44,8 @@ instance Arbitrary Literal where
   arbitrary = genLiteral ['A'..'Z']
 
 evalLiteral :: Allocation -> Literal -> Maybe Bool
-evalLiteral [] _ = Nothing
 evalLiteral xs (Not y) = not <$> evalLiteral xs (Literal y)
-evalLiteral ((x,y):xs) z = if x == z then Just y else evalLiteral xs z
+evalLiteral xs z = lookup z xs
 
 
 genLiteral :: [Char] -> Gen Literal
@@ -77,7 +77,8 @@ instance Show Clause where
         listShow [x] = show x
         listShow (x:xs) = show x ++ " OR " ++ listShow xs
 
-
+instance Arbitrary Clause where
+  arbitrary = genClause (1,5) ['A'..'Z']
 
 evalClause :: Allocation -> Clause -> Maybe Bool
 evalClause xs ys = or <$> sequence literals
@@ -86,7 +87,7 @@ evalClause xs ys = or <$> sequence literals
 
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
- | null lits || minlen < 0 || minlen > length lits = return (Clause empty)
+ | null lits || minlen <= 0 || minlen > length lits || minlen > maxlen = return (Clause empty)
  | otherwise = do
   len <- chooseInt (minlen,minimum [length lits, maxlen])
   literals <- generateLiterals lits [] len
@@ -111,7 +112,7 @@ instance Arbitrary CNF where
 instance Show CNF where
  show (CNF set) = listShow (toList set)
 
-   where listShow [] = "False"
+   where listShow [] = "True"
          listShow [x] = show x
          listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
 
@@ -123,20 +124,22 @@ evalCNF xs ys = and <$> sequence clauses
 
 
 getLiterals :: CNF -> [Literal]
-getLiterals cnf = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
-  where filterSign x = case x of Not y -> Literal y
-                                 _     -> x
+getLiterals cnf = toList $ unions $ map (Set.map turnPositive . getLs) $ toList (getCs cnf)
 
 
 
 genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
-genCNF (minNum,maxNum) (minLen,maxLen) lits = do
- num <- chooseInt (minNum,maxNum)
- cnf <- generateClauses lits empty num
- return (CNF cnf)
-  where generateClauses lits set num
-           | size set == num = return set
-           | otherwise = do
-              clause <- genClause (minLen,maxLen) lits
-              generateClauses lits (if clause `member` set then set else insert clause set) num
+genCNF (minNum,maxNum) (minLen,maxLen) lits 
+ | null lits || minLen <= 0 || minLen > length lits 
+   || minLen > maxLen || minNum <= 0 || minNum > maxNum 
+   || minNum > minLen^2 = return (CNF empty)
+ | otherwise = do
+  num <- chooseInt (minNum,(minimum [maxNum,minLen^2]))
+  cnf <- generateClauses lits empty num
+  return (CNF cnf)
+   where generateClauses lits set num
+            | size set == num = return set
+            | otherwise = do
+               clause <- genClause (minLen,maxLen) lits
+               generateClauses lits (if clause `member` set then set else insert clause set) num
 
