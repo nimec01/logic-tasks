@@ -9,36 +9,36 @@ data ClauseConfig = ClauseConfig
     , maxClauseLength :: Int
     , usedLiterals :: [Char]
     } deriving Show
-    
+
 
 
 data CnfConfig = CnfConfig
     { clauseConf :: ClauseConfig
     , minClauseAmount :: Int
-    , maxClauseAmount :: Int   
+    , maxClauseAmount :: Int
     } deriving Show
-    
-    
+
+
 
 data FillConfig = FillConfig
     { cnfConfig :: CnfConfig
     , amountOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     } deriving Show
-    
+
 
 
 data GiveCnfConfig = GiveCnfConfig
     { cnfConfig :: CnfConfig
     , percentTrueEntries :: Maybe (Int,Int)
     } deriving Show
-    
+
 
 
 data PickConfig = PickConfig
     { cnfConfig :: CnfConfig
     , amountOfOptions :: Int
-    , pickCnf :: Bool 
+    , pickCnf :: Bool
     } deriving Show
 
 
@@ -80,7 +80,7 @@ defaultCnfConfig = CnfConfig
   , maxClauseAmount = 3
   }
 
-  
+
 
 defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
@@ -137,18 +137,18 @@ checkClauseConfig ClauseConfig {..}
  | length usedLiterals < minClauseLength = Just "There's not enough literals to satisfy your minimum clause length."
  | null usedLiterals = Just "You did not specify which literals should be used."
  | otherwise = Nothing
- 
- 
+
+
 checkCnfConfig :: CnfConfig -> Maybe String
 checkCnfConfig CnfConfig {..}
  | any (<0) [minClauseAmount, maxClauseAmount] = Just "At least one of your clause amount parameters is negative."
  | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
- | otherwise = checkClauseConfig clauseConf 
+ | otherwise = checkClauseConfig clauseConf
 
 
 
 checkFillConfig :: FillConfig -> Maybe String
-checkFillConfig FillConfig {..} 
+checkFillConfig FillConfig {..}
  | amountOfGaps < 0 = Just "The amount of gaps can not be negative."
  | amountOfGaps >  2^length (usedLiterals clConfig) = Just "There's not enough literals for this amount of gaps."
  | amountOfGaps > 2^(maxClauseAmount cnfConfig *maxClauseLength clConfig) = Just "This amount of gaps is not possible with your Clause length and amount settings."
@@ -159,12 +159,12 @@ checkFillConfig FillConfig {..}
 
 checkGiveCnfConfig :: GiveCnfConfig -> Maybe String
 checkGiveCnfConfig GiveCnfConfig {..}
- | isJust percentTrueEntries = if lower > upper 
+ | isJust percentTrueEntries = if lower > upper
                                   then Just "The minimum percentage of true rows is greater than the maximum."
-                                  else if any (<0) [lower,upper] 
+                                  else if any (<0) [lower,upper]
                                          then Just "At least one of your percentages is negative."
                                          else checkCnfConfig cnfConfig
-                                         
+
  | otherwise = checkCnfConfig cnfConfig
   where (lower,upper) = fromJust percentTrueEntries
 

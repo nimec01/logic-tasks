@@ -32,9 +32,9 @@ genGiveCnfExercise GiveCnfConfig {cnfConfig = CnfConfig {clauseConf = ClauseConf
 
 
 exerciseDescCnf :: Table -> String
-exerciseDescCnf table = 
- "Betrachten Sie die folgende Wahrheitstafel: \n\n" ++ show table ++ 
- "\n\nGeben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme.\n" ++ 
+exerciseDescCnf table =
+ "Betrachten Sie die folgende Wahrheitstafel: \n\n" ++ show table ++
+ "\n\nGeben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme.\n" ++
  "\nGeben Sie eine Liste von Listen von Literalen an, wobei jede innere Liste einer Klausel der KNF entspricht."
 
 

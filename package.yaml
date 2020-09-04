@@ -6,7 +6,7 @@ dependencies:
 - QuickCheck >= 2.14
 - random
 - containers
-- hspec 
+- hspec
 
 library:
   source-dirs: src
@@ -14,38 +14,38 @@ library:
   - -Wall
 
 executables:
-  Fill: 
+  Fill:
     main:                fill.hs
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Cnf: 
+  Cnf:
     main:                giveCnf.hs
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Pick: 
+  Pick:
     main:                pick.hs
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Decide: 
+  Decide:
     main:                decide.hs
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Resolve: 
+  Resolve:
     main:                resolve.hs
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Step: 
+  Step:
     main:                step.hs
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-    
-    
+
+
 tests:
   src-test:
     main:                Spec.hs

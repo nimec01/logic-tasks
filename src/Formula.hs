@@ -1,4 +1,4 @@
-module Formula 
+module Formula
        (
          Literal(..)
        , Clause(..)
@@ -26,7 +26,7 @@ type Allocation = [(Literal, Bool)]
 
 ---------------------------------------------------------------------------------------------------
 
-data Literal 
+data Literal
     = Literal { getC :: Char}
     | Not { getC :: Char}
     deriving (Eq,Ord)
@@ -96,7 +96,7 @@ genClause (minlen,maxlen) lits
            | length xs == len = return xs
            | otherwise = do
               literal <- genLiteral lits
-              generateLiterals (delete (getC literal) lits) (literal:xs) len 
+              generateLiterals (delete (getC literal) lits) (literal:xs) len
 
 
 
@@ -104,10 +104,10 @@ genClause (minlen,maxlen) lits
 
 newtype CNF = CNF { getCs :: Set Clause}
      deriving (Eq,Ord)
-     
+
 instance Arbitrary CNF where
   arbitrary = genCNF (1,5) (1,5) ['A'..'Z']
-  
+
 
 instance Show CNF where
  show (CNF set) = listShow (toList set)
@@ -129,9 +129,9 @@ getLiterals cnf = toList $ unions $ map (Set.map turnPositive . getLs) $ toList 
 
 
 genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
-genCNF (minNum,maxNum) (minLen,maxLen) lits 
- | null lits || minLen <= 0 || minLen > length lits 
-   || minLen > maxLen || minNum <= 0 || minNum > maxNum 
+genCNF (minNum,maxNum) (minLen,maxLen) lits
+ | null lits || minLen <= 0 || minLen > length lits
+   || minLen > maxLen || minNum <= 0 || minNum > maxNum
    || minNum > minLen^2 = return (CNF empty)
  | otherwise = do
   num <- chooseInt (minNum,(minimum [maxNum,minLen^2]))

@@ -28,7 +28,7 @@ genPickExercise PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..
  rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first))
  let cnfs = first : rest
  rightCnf <- generate (elements cnfs)
- if pickCnf 
+ if pickCnf
    then do let table = getTable rightCnf
            let zippedCnfs = zip [1..] cnfs
            let desc = exerciseDescPick2 zippedCnfs table
@@ -38,12 +38,12 @@ genPickExercise PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..
            return (desc,Right (tables,rightCnf))
 
   where getCnf = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
-        getWithSameLiterals x = suchThat getCnf 
-            (\c -> let cLits = concatMap (toList . getLs) (toList (getCs c)) 
-                       xLits = concatMap (toList . getLs) (toList (getCs x)) in 
+        getWithSameLiterals x = suchThat getCnf
+            (\c -> let cLits = concatMap (toList . getLs) (toList (getCs c))
+                       xLits = concatMap (toList . getLs) (toList (getCs x)) in
                                all (\lit -> lit `elem` cLits || opposite lit `elem` cLits) xLits &&
                                all (\lit -> lit `elem` xLits || opposite lit `elem` xLits) cLits)
- 
+
 
 
 exerciseDescPick :: [(Int,Table)] -> CNF -> String
@@ -66,9 +66,9 @@ exerciseDescPick2 cnfs table =
  "\nGeben Sie die richtige Tafel durch ihre Nummer an."
   where showCnfs [] = " "
         showCnfs (x:xs) = show (fst x) ++ "\n" ++ show (snd x) ++ "\n" ++ showCnfs xs
-        
-        
-        
+
+
+
 evaluatePick :: [(Int,Table)] -> CNF -> IO ()
 evaluatePick tables cnf = do
  solution <- try readLn :: IO (Either SomeException Int)

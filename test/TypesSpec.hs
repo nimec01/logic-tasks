@@ -6,7 +6,7 @@ import Types
 spec :: Spec
 spec = do
   describe "checkFillConfig" $
-    context "when used with defaultFillConfig" $ 
+    context "when used with defaultFillConfig" $
       it "returns Nothing" $
         checkFillConfig defaultFillConfig `shouldBe` Nothing
 
@@ -16,12 +16,12 @@ spec = do
         checkGiveCnfConfig defaultGiveCnfConfig `shouldBe` Nothing
 
   describe "checkPickConfig" $
-    context "when used with defaultPickConfig" $ 
+    context "when used with defaultPickConfig" $
       it "returns Nothing" $
         checkPickConfig defaultPickConfig `shouldBe` Nothing
 
   describe "checkDecideConfig" $
-    context "when used with defaultDecideConfig" $ 
+    context "when used with defaultDecideConfig" $
       it "returns Nothing" $
         checkDecideConfig defaultDecideConfig `shouldBe` Nothing
 
@@ -31,6 +31,6 @@ spec = do
         checkStepConfig defaultStepConfig `shouldBe` Nothing
 
   describe "checkResolutionConfig" $
-    context "when used with defaultResolutionConfig" $ 
+    context "when used with defaultResolutionConfig" $
       it "returns Nothing" $
         checkResolutionConfig defaultResolutionConfig `shouldBe` Nothing

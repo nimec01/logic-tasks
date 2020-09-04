@@ -1,5 +1,5 @@
 
-module Table 
+module Table
        (
          Table
        , getTable
@@ -77,8 +77,8 @@ fillGaps :: [Bool] -> Table -> Table
 fillGaps solution table = Table (getLiterals table) (filledIn solution (getEntries table))
   where filledIn [] ys = ys
         filledIn _ [] = []
-        filledIn (x:xs) (y:ys) = if isNothing y then Just x : filledIn xs ys else y : filledIn (x:xs) ys   
-  
+        filledIn (x:xs) (y:ys) = if isNothing y then Just x : filledIn xs ys else y : filledIn (x:xs) ys
+
 
 readEntries :: Table -> [Maybe Bool]
 readEntries = getEntries
@@ -88,5 +88,5 @@ readEntries = getEntries
 countDiffEntries :: Table -> Table -> Int
 countDiffEntries t1 t2 = diffs (getEntries t1) (getEntries t2)
   where diffs [] ys = length ys
-        diffs xs [] = length xs   
+        diffs xs [] = length xs
         diffs (x:xs) (y:ys) = (if x == y then 0 else 1) + diffs xs ys

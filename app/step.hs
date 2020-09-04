@@ -37,10 +37,10 @@ genStepExercise StepConfig {clauseConfig = ClauseConfig{..}} = do
  clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
                      (not . any (\lit -> opposite lit `elem` getLs clause1) .  getLs))
  let litAddedClause1 = Clause (insert rLit (getLs clause1))
- let litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2)) 
+ let litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2))
  let desc = exerciseDescStep litAddedClause1 litAddedClause2
  return (desc,(litAddedClause1,litAddedClause2))
-  
+
 
 exerciseDescStep :: Clause -> Clause -> String
 exerciseDescStep c1 c2 = "Resolvieren Sie die folgenden Klauseln:\n" ++ show c1 ++ "\n" ++ show c2 ++ "\n" ++
@@ -52,7 +52,7 @@ evaluateStep :: Clause -> Clause -> IO()
 evaluateStep c1 c2 = do
  solution <- try readLn :: IO (Either SomeException (Literal,[Literal]))
  case solution of Left e                 -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                  Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if res == fromList result 
+                  Right (literal,result) -> case resolve c1 c2 literal of Just (Clause res) -> if res == fromList result
                                                                                                  then putStrLn "Richtige Lösung"
                                                                                                  else putStrLn "Falsche Lösung"
                                                                           Nothing  -> putStrLn "Das angegebene Literal kann nicht zur Resolvenz genutz werden."
