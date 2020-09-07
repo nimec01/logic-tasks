@@ -1,6 +1,8 @@
 module TableSpec where
 
 import Data.Set (Set,empty)
+import Data.Maybe (isNothing)
+import Control.Exception(evaluate)
 import Test.Hspec
 import Test.QuickCheck
 import Table
@@ -50,6 +52,11 @@ spec = do
 
 
   describe "genGapTable" $ do
+    it "should throw an error if the amount of gaps is negative" $
+       forAll (applySize arbitrary) $ \table ->
+         forAll (chooseInt (1,maxBound)) $
+           \gaps -> evaluate (genGapTable table (-gaps)) `shouldThrow` errorCall "The amount of gaps is negative."
+
     it "should return the table argument when the amount of gaps is zero" $
        forAll (applySize arbitrary) $ \table -> forAll (genGapTable table 0) $
         \gapTable -> table `shouldBe` gapTable
@@ -58,5 +65,15 @@ spec = do
       forAll arbitrarySizedNatural $ \gaps -> let emptyTable = getTable (CNF empty) in
         forAll (genGapTable emptyTable gaps) $ \gapTable -> gapTable `shouldBe` emptyTable
 
-  where size = 10
-        applySize g = resize size g
+    it "should return a fully gapped table if the gap parameter is bigger than the size of the table" $
+       forAll (applySize arbitrary) $ \table -> let tabLen = length (readEntries table) in
+         forAll (suchThat arbitrary (>= tabLen)) $ \gaps -> forAll (genGapTable table gaps) $
+          \gapTable -> length (filter (isNothing) (readEntries gapTable)) == tabLen
+
+    it "should return a table with the correct amount of gaps when called with valid parameters" $
+      forAll arbitrarySizedNatural $ \gaps -> forAll (applySize arbitrary) $
+        \table -> forAll (genGapTable table gaps) $
+          \gapTable -> gaps < length (readEntries table) ==> length (filter (isNothing) (readEntries gapTable)) == gaps
+
+  where size = 8
+        applySize = resize size

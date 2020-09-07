@@ -66,7 +66,8 @@ possibleAllocations xs = transpose (allCombinations xs 1)
 
 genGapTable :: Table -> Int -> Gen Table
 genGapTable table gaps
- |  rowAmount < gaps = genGapTable table rowAmount
+ | gaps < 0 = error "The amount of gaps is negative."
+ | rowAmount < gaps = genGapTable table rowAmount
  | otherwise = generateGaps [] gaps
 
  where rowAmount = length (getEntries table)
