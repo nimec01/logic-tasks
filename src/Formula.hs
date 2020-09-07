@@ -18,7 +18,7 @@ module Formula
 
 import Data.List (delete)
 import Data.Set (Set,member,size,fromList,toList,empty,insert,unions)
-import Test.QuickCheck (generate,Gen,elements,chooseInt,vectorOf,suchThat,Arbitrary(..))
+import Test.QuickCheck
 import qualified Data.Set as Set (map)
 
 
@@ -78,7 +78,11 @@ instance Show Clause where
         listShow (x:xs) = show x ++ " OR " ++ listShow xs
 
 instance Arbitrary Clause where
-  arbitrary = genClause (1,5) ['A'..'Z']
+  arbitrary = sized clause
+    where clause 0 = genClause (0,0) []
+          clause n = genClause (1,maxBound) (take n ['A'..'Z'])
+
+
 
 evalClause :: Allocation -> Clause -> Maybe Bool
 evalClause xs ys = or <$> sequence literals
@@ -106,7 +110,12 @@ newtype CNF = CNF { getCs :: Set Clause}
      deriving (Eq,Ord)
 
 instance Arbitrary CNF where
-  arbitrary = genCNF (1,5) (1,5) ['A'..'Z']
+   arbitrary = sized cnf
+    where cnf 0 = genCNF (0,0) (0,0) []
+          cnf n = do
+            minLen <- chooseInt (1,n)
+            genCNF (1,maxBound) (minLen,maxBound) (take n ['A'..'Z'])
+
 
 
 instance Show CNF where
@@ -142,4 +151,3 @@ genCNF (minNum,maxNum) (minLen,maxLen) lits
             | otherwise = do
                clause <- genClause (minLen,maxLen) lits
                generateClauses lits (if clause `member` set then set else insert clause set) num
-

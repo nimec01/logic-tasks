@@ -13,8 +13,8 @@ module Table
 
 import Data.List (transpose)
 import Data.Maybe (isNothing)
-import Data.Set (toList,unions)
-import Test.QuickCheck (Gen,suchThat,chooseInt)
+import Data.Set (toList,unions,empty)
+import Test.QuickCheck
 import Formula (Allocation,Literal(..),Clause(..),CNF(..),evalCNF)
 import qualified Data.Set as Set (map)
 
@@ -24,6 +24,8 @@ data Table = Table
     { getLiterals :: [Literal]
     , getEntries :: [Maybe Bool]}
     deriving Eq
+
+
 
 instance Show Table where
  show t = header ++ "\n" ++ rows
@@ -36,6 +38,13 @@ instance Show Table where
         comb len n = concat (replicate n $ replicate num 0 ++ replicate num 1) : comb (len-1) (n*2)
          where num = 2^(len -1)
 
+
+
+instance Arbitrary Table where
+  arbitrary = sized table
+    where table n = do
+            cnf <- resize n arbitrary
+            return (getTable cnf)
 
 
 getTable :: CNF -> Table
@@ -56,22 +65,31 @@ possibleAllocations xs = transpose (allCombinations xs 1)
 
 
 genGapTable :: Table -> Int -> Gen Table
-genGapTable table = generateGaps []
- where generateGaps indices 0 = do
+genGapTable table gaps
+ |  rowAmount < gaps = genGapTable table rowAmount
+ | otherwise = generateGaps [] gaps
+
+ where rowAmount = length (getEntries table)
+       generateGaps indices 0 = do
         let gapTable = Table (getLiterals table) [ if x `elem` indices then Nothing else getEntries table !! x | x <- [0..length (getEntries table)-1]]
         return gapTable
        generateGaps indices num = do
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateGaps (rInt: indices) (num-1)
 
+
+
 genWrongTable :: Table -> Int -> Gen ([Int],Table)
 genWrongTable table = generateChanges []
+
  where generateChanges indices 0 = do
         let newTable = Table (getLiterals table) [ if x `elem` indices then not <$> (getEntries table !! x) else getEntries table !! x | x <- [0..length (getEntries table)-1]]
         return (indices,newTable)
        generateChanges indices num = do
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateChanges (rInt: indices) (num-1)
+
+
 
 fillGaps :: [Bool] -> Table -> Table
 fillGaps solution table = Table (getLiterals table) (filledIn solution (getEntries table))

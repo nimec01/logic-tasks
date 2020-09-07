@@ -67,7 +67,7 @@ spec = do
 
   describe "evalClause" $ do
     it "should return Nothing when called with an empty allocation" $
-      property $ \clause -> evalClause [] clause `shouldBe` Nothing
+      property $ \clause -> clause /= Clause empty ==> evalClause [] clause `shouldBe` Nothing
     it "should return Nothing when called with a mismatched allocation" $
       property $ \clause -> forAll allocGen $
         \alloc -> not (all (`elem` map fst alloc) (map turnPositive (toList (getLs clause))))

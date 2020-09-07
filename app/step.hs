@@ -60,7 +60,3 @@ evaluateStep c1 c2 = do
 
 main :: IO()
 main = stepExercise defaultStepConfig
-
-
-
-

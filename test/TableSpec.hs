@@ -1,42 +1,62 @@
 module TableSpec where
 
-import Data.Set (toList,(\\),insert,delete)
+import Data.Set (Set,empty)
 import Test.Hspec
 import Test.QuickCheck
 import Table
 import Formula
-import qualified Data.Set as Set (null,filter)
+import qualified Data.Set as Set
 
 
 
 equivGen :: Gen (CNF,CNF)
-equivGen = do cnf1 <- arbitrary
-              let clauses = getCs cnf1
-              clause1 <- elements (toList clauses)
-              let restSet = delete clause1 clauses
-              let compatibleSets = Set.filter (\set -> not (Set.null (getLs set \\ getLs clause1))) restSet
-              if Set.null compatibleSets
-                then return (cnf1,cnf1)
-                else do clause2 <- elements (toList compatibleSets)
-                        let possibleLits = getLs clause2 \\ getLs clause1
-                        lit <- elements (toList possibleLits)
-                        let newSet = insert (Clause (insert lit (getLs clause1))) (getCs cnf1)
-                        let cnf2 = CNF newSet
-                        return (cnf1,cnf2)
+equivGen = sized equiv
+  where equiv n = do
+          cnf <- resize n arbitrary
+          let clauses = getCs cnf
+          if Set.null clauses
+            then equivGen
+            else do
+              let literals = Set.unions (Set.map getLs clauses)
+              clause <- elements (Set.toList clauses)
+              let clauseLits = getLs clause
+              let availLits = literals Set.\\ clauseLits
+              if Set.null availLits
+                then equivGen
+                else do
+                  chosenLit <- elements (Set.toList availLits)
+                  let newClause = Clause (Set.insert chosenLit clauseLits)
+                  let newCnf = CNF (Set.insert newClause clauses)
+                  return (cnf,newCnf)
+
+
 
 
 
 spec :: Spec
-spec =
+spec = do
   describe "getTable" $ do
     context "When generating different tables" $
       it "should have used different formulae" $
-        property $ \x y -> getTable x /= getTable y ==> x /= y
+        forAll (applySize arbitrary) $ \(x,y) -> getTable x /= getTable y ==> x /= y
 
     context "When using equivalent formulae" $
       it "should produce the same table twice" $
-        forAll equivGen $ \(x,y) -> getTable x == getTable y
+        forAll (applySize equivGen) $ \(x,y) -> getTable x == getTable y
 
     context "When looking at each row of the generated table" $
       it "should have truth values equal to the formula being evaluated with the row's allocation" $
-        property $ \x -> map (`evalCNF` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
+        forAll (applySize arbitrary) $ \x -> map (`evalCNF` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
+
+
+  describe "genGapTable" $ do
+    it "should return the table argument when the amount of gaps is zero" $
+       forAll (applySize arbitrary) $ \table -> forAll (genGapTable table 0) $
+        \gapTable -> table `shouldBe` gapTable
+
+    it "should return an empty table if the table parameter is empty" $
+      forAll arbitrarySizedNatural $ \gaps -> let emptyTable = getTable (CNF empty) in
+        forAll (genGapTable emptyTable gaps) $ \gapTable -> gapTable `shouldBe` emptyTable
+
+  where size = 10
+        applySize g = resize size g
