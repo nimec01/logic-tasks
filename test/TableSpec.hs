@@ -1,7 +1,7 @@
 module TableSpec where
 
 import Data.Set (Set,empty)
-import Data.Maybe (isNothing)
+import Data.Maybe (isNothing,fromJust)
 import Control.Exception(evaluate)
 import Test.Hspec
 import Test.QuickCheck
@@ -32,11 +32,43 @@ equivGen = sized equiv
                   return (cnf,newCnf)
 
 
-
-
-
 spec :: Spec
 spec = do
+ tableGenSpec
+ utilSpec
+
+
+
+
+utilSpec :: Spec
+utilSpec = do
+  describe "fillGaps" $ do
+    it "should return the table parameter if the list is empty" $
+      forAll (applySize arbitrary) $ \table -> fillGaps [] table `shouldBe` table
+
+    it "should return the empty table if the table parameter is empty" $
+      property $ \bools -> let eTable = getTable (CNF empty) in
+        fillGaps bools eTable `shouldBe` eTable
+
+    it "should return the table argument if the bool list is too large" $
+      property $ \bools -> forAll (applySize arbitrary) $
+        \table -> length bools > length (filter isNothing (readEntries table))
+          ==> fillGaps bools table `shouldBe` table
+
+
+    it "should produce a fully filled table if called with a fitting bool list" $
+      forAll (applySize arbitrary) $ \table ->
+        forAll (chooseInt (1,length (readEntries table))) $ \gaps ->
+          forAll (genGapTable table gaps) $ \gapTable ->
+            let gapEntries = readEntries gapTable in
+              forAll (vectorOf (length (filter isNothing gapEntries)) arbitrary) $
+                \bools -> bools `shouldBe`
+                  [fromJust x | (x,y) <- zip (readEntries (fillGaps bools gapTable))
+                                gapEntries, isNothing y]
+
+
+tableGenSpec :: Spec
+tableGenSpec = do
   describe "getTable" $ do
     context "When generating different tables" $
       it "should have used different formulae" $
@@ -75,5 +107,34 @@ spec = do
         \table -> forAll (genGapTable table gaps) $
           \gapTable -> gaps < length (readEntries table) ==> length (filter (isNothing) (readEntries gapTable)) == gaps
 
-  where size = 8
-        applySize = resize size
+
+  describe "genWrongTable" $ do
+    it "should throw an error if the amount of changes is negative" $
+       forAll (applySize arbitrary) $ \table ->
+         forAll (chooseInt (1,maxBound)) $
+           \changes -> evaluate (genWrongTable table (-changes)) `shouldThrow` errorCall "The amount of changes is negative."
+
+    it "should return the table argument when the amount of changes is zero" $
+       forAll (applySize arbitrary) $ \table -> forAll (genWrongTable table 0) $
+        \wTable -> table `shouldBe` snd wTable
+
+    it "should return an empty table if the table parameter is empty" $
+      forAll arbitrarySizedNatural $ \changes -> let emptyTable = getTable (CNF empty) in
+        forAll (genWrongTable emptyTable changes) $ \wTable -> snd wTable `shouldBe` emptyTable
+
+    it "should return an inverted table if the gap parameter is bigger than the size of the table" $
+       forAll (applySize arbitrary) $ \table -> let tabLen = length (readEntries table) in
+         forAll (suchThat arbitrary (>= tabLen)) $ \changes -> forAll (genWrongTable table changes) $
+          \wTable -> readEntries (snd wTable) `shouldBe` map (fmap not) (readEntries table)
+
+    it "should return a table with the correct amount of changes when called with valid parameters" $
+      forAll arbitrarySizedNatural $ \changes -> forAll (applySize arbitrary) $
+        \table -> forAll (genWrongTable table changes) $
+          \wTable -> let origEntries = readEntries table in
+            changes < length origEntries ==>
+              length [x | (x,y) <- zip origEntries (readEntries (snd wTable)), x/=y]  `shouldBe` changes
+
+
+
+applySize :: Gen a -> Gen a
+applySize = resize 8

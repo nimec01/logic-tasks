@@ -64,6 +64,7 @@ possibleAllocations :: [Literal] -> [Allocation]
 possibleAllocations xs = transpose (allCombinations xs 1)
 
 
+
 genGapTable :: Table -> Int -> Gen Table
 genGapTable table gaps
  | gaps < 0 = error "The amount of gaps is negative."
@@ -80,10 +81,15 @@ genGapTable table gaps
 
 
 
-genWrongTable :: Table -> Int -> Gen ([Int],Table)
-genWrongTable table = generateChanges []
 
- where generateChanges indices 0 = do
+genWrongTable :: Table -> Int -> Gen ([Int],Table)
+genWrongTable table changes
+ | changes < 0 = error "The amount of changes is negative."
+ | rowAmount < changes = genWrongTable table rowAmount
+ | otherwise = generateChanges [] changes
+
+ where rowAmount = length (getEntries table)
+       generateChanges indices 0 = do
         let newTable = Table (getLiterals table) [ if x `elem` indices then not <$> (getEntries table !! x) else getEntries table !! x | x <- [0..length (getEntries table)-1]]
         return (indices,newTable)
        generateChanges indices num = do
@@ -93,8 +99,11 @@ genWrongTable table = generateChanges []
 
 
 fillGaps :: [Bool] -> Table -> Table
-fillGaps solution table = Table (getLiterals table) (filledIn solution (getEntries table))
-  where filledIn [] ys = ys
+fillGaps solution table
+ | length solution > length (filter isNothing tabEntries) = table
+ | otherwise = Table (getLiterals table) (filledIn solution tabEntries)
+  where tabEntries = getEntries table
+        filledIn [] ys = ys
         filledIn _ [] = []
         filledIn (x:xs) (y:ys) = if isNothing y then Just x : filledIn xs ys else y : filledIn (x:xs) ys
 
