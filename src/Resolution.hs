@@ -10,7 +10,7 @@ module Resolution
 import Data.Maybe (fromJust,isJust)
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
 import Formula (Clause(..),Literal(..),opposite)
-import Data.Set (empty,size,fromList,toList,Set,member,notMember,empty,insert,delete,union,(\\))
+import Data.Set (empty,size,fromList,toList,member,notMember,empty,insert,delete,union,(\\))
 import qualified Data.Set as Set (filter,null,take,drop)
 
 

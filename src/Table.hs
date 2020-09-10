@@ -3,6 +3,7 @@ module Table
        (
          Table
        , getTable
+       , genTable
        , genGapTable
        , genWrongTable
        , fillGaps
@@ -13,7 +14,7 @@ module Table
 
 import Data.List (transpose)
 import Data.Maybe (isNothing)
-import Data.Set (toList,unions,empty)
+import Data.Set (toList,unions)
 import Test.QuickCheck
 import Formula (Allocation,Literal(..),Clause(..),CNF(..),evalCNF)
 import qualified Data.Set as Set (map)
@@ -54,6 +55,12 @@ getTable cnf = Table literals values
                                 _     -> x
        values = map (`evalCNF` cnf) $ possibleAllocations literals
 
+
+
+--getCNF :: Table -> CNF
+--getCNF table =
+
+
 allCombinations :: [Literal] -> Int ->  [Allocation]
 allCombinations [] _ = []
 allCombinations (x:xs) n = concat (replicate n $ replicate num (x,False) ++ replicate num (x,True)) : allCombinations xs (n*2)
@@ -62,6 +69,20 @@ allCombinations (x:xs) n = concat (replicate n $ replicate num (x,False) ++ repl
 
 possibleAllocations :: [Literal] -> [Allocation]
 possibleAllocations xs = transpose (allCombinations xs 1)
+
+
+genTable :: [Char] -> (Int,Int) -> Gen Table
+genTable lits (lower,upper)
+ | lower < 0 || upper < lower || upper > 100 = error "invalid percentage range."
+ | otherwise = do
+   percentage <- chooseInt (lower,upper)
+   let rows = (length lits)^2
+   let amountTrue = rows * percentage `div` 100
+   let falses = replicate (rows - amountTrue) False
+   let trues = replicate amountTrue True
+   entries <- shuffle (trues ++ falses)
+   return (Table (map Literal lits) (map Just entries))
+
 
 
 

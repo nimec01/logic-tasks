@@ -1,4 +1,4 @@
-module TaskUtility
+module Task.Utility
       ( withRatio
       , ensureChecksAndExecute
       , writeExercises
