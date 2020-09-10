@@ -114,7 +114,9 @@ instance Arbitrary CNF where
     where cnf 0 = genCNF (0,0) (0,0) []
           cnf n = do
             minLen <- chooseInt (1,n)
-            genCNF (1,maxBound) (minLen,maxBound) (take n ['A'..'Z'])
+            let lits = take n ['A'..'Z']
+            let maxLen = length lits
+            genCNF (1,maxLen ^2) (minLen,maxLen) lits
 
 
 
@@ -141,12 +143,13 @@ genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
 genCNF (minNum,maxNum) (minLen,maxLen) lits
  | null lits || minLen <= 0 || minLen > length lits
    || minLen > maxLen || minNum <= 0 || minNum > maxNum
-   || minNum > minLen^2 = return (CNF empty)
+   || minNum > upperBound = return (CNF empty)
  | otherwise = do
-  num <- chooseInt (minNum,(minimum [maxNum,minLen^2]))
+  num <- chooseInt (minNum,(minimum [maxNum,upperBound]))
   cnf <- generateClauses lits empty num
   return (CNF cnf)
-   where generateClauses lits set num
+   where upperBound = minimum [2^maxLen, 2^length lits]
+         generateClauses lits set num
             | size set == num = return set
             | otherwise = do
                clause <- genClause (minLen,maxLen) lits

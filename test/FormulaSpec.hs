@@ -24,15 +24,17 @@ allocGen = do
 validBoundsClause :: Gen ((Int,Int),[Char])
 validBoundsClause = do
  validChars <- sublistOf ['A'..'Z']
- lower <- chooseInt (1,length validChars)
- upper <- chooseInt (lower,maxBound)
+ let upperBound = length validChars
+ lower <- chooseInt (1,upperBound)
+ upper <- chooseInt (lower,upperBound)
  return ((lower,upper),validChars)
 
 validBoundsCnf :: Gen ((Int,Int),(Int,Int),[Char])
 validBoundsCnf = do
  ((minLen,maxLen),chars) <- validBoundsClause
- minNum <- chooseInt (1,minLen^2)
- maxNum <- chooseInt (minNum,maxBound)
+ let upperBound = minimum [2^ maxLen, 2^length chars]
+ minNum <- chooseInt (1,upperBound)
+ maxNum <- chooseInt (minNum,upperBound)
  return ((minNum,maxNum),(minLen,maxLen),chars)
 
 
@@ -79,7 +81,7 @@ spec = do
       property $ \bounds1 bounds2 -> forAll (genCNF bounds1 bounds2 []) (== CNF empty)
     it "should return the empty conjunction when called with invalid boundaries" $
       property $ \lower1 upper1 lower2 upper2 lits -> lower1 <= 0 || lower2 <= 0
-                 || upper1 < lower1 || upper2 < lower2 || lower1 > lower2^2
+                 || upper1 < lower1 || upper2 < lower2 || upper1 > minimum [lower2^2, length lits ^2]
                    ==> forAll (genCNF (lower1,upper1) (lower2,upper2) lits) (== CNF empty)
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCNF (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->

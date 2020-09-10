@@ -68,7 +68,7 @@ defaultClauseConfig :: ClauseConfig
 defaultClauseConfig = ClauseConfig
   { minClauseLength = 1
   , maxClauseLength = 3
-  , usedLiterals = "ABCD"
+  , usedLiterals = "ABCDEF"
   }
 
 
@@ -143,8 +143,9 @@ checkCnfConfig :: CnfConfig -> Maybe String
 checkCnfConfig CnfConfig {..}
  | any (<0) [minClauseAmount, maxClauseAmount] = Just "At least one of your clause amount parameters is negative."
  | minClauseAmount > maxClauseAmount = Just "The minimum amount of clauses is greater than the maximum amount."
+ | minClauseAmount > maxClauses = Just "There are not enough combinations available to satisfy your amount and length settings."
  | otherwise = checkClauseConfig clauseConf
-
+  where maxClauses = minimum [2^maxClauseLength clauseConf, 2^length (usedLiterals clauseConf)]
 
 
 checkFillConfig :: FillConfig -> Maybe String
