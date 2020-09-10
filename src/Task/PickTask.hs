@@ -13,13 +13,13 @@ module Task.PickTask
 import Control.Exception(try,SomeException)
 import Data.Set (toList)
 import Test.QuickCheck (suchThat,elements,generate,vectorOf)
-import Formula (CNF(..),opposite,Clause(..),genCNF)
+import Formula (Cnf(..),opposite,Clause(..),genCnf)
 import Types (PickConfig(..),CnfConfig(..),ClauseConfig(..))
 import Table (Table,getTable)
 
 
 
-genPickExercise :: PickConfig -> IO (String,Either ([(Int,CNF)],Table) ([(Int,Table)],CNF))
+genPickExercise :: PickConfig -> IO (String,Either ([(Int,Cnf)],Table) ([(Int,Table)],Cnf))
 genPickExercise PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..} = do
  first <- generate getCnf
  rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first))
@@ -34,7 +34,7 @@ genPickExercise PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..
            let desc = exerciseDescPick tables rightCnf
            return (desc,Right (tables,rightCnf))
 
-  where getCnf = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+  where getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
         getWithSameLiterals x = suchThat getCnf
             (\c -> let cLits = concatMap (toList . getLs) (toList (getCs c))
                        xLits = concatMap (toList . getLs) (toList (getCs x)) in
@@ -43,7 +43,7 @@ genPickExercise PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..
 
 
 
-exerciseDescPick :: [(Int,Table)] -> CNF -> String
+exerciseDescPick :: [(Int,Table)] -> Cnf -> String
 exerciseDescPick tables cnf =
  "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n\n" ++
  show cnf ++
@@ -54,7 +54,7 @@ exerciseDescPick tables cnf =
         showTables (x:xs) = show (fst x) ++ "\n" ++ show (snd x) ++ "\n" ++ showTables xs
 
 
-exerciseDescPick2 :: [(Int,CNF)] -> Table -> String
+exerciseDescPick2 :: [(Int,Cnf)] -> Table -> String
 exerciseDescPick2 cnfs table =
  "Betrachten Sie die folgende Wahrheitstafel: \n\n" ++
  show table ++
@@ -66,14 +66,14 @@ exerciseDescPick2 cnfs table =
 
 
 
-evaluatePick :: [(Int,Table)] -> CNF -> IO ()
+evaluatePick :: [(Int,Table)] -> Cnf -> IO ()
 evaluatePick tables cnf = do
  solution <- try readLn :: IO (Either SomeException Int)
  case solution of Left _ -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
                   Right s ->   putStr (case lookup s tables of Just table -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
                                                                Nothing    -> "Die angegebene Tabelle existiert nicht.")
 
-evaluatePick2 :: [(Int,CNF)] -> Table -> IO ()
+evaluatePick2 :: [(Int,Cnf)] -> Table -> IO ()
 evaluatePick2 cnfs table = do
  solution <- try readLn :: IO (Either SomeException Int)
  case solution of Left _ -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"

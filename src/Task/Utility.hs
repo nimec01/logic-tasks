@@ -6,13 +6,13 @@ module Task.Utility
 
 
 
-import Formula (CNF)
+import Formula (Cnf)
 import Table (readEntries, getTable)
 
 
 
 
-withRatio :: Int -> (CNF -> Bool)
+withRatio :: Int -> (Cnf -> Bool)
 withRatio percentage =
  \c -> let tableEntries = readEntries (getTable c) in
          length (filter (==Just True) tableEntries) == (length tableEntries *percentage `div` 100)

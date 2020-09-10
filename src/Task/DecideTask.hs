@@ -11,7 +11,7 @@ module Task.DecideTask
 import Control.Exception (try,SomeException)
 import Data.Set (fromList,toList)
 import Test.QuickCheck (generate,elements)
-import Formula (CNF,genCNF)
+import Formula (Cnf,genCnf)
 import Table (Table,getTable,genWrongTable)
 import Types (DecideConfig(..),CnfConfig(..),ClauseConfig(..))
 
@@ -19,7 +19,7 @@ import Types (DecideConfig(..),CnfConfig(..),ClauseConfig(..))
 
 genDecideExercise :: DecideConfig -> IO (String,(Table,Table,[Int]))
 genDecideExercise DecideConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig{..}, ..}, ..} = do
- cnf <- generate (genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
+ cnf <- generate (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
  let rightTable = getTable cnf
  (indices,wrongTable) <- generate $ genWrongTable rightTable amountOfChanges
  displayTable <- if findMistakes then return wrongTable else generate $ elements [rightTable,wrongTable]
@@ -28,7 +28,7 @@ genDecideExercise DecideConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig
 
 
 
-exerciseDescDecide :: CNF -> Table -> Bool -> String
+exerciseDescDecide :: Cnf -> Table -> Bool -> String
 exerciseDescDecide cnf table mode =
  "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n\n" ++
  show cnf ++

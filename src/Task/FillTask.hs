@@ -10,7 +10,7 @@ module Task.FillTask
 
 import Control.Exception (try,SomeException)
 import Test.QuickCheck (generate,suchThat,chooseInt)
-import Formula (CNF,genCNF)
+import Formula (Cnf,genCnf)
 import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries)
 import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
 import Task.Utility (withRatio)
@@ -20,17 +20,17 @@ genFillExercise :: FillConfig -> IO (String,(Table,Table))
 genFillExercise FillConfig
   { cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..} = do
  cnf <- generate (case percentTrueEntries of Just (lower,upper) -> do ratio <- chooseInt (lower,upper)
-                                                                      suchThat getCNF (withRatio ratio)
-                                             Nothing            -> getCNF)
+                                                                      suchThat getCnf (withRatio ratio)
+                                             Nothing            -> getCnf)
  let table = getTable cnf
  gapTable <- generate (genGapTable table amountOfGaps)
  let desc = exerciseDescFill cnf gapTable
  return (desc,(table,gapTable))
-  where getCNF = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+  where getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 
 
-exerciseDescFill :: CNF -> Table -> String
+exerciseDescFill :: Cnf -> Table -> String
 exerciseDescFill cnf table =
  "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n\n" ++
  show cnf ++

@@ -2,11 +2,11 @@ module Formula
        (
          Literal(..)
        , Clause(..)
-       , CNF(..)
+       , Cnf(..)
        , Allocation
        , opposite
-       , evalCNF
-       , genCNF
+       , evalCnf
+       , genCnf
        , genClause
        , getLiterals
        , genLiteral
@@ -106,48 +106,48 @@ genClause (minlen,maxlen) lits
 
 ---------------------------------------------------------------------------------------------------
 
-newtype CNF = CNF { getCs :: Set Clause}
+newtype Cnf = Cnf { getCs :: Set Clause}
      deriving (Eq,Ord)
 
-instance Arbitrary CNF where
+instance Arbitrary Cnf where
    arbitrary = sized cnf
-    where cnf 0 = genCNF (0,0) (0,0) []
+    where cnf 0 = genCnf (0,0) (0,0) []
           cnf n = do
             minLen <- chooseInt (1,n)
             let lits = take n ['A'..'Z']
             let maxLen = length lits
-            genCNF (1,maxLen ^2) (minLen,maxLen) lits
+            genCnf (1,maxLen ^2) (minLen,maxLen) lits
 
 
 
-instance Show CNF where
- show (CNF set) = listShow (toList set)
+instance Show Cnf where
+ show (Cnf set) = listShow (toList set)
 
    where listShow [] = "True"
          listShow [x] = show x
          listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
 
 
-evalCNF :: Allocation -> CNF -> Maybe Bool
-evalCNF xs ys = and <$> sequence clauses
+evalCnf :: Allocation -> Cnf -> Maybe Bool
+evalCnf xs ys = and <$> sequence clauses
  where clauses = map (evalClause xs) (toList (getCs ys))
 
 
 
-getLiterals :: CNF -> [Literal]
+getLiterals :: Cnf -> [Literal]
 getLiterals cnf = toList $ unions $ map (Set.map turnPositive . getLs) $ toList (getCs cnf)
 
 
 
-genCNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen CNF
-genCNF (minNum,maxNum) (minLen,maxLen) lits
+genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
+genCnf (minNum,maxNum) (minLen,maxLen) lits
  | null lits || minLen <= 0 || minLen > length lits
    || minLen > maxLen || minNum <= 0 || minNum > maxNum
-   || minNum > upperBound = return (CNF empty)
+   || minNum > upperBound = return (Cnf empty)
  | otherwise = do
   num <- chooseInt (minNum,(minimum [maxNum,upperBound]))
   cnf <- generateClauses lits empty num
-  return (CNF cnf)
+  return (Cnf cnf)
    where upperBound = minimum [2^maxLen, 2^length lits]
          generateClauses lits set num
             | size set == num = return set

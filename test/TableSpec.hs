@@ -11,7 +11,7 @@ import qualified Data.Set as Set
 
 
 
-equivGen :: Gen (CNF,CNF)
+equivGen :: Gen (Cnf,Cnf)
 equivGen = sized equiv
   where equiv n = do
           cnf <- resize n arbitrary
@@ -28,15 +28,15 @@ equivGen = sized equiv
                 else do
                   chosenLit <- elements (Set.toList availLits)
                   let newClause = Clause (Set.insert chosenLit clauseLits)
-                  let newCnf = CNF (Set.insert newClause clauses)
+                  let newCnf = Cnf (Set.insert newClause clauses)
                   return (cnf,newCnf)
+
 
 
 spec :: Spec
 spec = do
  tableGenSpec
  utilSpec
-
 
 
 
@@ -47,7 +47,7 @@ utilSpec = do
       forAll (applySize arbitrary) $ \table -> fillGaps [] table `shouldBe` table
 
     it "should return the empty table if the table parameter is empty" $
-      property $ \bools -> let eTable = getTable (CNF empty) in
+      property $ \bools -> let eTable = getTable (Cnf empty) in
         fillGaps bools eTable `shouldBe` eTable
 
     it "should return the table argument if the bool list is too large" $
@@ -80,7 +80,7 @@ tableGenSpec = do
 
     context "When looking at each row of the generated table" $
       it "should have truth values equal to the formula being evaluated with the row's allocation" $
-        forAll (applySize arbitrary) $ \x -> map (`evalCNF` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
+        forAll (applySize arbitrary) $ \x -> map (`evalCnf` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
 
 
   describe "genGapTable" $ do
@@ -94,18 +94,18 @@ tableGenSpec = do
         \gapTable -> table `shouldBe` gapTable
 
     it "should return an empty table if the table parameter is empty" $
-      forAll arbitrarySizedNatural $ \gaps -> let emptyTable = getTable (CNF empty) in
+      forAll arbitrarySizedNatural $ \gaps -> let emptyTable = getTable (Cnf empty) in
         forAll (genGapTable emptyTable gaps) $ \gapTable -> gapTable `shouldBe` emptyTable
 
     it "should return a fully gapped table if the gap parameter is bigger than the size of the table" $
        forAll (applySize arbitrary) $ \table -> let tabLen = length (readEntries table) in
          forAll (suchThat arbitrary (>= tabLen)) $ \gaps -> forAll (genGapTable table gaps) $
-          \gapTable -> length (filter (isNothing) (readEntries gapTable)) == tabLen
+          \gapTable -> length (filter isNothing (readEntries gapTable)) == tabLen
 
     it "should return a table with the correct amount of gaps when called with valid parameters" $
       forAll arbitrarySizedNatural $ \gaps -> forAll (applySize arbitrary) $
         \table -> forAll (genGapTable table gaps) $
-          \gapTable -> gaps < length (readEntries table) ==> length (filter (isNothing) (readEntries gapTable)) == gaps
+          \gapTable -> gaps < length (readEntries table) ==> length (filter isNothing (readEntries gapTable)) == gaps
 
 
   describe "genWrongTable" $ do
@@ -119,7 +119,7 @@ tableGenSpec = do
         \wTable -> table `shouldBe` snd wTable
 
     it "should return an empty table if the table parameter is empty" $
-      forAll arbitrarySizedNatural $ \changes -> let emptyTable = getTable (CNF empty) in
+      forAll arbitrarySizedNatural $ \changes -> let emptyTable = getTable (Cnf empty) in
         forAll (genWrongTable emptyTable changes) $ \wTable -> snd wTable `shouldBe` emptyTable
 
     it "should return an inverted table if the gap parameter is bigger than the size of the table" $

@@ -11,7 +11,7 @@ module Task.GiveCnfTask
 import Control.Exception (try,SomeException)
 import Data.Set (fromList)
 import Test.QuickCheck (generate,chooseInt,suchThat)
-import Formula (Literal,Clause(..),CNF(..),genCNF)
+import Formula (Literal,Clause(..),Cnf(..),genCnf)
 import Task.Utility
 import Types
 import Table(Table,getTable)
@@ -21,12 +21,12 @@ import Table(Table,getTable)
 genGiveCnfExercise :: GiveCnfConfig -> IO (String,Table)
 genGiveCnfExercise GiveCnfConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..} = do
  cnf <- generate (case percentTrueEntries of Just (lower,upper) -> do ratio <- chooseInt (lower,upper)
-                                                                      suchThat getCNF (withRatio ratio)
-                                             Nothing            -> getCNF)
+                                                                      suchThat getCnf (withRatio ratio)
+                                             Nothing            -> getCnf)
  let table = getTable cnf
  let desc = exerciseDescCnf table
  return (desc,table)
-  where getCNF = genCNF (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+  where getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 
 
@@ -43,4 +43,4 @@ evaluateCnf :: Table -> IO ()
 evaluateCnf table = do
   solution <- try readLn :: IO (Either SomeException [[Literal]])
   case solution of Left _ -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                   Right s ->   putStr (if table == getTable (CNF (fromList (map (Clause . fromList) s))) then "Richtige Lösung" else "Falsche Lösung")
+                   Right s ->   putStr (if table == getTable (Cnf (fromList (map (Clause . fromList) s))) then "Richtige Lösung" else "Falsche Lösung")

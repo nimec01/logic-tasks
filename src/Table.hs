@@ -16,7 +16,7 @@ import Data.List (transpose)
 import Data.Maybe (isNothing)
 import Data.Set (toList,unions)
 import Test.QuickCheck
-import Formula (Allocation,Literal(..),Clause(..),CNF(..),evalCNF)
+import Formula (Allocation,Literal(..),Clause(..),Cnf(..),evalCnf)
 import qualified Data.Set as Set (map)
 
 
@@ -48,17 +48,17 @@ instance Arbitrary Table where
             return (getTable cnf)
 
 
-getTable :: CNF -> Table
+getTable :: Cnf -> Table
 getTable cnf = Table literals values
  where literals = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
        filterSign x = case x of Not y -> Literal y
                                 _     -> x
-       values = map (`evalCNF` cnf) $ possibleAllocations literals
+       values = map (`evalCnf` cnf) $ possibleAllocations literals
 
 
 
---getCNF :: Table -> CNF
---getCNF table =
+--getCnf :: Table -> Cnf
+--getCnf table =
 
 
 allCombinations :: [Literal] -> Int ->  [Allocation]
