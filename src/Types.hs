@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
+{-# LANGUAGE DuplicateRecordFields, RecordWildCards #-}
 module Types where
 
 import Data.Maybe (isJust,fromJust)
@@ -85,8 +85,8 @@ defaultCnfConfig = CnfConfig
 defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
   { cnfConfig = defaultCnfConfig
-  , amountOfGaps = 2
-  , percentTrueEntries = Just (10,90)
+  , amountOfGaps = 4
+  , percentTrueEntries = Just (50,60)
   }
 
 

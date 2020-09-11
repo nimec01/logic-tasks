@@ -96,11 +96,11 @@ genClause (minlen,maxlen) lits
   len <- chooseInt (minlen,minimum [length lits, maxlen])
   literals <- generateLiterals lits [] len
   return (Clause (fromList literals))
-   where generateLiterals lits xs len
+   where generateLiterals usedLits xs len
            | length xs == len = return xs
            | otherwise = do
-              literal <- genLiteral lits
-              generateLiterals (delete (getC literal) lits) (literal:xs) len
+              literal <- genLiteral usedLits
+              generateLiterals (delete (getC literal) usedLits) (literal:xs) len
 
 
 
@@ -145,12 +145,12 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
    || minLen > maxLen || minNum <= 0 || minNum > maxNum
    || minNum > upperBound = return (Cnf empty)
  | otherwise = do
-  num <- chooseInt (minNum,(minimum [maxNum,upperBound]))
+  num <- chooseInt (minNum, minimum [maxNum,upperBound])
   cnf <- generateClauses lits empty num
   return (Cnf cnf)
    where upperBound = minimum [2^maxLen, 2^length lits]
-         generateClauses lits set num
+         generateClauses usedLits set num
             | size set == num = return set
             | otherwise = do
-               clause <- genClause (minLen,maxLen) lits
-               generateClauses lits (if clause `member` set then set else insert clause set) num
+               clause <- genClause (minLen,maxLen) usedLits
+               generateClauses usedLits (if clause `member` set then set else insert clause set) num

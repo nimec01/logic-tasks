@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, DuplicateRecordFields, RecordWildCards #-}
+{-# LANGUAGE DuplicateRecordFields, RecordWildCards #-}
 
 module Task.ResolveTask
       ( genResolutionExercise

@@ -7,7 +7,7 @@ module Resolution
        ) where
 
 
-import Data.Maybe (fromJust,isJust)
+import Data.Maybe (catMaybes)
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
 import Formula (Clause(..),Literal(..),opposite)
 import Data.Set (empty,size,fromList,toList,member,notMember,empty,insert,delete,union,(\\))
@@ -46,7 +46,7 @@ genRes (minLen,maxLen) steps lits = do
                                   if choice == 1 then do let newClause1 = insert (Literal chosenChar) chosenClause
                                                          let newClause2 = insert (Not chosenChar) chosenClause
                                                          let newSet = insert newClause2 (insert newClause1 (delete chosenClause ys))
-                                                         let possible = map fromJust (filter isJust ([resolve (Clause newClause1) (Clause z) y | y <- toList newClause1, z <- toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- toList newClause2, z <- toList newSet, z /= newClause2, z /= newClause1]))
+                                                         let possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- toList newClause1, z <- toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- toList newClause2, z <- toList newSet, z /= newClause2, z /= newClause1])
                                                          if any (\cl -> getLs cl `member` zs) possible
                                                            then buildClauses xs ys zs
                                                            else buildClauses xs newSet (insert newClause2 (insert newClause1 zs))
@@ -55,7 +55,7 @@ genRes (minLen,maxLen) steps lits = do
                                           let newClause1 = insert chosenSign (Set.take firstAmount chosenClause)
                                           let newClause2 = insert (opposite chosenSign) (Set.drop firstAmount chosenClause)
                                           let newSet = insert newClause2 (insert newClause1 (delete chosenClause ys))
-                                          let possible = map fromJust (filter isJust ([resolve (Clause newClause1) (Clause z) y | y <- toList newClause1, z <- toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- toList newClause2, z <- toList newSet, z /= newClause2, z /= newClause1]))
+                                          let possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- toList newClause1, z <- toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- toList newClause2, z <- toList newSet, z /= newClause2, z /= newClause1])
                                           if any (\cl -> getLs cl `member` zs) possible
                                             then buildClauses xs ys zs
                                             else buildClauses xs newSet (insert newClause2 (insert newClause1 zs))

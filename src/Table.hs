@@ -3,7 +3,6 @@ module Table
        (
          Table
        , getTable
-       , genTable
        , genGapTable
        , genWrongTable
        , fillGaps
@@ -32,7 +31,7 @@ instance Show Table where
  show t = header ++ "\n" ++ rows
   where literals = getLiterals t
         formatLine [] _ = []
-        formatLine x y = foldr ((\x y -> x ++ " | " ++ y) . show) (maybe "---" show y) x ++ "\n"
+        formatLine x y = foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "---" show y) x ++ "\n"
         header = concat [show x ++ " | " | x <- literals] ++ "VALUES"
         rows = concat [formatLine x y | (x,y) <- zip (transpose $ comb (length literals) 1) $ getEntries t]
         comb 0 _ = []
@@ -57,9 +56,6 @@ getTable cnf = Table literals values
 
 
 
---getCnf :: Table -> Cnf
---getCnf table =
-
 
 allCombinations :: [Literal] -> Int ->  [Allocation]
 allCombinations [] _ = []
@@ -69,20 +65,6 @@ allCombinations (x:xs) n = concat (replicate n $ replicate num (x,False) ++ repl
 
 possibleAllocations :: [Literal] -> [Allocation]
 possibleAllocations xs = transpose (allCombinations xs 1)
-
-
-genTable :: [Char] -> (Int,Int) -> Gen Table
-genTable lits (lower,upper)
- | lower < 0 || upper < lower || upper > 100 = error "invalid percentage range."
- | otherwise = do
-   percentage <- chooseInt (lower,upper)
-   let rows = (length lits)^2
-   let amountTrue = rows * percentage `div` 100
-   let falses = replicate (rows - amountTrue) False
-   let trues = replicate amountTrue True
-   entries <- shuffle (trues ++ falses)
-   return (Table (map Literal lits) (map Just entries))
-
 
 
 
@@ -127,6 +109,7 @@ fillGaps solution table
         filledIn [] ys = ys
         filledIn _ [] = []
         filledIn (x:xs) (y:ys) = if isNothing y then Just x : filledIn xs ys else y : filledIn (x:xs) ys
+
 
 
 readEntries :: Table -> [Maybe Bool]
