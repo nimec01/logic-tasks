@@ -12,6 +12,7 @@ import Types (StepConfig,defaultStepConfig,checkStepConfig)
 stepExercise :: StepConfig -> IO()
 stepExercise = ensureChecksAndExecute checkStepConfig executeStepExercise
   where
+    executeStepExercise :: StepConfig -> IO ()
     executeStepExercise stepConfig = do
         (desc,(clause1,clause2)) <- genStepExercise stepConfig
         putStrLn desc
@@ -19,5 +20,5 @@ stepExercise = ensureChecksAndExecute checkStepConfig executeStepExercise
 
 
 
-main :: IO()
+main :: IO ()
 main = stepExercise defaultStepConfig

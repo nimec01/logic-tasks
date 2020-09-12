@@ -32,6 +32,7 @@ ensureChecksAndExecute checker exercise config =
 writeExercises :: Int -> a -> (a -> IO (String,b)) -> IO()
 writeExercises amount config exercise = write 1
   where
+    write :: Int -> IO ()
     write current
         | current > amount = return ()
         | otherwise = do

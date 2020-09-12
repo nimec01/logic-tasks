@@ -11,6 +11,7 @@ import Task.Utility (ensureChecksAndExecute)
 decideExercise :: DecideConfig -> IO()
 decideExercise = ensureChecksAndExecute checkDecideConfig executeDecideExercise
   where
+    executeDecideExercise :: DecideConfig -> IO ()
     executeDecideExercise decideConfig = do
         (desc,(rightTable,displayTable,indices)) <- genDecideExercise decideConfig
         putStrLn desc
@@ -22,5 +23,5 @@ decideExercise = ensureChecksAndExecute checkDecideConfig executeDecideExercise
 
 
 
-main :: IO()
+main :: IO ()
 main = decideExercise defaultDecideConfig

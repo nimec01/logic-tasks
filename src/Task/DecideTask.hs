@@ -30,6 +30,7 @@ genDecideExercise
     let desc = exerciseDescDecide cnf displayT findMistakes
     pure (desc,(rightT,displayT,indices))
   where
+    pickOne :: [Table] -> IO Table
     pickOne = generate . elements
 
 
@@ -74,6 +75,8 @@ evaluateDecide2 indices = do
              else putStrLn ("Ihre Loesung beinhaltet " ++ show mistakeNum ++ " Fehler.")
   where
     correct = fromList (map (+1) indices)
+
+    mistakes :: Eq a => [a] -> [a] -> Int
     mistakes [] ys = length ys
     mistakes xs [] = length xs
     mistakes (x:xs) (y:ys) = (if x == y then 0 else 1) + mistakes xs ys

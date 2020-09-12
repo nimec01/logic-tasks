@@ -42,7 +42,7 @@ spec = do
 
 
 utilSpec :: Spec
-utilSpec = do
+utilSpec =
   describe "fillGaps" $ do
     it "should return the table parameter if the list is empty" $
       forAll (applySize arbitrary) $ \table -> fillGaps [] table `shouldBe` table

@@ -12,6 +12,7 @@ import Task.Utility (ensureChecksAndExecute)
 pickExercise :: PickConfig -> IO()
 pickExercise = ensureChecksAndExecute checkPickConfig executePickExercise
   where
+    executePickExercise :: PickConfig -> IO ()
     executePickExercise pickConfig = do
         (desc,genResult) <- genPickExercise pickConfig
         putStrLn desc
@@ -21,5 +22,5 @@ pickExercise = ensureChecksAndExecute checkPickConfig executePickExercise
 
 
 
-main :: IO()
+main :: IO ()
 main = pickExercise defaultPickConfig

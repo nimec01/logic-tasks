@@ -11,7 +11,7 @@ module Resolution
 import Data.Maybe (catMaybes)
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
 import Formula (Clause(..),Literal(..),opposite)
-import Data.Set (empty)
+import Data.Set (empty,Set)
 import qualified Data.Set as Set
 
 
@@ -35,6 +35,7 @@ genRes (minLen,maxLen) steps lits = do
     shuffled <- shuffle (Set.toList clauses)
     pure (map Clause shuffled)
   where
+    buildClauses :: [Char] -> Set (Set Literal) -> Set (Set Literal) -> Gen (Set (Set Literal))
     buildClauses xs ys zs
         | Set.size ys >= steps+1  = return ys
         | otherwise =
@@ -43,8 +44,10 @@ genRes (minLen,maxLen) steps lits = do
                 chosenChar <- elements xs
                 buildClauses xs (Set.fromList [Set.fromList [Literal chosenChar],Set.fromList [Not chosenChar]]) (Set.fromList [Set.fromList [Literal chosenChar],Set.fromList [Not chosenChar]])
               else do
-                let underMin = Set.filter (\clause -> Set.size clause < minLen) ys
-                    underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
+                let
+                  underMin = Set.filter (\clause -> Set.size clause < minLen) ys
+                  underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
+
                 chosenClause <- elements (if Set.null underMin then Set.toList underMax else Set.toList underMin)
                 let chooseableLits = filter (\lit -> Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
                 choice <- if Set.size chosenClause == 1 || chosenClause `Set.member` underMin
@@ -55,20 +58,24 @@ genRes (minLen,maxLen) steps lits = do
                 chosenChar <- elements chooseableLits
                 if choice == 1
                   then do
-                    let newClause1 = Set.insert (Literal chosenChar) chosenClause
-                        newClause2 = Set.insert (Not chosenChar) chosenClause
-                        newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete chosenClause ys))
-                        possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
+                    let
+                      newClause1 = Set.insert (Literal chosenChar) chosenClause
+                      newClause2 = Set.insert (Not chosenChar) chosenClause
+                      newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete chosenClause ys))
+                      possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
+
                     if any (\cl -> getLs cl `Set.member` zs) possible
                       then buildClauses xs ys zs
                       else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))
                   else do
                     firstAmount <- chooseInt (1, Set.size chosenClause-1)
                     chosenSign <- elements [Literal chosenChar, Not chosenChar]
-                    let newClause1 = Set.insert chosenSign (Set.take firstAmount chosenClause)
-                        newClause2 = Set.insert (opposite chosenSign) (Set.drop firstAmount chosenClause)
-                        newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete chosenClause ys))
-                        possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
+                    let
+                      newClause1 = Set.insert chosenSign (Set.take firstAmount chosenClause)
+                      newClause2 = Set.insert (opposite chosenSign) (Set.drop firstAmount chosenClause)
+                      newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete chosenClause ys))
+                      possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
+
                     if any (\cl -> getLs cl `Set.member` zs) possible
                       then buildClauses xs ys zs
                       else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))
@@ -91,8 +98,6 @@ applySteps :: [(Int,Clause)] -> [(Int,Int,Literal)] -> Maybe [(Int,Clause)]
 applySteps [] _ = Just []
 applySteps xs [] = Just xs
 applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
-
-
 
 
 

@@ -28,9 +28,10 @@ genStepExercise
     clause1 <- generate (genClause (minClauseLength-1,maxClauseLength-1) restLits)
     clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
                         (not . any (\lit -> opposite lit `elem` getLs clause1) .  getLs))
-    let litAddedClause1 = Clause (insert rLit (getLs clause1))
-        litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2))
-        desc = exerciseDescStep litAddedClause1 litAddedClause2
+    let
+      litAddedClause1 = Clause (insert rLit (getLs clause1))
+      litAddedClause2 = Clause (insert (opposite rLit) (getLs clause2))
+      desc = exerciseDescStep litAddedClause1 litAddedClause2
     pure (desc,(litAddedClause1,litAddedClause2))
 
 

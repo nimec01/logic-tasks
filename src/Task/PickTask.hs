@@ -12,7 +12,7 @@ module Task.PickTask
 
 import Control.Exception(try,SomeException)
 import Data.Set (toList)
-import Test.QuickCheck (suchThat,elements,generate,vectorOf)
+import Test.QuickCheck (suchThat,elements,generate,vectorOf,Gen)
 import Formula (Cnf(..),opposite,Clause(..),genCnf)
 import Types (PickConfig(..),CnfConfig(..),ClauseConfig(..))
 import Table (Table,getTable)
@@ -29,17 +29,21 @@ genPickExercise
     rightCnf <- generate (elements cnfs)
     if pickCnf
       then do
-        let table = getTable rightCnf
-            zippedCnfs = zip [1..] cnfs
-            desc = exerciseDescPick2 zippedCnfs table
+        let
+          table = getTable rightCnf
+          zippedCnfs = zip [1..] cnfs
+          desc = exerciseDescPick2 zippedCnfs table
         pure (desc,Left (zippedCnfs,table))
       else do
-        let tables = zip [1..] (map getTable cnfs)
-            desc = exerciseDescPick tables rightCnf
+        let
+          tables = zip [1..] (map getTable cnfs)
+          desc = exerciseDescPick tables rightCnf
         pure (desc,Right (tables,rightCnf))
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
+
+    getWithSameLiterals :: Cnf -> Gen Cnf
     getWithSameLiterals x =
         suchThat getCnf (\c ->
           let
@@ -56,11 +60,9 @@ exerciseDescPick tables cnf =
     "Betrachten Sie die folgende Formel in konjunktiver Normalform: \n\n" ++
     show cnf ++
     "\n Welche der folgenden Wahrheitstafeln passt zu der Formel?\n\n" ++
-    showTables tables ++
+    showIndexedList tables ++
     "\nGeben Sie die richtige Tafel durch ihre Nummer an."
-  where
-    showTables [] = " "
-    showTables (x:xs) = show (fst x) ++ "\n" ++ show (snd x) ++ "\n" ++ showTables xs
+
 
 
 exerciseDescPick2 :: [(Int,Cnf)] -> Table -> String
@@ -68,11 +70,14 @@ exerciseDescPick2 cnfs table =
     "Betrachten Sie die folgende Wahrheitstafel: \n\n" ++
     show table ++
     "\n Welche der folgenden Formeln in konjunktiver Normalform passt zu der Wahrheitstafel?\n\n" ++
-    showCnfs cnfs ++
+    showIndexedList cnfs ++
     "\nGeben Sie die richtige Tafel durch ihre Nummer an."
-  where
-    showCnfs [] = " "
-    showCnfs (x:xs) = show (fst x) ++ "\n" ++ show (snd x) ++ "\n" ++ showCnfs xs
+
+
+
+showIndexedList :: Show a => Show b => [(a,b)] -> String
+showIndexedList [] = " "
+showIndexedList (x:xs) = show (fst x) ++ "\n" ++ show (snd x) ++ "\n" ++ showIndexedList xs
 
 
 
@@ -83,6 +88,7 @@ evaluatePick tables cnf = do
         Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
         Right s -> putStr (checkAnswer s)
   where
+    checkAnswer :: Int -> String
     checkAnswer answer = case lookup answer tables of
         Just table -> if table == getTable cnf
           then "Richtige Lösung"
@@ -98,6 +104,7 @@ evaluatePick2 cnfs table = do
         Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
         Right s -> putStr (checkAnswer s)
   where
+    checkAnswer :: Int -> String
     checkAnswer answer = case lookup answer cnfs of
         Just cnf -> if table == getTable cnf
           then "Richtige Lösung"

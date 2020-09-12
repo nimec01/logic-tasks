@@ -11,6 +11,7 @@ import Task.Utility (ensureChecksAndExecute)
 giveCnfExercise :: GiveCnfConfig -> IO()
 giveCnfExercise = ensureChecksAndExecute checkGiveCnfConfig executeCnfExercise
   where
+    executeCnfExercise :: GiveCnfConfig -> IO ()
     executeCnfExercise cnfConfig = do
         (desc,table) <- genGiveCnfExercise cnfConfig
         putStrLn desc
@@ -18,4 +19,5 @@ giveCnfExercise = ensureChecksAndExecute checkGiveCnfConfig executeCnfExercise
 
 
 
+main :: IO ()
 main = giveCnfExercise defaultGiveCnfConfig

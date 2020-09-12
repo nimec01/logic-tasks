@@ -23,8 +23,9 @@ genGiveCnfExercise
     GiveCnfConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..}
   = do
     cnf <- generate cnfInRange
-    let table = getTable cnf
-    let desc = exerciseDescCnf table
+    let
+      table = getTable cnf
+      desc = exerciseDescCnf table
     return (desc,table)
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)

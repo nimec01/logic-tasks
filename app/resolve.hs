@@ -12,6 +12,7 @@ import Types (ResolutionConfig,defaultResolutionConfig,checkResolutionConfig)
 resolutionExercise :: ResolutionConfig -> IO()
 resolutionExercise = ensureChecksAndExecute checkResolutionConfig executeResolutionExercise
   where
+    executeResolutionExercise :: ResolutionConfig -> IO ()
     executeResolutionExercise resolutionConfig = do
         (desc,numberedClauses) <- genResolutionExercise resolutionConfig
         putStrLn desc
@@ -19,5 +20,5 @@ resolutionExercise = ensureChecksAndExecute checkResolutionConfig executeResolut
 
 
 
-main :: IO()
+main :: IO ()
 main = resolutionExercise defaultResolutionConfig

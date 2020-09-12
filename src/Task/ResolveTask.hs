@@ -22,8 +22,9 @@ genResolutionExercise
     ResolutionConfig { clauseConfig = ClauseConfig {..}, ..}
   = do
     clauses <- generate (genRes (minClauseLength, maxClauseLength) steps usedLiterals)
-    let numberedClauses = zip [1..] clauses
-        desc = exerciseDescResolve numberedClauses
+    let
+      numberedClauses = zip [1..] clauses
+      desc = exerciseDescResolve numberedClauses
     pure (desc,numberedClauses)
 
 

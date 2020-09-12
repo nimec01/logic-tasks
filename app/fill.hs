@@ -11,6 +11,7 @@ import Types (FillConfig,defaultFillConfig,checkFillConfig)
 fillExercise :: FillConfig -> IO()
 fillExercise = ensureChecksAndExecute checkFillConfig executeFillExercise
   where
+    executeFillExercise :: FillConfig -> IO ()
     executeFillExercise fillConfig = do
         (desc,(table,gapTable)) <- genFillExercise fillConfig
         putStrLn desc
@@ -18,5 +19,5 @@ fillExercise = ensureChecksAndExecute checkFillConfig executeFillExercise
 
 
 
-main :: IO()
+main :: IO ()
 main = fillExercise defaultFillConfig

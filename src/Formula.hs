@@ -77,6 +77,7 @@ newtype Clause = Clause { getLs :: Set Literal}
 instance Show Clause where
    show (Clause set) = listShow (Set.toList set)
      where
+       listShow :: [Literal] -> String
        listShow [] = "False"
        listShow [x] = show x
        listShow (x:xs) = show x ++ " OR " ++ listShow xs
@@ -84,6 +85,7 @@ instance Show Clause where
 instance Arbitrary Clause where
    arbitrary = sized clause
      where
+       clause :: Int -> Gen Clause
        clause 0 = genClause (0,0) []
        clause n = genClause (1,maxBound) (take n ['A'..'Z'])
 
@@ -107,6 +109,7 @@ genClause (minlen,maxlen) lits
     nLits = nub lits
     invalidLen = minlen > maxlen || minlen <= 0
 
+    generateLiterals :: [Char] -> [Literal] -> Int -> Gen [Literal]
     generateLiterals usedLits xs len
         | length xs == len = pure xs
         | otherwise = do
@@ -125,11 +128,13 @@ newtype Cnf = Cnf { getCs :: Set Clause}
 instance Arbitrary Cnf where
     arbitrary = sized cnf
       where
+        cnf :: Int -> Gen Cnf
         cnf 0 = genCnf (0,0) (0,0) []
         cnf n = do
             minLen <- chooseInt (1,n)
-            let lits = take n ['A'..'Z']
-            let maxLen = length lits
+            let
+              lits = take n ['A'..'Z']
+              maxLen = length lits
             genCnf (1,maxLen ^2) (minLen,maxLen) lits
 
 
@@ -137,6 +142,7 @@ instance Arbitrary Cnf where
 instance Show Cnf where
     show (Cnf set) = listShow (Set.toList set)
       where
+        listShow :: [Clause] -> String
         listShow [] = "True"
         listShow [x] = show x
         listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
@@ -145,13 +151,15 @@ instance Show Cnf where
 
 evalCnf :: Allocation -> Cnf -> Maybe Bool
 evalCnf xs ys = and <$> sequence clauses
-  where clauses = map (evalClause xs) (Set.toList (getCs ys))
+  where
+    clauses = map (evalClause xs) (Set.toList (getCs ys))
 
 
 
 getLiterals :: Cnf -> [Literal]
 getLiterals cnf = Set.toList $ Set.unions $ map positive $ Set.toList (getCs cnf)
-  where positive = Set.map turnPositive . getLs
+  where
+    positive = Set.map turnPositive . getLs
 
 
 
@@ -168,13 +176,17 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
     upperBound = minimum [2^maxLen, 2^length nLits]
 
+    generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
     generateClauses usedLits set num
         | Set.size set == num = return set
         | otherwise = do
             clause <- genClause (minLen,maxLen) usedLits
             generateClauses usedLits (decide clause) num
       where
-        alreadyIn = (flip Set.member) set
+        alreadyIn :: Clause -> Bool
+        alreadyIn = flip Set.member set
+
+        decide :: Clause -> Set Clause
         decide c
             | alreadyIn c = set
             | otherwise = Set.insert c set

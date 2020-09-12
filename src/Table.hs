@@ -33,25 +33,33 @@ instance Show Table where
     show t = header ++ "\n" ++ rows
       where
         literals = getLiterals t
+
+        formatLine :: Show a => [a] -> Maybe Bool -> String
         formatLine [] _ = []
         formatLine x y =
             foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "---" show y) x ++ "\n"
+
         header = concat [show x ++ " | " | x <- literals] ++ "VALUES"
-        rows =
-            concat [formatLine x y | (x,y) <- unformattedRows]
+        rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
             unformattedRows = zip (transpose $ comb (length literals) 1) $ getEntries t
-        comb 0 _ = []
-        comb len n =
-            concat (replicate n $ replicate num 0 ++ replicate num 1) : comb (len-1) (n*2)
-          where
-            num = 2^(len -1)
+              where
+                comb :: Int -> Int -> [[Int]]
+                comb 0 _ = []
+                comb len n =
+                    concat (replicate n $ repNum 0 ++ repNum 1) : comb (len-1) (n*2)
+                  where
+                    num = 2^(len -1)
+
+                    repNum :: a -> [a]
+                    repNum = replicate num
 
 
 
 instance Arbitrary Table where
     arbitrary = sized table
       where
+        table :: Int -> Gen Table
         table n = do
             cnf <- resize n arbitrary
             pure (getTable cnf)
@@ -62,6 +70,8 @@ getTable :: Cnf -> Table
 getTable cnf = Table literals values
   where
     literals = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
+
+    filterSign :: Literal -> Literal
     filterSign x = case x of Not y -> Literal y
                              _     -> x
     values = map (`evalCnf` cnf) $ possibleAllocations literals
@@ -75,7 +85,8 @@ allCombinations (x:xs) n =
     concat (replicate n $ pairs False ++ pairs True) : allCombinations xs (n*2)
   where
     num = 2^ length xs
-    pairs bool = replicate num (x,bool)
+    pairs :: a -> [(Literal,a)]
+    pairs a = replicate num (x,a)
 
 
 
@@ -91,12 +102,17 @@ genGapTable table gaps
     | otherwise = generateGaps [] gaps
   where
     rowAmount = length (getEntries table)
+
+    generateGaps :: [Int] -> Int -> Gen Table
     generateGaps indices 0 = do
-        let entries = getEntries table
-        let newEntries = [ if x `elem` indices then Nothing else entries !! x
-                         | x <- [0..length entries-1]]
-        let gapTable = Table (getLiterals table) newEntries
+        let
+          entries = getEntries table
+          newEntries = [ if x `elem` indices then Nothing else entries !! x
+                       | x <- [0..length entries-1]]
+          gapTable = Table (getLiterals table) newEntries
+
         pure gapTable
+
     generateGaps indices num = do
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateGaps (rInt: indices) (num-1)
@@ -111,13 +127,21 @@ genWrongTable table changes
     | otherwise = generateChanges [] changes
   where
     rowAmount = length (getEntries table)
+
+    generateChanges :: [Int] -> Int -> Gen ([Int],Table)
     generateChanges indices 0 = do
-        let entries = getEntries table
-        let at index = entries !! index
-        let newEntries = [ if x `elem` indices then not <$> at x else at x
-                         | x <- [0..length entries-1]]
-        let newTable = Table (getLiterals table) newEntries
-        return (indices,newTable)
+        let
+          entries = getEntries table
+
+          at :: Int -> Maybe Bool
+          at index = entries !! index
+
+          newEntries = [ if x `elem` indices then not <$> at x else at x
+                       | x <- [0..length entries-1]]
+          newTable = Table (getLiterals table) newEntries
+
+        pure (indices,newTable)
+
     generateChanges indices num = do
         rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
         generateChanges (rInt: indices) (num-1)
@@ -130,6 +154,8 @@ fillGaps solution table
     | otherwise = Table (getLiterals table) (filledIn solution tabEntries)
   where
     tabEntries = getEntries table
+
+    filledIn :: [Bool] -> [Maybe Bool] -> [Maybe Bool]
     filledIn [] ys = ys
     filledIn _ [] = []
     filledIn (x:xs) (y:ys) = if isNothing y
@@ -146,6 +172,7 @@ readEntries = getEntries
 countDiffEntries :: Table -> Table -> Int
 countDiffEntries t1 t2 = diffs (getEntries t1) (getEntries t2)
   where
+    diffs :: [Maybe Bool] -> [Maybe Bool] -> Int
     diffs [] ys = length ys
     diffs xs [] = length xs
     diffs (x:xs) (y:ys) = (if x == y then 0 else 1) + diffs xs ys
