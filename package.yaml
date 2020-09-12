@@ -44,7 +44,11 @@ executables:
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-
+  Write:
+    main:                writer.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
 
 tests:
   src-test:
