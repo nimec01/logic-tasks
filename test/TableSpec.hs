@@ -13,30 +13,31 @@ import qualified Data.Set as Set
 
 equivGen :: Gen (Cnf,Cnf)
 equivGen = sized equiv
-  where equiv n = do
-          cnf <- resize n arbitrary
-          let clauses = getCs cnf
-          if Set.null clauses
-            then equivGen
-            else do
-              let literals = Set.unions (Set.map getLs clauses)
-              clause <- elements (Set.toList clauses)
-              let clauseLits = getLs clause
-              let availLits = literals Set.\\ clauseLits
-              if Set.null availLits
-                then equivGen
-                else do
-                  chosenLit <- elements (Set.toList availLits)
-                  let newClause = Clause (Set.insert chosenLit clauseLits)
-                  let newCnf = Cnf (Set.insert newClause clauses)
-                  return (cnf,newCnf)
+  where
+    equiv n = do
+        cnf <- resize n arbitrary
+        let clauses = getCs cnf
+        if Set.null clauses
+          then equivGen
+          else do
+            let literals = Set.unions (Set.map getLs clauses)
+            clause <- elements (Set.toList clauses)
+            let clauseLits = getLs clause
+                availLits = literals Set.\\ clauseLits
+            if Set.null availLits
+              then equivGen
+              else do
+                chosenLit <- elements (Set.toList availLits)
+                let newClause = Clause (Set.insert chosenLit clauseLits)
+                let newCnf = Cnf (Set.insert newClause clauses)
+                pure (cnf,newCnf)
 
 
 
 spec :: Spec
 spec = do
- tableGenSpec
- utilSpec
+    tableGenSpec
+    utilSpec
 
 
 

@@ -16,13 +16,12 @@ import Task.PickTask
 
 main :: IO ()
 main = do
- putStrLn "how many?"
- amount <- readLn
- writeExercises amount defaultFillConfig genFillExercise
- writeExercises amount defaultGiveCnfConfig genGiveCnfExercise
- writeExercises amount defaultPickConfig genPickExercise
- writeExercises amount defaultDecideConfig genDecideExercise
- writeExercises amount defaultStepConfig genStepExercise
- writeExercises amount defaultResolutionConfig genResolutionExercise
-
-
+    putStrLn "how many?"
+    amount <- readLn
+    let writeNum = writeExercises amount
+    writeNum defaultFillConfig genFillExercise
+    writeNum defaultGiveCnfConfig genGiveCnfExercise
+    writeNum defaultPickConfig genPickExercise
+    writeNum defaultDecideConfig genDecideExercise
+    writeNum defaultStepConfig genStepExercise
+    writeNum defaultResolutionConfig genResolutionExercise
