@@ -47,8 +47,9 @@ exerciseDescCnf table =
 evaluateCnf :: Table -> IO ()
 evaluateCnf table = do
     solution <- try readLn :: IO (Either SomeException [[Literal]])
-    case solution of Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                     Right s -> let
-                                  answer = getTable (Cnf (fromList (map (Clause . fromList) s)))
-                                in
-                                  putStr (if table == answer then "Richtige Lösung" else "Falsche Lösung")
+    case solution of
+        Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+        Right s -> let
+            answer = getTable (Cnf (fromList (map (Clause . fromList) s)))
+          in
+            putStr (if table == answer then "Richtige Lösung" else "Falsche Lösung")

@@ -81,13 +81,25 @@ evaluatePick tables cnf = do
     solution <- try readLn :: IO (Either SomeException Int)
     case solution of
         Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-        Right s -> putStr (case lookup s tables of Just table -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
-                                                   Nothing    -> "Die angegebene Tabelle existiert nicht.")
+        Right s -> putStr (checkAnswer s)
+  where
+    checkAnswer answer = case lookup answer tables of
+        Just table -> if table == getTable cnf
+          then "Richtige Lösung"
+          else "Falsche Lösung"
+        Nothing    -> "Die angegebene Tabelle existiert nicht."
+
+
 
 evaluatePick2 :: [(Int,Cnf)] -> Table -> IO ()
 evaluatePick2 cnfs table = do
     solution <- try readLn :: IO (Either SomeException Int)
     case solution of
         Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-        Right s -> putStr (case lookup s cnfs of Just cnf -> if table == getTable cnf then "Richtige Lösung" else "Falsche Lösung"
-                                                 Nothing    -> "Die angegebene Tabelle existiert nicht.")
+        Right s -> putStr (checkAnswer s)
+  where
+    checkAnswer answer = case lookup answer cnfs of
+        Just cnf -> if table == getTable cnf
+          then "Richtige Lösung"
+          else "Falsche Lösung"
+        Nothing    -> "Die angegebene Tabelle existiert nicht."

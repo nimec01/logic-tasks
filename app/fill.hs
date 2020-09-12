@@ -8,15 +8,13 @@ import Types (FillConfig,defaultFillConfig,checkFillConfig)
 
 
 
-
 fillExercise :: FillConfig -> IO()
 fillExercise = ensureChecksAndExecute checkFillConfig executeFillExercise
-
-  where executeFillExercise fillConfig = do
-         (desc,(table,gapTable)) <- genFillExercise fillConfig
-         putStrLn desc
-         evaluateFill table gapTable
-
+  where
+    executeFillExercise fillConfig = do
+        (desc,(table,gapTable)) <- genFillExercise fillConfig
+        putStrLn desc
+        evaluateFill table gapTable
 
 
 

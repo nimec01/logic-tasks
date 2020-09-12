@@ -11,11 +11,11 @@ import Types (ResolutionConfig,defaultResolutionConfig,checkResolutionConfig)
 
 resolutionExercise :: ResolutionConfig -> IO()
 resolutionExercise = ensureChecksAndExecute checkResolutionConfig executeResolutionExercise
-
-  where executeResolutionExercise resolutionConfig = do
-          (desc,numberedClauses) <- genResolutionExercise resolutionConfig
-          putStrLn desc
-          evaluateResolve numberedClauses
+  where
+    executeResolutionExercise resolutionConfig = do
+        (desc,numberedClauses) <- genResolutionExercise resolutionConfig
+        putStrLn desc
+        evaluateResolve numberedClauses
 
 
 

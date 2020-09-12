@@ -29,9 +29,10 @@ genFillExercise
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
-    cnfInRange = case percentTrueEntries of Just range -> do ratio <- chooseInt range
-                                                             suchThat getCnf (withRatio ratio)
-                                            Nothing    -> getCnf
+    cnfInRange = case percentTrueEntries of
+        Just range -> do ratio <- chooseInt range
+                         suchThat getCnf (withRatio ratio)
+        Nothing    -> getCnf
 
 
 
@@ -48,10 +49,12 @@ exerciseDescFill cnf table =
 evaluateFill :: Table -> Table -> IO ()
 evaluateFill table gapTable = do
     solution <- try readLn :: IO (Either SomeException [Bool])
-    case solution of Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                     Right s -> let
-                                  filledTable = fillGaps s gapTable
-                                  diffCount = countDiffEntries filledTable table
-                                  errorDisplay = "Die Lösung enthält " ++ show diffCount ++ if diffCount == 1 then " falschen Eintrag" else " falsche Eintraege"
-                                in
-                                  putStr (if filledTable == table then "Richtige Lösung" else errorDisplay)
+    case solution of
+        Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+        Right s -> let
+            filledTable = fillGaps s gapTable
+            diffCount = countDiffEntries filledTable table
+            numerus = if diffCount == 1 then " falschen Eintrag" else " falsche Eintraege"
+            errorDisplay = "Die Lösung enthält " ++ show diffCount ++ numerus
+          in
+            putStr (if filledTable == table then "Richtige Lösung" else errorDisplay)

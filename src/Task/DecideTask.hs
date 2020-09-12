@@ -51,26 +51,29 @@ exerciseDescDecide cnf table mode =
 evaluateDecide :: Bool -> IO ()
 evaluateDecide bool = do
     solution <- try readLn :: IO (Either SomeException String)
-    case solution of Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                     Right s -> case s of "ja"   -> putStrLn (if bool then "Richtige Antwort" else "Falsche Antwort")
-                                          "nein" -> putStrLn (if not bool then "Richtige Antwort" else "Falsche Antwort")
-                                          _      -> putStrLn "keine Lösung der Aufgabe."
+    case solution of
+        Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+        Right s -> case s of
+            "ja"   -> putStrLn (if bool then "Richtige Antwort" else "Falsche Antwort")
+            "nein" -> putStrLn (if bool then "Falsche Antwort" else "Richtige Antwort")
+            _      -> putStrLn "keine Lösung der Aufgabe."
 
 
 
 evaluateDecide2 :: [Int] -> IO ()
 evaluateDecide2 indices = do
     solution <- try readLn :: IO (Either SomeException [Int])
-    case solution of Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
-                     Right s -> let
-                                  correct = fromList (map (+1) indices)
-                                  answer = fromList s
-                                  mistakeNum = mistakes (toList answer) (toList correct)
-                                in
-                                  if correct == answer
-                                    then putStrLn "Richtige Antwort"
-                                    else putStrLn ("Ihre Loesung beinhaltet " ++ show mistakeNum ++ " Fehler.")
+    case solution of
+        Left _  -> putStrLn "Die Eingabe entspricht nicht der vorgegebenen Form"
+        Right s -> let
+           answer = fromList s
+           mistakeNum = mistakes (toList answer) (toList correct)
+          in
+           if correct == answer
+             then putStrLn "Richtige Antwort"
+             else putStrLn ("Ihre Loesung beinhaltet " ++ show mistakeNum ++ " Fehler.")
   where
+    correct = fromList (map (+1) indices)
     mistakes [] ys = length ys
     mistakes xs [] = length xs
     mistakes (x:xs) (y:ys) = (if x == y then 0 else 1) + mistakes xs ys
