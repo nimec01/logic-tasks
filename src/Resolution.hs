@@ -9,8 +9,8 @@ module Resolution
 
 
 import Data.Maybe (catMaybes)
-import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
-import Formula (Clause(..),Literal(..),opposite)
+import Test.QuickCheck (Gen,chooseInt,elements,shuffle,generate)
+import Formula (Clause(..),Literal(..),opposite,setElements)
 import Data.Set (empty,Set)
 import qualified Data.Set as Set
 
@@ -49,7 +49,7 @@ genRes (minLen,maxLen) steps lits = do
                 let
                   underMin = Set.filter (\clause -> Set.size clause < minLen) ys
                   underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
-                chosenClause <- elements (if Set.null underMin then Set.toList underMax else Set.toList underMin)
+                chosenClause <- setElements (if Set.null underMin then underMax else underMin)
                 let
                   chooseableLits = filter (\lit -> Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
                   clauseSize = Set.size chosenClause
@@ -70,12 +70,18 @@ genRes (minLen,maxLen) steps lits = do
       where
         checkValidAndInsert :: Literal -> Set Literal -> Int -> Int -> Gen (Set (Set Literal))
         checkValidAndInsert lit clause get leave = do
+            shuffledClause <- shuffle (Set.toList clause)
             let
-              newClause1 = Set.insert lit (Set.take get clause)
-              newClause2 = Set.insert (opposite lit) (Set.drop leave clause)
+              newClause1 = Set.fromList (lit : take get shuffledClause)
+              newClause2 = Set.fromList ((opposite lit) : drop leave shuffledClause)
               newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete clause ys))
-              possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
-
+              resolvables :: Set Literal -> [Maybe Clause]
+              resolvables c = [resolve (Clause c) (Clause z) y
+                              | y <- Set.toList newClause1
+                              , z <- Set.toList newSet
+                              , z /= newClause2
+                              , z /= newClause1]
+              possible = catMaybes (resolvables newClause1 ++ resolvables newClause2)
             if any (\cl -> getLs cl `Set.member` zs) possible
               then buildClauses xs ys zs
               else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))

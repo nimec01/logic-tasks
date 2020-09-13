@@ -13,6 +13,7 @@ module Formula
        , evalLiteral
        , evalClause
        , turnPositive
+       , setElements
        ) where
 
 
@@ -103,18 +104,21 @@ genClause (minlen,maxlen) lits
     | null nLits || minlen > length lits || invalidLen = pure (Clause empty)
     | otherwise = do
         len <- chooseInt (minlen,minimum [length nLits, maxlen])
-        literals <- generateLiterals nLits [] len
-        pure (Clause (Set.fromList literals))
+        literals <- generateLiterals nLits empty len
+        pure (Clause literals)
   where
     nLits = nub lits
     invalidLen = minlen > maxlen || minlen <= 0
 
-    generateLiterals :: [Char] -> [Literal] -> Int -> Gen [Literal]
+    generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
     generateLiterals usedLits xs len
-        | length xs == len = pure xs
+        | Set.size xs == len = pure xs
         | otherwise = do
             literal <- genLiteral usedLits
-            generateLiterals (delete (getC literal) usedLits) (literal:xs) len
+            let
+              restLits = delete (getC literal) usedLits
+              newSet = Set.insert literal xs
+            generateLiterals restLits newSet len
 
 
 
@@ -190,3 +194,9 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
         decide c
             | alreadyIn c = set
             | otherwise = Set.insert c set
+
+
+setElements :: Set a -> Gen a
+setElements set
+    | null set = error "setElements used with empty set."
+    | otherwise = (`Set.elemAt` set) `fmap` chooseInt (0, Set.size set - 1)
