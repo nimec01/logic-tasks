@@ -37,48 +37,48 @@ genRes (minLen,maxLen) steps lits = do
   where
     buildClauses :: [Char] -> Set (Set Literal) -> Set (Set Literal) -> Gen (Set (Set Literal))
     buildClauses xs ys zs
-        | Set.size ys >= steps+1  = return ys
+        | Set.size ys >= steps+1  = pure ys
         | otherwise =
             if Set.null ys
               then do
                 chosenChar <- elements xs
-                buildClauses xs (Set.fromList [Set.fromList [Literal chosenChar],Set.fromList [Not chosenChar]]) (Set.fromList [Set.fromList [Literal chosenChar],Set.fromList [Not chosenChar]])
+                let
+                  startSet = Set.fromList [Set.singleton (Literal chosenChar),Set.singleton (Not chosenChar)]
+                buildClauses xs startSet startSet
               else do
                 let
                   underMin = Set.filter (\clause -> Set.size clause < minLen) ys
                   underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
-
                 chosenClause <- elements (if Set.null underMin then Set.toList underMax else Set.toList underMin)
-                let chooseableLits = filter (\lit -> Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
-                choice <- if Set.size chosenClause == 1 || chosenClause `Set.member` underMin
-                  then return 1
-                  else if Set.size chosenClause == maxLen
-                    then return 2
-                    else chooseInt (1,2)
+                let
+                  chooseableLits = filter (\lit -> Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
+                  clauseSize = Set.size chosenClause
+                choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
+                            then return 1
+                            else
+                              if clauseSize == maxLen
+                                then return 2
+                                else chooseInt (1,2)
                 chosenChar <- elements chooseableLits
                 if choice == 1
-                  then do
-                    let
-                      newClause1 = Set.insert (Literal chosenChar) chosenClause
-                      newClause2 = Set.insert (Not chosenChar) chosenClause
-                      newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete chosenClause ys))
-                      possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
-
-                    if any (\cl -> getLs cl `Set.member` zs) possible
-                      then buildClauses xs ys zs
-                      else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))
+                  then
+                    checkValidAndInsert (Literal chosenChar) chosenClause clauseSize 0
                   else do
-                    firstAmount <- chooseInt (1, Set.size chosenClause-1)
+                    firstAmount <- chooseInt (1, clauseSize-1)
                     chosenSign <- elements [Literal chosenChar, Not chosenChar]
-                    let
-                      newClause1 = Set.insert chosenSign (Set.take firstAmount chosenClause)
-                      newClause2 = Set.insert (opposite chosenSign) (Set.drop firstAmount chosenClause)
-                      newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete chosenClause ys))
-                      possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
+                    checkValidAndInsert chosenSign chosenClause firstAmount firstAmount
+      where
+        checkValidAndInsert :: Literal -> Set Literal -> Int -> Int -> Gen (Set (Set Literal))
+        checkValidAndInsert lit clause get leave = do
+            let
+              newClause1 = Set.insert lit (Set.take get clause)
+              newClause2 = Set.insert (opposite lit) (Set.drop leave clause)
+              newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete clause ys))
+              possible = catMaybes ([resolve (Clause newClause1) (Clause z) y | y <- Set.toList newClause1, z <- Set.toList newSet, z /= newClause2, z /= newClause1] ++ [resolve (Clause newClause2) (Clause z) y | y <- Set.toList newClause2, z <- Set.toList newSet, z /= newClause2, z /= newClause1])
 
-                    if any (\cl -> getLs cl `Set.member` zs) possible
-                      then buildClauses xs ys zs
-                      else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))
+            if any (\cl -> getLs cl `Set.member` zs) possible
+              then buildClauses xs ys zs
+              else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))
 
 
 
