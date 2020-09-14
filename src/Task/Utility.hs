@@ -34,7 +34,7 @@ writeExercises amount config exercise = write 1
   where
     write :: Int -> IO ()
     write current
-        | current > amount = return ()
+        | current > amount = pure ()
         | otherwise = do
             (desc,_) <- exercise config
             appendFile "exercisetest.txt" (show current ++"\n" ++ desc ++"\n")

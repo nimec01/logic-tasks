@@ -8,7 +8,7 @@ data ClauseConfig = ClauseConfig
     { minClauseLength :: Int
     , maxClauseLength :: Int
     , usedLiterals :: [Char]
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
@@ -16,7 +16,7 @@ data CnfConfig = CnfConfig
     { clauseConf :: ClauseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
@@ -24,14 +24,14 @@ data FillConfig = FillConfig
     { cnfConfig :: CnfConfig
     , amountOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
 data GiveCnfConfig = GiveCnfConfig
     { cnfConfig :: CnfConfig
     , percentTrueEntries :: Maybe (Int,Int)
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
@@ -39,7 +39,7 @@ data PickConfig = PickConfig
     { cnfConfig :: CnfConfig
     , amountOfOptions :: Int
     , pickCnf :: Bool
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
@@ -47,28 +47,28 @@ data DecideConfig = DecideConfig
     { cnfConfig :: CnfConfig
     , amountOfChanges :: Int
     , findMistakes :: Bool
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
 newtype StepConfig = StepConfig
     { clauseConfig :: ClauseConfig
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
 data ResolutionConfig = ResolutionConfig
     { clauseConfig :: ClauseConfig
     , steps :: Int
-    } deriving Show
+    } deriving (Show,Read)
 
 
 
 defaultClauseConfig :: ClauseConfig
 defaultClauseConfig = ClauseConfig
-    { minClauseLength = 1
-    , maxClauseLength = 3
-    , usedLiterals = "ABCDEF"
+    { minClauseLength = 5
+    , maxClauseLength = 8
+    , usedLiterals = ['A'..'Z']
     }
 
 
@@ -76,8 +76,8 @@ defaultClauseConfig = ClauseConfig
 defaultCnfConfig :: CnfConfig
 defaultCnfConfig = CnfConfig
     { clauseConf = defaultClauseConfig
-    , minClauseAmount = 2
-    , maxClauseAmount = 3
+    , minClauseAmount = 1
+    , maxClauseAmount = 2
     }
 
 
@@ -85,8 +85,8 @@ defaultCnfConfig = CnfConfig
 defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
     { cnfConfig = defaultCnfConfig
-    , amountOfGaps = 4
-    , percentTrueEntries = Just (50,60)
+    , amountOfGaps = 2
+    , percentTrueEntries = Nothing
     }
 
 
@@ -94,7 +94,7 @@ defaultFillConfig = FillConfig
 defaultGiveCnfConfig :: GiveCnfConfig
 defaultGiveCnfConfig = GiveCnfConfig
     { cnfConfig = defaultCnfConfig
-    , percentTrueEntries = Just (50,60)
+    , percentTrueEntries = Nothing
     }
 
 

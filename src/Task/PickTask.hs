@@ -11,9 +11,8 @@ module Task.PickTask
 
 
 import Control.Exception(try,SomeException)
-import Data.Set (toList)
-import Test.QuickCheck (suchThat,elements,generate,vectorOf,Gen)
-import Formula (Cnf(..),opposite,Clause(..),genCnf)
+import Test.QuickCheck (elements,generate,vectorOf,Gen)
+import Formula (Cnf(..),genCnf,getLiterals,Literal(..))
 import Types (PickConfig(..),CnfConfig(..),ClauseConfig(..))
 import Table (Table,getTable)
 
@@ -23,7 +22,7 @@ genPickExercise :: PickConfig -> IO (String,Either ([(Int,Cnf)],Table) ([(Int,Ta
 genPickExercise
     PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..}
   = do
-    first <- generate getCnf
+    first <- generate (getCnf usedLiterals)
     rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first))
     let cnfs = first : rest
     rightCnf <- generate (elements cnfs)
@@ -40,18 +39,18 @@ genPickExercise
           desc = exerciseDescPick tables rightCnf
         pure (desc,Right (tables,rightCnf))
   where
-    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
-                     usedLiterals
+    getCnf :: [Char] -> Gen Cnf
+    getCnf lits = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
+                     lits
 
     getWithSameLiterals :: Cnf -> Gen Cnf
-    getWithSameLiterals x =
-        suchThat getCnf (\c ->
-          let
-            cLits = concatMap (toList . getLs) (toList (getCs c))
-            xLits = concatMap (toList . getLs) (toList (getCs x))
-          in
-            all (\lit -> lit `elem` cLits || opposite lit `elem` cLits) xLits &&
-            all (\lit -> lit `elem` xLits || opposite lit `elem` xLits) cLits)
+    getWithSameLiterals cnf = do
+        let cnfLits = getLiterals cnf
+        newCnf <- getCnf (map getC cnfLits)
+        if getLiterals newCnf == cnfLits
+          then pure newCnf
+          else getWithSameLiterals cnf
+
 
 
 

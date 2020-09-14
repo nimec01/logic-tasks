@@ -9,8 +9,8 @@ module Resolution
 
 
 import Data.Maybe (catMaybes)
-import Test.QuickCheck (Gen,chooseInt,elements,shuffle,generate)
-import Formula (Clause(..),Literal(..),opposite,setElements)
+import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
+import Formula (Clause(..),Literal(..),opposite)
 import Data.Set (empty,Set)
 import qualified Data.Set as Set
 
@@ -73,7 +73,7 @@ genRes (minLen,maxLen) steps lits = do
             shuffledClause <- shuffle (Set.toList clause)
             let
               newClause1 = Set.fromList (lit : take get shuffledClause)
-              newClause2 = Set.fromList ((opposite lit) : drop leave shuffledClause)
+              newClause2 = Set.fromList (opposite lit : drop leave shuffledClause)
               newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete clause ys))
               resolvables :: Set Literal -> [Maybe Clause]
               resolvables c = [resolve (Clause c) (Clause z) y
@@ -113,3 +113,10 @@ showResClauses ((index,clause):xs) =
     show index ++ " " ++ literals ++ " " ++ showResClauses xs
   where
     literals = show $ Set.toList $ getLs clause
+
+
+
+setElements :: Set a -> Gen a
+setElements set
+    | null set = error "setElements used with empty set."
+    | otherwise = (`Set.elemAt` set) `fmap` chooseInt (0, Set.size set - 1)

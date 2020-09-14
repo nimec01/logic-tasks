@@ -13,7 +13,6 @@ module Formula
        , evalLiteral
        , evalClause
        , turnPositive
-       , setElements
        ) where
 
 
@@ -182,21 +181,7 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
 
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
     generateClauses usedLits set num
-        | Set.size set == num = return set
+        | Set.size set == num = pure set
         | otherwise = do
             clause <- genClause (minLen,maxLen) usedLits
-            generateClauses usedLits (decide clause) num
-      where
-        alreadyIn :: Clause -> Bool
-        alreadyIn = flip Set.member set
-
-        decide :: Clause -> Set Clause
-        decide c
-            | alreadyIn c = set
-            | otherwise = Set.insert c set
-
-
-setElements :: Set a -> Gen a
-setElements set
-    | null set = error "setElements used with empty set."
-    | otherwise = (`Set.elemAt` set) `fmap` chooseInt (0, Set.size set - 1)
+            generateClauses usedLits (Set.insert clause set) num
