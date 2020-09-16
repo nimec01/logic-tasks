@@ -66,8 +66,8 @@ data ResolutionConfig = ResolutionConfig
 
 defaultClauseConfig :: ClauseConfig
 defaultClauseConfig = ClauseConfig
-    { minClauseLength = 5
-    , maxClauseLength = 8
+    { minClauseLength = 2
+    , maxClauseLength = 5
     , usedLiterals = ['A'..'Z']
     }
 
@@ -86,7 +86,7 @@ defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
     { cnfConfig = defaultCnfConfig
     , amountOfGaps = 2
-    , percentTrueEntries = Nothing
+    , percentTrueEntries = Just (30,70)
     }
 
 
@@ -94,7 +94,7 @@ defaultFillConfig = FillConfig
 defaultGiveCnfConfig :: GiveCnfConfig
 defaultGiveCnfConfig = GiveCnfConfig
     { cnfConfig = defaultCnfConfig
-    , percentTrueEntries = Nothing
+    , percentTrueEntries = Just (30,70)
     }
 
 

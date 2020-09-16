@@ -9,7 +9,7 @@ module Task.FillTask
 
 
 import Control.Exception (try,SomeException)
-import Test.QuickCheck (generate,suchThat,chooseInt)
+import Test.QuickCheck (generate)
 import Formula (Cnf,genCnf)
 import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries)
 import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
@@ -30,9 +30,14 @@ genFillExercise
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
     cnfInRange = case percentTrueEntries of
-        Just range -> do ratio <- chooseInt range
-                         suchThat getCnf (withRatio ratio)
+        Just range -> cnfWithRatio range
         Nothing    -> getCnf
+
+    cnfWithRatio ratio = do
+        cnf <- getCnf
+        if withRatio ratio cnf
+          then pure cnf
+          else cnfWithRatio ratio
 
 
 

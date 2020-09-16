@@ -12,12 +12,15 @@ import Table (readEntries, getTable)
 
 
 
-withRatio :: Int -> Cnf -> Bool
-withRatio percentage cnf =
-    length trueEntries == (length tableEntries *percentage `div` 100)
+withRatio :: (Int,Int) -> Cnf -> Bool
+withRatio (lower,upper) cnf =
+    length trueEntries <= percentage upper && length trueEntries >= percentage lower
   where
     tableEntries = readEntries (getTable cnf)
     trueEntries = filter (== Just True) tableEntries
+
+    percentage :: Int -> Int
+    percentage num = length tableEntries *num `div` 100
 
 
 

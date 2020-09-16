@@ -10,7 +10,7 @@ module Task.GiveCnfTask
 
 import Control.Exception (try,SomeException)
 import Data.Set (fromList)
-import Test.QuickCheck (generate,chooseInt,suchThat)
+import Test.QuickCheck (generate)
 import Formula (Literal,Clause(..),Cnf(..),genCnf)
 import Task.Utility
 import Types
@@ -31,9 +31,14 @@ genGiveCnfExercise
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
     cnfInRange =
-        case percentTrueEntries of Just range -> do ratio <- chooseInt range
-                                                    suchThat getCnf (withRatio ratio)
+        case percentTrueEntries of Just range -> cnfWithRatio range
                                    Nothing    -> getCnf
+
+    cnfWithRatio ratio = do
+        cnf <- getCnf
+        if withRatio ratio cnf
+          then pure cnf
+          else cnfWithRatio ratio
 
 
 exerciseDescCnf :: Table -> String
