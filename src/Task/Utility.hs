@@ -2,12 +2,14 @@ module Task.Utility
       ( withRatio
       , ensureChecksAndExecute
       , writeExercises
+      , noSequences
       ) where
 
 
 
 import Formula (Cnf)
 import Table (readEntries, getTable)
+
 
 
 
@@ -21,6 +23,17 @@ withRatio (lower,upper) cnf =
 
     percentage :: Int -> Int
     percentage num = length tableEntries *num `div` 100
+
+
+
+
+noSequences :: Eq a => Int -> [a] -> Bool
+noSequences _ [] = True
+noSequences n xs
+  | length same >= n = False
+  | otherwise = noSequences n diff
+  where
+    (same,diff) = span (== head xs) xs
 
 
 

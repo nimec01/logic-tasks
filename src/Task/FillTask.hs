@@ -11,9 +11,9 @@ module Task.FillTask
 import Control.Exception (try,SomeException)
 import Test.QuickCheck (generate)
 import Formula (Cnf,genCnf)
-import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries)
+import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries,readEntries)
 import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
-import Task.Utility (withRatio)
+import Task.Utility (withRatio,noSequences)
 
 
 
@@ -35,9 +35,11 @@ genFillExercise
 
     cnfWithRatio ratio = do
         cnf <- getCnf
-        if withRatio ratio cnf
+        let entries = readEntries (getTable cnf)
+        if withRatio ratio cnf -- && noSequences 4 entries
           then pure cnf
           else cnfWithRatio ratio
+
 
 
 

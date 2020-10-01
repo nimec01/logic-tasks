@@ -68,7 +68,7 @@ defaultClauseConfig :: ClauseConfig
 defaultClauseConfig = ClauseConfig
     { minClauseLength = 2
     , maxClauseLength = 5
-    , usedLiterals = ['A'..'Z']
+    , usedLiterals = ['A'..'E']
     }
 
 
@@ -76,8 +76,8 @@ defaultClauseConfig = ClauseConfig
 defaultCnfConfig :: CnfConfig
 defaultCnfConfig = CnfConfig
     { clauseConf = defaultClauseConfig
-    , minClauseAmount = 1
-    , maxClauseAmount = 2
+    , minClauseAmount = 2
+    , maxClauseAmount = 4
     }
 
 
@@ -85,8 +85,8 @@ defaultCnfConfig = CnfConfig
 defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
     { cnfConfig = defaultCnfConfig
-    , amountOfGaps = 2
-    , percentTrueEntries = Just (30,70)
+    , amountOfGaps = 4
+    , percentTrueEntries = Just (40,60)
     }
 
 
