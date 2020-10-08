@@ -49,6 +49,11 @@ executables:
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
+  Guess:
+    main:                guess.hs
+    source-dirs:         app
+    dependencies:
+    - ba-patrick-ritzenfeld
 
 tests:
   src-test:
