@@ -91,6 +91,13 @@ instance Arbitrary Clause where
 
 
 
+smartClause :: Clause -> Literal -> Clause
+smartClause (Clause set) lit
+ | lit `Set.member` set || opposite lit `Set.member` set = Clause set
+ | otherwise = Clause (Set.insert lit set)
+
+
+
 evalClause :: Allocation -> Clause -> Maybe Bool
 evalClause xs ys = or <$> sequence literals
   where
@@ -152,6 +159,31 @@ instance Show Cnf where
 
 
 
+smartCnf :: Cnf -> Clause -> Cnf
+smartCnf (Cnf cSet) (Clause lSet)
+ | Set.size lSet == 1 = Cnf (Set.map Clause updated)
+ | otherwise = Cnf (Set.map Clause (if Set.size neg == 0 then Set.insert lSet cnfClauses else removeDiff))
+  where
+    cnfClauses = Set.map getLs cSet
+    toAdd = Set.elemAt 0 lSet
+    updated = Set.insert lSet (Set.map (\set -> Set.delete (opposite toAdd) set) cnfClauses)
+    disj set = (Set.union set lSet) Set.\\ (Set.intersection set lSet)
+    neg = Set.filter (\set -> onlyOpposites (disj set)) cnfClauses
+    removeDiff = Set.map (\set -> if set `Set.member` neg then set Set.\\ disj set else set) cnfClauses
+
+
+onlyOpposites :: Set Literal -> Bool
+onlyOpposites set
+ | Set.null set = True
+ | otherwise = if opposite first `Set.member` set
+                 then onlyOpposites (Set.delete (opposite first) (Set.delete first set))
+                 else False
+   where first = Set.elemAt 0 set
+
+
+test = Cnf (Set.fromList [Clause (Set.fromList [Literal 'a', Literal 'b'])])
+test2 = Clause (Set.fromList [Not 'a', Literal 'b'])
+
 evalCnf :: Allocation -> Cnf -> Maybe Bool
 evalCnf xs ys = and <$> sequence clauses
   where
@@ -164,6 +196,24 @@ getLiterals cnf = Set.toList $ Set.unions $ map positive $ Set.toList (getCs cnf
   where
     positive = Set.map turnPositive . getLs
 
+
+rearrange :: Cnf -> Gen Cnf
+rearrange cnf = do
+    let literals = getLiterals cnf
+        initial = zip literals [1..]
+    newOrder <- shuffle literals
+    let pairing = zip [1..] newOrder
+        litSet = Set.map getLs (getCs cnf)
+    let toNum = conv initial litSet
+        fromNum = conv pairing toNum
+    return $ Cnf (Set.map Clause fromNum)
+  where
+    conv :: Eq a => Ord b => [(a,b)] -> Set (Set a) -> Set (Set b)
+    conv pairs = Set.map (Set.map replacer)
+      where
+        replacer elmn = case lookup elmn pairs of
+            Just x  -> x
+            Nothing -> error "not possible"
 
 
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
