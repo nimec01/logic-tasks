@@ -13,6 +13,7 @@ module Formula
        , evalLiteral
        , evalClause
        , turnPositive
+       , convert
        ) where
 
 
@@ -20,9 +21,15 @@ import Data.List (delete, nub)
 import Data.Set (Set,empty)
 import Test.QuickCheck
 import qualified Data.Set as Set
+import qualified SAT.MiniSat as Sat
+
 
 
 type Allocation = [(Literal, Bool)]
+
+
+class SatConvertible a where
+    convert :: a -> Sat.Formula Char
 
 ---------------------------------------------------------------------------------------------------
 
@@ -42,6 +49,10 @@ instance Read Literal where
 
 instance Arbitrary Literal where
    arbitrary = genLiteral ['A'..'Z']
+
+instance SatConvertible Literal where
+   convert (Literal c) = Sat.Var c
+   convert (Not c) = Sat.Not (Sat.Var c)
 
 
 
@@ -69,6 +80,9 @@ turnPositive :: Literal -> Literal
 turnPositive (Not x) = Literal x
 turnPositive (Literal x) = Literal x
 
+
+
+
 ---------------------------------------------------------------------------------------------------
 
 newtype Clause = Clause { getLs :: Set Literal}
@@ -88,6 +102,11 @@ instance Arbitrary Clause where
        clause :: Int -> Gen Clause
        clause 0 = genClause (0,0) []
        clause n = genClause (1,maxBound) (take n ['A'..'Z'])
+
+instance SatConvertible Clause where
+   convert (Clause set)
+        | Set.null set = Sat.No
+        | otherwise = Sat.Some (map convert (Set.toList set))
 
 
 
@@ -148,7 +167,6 @@ instance Arbitrary Cnf where
             genCnf (1,maxLen ^2) (minLen,maxLen) lits
 
 
-
 instance Show Cnf where
     show (Cnf set) = listShow (Set.toList set)
       where
@@ -157,6 +175,11 @@ instance Show Cnf where
         listShow [x] = show x
         listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
 
+
+instance SatConvertible Cnf where
+    convert (Cnf set)
+        | Set.null set = Sat.Yes
+        | otherwise = Sat.All (map convert (Set.toList set))
 
 
 smartCnf :: Cnf -> Clause -> Cnf
