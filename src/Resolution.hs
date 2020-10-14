@@ -8,10 +8,10 @@ module Resolution
 
 
 
-import Data.Maybe (catMaybes)
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
-import Formula (Clause(..),Literal(..),opposite)
+import Formula (Clause(..),Literal(..),opposite,convert)
 import Data.Set (empty,Set)
+import qualified SAT.MiniSat as Sat
 import qualified Data.Set as Set
 
 
@@ -31,12 +31,12 @@ resolve (Clause x) (Clause y) literal
 
 genRes :: (Int,Int) -> Int -> [Char] -> Gen [Clause]
 genRes (minLen,maxLen) steps lits = do
-    clauses <- buildClauses lits empty empty
+    clauses <- buildClauses lits empty
     shuffled <- shuffle (Set.toList clauses)
     pure (map Clause shuffled)
   where
-    buildClauses :: [Char] -> Set (Set Literal) -> Set (Set Literal) -> Gen (Set (Set Literal))
-    buildClauses xs ys zs
+    buildClauses :: [Char] -> Set (Set Literal) -> Gen (Set (Set Literal))
+    buildClauses xs ys
         | Set.size ys >= steps+1  = pure ys
         | otherwise =
             if Set.null ys
@@ -44,7 +44,7 @@ genRes (minLen,maxLen) steps lits = do
                 chosenChar <- elements xs
                 let
                   startSet = Set.fromList [Set.singleton (Literal chosenChar),Set.singleton (Not chosenChar)]
-                buildClauses xs startSet startSet
+                buildClauses xs startSet
               else do
                 let
                   underMin = Set.filter (\clause -> Set.size clause < minLen) ys
@@ -75,16 +75,10 @@ genRes (minLen,maxLen) steps lits = do
               newClause1 = Set.fromList (lit : take get shuffledClause)
               newClause2 = Set.fromList (opposite lit : drop leave shuffledClause)
               newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete clause ys))
-              resolvables :: Set Literal -> [Maybe Clause]
-              resolvables c = [resolve (Clause c) (Clause z) y
-                              | y <- Set.toList newClause1
-                              , z <- Set.toList newSet
-                              , z /= newClause2
-                              , z /= newClause1]
-              possible = catMaybes (resolvables newClause1 ++ resolvables newClause2)
-            if any (\cl -> getLs cl `Set.member` zs) possible
-              then buildClauses xs ys zs
-              else buildClauses xs newSet (Set.insert newClause2 (Set.insert newClause1 zs))
+              subSets = Set.delete (Set.map Clause newSet) $ Set.powerSet (Set.map Clause newSet)
+              listForm = map Set.toList (Set.toList subSets)
+              satForm = map (Sat.satisfiable . Sat.All) $ map (map convert) listForm
+            buildClauses xs (if False `notElem` satForm then newSet else ys)
 
 
 
