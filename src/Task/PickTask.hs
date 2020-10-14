@@ -49,7 +49,7 @@ genPickExercise
     getWithSameLiterals cnf sat = do
         let cnfLits = getLiterals cnf
         newCnf <- getCnf (map getC cnfLits)
-        if getLiterals newCnf == cnfLits && Sat.satisfiable (sat Sat.:++: convert newCnf Sat.:<->: Sat.Yes)
+        if getLiterals newCnf == cnfLits && Sat.satisfiable (sat Sat.:++: convert newCnf)
           then pure newCnf
           else getWithSameLiterals cnf sat
 
