@@ -12,7 +12,8 @@ module Task.PickTask
 
 import Control.Exception(try,SomeException)
 import Test.QuickCheck (elements,generate,vectorOf,Gen)
-import Formula (Cnf(..),genCnf,getLiterals,Literal(..))
+import qualified SAT.MiniSat as Sat
+import Formula (Cnf(..),genCnf,getLiterals,Literal(..),convert)
 import Types (PickConfig(..),CnfConfig(..),ClauseConfig(..))
 import Table (Table,getTable)
 
@@ -23,7 +24,8 @@ genPickExercise
     PickConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..}, ..}, ..}
   = do
     first <- generate (getCnf usedLiterals)
-    rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first))
+    let satForm = convert first
+    rest <- generate (vectorOf (amountOfOptions-1) (getWithSameLiterals first satForm))
     let cnfs = first : rest
     rightCnf <- generate (elements cnfs)
     if pickCnf
@@ -43,13 +45,13 @@ genPickExercise
     getCnf lits = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      lits
 
-    getWithSameLiterals :: Cnf -> Gen Cnf
-    getWithSameLiterals cnf = do
+    getWithSameLiterals :: Cnf -> Sat.Formula Char -> Gen Cnf
+    getWithSameLiterals cnf sat = do
         let cnfLits = getLiterals cnf
         newCnf <- getCnf (map getC cnfLits)
-        if getLiterals newCnf == cnfLits
+        if getLiterals newCnf == cnfLits && Sat.satisfiable (sat Sat.:++: convert newCnf Sat.:<->: Sat.Yes)
           then pure newCnf
-          else getWithSameLiterals cnf
+          else getWithSameLiterals cnf sat
 
 
 
