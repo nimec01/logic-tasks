@@ -11,9 +11,24 @@ module Task.FillTask
 import Control.Exception (try,SomeException)
 import Test.QuickCheck (generate)
 import Formula (Cnf,genCnf)
-import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries,readEntries)
+import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries,readEntries, possibleAllocations)
 import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
 import Task.Utility (withRatio,noSequences)
+
+
+solverA :: Table -> Cnf -> Int
+solverA gapTable = solve blankOnly
+  where
+    allocs = possibleAllocations (getCs cnf)
+    zipped = zip allocs (readEntries gapTable)
+    blankOnly = map fst (filter (\(x,y) -> y == Nothing) zipped)
+
+    solve :: [Allocation] -> Cnf -> Int
+    solve [] _ = 0
+    solve (x:xs) cnf = steps x cnf + solve xs cnf
+      where
+        steps [] _ = 0
+        steps (x:xs) cnf =
 
 
 
