@@ -16,7 +16,7 @@ import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
 import Task.Utility (withRatio,noSequences)
 
 
-solverA :: Table -> Cnf -> Int
+{-solverA :: Table -> Cnf -> Int
 solverA gapTable = solve blankOnly
   where
     allocs = possibleAllocations (getCs cnf)
@@ -29,7 +29,7 @@ solverA gapTable = solve blankOnly
       where
         steps [] _ = 0
         steps (x:xs) cnf =
-
+-}
 
 
 genFillExercise :: FillConfig -> IO (String,(Table,Table))

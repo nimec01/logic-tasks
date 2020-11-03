@@ -204,8 +204,6 @@ onlyOpposites set
    where first = Set.elemAt 0 set
 
 
-test = Cnf (Set.fromList [Clause (Set.fromList [Literal 'a', Literal 'b'])])
-test2 = Clause (Set.fromList [Not 'a', Literal 'b'])
 
 evalCnf :: Allocation -> Cnf -> Maybe Bool
 evalCnf xs ys = and <$> sequence clauses
