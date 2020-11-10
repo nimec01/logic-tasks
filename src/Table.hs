@@ -24,8 +24,10 @@ import qualified Data.Set as Set (map)
 
 data Table = Table
     { getLiterals :: [Literal]
-    , getEntries :: [Maybe Bool]}
-    deriving Eq
+    , getEntries :: [Maybe Bool]} deriving Ord
+
+instance Eq Table where
+    (==) t1 t2 = getEntries t1 == getEntries t2
 
 
 
@@ -79,6 +81,8 @@ getTable cnf = Table literals values
 
 
 
+
+
 allCombinations :: [Literal] -> Int ->  [Allocation]
 allCombinations [] _ = []
 allCombinations (x:xs) n =
@@ -98,10 +102,11 @@ possibleAllocations xs = transpose (allCombinations xs 1)
 genGapTable :: Table -> Int -> Gen Table
 genGapTable table gaps
     | gaps < 0 = error "The amount of gaps is negative."
-    | rowAmount < gaps = genGapTable table rowAmount
-    | otherwise = generateGaps [] gaps
+    | gaps > 100 = error "gap percentage must be less than 100%."
+    | otherwise = generateGaps [] percentage
   where
     rowAmount = length (getEntries table)
+    percentage = maximum [gaps * rowAmount `div` 100,1]
 
     generateGaps :: [Int] -> Int -> Gen Table
     generateGaps indices 0 = do

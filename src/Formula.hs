@@ -14,11 +14,13 @@ module Formula
        , evalClause
        , turnPositive
        , convert
+       , partEvalCnf
        ) where
 
 
 import Data.List (delete, nub)
 import Data.Set (Set,empty)
+import Data.Either
 import Test.QuickCheck
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
@@ -123,6 +125,21 @@ evalClause xs ys = or <$> sequence literals
     literals = map (evalLiteral xs) (Set.toList (getLs ys))
 
 
+partEvalClause :: Clause -> (Literal,Bool) -> Either Bool Clause
+partEvalClause (Clause set) x
+    | Set.null set = Left False
+    | isIn || negIsIn =
+      case snd x of True  -> if isIn then Left True else if Set.null setWithoutNeg then Left False else Right (Clause setWithoutNeg)
+                    False -> if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
+    | otherwise = Right (Clause set)
+  where
+    next = fst x
+    negNext = opposite next
+    isIn = next `Set.member` set
+    negIsIn = opposite (next) `Set.member` set
+    setWithout = Set.delete next set
+    setWithoutNeg = Set.delete negNext set
+
 
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
@@ -216,6 +233,27 @@ getLiterals :: Cnf -> [Literal]
 getLiterals cnf = Set.toList $ Set.unions $ map positive $ Set.toList (getCs cnf)
   where
     positive = Set.map turnPositive . getLs
+
+
+partEvalCnf :: Cnf -> Allocation -> (Either Bool Cnf,Int)
+partEvalCnf cnf [] = (Right cnf,0)
+partEvalCnf (Cnf set) (x:xs) = case thin applied of Left bool -> (Left bool,1)
+                                                    Right clauses -> let (f,s) = partEvalCnf (Cnf (Set.fromList clauses)) xs in (f,s+1)
+  where
+   applied = map (flip partEvalClause x) (Set.toList set)
+   thin :: [Either Bool Clause] -> Either Bool [Clause]
+   thin [] = Left True
+   thin (x:xs) =
+     case x of Left False   -> Left False
+               Left True    -> thin xs
+               Right clause -> if null xs then Right [clause] else Right ([clause] ++) <*> (thin xs)
+
+
+tc1 = Clause (Set.fromList [Literal 'A', Not 'B'])
+tc2 = Clause (Set.fromList [Not 'A'])
+ta = [(Literal 'A',True),(Literal 'C', False),(Literal 'B',True) ]
+tc = Cnf (Set.fromList [tc1,tc2])
+
 
 
 rearrange :: Cnf -> Gen Cnf

@@ -4,43 +4,39 @@ module Task.FillTask
       ( genFillExercise
       , exerciseDescFill
       , evaluateFill
+      , solver
       ) where
 
 
 
 import Control.Exception (try,SomeException)
 import Test.QuickCheck (generate)
-import Formula (Cnf,genCnf)
+import Formula (Cnf,getLiterals,genCnf, partEvalCnf)
 import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries,readEntries, possibleAllocations)
 import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
 import Task.Utility (withRatio,noSequences)
 
 
-{-solverA :: Table -> Cnf -> Int
-solverA gapTable = solve blankOnly
+solver :: Table -> Cnf -> Int
+solver gapTable cnf = sum $ map snd solveForAllocs
   where
-    allocs = possibleAllocations (getCs cnf)
+    allocs = possibleAllocations (getLiterals cnf)
     zipped = zip allocs (readEntries gapTable)
-    blankOnly = map fst (filter (\(x,y) -> y == Nothing) zipped)
-
-    solve :: [Allocation] -> Cnf -> Int
-    solve [] _ = 0
-    solve (x:xs) cnf = steps x cnf + solve xs cnf
-      where
-        steps [] _ = 0
-        steps (x:xs) cnf =
--}
+    blankOnly = map fst (filter (\(_,y) -> y == Nothing) zipped)
+    solveForAllocs = map (partEvalCnf cnf) blankOnly
 
 
-genFillExercise :: FillConfig -> IO (String,(Table,Table))
+
+
+genFillExercise :: FillConfig -> IO (String,(Cnf,Table,Table))
 genFillExercise
     FillConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig {..},..},..}
   = do
     cnf <- generate cnfInRange
     let table = getTable cnf
-    gapTable <- generate (genGapTable table amountOfGaps)
+    gapTable <- generate (genGapTable table percentageOfGaps)
     let desc = exerciseDescFill cnf gapTable
-    pure (desc,(table,gapTable))
+    pure (desc,(cnf,table,gapTable))
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals

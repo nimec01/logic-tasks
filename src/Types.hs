@@ -22,7 +22,7 @@ data CnfConfig = CnfConfig
 
 data FillConfig = FillConfig
     { cnfConfig :: CnfConfig
-    , amountOfGaps :: Int
+    , percentageOfGaps :: Int
     , percentTrueEntries :: Maybe (Int,Int)
     } deriving (Show,Read)
 
@@ -66,9 +66,9 @@ data ResolutionConfig = ResolutionConfig
 
 defaultClauseConfig :: ClauseConfig
 defaultClauseConfig = ClauseConfig
-    { minClauseLength = 2
-    , maxClauseLength = 5
-    , usedLiterals = ['A'..'E']
+    { minClauseLength = 1
+    , maxClauseLength = 3
+    , usedLiterals = ['A'..'D']
     }
 
 
@@ -77,7 +77,7 @@ defaultCnfConfig :: CnfConfig
 defaultCnfConfig = CnfConfig
     { clauseConf = defaultClauseConfig
     , minClauseAmount = 2
-    , maxClauseAmount = 4
+    , maxClauseAmount = 3
     }
 
 
@@ -85,7 +85,7 @@ defaultCnfConfig = CnfConfig
 defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
     { cnfConfig = defaultCnfConfig
-    , amountOfGaps = 4
+    , percentageOfGaps = 30
     , percentTrueEntries = Just (40,60)
     }
 
@@ -151,12 +151,9 @@ checkCnfConfig CnfConfig {..}
 
 checkFillConfig :: FillConfig -> Maybe String
 checkFillConfig FillConfig {..}
-    | amountOfGaps < 0 = Just "The amount of gaps can not be negative."
-    | amountOfGaps >  2^length (usedLiterals clConfig) = Just "There's not enough literals for this amount of gaps."
-    | amountOfGaps > 2^(maxClauseAmount cnfConfig *maxClauseLength clConfig) = Just "This amount of gaps is not possible with your Clause length and amount settings."
+    | percentageOfGaps < 0 || percentageOfGaps > 100 = Just "The percentage of gaps must be between 0 and 100%."
     | otherwise = checkCnfConfig cnfConfig
   where
-    clConfig = clauseConf cnfConfig
 
 
 
