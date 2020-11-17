@@ -25,8 +25,10 @@ genStepExercise
     rChar <- generate $ elements usedLiterals
     rLit <- generate $ elements [Literal rChar, Not rChar]
     let restLits = delete rChar usedLiterals
-    clause1 <- generate (genClause (minClauseLength-1,maxClauseLength-1) restLits)
-    clause2 <- generate (suchThat (genClause (minClauseLength-1,maxClauseLength-1) restLits)
+    minLen1 <- generate (elements [minClauseLength-1..maxClauseLength-1])
+    minLen2 <- generate (elements [minClauseLength-1..maxClauseLength-1])
+    clause1 <- generate (genClause (minLen1,maxClauseLength-1) restLits)
+    clause2 <- generate (suchThat (genClause (minLen2,maxClauseLength-1) restLits)
                         (not . any (\lit -> opposite lit `elem` getLs clause1) .  getLs))
     let
       litAddedClause1 = Clause (insert rLit (getLs clause1))

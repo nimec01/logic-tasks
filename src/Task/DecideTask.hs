@@ -5,6 +5,7 @@ module Task.DecideTask
       , exerciseDescDecide
       , evaluateDecide
       , evaluateDecide2
+      , solver
       ) where
 
 
@@ -12,13 +13,20 @@ module Task.DecideTask
 import Control.Exception (try,SomeException)
 import Data.Set (fromList,toList)
 import Test.QuickCheck (generate,elements)
-import Formula (Cnf,genCnf)
-import Table (Table,getTable,genWrongTable)
+import Formula (Cnf,genCnf,partEvalCnf,getLiterals)
+import Table (Table,getTable,genWrongTable,possibleAllocations)
 import Types (DecideConfig(..),CnfConfig(..),ClauseConfig(..))
 
 
+solver :: Cnf -> Int
+solver cnf = sum $ map snd solveForAllocs
+  where
+    allocs = possibleAllocations (getLiterals cnf)
+    solveForAllocs = map (partEvalCnf cnf) allocs
 
-genDecideExercise :: DecideConfig -> IO (String,(Table,Table,[Int]))
+
+
+genDecideExercise :: DecideConfig -> IO (String,(Cnf,Table,Table,[Int]))
 genDecideExercise
     DecideConfig {cnfConfig = CnfConfig {clauseConf = ClauseConfig{..},..},..}
   = do
@@ -28,7 +36,7 @@ genDecideExercise
     (indices,wrongT) <- generate $ genWrongTable rightT amountOfChanges
     displayT <- if findMistakes then return wrongT else pickOne [rightT,wrongT]
     let desc = exerciseDescDecide cnf displayT findMistakes
-    pure (desc,(rightT,displayT,indices))
+    pure (desc,(cnf,rightT,displayT,indices))
   where
     pickOne :: [Table] -> IO Table
     pickOne = generate . elements

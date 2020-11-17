@@ -286,7 +286,13 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
     nLits = nub lits
     invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    upperBound = minimum [2^maxLen, 2^length nLits]
+    lengthBound 1 len = 2*len
+    lengthBound n len
+        | n == maxLen && n == minLen = 2^n
+        | n == minLen = 2^n * len
+        | n == len = 2^n + lengthBound (n-1) len
+        | otherwise = 2^n * len + lengthBound (n-1) len
+    upperBound = lengthBound (maxLen) (length nLits)
 
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
     generateClauses usedLits set num
