@@ -41,7 +41,7 @@ genStepExercise
 exerciseDescStep :: Clause -> Clause -> String
 exerciseDescStep c1 c2 =
     "Resolvieren Sie die folgenden Klauseln:\n" ++ show c1 ++ "\n" ++ show c2 ++ "\n" ++
-    "Geben Sie das in der Resolution genutzte Literal und das Ergebnis in Form eines Tupels an: (Literal, Liste der Literale in der neuen Klausel)."
+    "Geben Sie das in der Resolution genutzte Literal und das Ergebnis in Form eines Tupels an: (Literal, Liste der Literale in der Reslvente)."
 
 
 
