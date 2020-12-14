@@ -13,7 +13,7 @@ decideExercise = ensureChecksAndExecute checkDecideConfig executeDecideExercise
   where
     executeDecideExercise :: DecideConfig -> IO ()
     executeDecideExercise decideConfig = do
-        (desc,(rightTable,displayTable,indices)) <- genDecideExercise decideConfig
+        (desc,(_,rightTable,displayTable,indices)) <- genDecideExercise decideConfig
         putStrLn desc
         if mistakes
           then evaluateDecide2 indices

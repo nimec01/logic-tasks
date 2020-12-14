@@ -13,7 +13,7 @@ fillExercise = ensureChecksAndExecute checkFillConfig executeFillExercise
   where
     executeFillExercise :: FillConfig -> IO ()
     executeFillExercise fillConfig = do
-        (desc,(table,gapTable)) <- genFillExercise fillConfig
+        (desc,(_,table,gapTable)) <- genFillExercise fillConfig
         putStrLn desc
         evaluateFill table gapTable
 

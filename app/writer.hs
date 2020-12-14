@@ -51,12 +51,12 @@ data GenericExercise = forall conf. Exercise conf => GExercise conf
 
 
 chooseType :: Int -> String -> GenericExercise
-chooseType 0 c = GExercise $ (read c :: FillConfig)
-chooseType 1 c = GExercise $ (read c :: GiveCnfConfig)
-chooseType 2 c = GExercise $ (read c :: PickConfig)
-chooseType 3 c = GExercise $ (read c :: DecideConfig)
-chooseType 4 c = GExercise $ (read c :: ResolutionConfig)
-chooseType 5 c = GExercise $ (read c :: StepConfig)
+chooseType 0 c = GExercise (read c :: FillConfig)
+chooseType 1 c = GExercise (read c :: GiveCnfConfig)
+chooseType 2 c = GExercise (read c :: PickConfig)
+chooseType 3 c = GExercise (read c :: DecideConfig)
+chooseType 4 c = GExercise (read c :: ResolutionConfig)
+chooseType 5 c = GExercise (read c :: StepConfig)
 chooseType _ _ = error "Number not in use."
 
 
