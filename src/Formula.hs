@@ -15,12 +15,13 @@ module Formula
        , turnPositive
        , convert
        , partEvalCnf
+       , isPositive
        ) where
 
 
 import Data.List (delete, nub)
 import Data.Set (Set,empty)
-import Data.Either
+import Data.Either(rights)
 import Test.QuickCheck
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
@@ -83,7 +84,9 @@ turnPositive (Not x) = Literal x
 turnPositive (Literal x) = Literal x
 
 
-
+isPositive :: Literal -> Bool
+isPositive (Not _) = False
+isPositive _ = True
 
 ---------------------------------------------------------------------------------------------------
 
@@ -112,12 +115,6 @@ instance SatConvertible Clause where
 
 
 
-smartClause :: Clause -> Literal -> Clause
-smartClause (Clause set) lit
- | lit `Set.member` set || opposite lit `Set.member` set = Clause set
- | otherwise = Clause (Set.insert lit set)
-
-
 
 evalClause :: Allocation -> Clause -> Maybe Bool
 evalClause xs ys = or <$> sequence literals
@@ -129,21 +126,21 @@ partEvalClause :: Clause -> (Literal,Bool) -> Either Bool Clause
 partEvalClause (Clause set) x
     | Set.null set = Left False
     | isIn || negIsIn =
-      case snd x of True  -> if isIn then Left True else if Set.null setWithoutNeg then Left False else Right (Clause setWithoutNeg)
-                    False -> if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
+     if snd x then if isIn then Left True else if Set.null setWithoutNeg then Left False else Right (Clause setWithoutNeg)
+              else if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
     | otherwise = Right (Clause set)
   where
     next = fst x
     negNext = opposite next
     isIn = next `Set.member` set
-    negIsIn = opposite (next) `Set.member` set
+    negIsIn = negNext `Set.member` set
     setWithout = Set.delete next set
     setWithoutNeg = Set.delete negNext set
 
 
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
-    | null nLits || minlen > length lits || invalidLen = pure (Clause empty)
+    | null lits || minlen > length nLits || invalidLen = pure (Clause empty)
     | otherwise = do
         len <- chooseInt (minlen,minimum [length nLits, maxlen])
         literals <- generateLiterals nLits empty len
@@ -199,26 +196,6 @@ instance SatConvertible Cnf where
         | otherwise = Sat.All (map convert (Set.toList set))
 
 
-smartCnf :: Cnf -> Clause -> Cnf
-smartCnf (Cnf cSet) (Clause lSet)
- | Set.size lSet == 1 = Cnf (Set.map Clause updated)
- | otherwise = Cnf (Set.map Clause (if Set.size neg == 0 then Set.insert lSet cnfClauses else removeDiff))
-  where
-    cnfClauses = Set.map getLs cSet
-    toAdd = Set.elemAt 0 lSet
-    updated = Set.insert lSet (Set.map (\set -> Set.delete (opposite toAdd) set) cnfClauses)
-    disj set = (Set.union set lSet) Set.\\ (Set.intersection set lSet)
-    neg = Set.filter (\set -> onlyOpposites (disj set)) cnfClauses
-    removeDiff = Set.map (\set -> if set `Set.member` neg then set Set.\\ disj set else set) cnfClauses
-
-
-onlyOpposites :: Set Literal -> Bool
-onlyOpposites set
- | Set.null set = True
- | otherwise = if opposite first `Set.member` set
-                 then onlyOpposites (Set.delete (opposite first) (Set.delete first set))
-                 else False
-   where first = Set.elemAt 0 set
 
 
 
@@ -235,44 +212,27 @@ getLiterals cnf = Set.toList $ Set.unions $ map positive $ Set.toList (getCs cnf
     positive = Set.map turnPositive . getLs
 
 
-partEvalCnf :: Cnf -> Allocation -> (Either Bool Cnf,Int)
-partEvalCnf cnf [] = (Right cnf,0)
-partEvalCnf (Cnf set) (x:xs) = case thin applied of Left bool -> (Left bool,1)
-                                                    Right clauses -> let (f,s) = partEvalCnf (Cnf (Set.fromList clauses)) xs in (f,s+1)
+partEvalCnf :: Cnf -> (Literal,Bool) -> Either Bool Cnf
+partEvalCnf cnf tup
+    | fst tup `notElem` lits = Right cnf
+    | otherwise = result (thin applied)
   where
-   applied = map (flip partEvalClause x) (Set.toList set)
-   thin :: [Either Bool Clause] -> Either Bool [Clause]
-   thin [] = Left True
-   thin (x:xs) =
-     case x of Left False   -> Left False
-               Left True    -> thin xs
-               Right clause -> if null xs then Right [clause] else Right ([clause] ++) <*> (thin xs)
+    lits = getLiterals cnf
+    set = getCs cnf
+    applied = map (`partEvalClause` tup) (Set.toList set)
+    thin :: [Either Bool Clause] -> [Either Bool Clause]
+    thin [] = []
+    thin (x:xs) =
+      case x of Left False   -> [Left False]
+                Left True    -> thin xs
+                Right clause -> Right clause : thin xs
+    result :: [Either Bool Clause] -> Either Bool Cnf
+    result xs
+      | Left False `elem` xs = Left False
+      | null xs = Left True
+      | otherwise = Right (Cnf (Set.fromList (rights xs)))
 
 
-tc1 = Clause (Set.fromList [Literal 'A', Not 'B'])
-tc2 = Clause (Set.fromList [Not 'A'])
-ta = [(Literal 'A',True),(Literal 'C', False),(Literal 'B',True) ]
-tc = Cnf (Set.fromList [tc1,tc2])
-
-
-
-rearrange :: Cnf -> Gen Cnf
-rearrange cnf = do
-    let literals = getLiterals cnf
-        initial = zip literals [1..]
-    newOrder <- shuffle literals
-    let pairing = zip [1..] newOrder
-        litSet = Set.map getLs (getCs cnf)
-    let toNum = conv initial litSet
-        fromNum = conv pairing toNum
-    return $ Cnf (Set.map Clause fromNum)
-  where
-    conv :: Eq a => Ord b => [(a,b)] -> Set (Set a) -> Set (Set b)
-    conv pairs = Set.map (Set.map replacer)
-      where
-        replacer elmn = case lookup elmn pairs of
-            Just x  -> x
-            Nothing -> error "not possible"
 
 
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
@@ -292,7 +252,7 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
         | n == minLen = 2^n * len
         | n == len = 2^n + lengthBound (n-1) len
         | otherwise = 2^n * len + lengthBound (n-1) len
-    upperBound = lengthBound (maxLen) (length nLits)
+    upperBound = lengthBound maxLen (length nLits)
 
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
     generateClauses usedLits set num

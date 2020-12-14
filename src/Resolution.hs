@@ -31,12 +31,13 @@ resolve (Clause x) (Clause y) literal
 
 genRes :: (Int,Int) -> Int -> [Char] -> Gen [Clause]
 genRes (minLen,maxLen) steps lits = do
-    clauses <- buildClauses lits empty
+    clauses <- buildClauses lits empty 0
     shuffled <- shuffle (Set.toList clauses)
     pure (map Clause shuffled)
   where
-    buildClauses :: [Char] -> Set (Set Literal) -> Gen (Set (Set Literal))
-    buildClauses xs ys
+    buildClauses :: [Char] -> Set (Set Literal) -> Int -> Gen (Set (Set Literal))
+    buildClauses xs ys runs
+        | runs >= 100 = buildClauses xs empty 0
         | Set.size ys >= steps+1  = pure ys
         | otherwise =
             if Set.null ys
@@ -44,7 +45,7 @@ genRes (minLen,maxLen) steps lits = do
                 chosenChar <- elements xs
                 let
                   startSet = Set.fromList [Set.singleton (Literal chosenChar),Set.singleton (Not chosenChar)]
-                buildClauses xs startSet
+                buildClauses xs startSet 0
               else do
                 let
                   underMin = Set.filter (\clause -> Set.size clause < minLen) ys
@@ -52,21 +53,23 @@ genRes (minLen,maxLen) steps lits = do
                 chosenClause <- setElements (if Set.null underMin then underMax else underMin)
                 let
                   chooseableLits = filter (\lit -> Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
-                  clauseSize = Set.size chosenClause
-                choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
+                if null chooseableLits
+                    then buildClauses xs ys (runs+1)
+                    else do
+                      let clauseSize = Set.size chosenClause
+                      choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
                             then return 1
                             else
                               if clauseSize == maxLen
                                 then return 2
                                 else chooseInt (1,2)
-                chosenChar <- elements chooseableLits
-                if choice == 1
-                  then
-                    checkValidAndInsert (Literal chosenChar) chosenClause clauseSize 0
-                  else do
-                    firstAmount <- chooseInt (1, clauseSize-1)
-                    chosenSign <- elements [Literal chosenChar, Not chosenChar]
-                    checkValidAndInsert chosenSign chosenClause firstAmount firstAmount
+                      chosenChar <- elements chooseableLits
+                      if choice == 1
+                        then checkValidAndInsert (Literal chosenChar) chosenClause clauseSize 0
+                        else do
+                          firstAmount <- chooseInt (1, clauseSize-1)
+                          chosenSign <- elements [Literal chosenChar, Not chosenChar]
+                          checkValidAndInsert chosenSign chosenClause firstAmount firstAmount
       where
         checkValidAndInsert :: Literal -> Set Literal -> Int -> Int -> Gen (Set (Set Literal))
         checkValidAndInsert lit clause get leave = do
@@ -77,8 +80,9 @@ genRes (minLen,maxLen) steps lits = do
               newSet = Set.insert newClause2 (Set.insert newClause1 (Set.delete clause ys))
               subSets = Set.delete (Set.map Clause newSet) $ Set.powerSet (Set.map Clause newSet)
               listForm = map Set.toList (Set.toList subSets)
-              satForm = map (Sat.satisfiable . Sat.All) $ map (map convert) listForm
-            buildClauses xs (if False `notElem` satForm then newSet else ys)
+              satForm = map ((Sat.satisfiable . Sat.All) . map convert) listForm
+              (toInsert,newRuns) = if and satForm then (newSet,0) else (ys,runs+1)
+            buildClauses xs toInsert newRuns
 
 
 

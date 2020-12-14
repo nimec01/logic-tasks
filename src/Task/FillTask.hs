@@ -10,20 +10,36 @@ module Task.FillTask
 
 
 import Control.Exception (try,SomeException)
+import Data.Maybe(isNothing)
 import Test.QuickCheck (generate)
-import Formula (Cnf,getLiterals,genCnf, partEvalCnf)
+import Formula (Cnf(..),getLiterals,genCnf, partEvalCnf)
 import Table (Table,getTable,fillGaps,genGapTable,countDiffEntries,readEntries, possibleAllocations)
 import Types (FillConfig(..),CnfConfig(..),ClauseConfig(..))
-import Task.Utility (withRatio,noSequences)
+import Task.Utility (withRatio)
+import qualified Data.Set as Set
 
 
-solver :: Table -> Cnf -> Int
-solver gapTable cnf = sum $ map snd solveForAllocs
+
+solver :: Cnf -> Table -> Int
+solver cnf gapTable = step allocAndCnf
   where
     allocs = possibleAllocations (getLiterals cnf)
     zipped = zip allocs (readEntries gapTable)
-    blankOnly = map fst (filter (\(_,y) -> y == Nothing) zipped)
-    solveForAllocs = map (partEvalCnf cnf) blankOnly
+    blankOnly = map fst (filter (\(_,y) -> isNothing y) zipped)
+    allocAndCnf = zip blankOnly (repeat cnf)
+    step [] = 0
+    step (([],_):xss) = step xss
+    step ((x:xs,form):xss)
+        | Set.null (getCs form) = step xss
+        | otherwise = case partEvalCnf form x of
+            Left _ -> 1 + step cascaded
+            Right res -> 1 + step ((xs,res):cascaded)
+
+          where
+            cascaded = map (\(a,f) -> if x == head a then (tail a,newF x f) else (a,f)) xss
+            newF y f = case partEvalCnf f y of Left _ -> Cnf Set.empty
+                                               Right f2 -> f2
+
 
 
 
@@ -40,14 +56,11 @@ genFillExercise
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
-    cnfInRange = case percentTrueEntries of
-        Just range -> cnfWithRatio range
-        Nothing    -> getCnf
+    cnfInRange = maybe getCnf cnfWithRatio percentTrueEntries
 
     cnfWithRatio ratio = do
         cnf <- getCnf
-        let entries = readEntries (getTable cnf)
-        if withRatio ratio cnf -- && noSequences 4 entries
+        if withRatio ratio cnf
           then pure cnf
           else cnfWithRatio ratio
 

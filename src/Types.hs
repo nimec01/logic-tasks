@@ -68,7 +68,7 @@ defaultClauseConfig :: ClauseConfig
 defaultClauseConfig = ClauseConfig
     { minClauseLength = 1
     , maxClauseLength = 3
-    , usedLiterals = ['A'..'D']
+    , usedLiterals = ['A'..'C']
     }
 
 
@@ -85,8 +85,8 @@ defaultCnfConfig = CnfConfig
 defaultFillConfig :: FillConfig
 defaultFillConfig = FillConfig
     { cnfConfig = defaultCnfConfig
-    , percentageOfGaps = 30
-    , percentTrueEntries = Just (40,60)
+    , percentageOfGaps = 40
+    , percentTrueEntries = Just (20,80)
     }
 
 
@@ -103,7 +103,7 @@ defaultPickConfig :: PickConfig
 defaultPickConfig = PickConfig
     { cnfConfig = defaultCnfConfig
     , amountOfOptions = 5
-    , pickCnf = True
+    , pickCnf = False
     }
 
 
@@ -153,7 +153,6 @@ checkFillConfig :: FillConfig -> Maybe String
 checkFillConfig FillConfig {..}
     | percentageOfGaps < 0 || percentageOfGaps > 100 = Just "The percentage of gaps must be between 0 and 100%."
     | otherwise = checkCnfConfig cnfConfig
-  where
 
 
 

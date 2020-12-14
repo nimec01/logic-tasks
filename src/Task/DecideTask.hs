@@ -12,17 +12,37 @@ module Task.DecideTask
 
 import Control.Exception (try,SomeException)
 import Data.Set (fromList,toList)
+import qualified Data.Set as Set
 import Test.QuickCheck (generate,elements)
-import Formula (Cnf,genCnf,partEvalCnf,getLiterals)
+import Formula (Cnf(..),genCnf,partEvalCnf,getLiterals,getCs)
 import Table (Table,getTable,genWrongTable,possibleAllocations)
 import Types (DecideConfig(..),CnfConfig(..),ClauseConfig(..))
 
 
+
+
 solver :: Cnf -> Int
-solver cnf = sum $ map snd solveForAllocs
+solver cnf = step allocAndCnf
   where
     allocs = possibleAllocations (getLiterals cnf)
-    solveForAllocs = map (partEvalCnf cnf) allocs
+    allocAndCnf = zip allocs (repeat cnf)
+    step [] = 0
+    step (([],_):xss) = step xss
+    step ((x:xs,form):xss)
+        | Set.null (getCs form) = step xss
+        | otherwise = case partEvalCnf form x of
+            Left _ -> 1 + step cascaded
+            Right res -> 1 + step ((xs,res):cascaded)
+
+          where
+            cascaded = map (\(a,f) -> if x == head a then (tail a,newF x f) else (a,f)) xss
+            newF y f = case partEvalCnf f y of Left _ -> Cnf Set.empty
+                                               Right f2 -> f2
+
+
+
+
+
 
 
 

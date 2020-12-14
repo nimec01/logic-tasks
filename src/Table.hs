@@ -7,6 +7,7 @@ module Table
        , genWrongTable
        , fillGaps
        , readEntries
+       , readLiterals
        , countDiffEntries
        , possibleAllocations
        ) where
@@ -15,10 +16,10 @@ module Table
 
 import Data.List (transpose)
 import Data.Maybe (isNothing)
-import Data.Set (toList,unions)
+import Data.Set (toList,unions,Set)
 import Test.QuickCheck
 import Formula (Allocation,Literal(..),Clause(..),Cnf(..),evalCnf)
-import qualified Data.Set as Set (map)
+import qualified Data.Set as Set (map,fromList)
 
 
 
@@ -172,7 +173,8 @@ fillGaps solution table
 readEntries :: Table -> [Maybe Bool]
 readEntries = getEntries
 
-
+readLiterals :: Table -> Set Literal
+readLiterals = Set.fromList . getLiterals
 
 countDiffEntries :: Table -> Table -> Int
 countDiffEntries t1 t2 = diffs (getEntries t1) (getEntries t2)

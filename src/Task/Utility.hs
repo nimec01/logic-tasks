@@ -16,13 +16,15 @@ import Table (readEntries, getTable)
 
 withRatio :: (Int,Int) -> Cnf -> Bool
 withRatio (lower,upper) cnf =
-    length trueEntries <= percentage upper && length trueEntries >= percentage lower
+    length trueEntries <= maximum [upperBound,if upper == 0 then 0 else 1]
+        && length trueEntries >= maximum [if lower == 0 then 0 else 1, lowerBound]
   where
     tableEntries = readEntries (getTable cnf)
     trueEntries = filter (== Just True) tableEntries
-
     percentage :: Int -> Int
     percentage num = length tableEntries *num `div` 100
+    upperBound = percentage upper
+    lowerBound = percentage lower
 
 
 

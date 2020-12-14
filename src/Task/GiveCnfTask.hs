@@ -30,9 +30,7 @@ genGiveCnfExercise
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
-    cnfInRange =
-        case percentTrueEntries of Just range -> cnfWithRatio range
-                                   Nothing    -> getCnf
+    cnfInRange = maybe getCnf cnfWithRatio percentTrueEntries
 
     cnfWithRatio ratio = do
         cnf <- getCnf
