@@ -8,6 +8,7 @@ dependencies:
 - containers
 - hspec
 - minisat-solver
+- vector
 
 library:
   source-dirs: src
@@ -20,7 +21,7 @@ executables:
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Cnf:
+  GiveCnf:
     main:                giveCnf.hs
     source-dirs:         app
     dependencies:
@@ -50,12 +51,26 @@ executables:
     source-dirs:         app
     dependencies:
     - ba-patrick-ritzenfeld
-  Guess:
-    main:                guess.hs
-    source-dirs:         app
+  Robustness:
+    main:                robustness.hs
+    source-dirs:         app/criteria
     dependencies:
     - ba-patrick-ritzenfeld
-
+  Difficulty:
+    main:                difficulty.hs
+    source-dirs:         app/criteria
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Quantity:
+    main:                quantity.hs
+    source-dirs:         app/criteria
+    dependencies:
+    - ba-patrick-ritzenfeld
+  Similarity:
+    main:                similarity.hs
+    source-dirs:         app/criteria
+    dependencies:
+    - ba-patrick-ritzenfeld
 tests:
   src-test:
     main:                Spec.hs
