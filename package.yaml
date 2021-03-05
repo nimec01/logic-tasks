@@ -1,4 +1,4 @@
-name:                ba-patrick-ritzenfeld
+name:                logic-tasks
 version:             0.1.0.0
 
 dependencies:
@@ -20,57 +20,57 @@ executables:
     main:                fill.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   GiveCnf:
     main:                giveCnf.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Pick:
     main:                pick.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Decide:
     main:                decide.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Resolve:
     main:                resolve.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Step:
     main:                step.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Write:
     main:                writer.hs
     source-dirs:         app
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Robustness:
     main:                robustness.hs
-    source-dirs:         app/criteria
+    source-dirs:         app/Criteria
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Difficulty:
     main:                difficulty.hs
-    source-dirs:         app/criteria
+    source-dirs:         app/Criteria
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Quantity:
     main:                quantity.hs
-    source-dirs:         app/criteria
+    source-dirs:         app/Criteria
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
   Similarity:
     main:                similarity.hs
-    source-dirs:         app/criteria
+    source-dirs:         app/Criteria
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
 tests:
   src-test:
     main:                Spec.hs
@@ -80,4 +80,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - ba-patrick-ritzenfeld
+    - logic-tasks
