@@ -59,7 +59,7 @@ utilSpec =
 
     it "should produce a fully filled table if called with a fitting bool list" $
       forAll (applySize arbitrary) $ \table ->
-        forAll (chooseInt (1,length (readEntries table))) $ \gaps ->
+        forAll (chooseInt (1,100)) $ \gaps ->
           forAll (genGapTable table gaps) $ \gapTable ->
             let gapEntries = readEntries gapTable in
               forAll (vectorOf (length (filter isNothing gapEntries)) arbitrary) $
@@ -90,23 +90,21 @@ tableGenSpec = do
          forAll (chooseInt (1,maxBound)) $
            \gaps -> evaluate (genGapTable table (-gaps)) `shouldThrow` errorCall "The amount of gaps is negative."
 
-    it "should return the table argument when the amount of gaps is zero" $
-       forAll (applySize arbitrary) $ \table -> forAll (genGapTable table 0) $
-        \gapTable -> table `shouldBe` gapTable
+    it "should throw an error if the gap parameter is bigger than the size of the table" $
+       forAll (applySize arbitrary) $ \table ->
+         forAll (chooseInt (101,maxBound)) $
+           \gaps -> evaluate (genGapTable table gaps) `shouldThrow` errorCall "gap percentage must be less than 100%."
 
     it "should return an empty table if the table parameter is empty" $
       forAll arbitrarySizedNatural $ \gaps -> let emptyTable = getTable (Cnf empty) in
         forAll (genGapTable emptyTable gaps) $ \gapTable -> gapTable `shouldBe` emptyTable
 
-    it "should return a fully gapped table if the gap parameter is bigger than the size of the table" $
-       forAll (applySize arbitrary) $ \table -> let tabLen = length (readEntries table) in
-         forAll (suchThat arbitrary (>= tabLen)) $ \gaps -> forAll (genGapTable table gaps) $
-          \gapTable -> length (filter isNothing (readEntries gapTable)) == tabLen
 
     it "should return a table with the correct amount of gaps when called with valid parameters" $
       forAll arbitrarySizedNatural $ \gaps -> forAll (applySize arbitrary) $
         \table -> forAll (genGapTable table gaps) $
-          \gapTable -> gaps < length (readEntries table) ==> length (filter isNothing (readEntries gapTable)) == gaps
+          \gapTable -> let tableLen = length (readEntries table) in
+            gaps < tableLen ==> length (filter isNothing (readEntries gapTable)) == maximum [1, gaps * tableLen `div` 100]
 
 
   describe "genWrongTable" $ do
