@@ -8,69 +8,12 @@ dependencies:
 - containers
 - hspec
 - minisat-solver
-- vector
 
 library:
   source-dirs: src
   ghc-options:
   - -Wall
 
-executables:
-  Fill:
-    main:                fill.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  GiveCnf:
-    main:                giveCnf.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  Pick:
-    main:                pick.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  Decide:
-    main:                decide.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  Resolve:
-    main:                resolve.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  Step:
-    main:                step.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  Write:
-    main:                writer.hs
-    source-dirs:         app
-    dependencies:
-    - logic-tasks
-  Robustness:
-    main:                robustness.hs
-    source-dirs:         app/Criteria
-    dependencies:
-    - logic-tasks
-  Difficulty:
-    main:                difficulty.hs
-    source-dirs:         app/Criteria
-    dependencies:
-    - logic-tasks
-  Quantity:
-    main:                quantity.hs
-    source-dirs:         app/Criteria
-    dependencies:
-    - logic-tasks
-  Similarity:
-    main:                similarity.hs
-    source-dirs:         app/Criteria
-    dependencies:
-    - logic-tasks
 tests:
   src-test:
     main:                Spec.hs
