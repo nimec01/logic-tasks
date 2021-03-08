@@ -90,10 +90,6 @@ spec = do
   describe "genCnf" $ do
     it "should return the empty conjuncion when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) (== Cnf empty)
-    it "should return the empty conjunction when called with invalid boundaries" $
-      property $ \lower1 upper1 lower2 upper2 lits -> lower1 <= 0 || lower2 <= 0
-                 || upper1 < lower1 || upper2 < lower2 || lower1 > minimum [2^lower2, 2^length (nub lits)]
-                   ==> forAll (genCnf (lower1,upper1) (lower2,upper2) lits) (== Cnf empty)
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
         let num = Set.size (getCs cnf) in num >= lowerNum && num <= upperNum
