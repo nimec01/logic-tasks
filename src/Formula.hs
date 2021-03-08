@@ -13,7 +13,7 @@ import qualified Data.Set as Set
 
 import Data.Either(rights)
 
-import Data(Literal(..), Clause(..), Cnf(..), Allocation)
+import Types (Literal(..), Clause(..), Cnf(..), Allocation)
 
 
 ---------------------------------------------------------------------------------------------------

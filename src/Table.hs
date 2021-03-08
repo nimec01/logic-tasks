@@ -15,7 +15,7 @@ import Data.Maybe (isNothing)
 import Data.Set (Set)
 import Test.QuickCheck
 
-import Data
+import Types
 import qualified Data.Set as Set (fromList)
 
 

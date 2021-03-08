@@ -7,14 +7,14 @@ module Resolution
        ) where
 
 
-
-import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
-import Data (Clause(..),Literal(..),convert)
-import Formula(opposite)
-import Data.Set (empty,Set)
-import qualified SAT.MiniSat as Sat
 import qualified Data.Set as Set
+import qualified SAT.MiniSat as Sat
 
+import Data.Set (empty,Set)
+import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
+
+import Formula(opposite)
+import Types (Clause(..),Literal(..),convert)
 
 
 resolve :: Clause -> Clause -> Literal -> Maybe Clause

@@ -1,4 +1,4 @@
-module Data
+module Types
        (
          Literal(..)
        , Clause(..)
