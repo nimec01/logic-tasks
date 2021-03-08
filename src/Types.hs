@@ -10,10 +10,8 @@ module Types
        , genLiteral
        , genClause
        , genCnf
-       , evalLiteral
-       , evalClause
-       , evalCnf
        , possibleAllocations
+       , Formula(..)
        ) where
 
 
@@ -32,9 +30,12 @@ import Data.Set (Set,empty)
 
 type Allocation = [(Literal, Bool)]
 
-
-class SatConvertible a where
+class Formula a where
     convert :: a -> Sat.Formula Char
+    literals :: a -> [Literal]
+    atomics :: a -> [Literal]
+    evaluate :: Allocation -> a -> Maybe Bool
+
 
 ---------------------------------------------------
 
@@ -55,10 +56,17 @@ instance Read Literal where
    readsPrec _ _ = []
 
 
-instance SatConvertible Literal where
+instance Formula Literal where
    convert (Literal c) = Sat.Var c
    convert (Not c) = Sat.Not (Sat.Var c)
 
+   literals lit = [lit]
+
+   atomics (Not x) = [Literal x]
+   atomics lit = [lit]
+
+   evaluate xs (Not y) = not <$> evaluate xs (Literal y)
+   evaluate xs z = lookup z xs
 
 
 instance Arbitrary Literal where
@@ -73,9 +81,7 @@ genLiteral lits = do
    elements [Literal rChar, Not rChar]
 
 
-evalLiteral :: Allocation -> Literal -> Maybe Bool
-evalLiteral xs (Not y) = not <$> evalLiteral xs (Literal y)
-evalLiteral xs z = lookup z xs
+
 
 ------------------------------------------------------------
 
@@ -95,11 +101,18 @@ instance Show Clause where
 
 
 
-instance SatConvertible Clause where
+instance Formula Clause where
    convert (Clause set)
         | Set.null set = Sat.No
         | otherwise = Sat.Some (map convert (Set.toList set))
 
+   literals (Clause set) = Set.toList set
+
+   atomics (Clause set) = concatMap atomics (Set.toList set)
+
+   evaluate xs ys = or <$> sequence lits
+     where
+       lits = map (evaluate xs) (literals ys)
 
 
 
@@ -135,13 +148,6 @@ genClause (minlen,maxlen) lits
 
 
 
-evalClause :: Allocation -> Clause -> Maybe Bool
-evalClause xs ys = or <$> sequence literals
-  where
-    literals = map (evalLiteral xs) (Set.toList (getLs ys))
-
-
-
 --------------------------------------------------------------
 
 
@@ -160,10 +166,18 @@ instance Show Cnf where
         listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
 
 
-instance SatConvertible Cnf where
+instance Formula Cnf where
     convert (Cnf set)
         | Set.null set = Sat.Yes
         | otherwise = Sat.All (map convert (Set.toList set))
+
+    literals (Cnf set) = concatMap literals (Set.toList set)
+
+    atomics (Cnf set) = concatMap atomics (Set.toList set)
+
+    evaluate xs ys = and <$> sequence clauses
+      where
+        clauses = map (evaluate xs) (Set.toList (getCs ys))
 
 
 
@@ -207,11 +221,6 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
             generateClauses usedLits (Set.insert clause set) num
 
 
-evalCnf :: Allocation -> Cnf -> Maybe Bool
-evalCnf xs ys = and <$> sequence clauses
-  where
-    clauses = map (evalClause xs) (Set.toList (getCs ys))
-
 
 ------------------------------------------------------------
 
@@ -230,17 +239,17 @@ instance Eq Table where
 instance Show Table where
     show t = header ++ "\n" ++ rows
       where
-        literals = getLiterals t
+        lits = getLiterals t
 
         formatLine :: Show a => [a] -> Maybe Bool -> String
         formatLine [] _ = []
         formatLine x y =
             foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "---" show y) x ++ "\n"
 
-        header = concat [show x ++ " | " | x <- literals] ++ "VALUES"
+        header = concat [show x ++ " | " | x <- lits] ++ "VALUES"
         rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
-            unformattedRows = zip (transpose $ comb (length literals) 1) $ getEntries t
+            unformattedRows = zip (transpose $ comb (length lits) 1) $ getEntries t
               where
                 comb :: Int -> Int -> [[Int]]
                 comb 0 _ = []
@@ -277,11 +286,11 @@ possibleAllocations xs = transpose (allCombinations xs 1)
 
 
 getTable :: Cnf -> Table
-getTable cnf = Table literals values
+getTable cnf = Table lits values
   where
-    literals = Set.toList $ Set.unions $ map (Set.map filterSign . getLs) $ Set.toList (getCs cnf)
+    lits = Set.toList $ Set.unions $ map (Set.map filterSign . getLs) $ Set.toList (getCs cnf)
 
     filterSign :: Literal -> Literal
     filterSign x = case x of Not y -> Literal y
                              _     -> x
-    values = map (`evalCnf` cnf) $ possibleAllocations literals
+    values = map (`evaluate` cnf) $ possibleAllocations lits

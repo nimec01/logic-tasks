@@ -1,12 +1,12 @@
 module FormulaSpec where
 
 
+import qualified Control.Exception as Exc (evaluate)
 
 import Test.Hspec
 import Test.QuickCheck
 import Types
 import Formula
-import Control.Exception(evaluate)
 import qualified Data.Set as Set
 import Data.Set (empty,Set)
 import Data.List (nub)
@@ -54,18 +54,9 @@ spec :: Spec
 spec = do
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $
-      evaluate (genLiteral []) `shouldThrow` errorCall "Can not construct Literal from empty list."
+      Exc.evaluate (genLiteral []) `shouldThrow` errorCall "Can not construct Literal from empty list."
     it "should generate a random literal from the given char list" $
       property $ \chars -> not (null chars) ==> forAll (genLiteral chars) $ \char -> getC char `elem` chars
-
-  describe "evalLiteral" $ do
-    it "should return Nothing when called with an empty allocation" $
-      property $ \lit -> evalLiteral [] lit `shouldBe` Nothing
-    it "should return Nothing when called with a mismatched allocation" $
-      property $ \lit -> forAll allocGen $ \alloc ->
-                           turnPositive lit `notElem` map fst alloc
-                             ==> evalLiteral alloc lit `shouldBe` Nothing
-
 
 
   describe "genClause" $ do
@@ -78,14 +69,6 @@ spec = do
       forAll validBoundsClause $ \((lower,upper),chars) -> forAll (genClause (lower,upper) chars) $ \clause ->
         let len = Set.size (getLs clause) in len >= lower && len <= upper
 
-  describe "evalClause" $ do
-    it "should return Nothing when called with an empty allocation" $
-      property $ \clause -> clause /= Clause empty ==> evalClause [] clause `shouldBe` Nothing
-    it "should return Nothing when called with a mismatched allocation" $
-      property $ \clause -> forAll allocGen $
-        \alloc -> not (all (`elem` map fst alloc) (map turnPositive (Set.toList (getLs clause))))
-          ==> evalClause alloc clause `shouldBe` Nothing
-
 
   describe "genCnf" $ do
     it "should return the empty conjuncion when called with the empty list" $
@@ -96,3 +79,4 @@ spec = do
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
        let sizes = Set.map Set.size (Set.map getLs (getCs cnf)) in Set.findMax sizes <= upperLen && Set.findMin sizes >= lowerLen
+

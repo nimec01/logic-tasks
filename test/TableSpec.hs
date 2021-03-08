@@ -2,7 +2,7 @@ module TableSpec where
 
 import Data.Set (Set,empty)
 import Data.Maybe (isNothing,fromJust)
-import Control.Exception(evaluate)
+import qualified Control.Exception as Exc(evaluate)
 import Test.Hspec
 import Test.QuickCheck
 import Types hiding (getLiterals)
@@ -82,19 +82,19 @@ tableGenSpec = do
 
     context "When looking at each row of the generated table" $
       it "should have truth values equal to the formula being evaluated with the row's allocation" $
-        forAll (applySize arbitrary) $ \x -> map (`evalCnf` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
+        forAll (applySize arbitrary) $ \x -> map (`evaluate` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
 
 
   describe "genGapTable" $ do
     it "should throw an error if the amount of gaps is negative" $
        forAll (applySize arbitrary) $ \table ->
          forAll (chooseInt (1,maxBound)) $
-           \gaps -> evaluate (genGapTable table (-gaps)) `shouldThrow` errorCall "The amount of gaps is negative."
+           \gaps -> Exc.evaluate (genGapTable table (-gaps)) `shouldThrow` errorCall "The amount of gaps is negative."
 
     it "should throw an error if the gap parameter is bigger than the size of the table" $
        forAll (applySize arbitrary) $ \table ->
          forAll (chooseInt (101,maxBound)) $
-           \gaps -> evaluate (genGapTable table gaps) `shouldThrow` errorCall "gap percentage must be less than 100%."
+           \gaps -> Exc.evaluate (genGapTable table gaps) `shouldThrow` errorCall "gap percentage must be less than 100%."
 
     it "should return an empty table if the table parameter is empty" $
       forAll arbitrarySizedNatural $ \gaps -> let emptyTable = getTable (Cnf empty) in
@@ -112,7 +112,7 @@ tableGenSpec = do
     it "should throw an error if the amount of changes is negative" $
        forAll (applySize arbitrary) $ \table ->
          forAll (chooseInt (1,maxBound)) $
-           \changes -> evaluate (genWrongTable table (-changes)) `shouldThrow` errorCall "The amount of changes is negative."
+           \changes -> Exc.evaluate (genWrongTable table (-changes)) `shouldThrow` errorCall "The amount of changes is negative."
 
     it "should return the table argument when the amount of changes is zero" $
        forAll (applySize arbitrary) $ \table -> forAll (genWrongTable table 0) $
