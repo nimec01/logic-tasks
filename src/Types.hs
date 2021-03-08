@@ -7,6 +7,13 @@ module Types
        , getTable
        , Allocation
        , convert
+       , genLiteral
+       , genClause
+       , genCnf
+       , evalLiteral
+       , evalClause
+       , evalCnf
+       , possibleAllocations
        ) where
 
 

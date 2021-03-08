@@ -5,8 +5,9 @@ import Data.Maybe (isNothing,fromJust)
 import Control.Exception(evaluate)
 import Test.Hspec
 import Test.QuickCheck
-import Table
+import Types hiding (getLiterals)
 import Formula
+import Table
 import qualified Data.Set as Set
 
 

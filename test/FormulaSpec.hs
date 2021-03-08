@@ -4,6 +4,7 @@ module FormulaSpec where
 
 import Test.Hspec
 import Test.QuickCheck
+import Types
 import Formula
 import Control.Exception(evaluate)
 import qualified Data.Set as Set
