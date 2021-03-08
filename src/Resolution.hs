@@ -9,7 +9,8 @@ module Resolution
 
 
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
-import Formula (Clause(..),Literal(..),opposite,convert)
+import Data (Clause(..),Literal(..),convert)
+import Formula(opposite)
 import Data.Set (empty,Set)
 import qualified SAT.MiniSat as Sat
 import qualified Data.Set as Set

@@ -1,102 +1,23 @@
 
 module Table
        (
-         Table
-       , getTable
-       , genGapTable
+         genGapTable
        , genWrongTable
        , fillGaps
        , readEntries
        , readLiterals
        , countDiffEntries
-       , possibleAllocations
        ) where
 
 
 
-import Data.List (transpose)
 import Data.Maybe (isNothing)
-import Data.Set (toList,unions,Set)
+import Data.Set (Set)
 import Test.QuickCheck
-import Formula (Allocation,Literal(..),Clause(..),Cnf(..),evalCnf)
-import qualified Data.Set as Set (map,fromList)
 
+import Data
+import qualified Data.Set as Set (fromList)
 
-
-data Table = Table
-    { getLiterals :: [Literal]
-    , getEntries :: [Maybe Bool]} deriving Ord
-
-instance Eq Table where
-    (==) t1 t2 = getEntries t1 == getEntries t2
-
-
-
-instance Show Table where
-    show t = header ++ "\n" ++ rows
-      where
-        literals = getLiterals t
-
-        formatLine :: Show a => [a] -> Maybe Bool -> String
-        formatLine [] _ = []
-        formatLine x y =
-            foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "---" show y) x ++ "\n"
-
-        header = concat [show x ++ " | " | x <- literals] ++ "VALUES"
-        rows = concat [formatLine x y | (x,y) <- unformattedRows]
-          where
-            unformattedRows = zip (transpose $ comb (length literals) 1) $ getEntries t
-              where
-                comb :: Int -> Int -> [[Int]]
-                comb 0 _ = []
-                comb len n =
-                    concat (replicate n $ repNum 0 ++ repNum 1) : comb (len-1) (n*2)
-                  where
-                    num = 2^(len -1)
-
-                    repNum :: a -> [a]
-                    repNum = replicate num
-
-
-
-instance Arbitrary Table where
-    arbitrary = sized table
-      where
-        table :: Int -> Gen Table
-        table n = do
-            cnf <- resize n arbitrary
-            pure (getTable cnf)
-
-
-
-getTable :: Cnf -> Table
-getTable cnf = Table literals values
-  where
-    literals = toList $ unions $ map (Set.map filterSign . getLs) $ toList (getCs cnf)
-
-    filterSign :: Literal -> Literal
-    filterSign x = case x of Not y -> Literal y
-                             _     -> x
-    values = map (`evalCnf` cnf) $ possibleAllocations literals
-
-
-
-
-
-
-allCombinations :: [Literal] -> Int ->  [Allocation]
-allCombinations [] _ = []
-allCombinations (x:xs) n =
-    concat (replicate n $ pairs False ++ pairs True) : allCombinations xs (n*2)
-  where
-    num = 2^ length xs
-    pairs :: a -> [(Literal,a)]
-    pairs a = replicate num (x,a)
-
-
-
-possibleAllocations :: [Literal] -> [Allocation]
-possibleAllocations xs = transpose (allCombinations xs 1)
 
 
 
