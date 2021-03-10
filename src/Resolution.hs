@@ -13,8 +13,7 @@ import qualified SAT.MiniSat as Sat
 import Data.Set (empty,Set)
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
 
-import Formula(opposite)
-import Types (Clause(..),Literal(..),convert)
+import Types
 
 
 resolve :: Clause -> Clause -> Literal -> Maybe Clause
@@ -109,9 +108,9 @@ applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
 showResClauses :: [(Int,Clause)] -> String
 showResClauses [] = ""
 showResClauses ((index,clause):xs) =
-    show index ++ " " ++ literals ++ " " ++ showResClauses xs
+    show index ++ " " ++ lits ++ " " ++ showResClauses xs
   where
-    literals = show $ Set.toList $ getLs clause
+    lits = show $ literals clause
 
 
 

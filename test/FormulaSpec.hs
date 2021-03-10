@@ -56,7 +56,7 @@ spec = do
     it "should throw an error when called with the empty list" $
       Exc.evaluate (genLiteral []) `shouldThrow` errorCall "Can not construct Literal from empty list."
     it "should generate a random literal from the given char list" $
-      property $ \chars -> not (null chars) ==> forAll (genLiteral chars) $ \char -> getC char `elem` chars
+      property $ \chars -> not (null chars) ==> forAll (genLiteral chars) $ \char -> letter char `elem` chars
 
 
   describe "genClause" $ do
@@ -67,7 +67,7 @@ spec = do
                    ==> forAll (genClause (lower,upper) lits) (== Clause empty)
     it "should generate a random clause of the correct length if given valid parameters" $
       forAll validBoundsClause $ \((lower,upper),chars) -> forAll (genClause (lower,upper) chars) $ \clause ->
-        let len = Set.size (getLs clause) in len >= lower && len <= upper
+        let len = length (literals clause) in len >= lower && len <= upper
 
 
   describe "genCnf" $ do
@@ -75,8 +75,8 @@ spec = do
       property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) (== Cnf empty)
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
-        let num = Set.size (getCs cnf) in num >= lowerNum && num <= upperNum
+        let num = length (getClauses cnf) in num >= lowerNum && num <= upperNum
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
-       let sizes = Set.map Set.size (Set.map getLs (getCs cnf)) in Set.findMax sizes <= upperLen && Set.findMin sizes >= lowerLen
+       let sizes = map length (map literals (getClauses cnf)) in maximum sizes <= upperLen && minimum sizes >= lowerLen
 

@@ -1,12 +1,13 @@
 module Types
        (
          Literal(..)
+       , opposite
        , Clause(..)
        , Cnf(..)
+       , getClauses
        , Table(..)
        , getTable
        , Allocation
-       , convert
        , genLiteral
        , genClause
        , genCnf
@@ -21,6 +22,7 @@ import qualified SAT.MiniSat as Sat
 
 import Test.QuickCheck
 
+import Data.Either(rights)
 import Data.List(transpose, nub, delete)
 import Data.Set (Set,empty)
 
@@ -40,8 +42,8 @@ class Formula a where
 ---------------------------------------------------
 
 data Literal
-    = Literal { getC :: Char}
-    | Not { getC :: Char}
+    = Literal { letter :: Char}
+    | Not { letter :: Char}
     deriving (Eq,Ord)
 
 
@@ -74,6 +76,8 @@ instance Arbitrary Literal where
 
 
 
+
+
 genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Can not construct Literal from empty list."
 genLiteral lits = do
@@ -82,11 +86,15 @@ genLiteral lits = do
 
 
 
+opposite :: Literal -> Literal
+opposite (Literal l) = Not l
+opposite (Not l) = Literal l
+
 
 ------------------------------------------------------------
 
 
-newtype Clause = Clause { getLs :: Set Literal}
+newtype Clause = Clause { literalSet :: Set Literal}
     deriving (Eq,Ord)
 
 
@@ -108,12 +116,30 @@ instance Formula Clause where
 
    literals (Clause set) = Set.toList set
 
-   atomics (Clause set) = concatMap atomics (Set.toList set)
+   atomics (Clause set) = concat $ Set.toList $ Set.map atomics set
 
    evaluate xs ys = or <$> sequence lits
      where
        lits = map (evaluate xs) (literals ys)
 
+
+
+
+
+partEvalClause :: Clause -> (Literal,Bool) -> Either Bool Clause
+partEvalClause (Clause set) x
+    | Set.null set = Left False
+    | isIn || negIsIn =
+     if snd x then if isIn then Left True else if Set.null setWithoutNeg then Left False else Right (Clause setWithoutNeg)
+              else if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
+    | otherwise = Right (Clause set)
+  where
+    next = fst x
+    negNext = opposite next
+    isIn = next `Set.member` set
+    negIsIn = negNext `Set.member` set
+    setWithout = Set.delete next set
+    setWithoutNeg = Set.delete negNext set
 
 
 
@@ -130,8 +156,8 @@ genClause (minlen,maxlen) lits
     | null lits || minlen > length nLits || invalidLen = pure (Clause empty)
     | otherwise = do
         len <- chooseInt (minlen,minimum [length nLits, maxlen])
-        literals <- generateLiterals nLits empty len
-        pure (Clause literals)
+        genLits <- generateLiterals nLits empty len
+        pure (Clause genLits)
   where
     nLits = nub lits
     invalidLen = minlen > maxlen || minlen <= 0
@@ -142,7 +168,7 @@ genClause (minlen,maxlen) lits
         | otherwise = do
             literal <- genLiteral usedLits
             let
-              restLits = delete (getC literal) usedLits
+              restLits = delete (letter literal) usedLits
               newSet = Set.insert literal xs
             generateLiterals restLits newSet len
 
@@ -151,10 +177,36 @@ genClause (minlen,maxlen) lits
 --------------------------------------------------------------
 
 
-newtype Cnf = Cnf { getCs :: Set Clause}
+newtype Cnf = Cnf { clauseSet :: Set Clause}
      deriving (Eq,Ord)
 
 
+
+getClauses :: Cnf -> [Clause]
+getClauses (Cnf set) = Set.toList set
+
+
+
+
+partEvalCnf :: Cnf -> (Literal,Bool) -> Either Bool Cnf
+partEvalCnf cnf tup
+    | fst tup `notElem` lits = Right cnf
+    | otherwise = result (thin applied)
+  where
+    lits = literals cnf
+    clauses = getClauses cnf
+    applied = map (`partEvalClause` tup) clauses
+    thin :: [Either Bool Clause] -> [Either Bool Clause]
+    thin [] = []
+    thin (x:xs) =
+      case x of Left False   -> [Left False]
+                Left True    -> thin xs
+                Right clause -> Right clause : thin xs
+    result :: [Either Bool Clause] -> Either Bool Cnf
+    result xs
+      | Left False `elem` xs = Left False
+      | null xs = Left True
+      | otherwise = Right (Cnf (Set.fromList (rights xs)))
 
 
 instance Show Cnf where
@@ -171,13 +223,13 @@ instance Formula Cnf where
         | Set.null set = Sat.Yes
         | otherwise = Sat.All (map convert (Set.toList set))
 
-    literals (Cnf set) = concatMap literals (Set.toList set)
+    literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
-    atomics (Cnf set) = concatMap atomics (Set.toList set)
+    atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
 
-    evaluate xs ys = and <$> sequence clauses
+    evaluate alloc cnf = and <$> sequence clauses
       where
-        clauses = map (evaluate xs) (Set.toList (getCs ys))
+        clauses = map (evaluate alloc) (getClauses cnf)
 
 
 
@@ -273,7 +325,7 @@ instance Arbitrary Table where
 
 
 possibleAllocations :: [Literal] -> [Allocation]
-possibleAllocations xs = transpose (allCombinations xs 1)
+possibleAllocations lits = transpose (allCombinations lits 1)
   where
     allCombinations :: [Literal] -> Int ->  [Allocation]
     allCombinations [] _ = []
@@ -288,9 +340,5 @@ possibleAllocations xs = transpose (allCombinations xs 1)
 getTable :: Cnf -> Table
 getTable cnf = Table lits values
   where
-    lits = Set.toList $ Set.unions $ map (Set.map filterSign . getLs) $ Set.toList (getCs cnf)
-
-    filterSign :: Literal -> Literal
-    filterSign x = case x of Not y -> Literal y
-                             _     -> x
+    lits = atomics cnf
     values = map (`evaluate` cnf) $ possibleAllocations lits

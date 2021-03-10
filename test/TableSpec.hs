@@ -17,14 +17,14 @@ equivGen = sized equiv
   where
     equiv n = do
         cnf <- resize n arbitrary
-        let clauses = getCs cnf
+        let clauses = Set.fromList $ getClauses cnf
         if Set.null clauses
           then equivGen
           else do
-            let literals = Set.unions (Set.map getLs clauses)
+            let lits = Set.unions $ Set.map (\x -> Set.fromList (literals x)) clauses
             clause <- elements (Set.toList clauses)
-            let clauseLits = getLs clause
-                availLits = literals Set.\\ clauseLits
+            let clauseLits = Set.fromList $ literals clause
+                availLits = lits Set.\\ clauseLits
             if Set.null availLits
               then equivGen
               else do
@@ -82,7 +82,7 @@ tableGenSpec = do
 
     context "When looking at each row of the generated table" $
       it "should have truth values equal to the formula being evaluated with the row's allocation" $
-        forAll (applySize arbitrary) $ \x -> map (`evaluate` x) (possibleAllocations (getLiterals x)) == readEntries (getTable x)
+        forAll (applySize arbitrary) $ \x -> map (`evaluate` x) (possibleAllocations (atomics x)) == readEntries (getTable x)
 
 
   describe "genGapTable" $ do
