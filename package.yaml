@@ -11,6 +11,12 @@ dependencies:
 
 library:
   source-dirs: src
+  exposed-modules:
+    - Formula
+    - Table
+    - Resolution
+
+
   ghc-options:
   - -Wall
 
