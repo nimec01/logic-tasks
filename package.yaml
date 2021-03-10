@@ -12,6 +12,7 @@ dependencies:
 library:
   source-dirs: src
   exposed-modules:
+    - Types
     - Formula
     - Table
     - Resolution
