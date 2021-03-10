@@ -2,8 +2,8 @@ module Resolution
        (
          genRes
        , resolve
+       , resolvableWith
        , applySteps
-       , showResClauses
        ) where
 
 
@@ -11,9 +11,12 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Set (empty,Set)
+import Data.Maybe (isJust)
 import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
 
 import Types
+import Formula
+
 
 
 resolve :: Clause -> Clause -> Literal -> Maybe Clause
@@ -26,6 +29,44 @@ resolve (Clause x) (Clause y) literal
     | otherwise = Nothing
   where
     withoutLit = Set.union x y Set.\\ Set.fromList [literal,opposite literal]
+
+
+
+
+
+resolvableWith :: Clause -> Clause -> Maybe Literal
+resolvableWith c1 c2
+    | isEmptyClause c1 || isEmptyClause c2 = Nothing
+    | length possible == 1 = Just (head possible)
+    | otherwise = Nothing
+  where
+    lits = atomics c1
+    possible = filter (isJust . resolve c1 c2) lits
+
+
+
+
+
+
+applyStep :: [Clause] -> (Clause,Clause,Clause) -> Maybe [Clause]
+applyStep [] _ = Just []
+applyStep xs (c1,c2,resol)
+    | c1 `notElem` xs || c2 `notElem` xs = Nothing
+    | otherwise = do
+        literal <- resolvableWith c1 c2
+        new <- resolve c1 c2 literal
+        if new == resol
+          then pure (new:xs)
+          else Nothing
+
+
+
+
+applySteps :: [Clause] -> [(Clause,Clause,Clause)] -> Maybe [Clause]
+applySteps [] _ = Just []
+applySteps xs [] = Just xs
+applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
+
 
 
 
@@ -83,34 +124,6 @@ genRes (minLen,maxLen) steps lits = do
               satForm = map ((Sat.satisfiable . Sat.All) . map convert) listForm
               (toInsert,newRuns) = if and satForm then (newSet,0) else (ys,runs+1)
             buildClauses xs toInsert newRuns
-
-
-
-applyStep :: [(Int,Clause)] -> (Int,Int,Literal) -> Maybe [(Int,Clause)]
-applyStep [] _ = Just []
-applyStep xs (i1,i2,literal) = do
-    c1 <- lookup i1 xs
-    c2 <- lookup i2 xs
-    newClause <- resolve c1 c2 literal
-    pure ((newIndex, newClause) : xs)
-  where
-    newIndex = maximum (map fst xs) +1
-
-
-
-applySteps :: [(Int,Clause)] -> [(Int,Int,Literal)] -> Maybe [(Int,Clause)]
-applySteps [] _ = Just []
-applySteps xs [] = Just xs
-applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
-
-
-
-showResClauses :: [(Int,Clause)] -> String
-showResClauses [] = ""
-showResClauses ((index,clause):xs) =
-    show index ++ " " ++ lits ++ " " ++ showResClauses xs
-  where
-    lits = show $ literals clause
 
 
 
