@@ -1,93 +1,19 @@
 
 module Table
        (
-         genGapTable
-       , genWrongTable
-       , fillGaps
-       , readEntries
+         readEntries
        , readLiterals
-       , countDiffEntries
+       , flipAt
+       , gapsAt
        ) where
 
 
 
-import Data.Maybe (isNothing)
 import Data.Set (Set)
-import Test.QuickCheck
 
 import Types
 import qualified Data.Set as Set (fromList)
 
-
-
-
-genGapTable :: Table -> Int -> Gen Table
-genGapTable table gaps
-    | gaps < 0 = error "The amount of gaps is negative."
-    | gaps > 100 = error "gap percentage must be less than 100%."
-    | otherwise = generateGaps [] percentage
-  where
-    rowAmount = length (getEntries table)
-    percentage = maximum [gaps * rowAmount `div` 100,1]
-
-    generateGaps :: [Int] -> Int -> Gen Table
-    generateGaps indices 0 = do
-        let
-          entries = getEntries table
-          newEntries = [ if x `elem` indices then Nothing else entries !! x
-                       | x <- [0..length entries-1]]
-          gapTable = Table (getLiterals table) newEntries
-
-        pure gapTable
-
-    generateGaps indices num = do
-        rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
-        generateGaps (rInt: indices) (num-1)
-
-
-
-
-genWrongTable :: Table -> Int -> Gen ([Int],Table)
-genWrongTable table changes
-    | changes < 0 = error "The amount of changes is negative."
-    | rowAmount < changes = genWrongTable table rowAmount
-    | otherwise = generateChanges [] changes
-  where
-    rowAmount = length (getEntries table)
-
-    generateChanges :: [Int] -> Int -> Gen ([Int],Table)
-    generateChanges indices 0 = do
-        let
-          entries = getEntries table
-
-          at :: Int -> Maybe Bool
-          at index = entries !! index
-
-          newEntries = [ if x `elem` indices then not <$> at x else at x
-                       | x <- [0..length entries-1]]
-          newTable = Table (getLiterals table) newEntries
-
-        pure (indices,newTable)
-
-    generateChanges indices num = do
-        rInt <- suchThat (chooseInt (0, length (getEntries table)-1)) (`notElem` indices)
-        generateChanges (rInt: indices) (num-1)
-
-
-
-fillGaps :: [Bool] -> Table -> Table
-fillGaps solution table
-    | length solution > length (filter isNothing tabEntries) = table
-    | otherwise = Table (getLiterals table) (filledIn solution tabEntries)
-  where
-    tabEntries = getEntries table
-
-    filledIn :: [Bool] -> [Maybe Bool] -> [Maybe Bool]
-    filledIn [] ys = ys
-    filledIn _ [] = []
-    filledIn (x:xs) (y:ys) = if isNothing y
-        then Just x : filledIn xs ys
-        else y : filledIn (x:xs) ys
 
 
 
@@ -97,10 +23,26 @@ readEntries = getEntries
 readLiterals :: Table -> Set Literal
 readLiterals = Set.fromList . getLiterals
 
-countDiffEntries :: Table -> Table -> Int
-countDiffEntries t1 t2 = diffs (getEntries t1) (getEntries t2)
+
+
+gapsAt :: Table -> [Int] -> Table
+gapsAt table gaps = Table (getLiterals table) newEntries
   where
-    diffs :: [Maybe Bool] -> [Maybe Bool] -> Int
-    diffs [] ys = length ys
-    diffs xs [] = length xs
-    diffs (x:xs) (y:ys) = (if x == y then 0 else 1) + diffs xs ys
+    entries = getEntries table
+    newEntries = [ if x+1 `elem` gaps then Nothing else entries !! x
+                 | x <- [0..length entries-1]
+                 ]
+
+
+
+
+
+flipAt :: Table -> [Int] -> Table
+flipAt table indices = Table (getLiterals table) newEntries
+  where
+    entries = getEntries table
+    newEntries = [ let value = entries !! x in
+                     if x+1 `elem` indices then fmap not value else value
+                 | x <- [0..length entries-1]
+                 ]
+
