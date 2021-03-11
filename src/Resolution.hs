@@ -2,6 +2,7 @@ module Resolution
        (
          genRes
        , resolve
+       , resolvable
        , resolvableWith
        , applySteps
        ) where
@@ -29,6 +30,15 @@ resolve (Clause x) (Clause y) literal
     | otherwise = Nothing
   where
     withoutLit = Set.union x y Set.\\ Set.fromList [literal,opposite literal]
+
+
+
+resolvable :: Clause -> Clause -> Bool
+resolvable c1 c2
+    | isEmptyClause c1 || isEmptyClause c2 = False
+    | otherwise = any (isJust . resolve c1 c2) lits
+  where
+    lits = literals c1
 
 
 
