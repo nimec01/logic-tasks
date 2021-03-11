@@ -50,10 +50,11 @@ data Literal
 
 instance Show Literal where
    show (Literal x) = [x]
-   show (Not x) = "not(" ++ [x] ++ ")"
+   show (Not x) = ['~', x]
+
 
 instance Read Literal where
-   readsPrec _ ('n':'o':'t':'(':x:')':rest) = [(Not x, rest) | x `elem` ['A' .. 'Z']]
+   readsPrec _ ('~':x:rest) = [(Not x, rest) | x `elem` ['A' .. 'Z']]
    readsPrec _ (x:rest) = [(Literal x, rest) | x `elem` ['A' .. 'Z']]
    readsPrec _ _ = []
 
@@ -289,18 +290,23 @@ instance Eq Table where
 
 
 instance Show Table where
-    show t = header ++ "\n" ++ rows
+    show t = unlines [ header
+                     , hLine
+                     , rows
+                     ]
       where
+        hLine = map (\c -> if c /= '|' then '-' else c) header
         lits = getLiterals t
 
         formatLine :: Show a => [a] -> Maybe Bool -> String
         formatLine [] _ = []
         formatLine x y =
-            foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "---" show y) x ++ "\n"
+            foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "-" (show . fromEnum) y) x ++ "\n"
 
-        header = concat [show x ++ " | " | x <- lits] ++ "VALUES"
+        header = concat [show x ++ " | " | x <- lits] ++ "F"
         rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
+
             unformattedRows = zip (transpose $ comb (length lits) 1) $ getEntries t
               where
                 comb :: Int -> Int -> [[Int]]
@@ -312,6 +318,7 @@ instance Show Table where
 
                     repNum :: a -> [a]
                     repNum = replicate num
+
 
 
 
