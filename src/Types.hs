@@ -155,7 +155,7 @@ genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
     | null lits || minlen > length nLits || invalidLen = pure (Clause empty)
     | otherwise = do
-        len <- chooseInt (minlen,minimum [length nLits, maxlen])
+        len <- choose (minlen,minimum [length nLits, maxlen])
         genLits <- generateLiterals nLits empty len
         pure (Clause genLits)
   where
@@ -239,7 +239,7 @@ instance Arbitrary Cnf where
         cnf :: Int -> Gen Cnf
         cnf 0 = genCnf (0,0) (0,0) []
         cnf n = do
-            minLen <- chooseInt (1,n)
+            minLen <- choose (1,n)
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
@@ -250,7 +250,7 @@ genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
 genCnf (minNum,maxNum) (minLen,maxLen) lits
     | null nLits || invalidLen || invalidNum = pure (Cnf empty)
     | otherwise = do
-        num <- chooseInt (minNum, minimum [maxNum,upperBound])
+        num <- choose (minNum, minimum [maxNum,upperBound])
         cnf <- generateClauses nLits empty num
         pure (Cnf cnf)
   where
