@@ -1,3 +1,6 @@
+{-# language DeriveGeneric #-}
+
+
 module Types
        (
          Literal(..)
@@ -20,12 +23,12 @@ module Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
-import Test.QuickCheck
-
 import Data.Either(rights)
 import Data.List(transpose, nub, delete)
 import Data.Set (Set,empty)
-
+import Data.Typeable
+import GHC.Generics
+import Test.QuickCheck
 
 
 
@@ -44,7 +47,7 @@ class Formula a where
 data Literal
     = Literal { letter :: Char}
     | Not { letter :: Char}
-    deriving (Eq,Ord)
+    deriving (Eq,Ord,Typeable,Generic)
 
 
 
@@ -96,7 +99,7 @@ opposite (Not l) = Literal l
 
 
 newtype Clause = Clause { literalSet :: Set Literal}
-    deriving (Eq,Ord)
+    deriving (Eq,Ord,Typeable,Generic)
 
 
 
@@ -179,7 +182,7 @@ genClause (minlen,maxlen) lits
 
 
 newtype Cnf = Cnf { clauseSet :: Set Clause}
-     deriving (Eq,Ord)
+     deriving (Eq,Ord,Typeable,Generic)
 
 
 
@@ -280,7 +283,8 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
 
 data Table = Table
     { getLiterals :: [Literal]
-    , getEntries :: [Maybe Bool]} deriving Ord
+    , getEntries :: [Maybe Bool]
+    } deriving (Ord,Typeable,Generic)
 
 
 
