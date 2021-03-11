@@ -47,7 +47,14 @@ class Formula a where
 data Literal
     = Literal { letter :: Char}
     | Not { letter :: Char}
-    deriving (Eq,Ord,Typeable,Generic)
+    deriving (Eq,Typeable,Generic)
+
+
+
+instance Ord Literal where
+   compare (Not x) (Literal y) = if x == y then LT else compare x y
+   compare (Literal x) (Not y) = if x == y then GT else compare x y
+   compare l1 l2 = compare (letter l1) (letter l2)
 
 
 
@@ -99,7 +106,17 @@ opposite (Not l) = Literal l
 
 
 newtype Clause = Clause { literalSet :: Set Literal}
-    deriving (Eq,Ord,Typeable,Generic)
+    deriving (Eq,Typeable,Generic)
+
+
+
+instance Ord Clause where
+   compare (Clause set1) (Clause set2)
+       | size1 /= size2 = compare size1 size2
+       | otherwise = compare set1 set2
+     where
+       size1 = Set.size set1
+       size2 = Set.size set2
 
 
 
@@ -182,7 +199,19 @@ genClause (minlen,maxlen) lits
 
 
 newtype Cnf = Cnf { clauseSet :: Set Clause}
-     deriving (Eq,Ord,Typeable,Generic)
+     deriving (Eq,Typeable,Generic)
+
+
+
+instance Ord Cnf where
+   compare (Cnf set1) (Cnf set2)
+       | size1 /= size2 = compare size1 size2
+       | otherwise = compare set1 set2
+     where
+       size1 = Set.size set1
+       size2 = Set.size set2
+
+
 
 
 
