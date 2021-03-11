@@ -12,7 +12,7 @@ import qualified SAT.MiniSat as Sat
 
 import Data.Set (empty,Set)
 import Data.Maybe (isJust)
-import Test.QuickCheck (Gen,chooseInt,elements,shuffle)
+import Test.QuickCheck (Gen,choose,elements,shuffle)
 
 import Types
 import Formula
@@ -99,16 +99,16 @@ genRes (minLen,maxLen) steps lits = do
                     else do
                       let clauseSize = Set.size chosenClause
                       choice <- if clauseSize == 1 || chosenClause `Set.member` underMin
-                            then return 1
+                            then return (1 :: Int)
                             else
                               if clauseSize == maxLen
                                 then return 2
-                                else chooseInt (1,2)
+                                else choose (1,2)
                       chosenChar <- elements chooseableLits
                       if choice == 1
                         then checkValidAndInsert (Literal chosenChar) chosenClause clauseSize 0
                         else do
-                          firstAmount <- chooseInt (1, clauseSize-1)
+                          firstAmount <- choose (1, clauseSize-1)
                           chosenSign <- elements [Literal chosenChar, Not chosenChar]
                           checkValidAndInsert chosenSign chosenClause firstAmount firstAmount
       where
@@ -130,4 +130,4 @@ genRes (minLen,maxLen) steps lits = do
 setElements :: Set a -> Gen a
 setElements set
     | null set = error "setElements used with empty set."
-    | otherwise = (`Set.elemAt` set) `fmap` chooseInt (0, Set.size set - 1)
+    | otherwise = (`Set.elemAt` set) `fmap` choose (0, Set.size set - 1)
