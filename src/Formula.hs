@@ -13,6 +13,7 @@ module Formula
        , andSat
        , implSat
        , equivSat
+       , sat
        ) where
 
 
@@ -87,3 +88,8 @@ implSat = logOpSat (Sat.:->:)
 
 equivSat :: (Formula a, Formula b) => a -> b -> Bool
 equivSat = logOpSat (Sat.:<->:)
+
+
+
+sat :: Formula a => a -> Bool
+sat f = Sat.satisfiable $ convert f
