@@ -77,5 +77,5 @@ spec = do
         let num = length (getClauses cnf) in num >= lowerNum && num <= upperNum
     it "should generate a random cnf formula with the correct clause length if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
-       let sizes = map length (map literals (getClauses cnf)) in maximum sizes <= upperLen && minimum sizes >= lowerLen
+       let sizes = map (length . literals) (getClauses cnf) in maximum sizes <= upperLen && minimum sizes >= lowerLen
 

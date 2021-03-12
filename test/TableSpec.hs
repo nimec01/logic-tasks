@@ -20,7 +20,7 @@ equivGen = sized equiv
         if Set.null clauses
           then equivGen
           else do
-            let lits = Set.unions $ Set.map (\x -> Set.fromList (literals x)) clauses
+            let lits = Set.unions $ Set.map (Set.fromList . literals) clauses
             clause <- elements (Set.toList clauses)
             let clauseLits = Set.fromList $ literals clause
                 availLits = lits Set.\\ clauseLits
@@ -40,7 +40,7 @@ spec = tableGenSpec
 
 
 tableGenSpec :: Spec
-tableGenSpec = do
+tableGenSpec =
   describe "getTable" $ do
     context "When generating different tables" $
       it "should have used different formulae" $
