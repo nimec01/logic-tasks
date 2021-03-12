@@ -60,24 +60,30 @@ hasEmptyClause (Cnf set) = Clause Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 
-xorSat :: (Formula a, Formula b) => a -> b -> Bool
-xorSat f1 f2 = Sat.satisfiable (convert f1 Sat.:++: convert f2)
+logOpSat :: (Formula a, Formula b)
+         => (Sat.Formula Char -> Sat.Formula Char -> Sat.Formula Char)
+         -> a
+         -> b
+         -> Bool
+logOpSat op f1 f2 = Sat.satisfiable (op (convert f1) (convert f2))
 
+
+
+xorSat :: (Formula a, Formula b) => a -> b -> Bool
+xorSat = logOpSat (Sat.:++:)
 
 
 andSat :: (Formula a, Formula b) => a -> b -> Bool
-andSat f1 f2 = Sat.satisfiable (convert f1 Sat.:&&: convert f2)
+andSat = logOpSat (Sat.:&&:)
 
 
 orSat :: (Formula a, Formula b) => a -> b -> Bool
-orSat f1 f2 = Sat.satisfiable (convert f1 Sat.:||: convert f2)
+orSat = logOpSat (Sat.:||:)
 
 
 implSat :: (Formula a, Formula b) => a -> b -> Bool
-implSat f1 f2 = Sat.satisfiable (convert f1 Sat.:->: convert f2)
+implSat = logOpSat (Sat.:->:)
 
 
 equivSat :: (Formula a, Formula b) => a -> b -> Bool
-equivSat f1 f2 = Sat.satisfiable (convert f1 Sat.:<->: convert f2)
-
-
+equivSat = logOpSat (Sat.:<->:)
