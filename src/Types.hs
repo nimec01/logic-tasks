@@ -1,6 +1,6 @@
 {-# language DeriveGeneric #-}
 
-
+-- | Some basic types for propositional logic
 module Types
        (
          Literal(..)
@@ -32,9 +32,6 @@ import Test.QuickCheck
 
 
 
-
-type Allocation = [(Literal, Bool)]
-
 class Formula a where
     convert :: a -> Sat.Formula Char
     literals :: a -> [Literal]
@@ -44,20 +41,25 @@ class Formula a where
 
 ---------------------------------------------------
 
+-- | A datatype representing a literal
 data Literal
-    = Literal { letter :: Char}
-    | Not { letter :: Char}
-    deriving (Eq,Typeable,Generic)
+    = Literal { letter :: Char} -- ^ positive sign
+    | Not { letter :: Char} -- ^ negative sign
+    deriving
+      ( Eq -- ^ derived
+      , Typeable -- ^ derived
+      , Generic -- ^ derived
+      )
 
 
-
+-- | order literals alphabetically first, then prefer a positive sign
 instance Ord Literal where
    compare (Not x) (Literal y) = if x == y then LT else compare x y
    compare (Literal x) (Not y) = if x == y then GT else compare x y
    compare l1 l2 = compare (letter l1) (letter l2)
 
 
-
+-- | '~' denotes a negative sign
 instance Show Literal where
    show (Literal x) = [x]
    show (Not x) = ['~', x]
@@ -87,8 +89,6 @@ instance Arbitrary Literal where
 
 
 
-
-
 genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Can not construct Literal from empty list."
 genLiteral lits = do
@@ -104,7 +104,7 @@ opposite (Not l) = Literal l
 
 ------------------------------------------------------------
 
-
+-- | A datatype representing a clause
 newtype Clause = Clause { literalSet :: Set Literal}
     deriving (Eq,Typeable,Generic)
 
@@ -194,10 +194,13 @@ genClause (minlen,maxlen) lits
             generateLiterals restLits newSet len
 
 
+-- | A shorthand representing an allocation
+type Allocation = [(Literal, Bool)]
+
 
 --------------------------------------------------------------
 
-
+-- | A datatype representing a formula in conjunctive normalform
 newtype Cnf = Cnf { clauseSet :: Set Clause}
      deriving (Eq,Typeable,Generic)
 
@@ -309,7 +312,7 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
 
 ------------------------------------------------------------
 
-
+-- | A datatype representing a truth table
 data Table = Table
     { getLiterals :: [Literal]
     , getEntries :: [Maybe Bool]

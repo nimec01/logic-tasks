@@ -5,9 +5,8 @@ import Data.Maybe (isNothing,fromJust)
 import qualified Control.Exception as Exc(evaluate)
 import Test.Hspec
 import Test.QuickCheck
-import Types hiding (getLiterals)
-import Formula
-import Table
+import LogicTasks.Formula
+import LogicTasks.Table
 import qualified Data.Set as Set
 
 
@@ -29,8 +28,8 @@ equivGen = sized equiv
               then equivGen
               else do
                 chosenLit <- elements (Set.toList availLits)
-                let newClause = Clause (Set.insert chosenLit clauseLits)
-                let newCnf = Cnf (Set.insert newClause clauses)
+                let newClause = mkClause $ Set.toList $ Set.insert chosenLit clauseLits
+                let newCnf = mkCnf $ Set.toList $ Set.insert newClause clauses
                 pure (cnf,newCnf)
 
 

@@ -5,8 +5,7 @@ import qualified Control.Exception as Exc (evaluate)
 
 import Test.Hspec
 import Test.QuickCheck
-import Types
-import Formula
+import LogicTasks.Formula
 import qualified Data.Set as Set
 import Data.Set (empty,Set)
 import Data.List (nub)
@@ -61,10 +60,10 @@ spec = do
 
   describe "genClause" $ do
     it "should return the empty Clause when called with the empty list" $
-      property $ \bounds -> forAll (genClause bounds []) (== Clause empty)
+      property $ \bounds -> forAll (genClause bounds []) isEmptyClause
     it "should return the empty Clause when called with invalid boundaries" $
       property $ \lower upper lits -> lower <= 0 || upper < lower || lower > length lits
-                   ==> forAll (genClause (lower,upper) lits) (== Clause empty)
+                   ==> forAll (genClause (lower,upper) lits) isEmptyClause
     it "should generate a random clause of the correct length if given valid parameters" $
       forAll validBoundsClause $ \((lower,upper),chars) -> forAll (genClause (lower,upper) chars) $ \clause ->
         let len = length (literals clause) in len >= lower && len <= upper
@@ -72,7 +71,7 @@ spec = do
 
   describe "genCnf" $ do
     it "should return the empty conjuncion when called with the empty list" $
-      property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) (== Cnf empty)
+      property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) isEmptyCnf
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) -> forAll (genCnf (lowerNum,upperNum) (lowerLen,upperLen) chars) $ \cnf ->
         let num = length (getClauses cnf) in num >= lowerNum && num <= upperNum
