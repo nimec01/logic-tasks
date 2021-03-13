@@ -88,7 +88,8 @@ instance Arbitrary Literal where
    arbitrary = genLiteral ['A'..'Z']
 
 
-
+-- | Generates a literal with random sign from the given list of chars.
+--   throws an error if called with the empty list.
 genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Can not construct Literal from empty list."
 genLiteral lits = do
@@ -96,7 +97,7 @@ genLiteral lits = do
    elements [Literal rChar, Not rChar]
 
 
-
+-- | Reverses the sign of the literal
 opposite :: Literal -> Literal
 opposite (Literal l) = Not l
 opposite (Not l) = Literal l
@@ -172,6 +173,8 @@ instance Arbitrary Clause where
        clause n = genClause (1,maxBound) (take n ['A'..'Z'])
 
 
+-- | Generates a random clause. The length of the generated clause lies in the given length bounds.
+--   The used atomic formulae are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
 genClause (minlen,maxlen) lits
     | null lits || minlen > length nLits || invalidLen = pure (Clause empty)
@@ -194,13 +197,13 @@ genClause (minlen,maxlen) lits
             generateLiterals restLits newSet len
 
 
--- | A shorthand representing an allocation
+-- | A shorthand representing an allocation.
 type Allocation = [(Literal, Bool)]
 
 
 --------------------------------------------------------------
 
--- | A datatype representing a formula in conjunctive normalform
+-- | A datatype representing a formula in conjunctive normalform.
 newtype Cnf = Cnf { clauseSet :: Set Clause}
      deriving (Eq,Typeable,Generic)
 
@@ -217,7 +220,7 @@ instance Ord Cnf where
 
 
 
-
+-- | Retrieves the contained clauses of the cnf.
 getClauses :: Cnf -> [Clause]
 getClauses (Cnf set) = Set.toList set
 
@@ -281,6 +284,12 @@ instance Arbitrary Cnf where
               maxLen = length lits
             genCnf (1,maxLen ^2) (minLen,maxLen) lits
 
+
+
+
+-- | Generates a random cnf satisfying the given bounds
+--   for the amount and the length of the contained clauses.
+--   The used atomic formulae are drawn from the list of chars.
 
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
 genCnf (minNum,maxNum) (minLen,maxLen) lits
@@ -364,9 +373,10 @@ instance Arbitrary Table where
         table :: Int -> Gen Table
         table n = do
             cnf <- resize n arbitrary
-            pure (getTable cnf)
+            pure (getTable (cnf :: Cnf))
 
 
+-- | Returns all possible allocations for the list of literals.
 possibleAllocations :: [Literal] -> [Allocation]
 possibleAllocations lits = transpose (allCombinations lits 1)
   where
@@ -380,8 +390,10 @@ possibleAllocations lits = transpose (allCombinations lits 1)
         pairs a = replicate num (x,a)
 
 
-getTable :: Cnf -> Table
-getTable cnf = Table lits values
+
+-- | Constructs a truth table for the given formula
+getTable :: Formula a => a -> Table
+getTable f = Table lits values
   where
-    lits = atomics cnf
-    values = map (`evaluate` cnf) $ possibleAllocations lits
+    lits = atomics f
+    values = map (`evaluate` f) $ possibleAllocations lits

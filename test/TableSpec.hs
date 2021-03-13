@@ -44,7 +44,7 @@ tableGenSpec =
   describe "getTable" $ do
     context "When generating different tables" $
       it "should have used different formulae" $
-        forAll (applySize arbitrary) $ \(x,y) -> getTable x /= getTable y ==> x /= y
+        forAll (applySize (arbitrary :: Gen (Cnf,Cnf))) $ \(x,y) -> getTable x /= getTable y ==> x /= y
 
     context "When using equivalent formulae" $
       it "should produce the same table twice" $
@@ -52,7 +52,7 @@ tableGenSpec =
 
     context "When looking at each row of the generated table" $
       it "should have truth values equal to the formula being evaluated with the row's allocation" $
-        forAll (applySize arbitrary) $ \x -> map (`evaluate` x) (possibleAllocations (atomics x)) == readEntries (getTable x)
+        forAll (applySize (arbitrary :: Gen Cnf)) $ \x -> map (`evaluate` x) (possibleAllocations (atomics x)) == readEntries (getTable x)
 
 
 
