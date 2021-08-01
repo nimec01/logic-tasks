@@ -8,6 +8,7 @@ dependencies:
 - containers
 - hspec
 - minisat-solver
+- wl-pprint-text
 
 library:
   source-dirs: src
