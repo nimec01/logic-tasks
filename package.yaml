@@ -9,6 +9,8 @@ dependencies:
 - hspec
 - minisat-solver
 - wl-pprint-text
+- parsec
+- text
 
 library:
   source-dirs: src
