@@ -3,19 +3,28 @@
 
 module Printing
        ( showIndexedList
+       , myText
+       , Language(..)
+       , MText
        ) where
 
 
 import Config
-import Formula
-import Table
 import Types
 
-import Data.List(transpose, intersperse)
+import Data.List (intersperse)
 import Data.Text.Lazy (pack)
-import qualified Data.Set as Set
+
 
 import Text.PrettyPrint.Leijen.Text
+
+
+
+
+data Language = DE | UK
+
+type MText = [(Language, String)]
+
 
 
 
