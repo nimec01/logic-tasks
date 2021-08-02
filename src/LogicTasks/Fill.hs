@@ -8,8 +8,10 @@ import Printing
 import Table
 import Types
 import Formula
+import Util
 
-import Data.Maybe (fromMaybe)
+import Data.List (nub)
+import Data.Maybe (fromMaybe, fromJust)
 
 import Text.PrettyPrint.Leijen.Text
 
@@ -67,6 +69,54 @@ verify FillInst{..}
 
 
 
+partialGrade :: FillInst -> [Int] -> Maybe MText
+partialGrade FillInst{..} sol
+    | not (null notBin) =
+        Just [(DE, "Lösung enthält Werte die nicht 0 oder 1 sind. Diese sind keine Wahrheitswerte: " ++ show notBin)
+             ,(UK, "Your Solution contains values which are not 0 or 1. The following are not truth values: " ++ show notBin)
+             ]
+
+    | solLen > acLen =
+        Just [(DE, "Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden.")
+             ,(UK, "Solution contains too many values. Please remove " ++ eng ++ " to proceed.")
+             ]
+
+    | acLen > solLen =
+        Just [(DE, "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden.")
+             , (UK, "Solution does not contain enough values. Please add " ++ eng ++ " to proceed.")
+             ]
+
+    | otherwise = Nothing
+
+
+  where
+    acLen = length missing
+    solLen = length sol
+    distance = abs (solLen - acLen)
+    display = show distance
+    notBin = nub $ filter (> 1) sol
+    (ger, eng) = if distance == 1
+      then ( "muss " ++ display ++ " Wert", display ++ " value")
+      else ("müssen " ++ display ++ " Werte.", display ++ " values")
+
+
+
+completeGrade :: FillInst -> [Int] -> Maybe MText
+completeGrade FillInst{..} sol
+
+    | not (null diff) =
+        Just [(DE, "Die Lösung beinhaltet " ++ display ++ " Fehler.")
+             ,(UK, "Your solution contains " ++ display ++ " mistakes.")
+             ]
+    | otherwise = Nothing
+
+  where
+    table = getTable cnf
+    correct = [ fromJust (readEntries table !! i) | i <- map (\x -> x-1) missing]
+    boolSol = map toEnum sol
+    zipped = zip3 boolSol correct [1..]
+    (_,diff) = pairwiseCheck zipped
+    display = show (length diff)
 
 
 
