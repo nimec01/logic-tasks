@@ -45,6 +45,7 @@ class Formula a where
     convert :: a -> Sat.Formula Char
     literals :: a -> [Literal]
     atomics :: a -> [Literal]
+    size :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
 
 
@@ -88,6 +89,8 @@ instance Formula Literal where
 
    atomics (Not x) = [Literal x]
    atomics lit = [lit]
+
+   size _ = 1
 
    evaluate xs (Not y) = not <$> evaluate xs (Literal y)
    evaluate xs z = lookup z xs
@@ -148,6 +151,8 @@ instance Formula Clause where
    literals (Clause set) = Set.toList set
 
    atomics (Clause set) = concat $ Set.toList $ Set.map atomics set
+
+   size (Clause set) = Set.size set
 
    evaluate xs ys = or <$> sequence lits
      where
@@ -274,6 +279,8 @@ instance Formula Cnf where
     literals (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . literals) set
 
     atomics (Cnf set) = Set.toList $ Set.unions $ Set.map (Set.fromList . atomics) set
+
+    size (Cnf set) = Set.size set
 
     evaluate alloc cnf = and <$> sequence clauses
       where
