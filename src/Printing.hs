@@ -4,8 +4,6 @@
 module Printing
        ( showIndexedList
        , myText
-       , Language(..)
-       , MText
        ) where
 
 
@@ -18,12 +16,6 @@ import Data.Text.Lazy (pack)
 
 import Text.PrettyPrint.Leijen.Text
 
-
-
-
-data Language = DE | UK
-
-type MText = [(Language, String)]
 
 
 

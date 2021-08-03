@@ -43,8 +43,8 @@ description FillInst{..} =
 
 
 
-verify :: FillInst -> Maybe MText
-verify FillInst{..}
+verifyStatic :: FillInst -> Maybe MText
+verifyStatic FillInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
         Just [ (DE, "Geben Sie bitte eine nicht-leere Formel an.")
              , (UK, "Please give a non empty formula.")
@@ -66,6 +66,36 @@ verify FillInst{..}
              ]
 
     | otherwise = Nothing
+
+
+
+
+verifyQuiz :: FillConfig -> Maybe MText
+verifyQuiz FillConfig{..}
+
+
+    | isOutside 1 100 percentageOfGaps =
+        Just [ (DE, "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen.")
+             , (UK, "The percentile of gaps has to be set between 1 and 100.")
+             ]
+
+    | isOutside 0 100 low || isOutside 0 100 high =
+        Just [ (DE, "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent.")
+             , (UK, "The given restriction on true entries are not in the range of 0 to 100 percent.")
+             ]
+
+    | low > high =
+        Just [ (DE, "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite.")
+             , (UK, "The given restriction on true entries are not a valid range.")
+             ]
+
+    | otherwise = checkCnfConf cnfConf
+
+  where
+    (low,high) = fromMaybe (0,100) percentTrueEntries
+
+
+
 
 
 

@@ -3,7 +3,9 @@
 -- | Some basic types for propositional logic
 module Types
        (
-         Literal(..)
+         Language(..)
+       , MText
+       , Literal(..)
        , opposite
        , Clause(..)
        , Cnf(..)
@@ -29,6 +31,13 @@ import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
 import Test.QuickCheck
+
+
+
+
+data Language = DE | UK
+
+type MText = [(Language, String)]
 
 
 
