@@ -84,7 +84,7 @@ verifyQuiz PickConfig{..}
 
 
 
-partialGrade :: PickInst -> Cnf -> Maybe MText
+partialGrade :: PickInst -> Number -> Maybe MText
 partialGrade _ _ = Nothing
 
 
