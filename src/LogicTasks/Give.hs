@@ -112,7 +112,7 @@ partialGrade GiveInst{..} sol
                 ++ show missing)
              ]
 
-    | not  (all (\c -> size c == length corLits) (getClauses sol)) =
+    | not  (all (\c -> amount c == length corLits) (getClauses sol)) =
         Just [ (DE, "Nicht alle Klauseln sind Maxterme!")
              , (UK, "Not all clauses are maxterms!")
              ]
@@ -136,7 +136,7 @@ partialGrade GiveInst{..} sol
     missing = corLits \\ solLits
     table = getTable cnf
     corrLen = length $ filter (== Just False) (readEntries table)
-    solLen = size sol
+    solLen = amount sol
     diff = show $ abs (solLen - corrLen)
 
 
