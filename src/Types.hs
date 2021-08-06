@@ -3,8 +3,7 @@
 -- | Some basic types for propositional logic
 module Types
        (
-         Language(..)
-       , MText
+         MText
        , Literal(..)
        , opposite
        , Clause(..)
@@ -35,9 +34,7 @@ import Test.QuickCheck
 
 
 
-data Language = DE | UK
-
-type MText = [(Language, String)]
+type MText = (String,String)
 
 
 

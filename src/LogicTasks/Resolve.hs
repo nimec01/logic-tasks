@@ -37,32 +37,32 @@ thrd3 (_,_,c) = c
 
 description :: ResolutionInst -> [Either MText Doc]
 description ResolutionInst{..} =
-              [ Left [  (DE, "Betrachten Sie die folgende Formel in KNF:")
-                     , (UK, "Consider the following formula in cnf:")
-                     ]
+              [ Left ("Betrachten Sie die folgende Formel in KNF:"
+                     ,"Consider the following formula in cnf:"
+                     )
               , Right line
               , Right $ nest 4 $ pretty $ mkCnf clauses
               , Right line
-              , Left [ (DE, "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten.")
-                     , (UK, "Use the resolution technique on this formula to derive the empty clause.")
-                     ]
-              , Left [ (DE, "Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind:")
-                     , (UK, "Provide the solution as a list of triples with this structure:")
-                     ]
-              , Left [ (DE, "(Erste Klausel, Zweite Klausel, Resolvente)")
-                     , (UK, "(first clause, second clause, resolvent).")
-                     ]
-              , Left [ (DE, "Beachten Sie dabei für die ASCII-Formel diese Legende:")
-                     , (UK, "Consider this key for the ASCII based formula:")
-                     ]
+              , Left ("Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
+                     ,"Use the resolution technique on this formula to derive the empty clause."
+                     )
+              , Left ("Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind:"
+                     ,"Provide the solution as a list of triples with this structure:"
+                     )
+              , Left ("(Erste Klausel, Zweite Klausel, Resolvente)"
+                     ,"(first clause, second clause, resolvent)."
+                     )
+              , Left ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
+                     ,"Consider this key for the ASCII based formula:"
+                     )
               , Right line
-              , Left [ (DE, "Negation")
-                     , (UK, "negation")
-                     ]
+              , Left ("Negation"
+                     ,"negation"
+                     )
               , Right $ myText ": ~"
-              , Left [ (DE, "oder")
-                     , (UK, "or")
-                     ]
+              , Left ("oder"
+                     ,"or"
+                     )
               , Right $ myText ": \\/"
               , Right line
               , Right $ myText (fromMaybe "" addText)
@@ -75,13 +75,13 @@ description ResolutionInst{..} =
 verifyStatic :: ResolutionInst -> Maybe MText
 verifyStatic ResolutionInst{..}
     | any isEmptyClause clauses =
-        Just [ (DE, "Mindestens eine der Klauseln ist leer.")
-             , (UK, "At least one of the clauses is empty.")
-             ]
+        Just ("Mindestens eine der Klauseln ist leer."
+             ,"At least one of the clauses is empty."
+             )
     | sat $ mkCnf clauses =
-        Just [ (DE, "Die Formel ist erfüllbar.")
-             , (UK, "This formula is satisfiable.")
-             ]
+        Just ("Die Formel ist erfüllbar."
+             ,"This formula is satisfiable."
+             )
 
     | otherwise = Nothing
 
@@ -91,19 +91,19 @@ verifyStatic ResolutionInst{..}
 verifyQuiz :: ResolutionConfig -> Maybe MText
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
-        Just [ (DE, "Die Mindestschritte müssen größer als 0 sein.")
-             , (UK, "The minimal amount of steps must be greater than 0.")
-             ]
+        Just ("Die Mindestschritte müssen größer als 0 sein."
+             ,"The minimal amount of steps must be greater than 0."
+             )
 
     | maxClauseLength baseConf == 1 && minSteps > 1 =
-        Just [ (DE, "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden.")
-             , (UK, "More than one step using only length 1 clauses is not possible.")
-             ]
+        Just ("Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
+             ,"More than one step using only length 1 clauses is not possible."
+             )
 
     | minSteps > 2 * length (usedLiterals baseConf) =
-        Just [ (DE, "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden.")
-             , (UK, "This amount of steps is impossible with the given amount of literals.")
-             ]
+        Just ("Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
+             ,"This amount of steps is impossible with the given amount of literals."
+             )
 
     | otherwise = checkBaseConf baseConf
 
@@ -114,23 +114,23 @@ verifyQuiz ResolutionConfig{..}
 partialGrade :: ResolutionInst -> [(Clause,Clause,Clause)] -> Maybe MText
 partialGrade ResolutionInst{..} sol
     | not (null wrongLitsSteps) =
-        Just [ (DE, "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
-                ++ show wrongLitsSteps)
-             , (UK, "At least one step contains literals not found in the original formula. "
-                ++ show wrongLitsSteps)
-             ]
+        Just ("Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
+                ++ show wrongLitsSteps
+             ,"At least one step contains literals not found in the original formula. "
+                ++ show wrongLitsSteps
+             )
 
     | not (null noResolveSteps) =
-        Just [ (DE, "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-                ++ show noResolveSteps)
-             , (UK, "At least one step is not a valid resolution step. "
-                ++ show noResolveSteps)
-             ]
+        Just ("Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
+                ++ show noResolveSteps
+             ,"At least one step is not a valid resolution step. "
+                ++ show noResolveSteps
+             )
 
     | not (isEmptyClause $ thrd3 $ last sol) =
-        Just [  (DE, "Im letzten Schritt muss die leere Klausel abgeleitet werden.")
-             , (UK, "The last step must derive the empty clause.")
-             ]
+        Just ("Im letzten Schritt muss die leere Klausel abgeleitet werden."
+             ,"The last step must derive the empty clause."
+             )
 
     | otherwise = Nothing
 
@@ -148,14 +148,14 @@ partialGrade ResolutionInst{..} sol
 completeGrade :: ResolutionInst -> [(Clause,Clause,Clause)] -> Maybe MText
 completeGrade ResolutionInst{..} sol =
     case applySteps clauses sol of
-        Nothing -> Just [  (DE, "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden.")
-                        , (UK, "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps.")
-                        ]
+        Nothing -> Just ("In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
+                        ,"In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
+                        )
         Just solClauses -> if (any isEmptyClause solClauses)
                             then Nothing
-                            else Just [  (DE, "Die Leere Klausel wurde nicht korrekt abgeleitet.")
-                                      , (UK, "The Empty clause was not derived correctly.")
-                                      ]
+                            else Just ("Die Leere Klausel wurde nicht korrekt abgeleitet."
+                                      ,"The Empty clause was not derived correctly."
+                                      )
 
 
 
