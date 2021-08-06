@@ -27,7 +27,7 @@ library:
     - LogicTasks.Resolve
     - LogicTasks.Printing
     - LogicTasks.Parsing
-
+    - LogicTasks.Util
 
   ghc-options:
   - -Wall
