@@ -1,4 +1,4 @@
-module LogicTasks.Config where
+module LogicTasks.Config (module Config) where
 
 
 
