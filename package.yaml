@@ -18,6 +18,13 @@ library:
     - LogicTasks.Formula
     - LogicTasks.Table
     - LogicTasks.Resolution
+    - LogicTasks.Config
+    - LogicTasks.Fill
+    - LogicTasks.Pick
+    - LogicTasks.Decide
+    - LogicTasks.Give
+    - LogicTasks.Step
+    - LogicTasks.Resolve
 
 
   ghc-options:
