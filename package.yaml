@@ -25,6 +25,8 @@ library:
     - LogicTasks.Give
     - LogicTasks.Step
     - LogicTasks.Resolve
+    - LogicTasks.Printing
+    - LogicTasks.Parsing
 
 
   ghc-options:
