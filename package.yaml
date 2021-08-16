@@ -9,6 +9,8 @@ dependencies:
 - hspec
 - minisat-solver
 - wl-pprint-text
+- parsec
+- text
 
 library:
   source-dirs: src
@@ -16,7 +18,16 @@ library:
     - LogicTasks.Formula
     - LogicTasks.Table
     - LogicTasks.Resolution
-
+    - LogicTasks.Config
+    - LogicTasks.Fill
+    - LogicTasks.Pick
+    - LogicTasks.Decide
+    - LogicTasks.Give
+    - LogicTasks.Step
+    - LogicTasks.Resolve
+    - LogicTasks.Printing
+    - LogicTasks.Parsing
+    - LogicTasks.Util
 
   ghc-options:
   - -Wall

@@ -1,0 +1,72 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           logic-tasks
+version:        0.1.0.0
+build-type:     Simple
+
+library
+  exposed-modules:
+      LogicTasks.Formula
+      LogicTasks.Table
+      LogicTasks.Resolution
+      LogicTasks.Config
+      LogicTasks.Fill
+      LogicTasks.Pick
+      LogicTasks.Decide
+      LogicTasks.Give
+      LogicTasks.Step
+      LogicTasks.Resolve
+      LogicTasks.Printing
+      LogicTasks.Parsing
+      LogicTasks.Util
+  other-modules:
+      Config
+      Formula
+      Parsing
+      Printing
+      Resolution
+      Table
+      Types
+      Util
+      Paths_logic_tasks
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , hspec
+    , minisat-solver
+    , parsec
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
+
+test-suite src-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      FormulaSpec
+      TableSpec
+      Paths_logic_tasks
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , hspec
+    , logic-tasks
+    , minisat-solver
+    , parsec
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
