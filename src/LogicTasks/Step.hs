@@ -26,9 +26,9 @@ description StepInst{..} =
                      ,"Consider the two following clauses:"
                      )
               , Right line
-              , Right $ nest 4 $ printer clause1
+              , Right $ nest 4 $ pretty clause1
               , Right line
-              , Right $ nest 4 $ printer clause2
+              , Right $ nest 4 $ pretty clause2
               , Right line
               , Left ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
                      ,"Resolve the clauses and give the resulting resolvent."

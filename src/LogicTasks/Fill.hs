@@ -24,7 +24,7 @@ description FillInst{..} =
                      ,"Consider the following formula in conjunctive normal form:"
                      )
               , Right line
-              , Right $ nest 4 $ myText "F = " <+> printer cnf
+              , Right $ nest 4 $ myText "F = " <+> pretty cnf
               , Right line
               , Left ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (True oder False)."
                      ,"Fill all blanks in the corresponding truth table with either True or False."
@@ -37,7 +37,7 @@ description FillInst{..} =
                      )
               , Right $ myText (fromMaybe "" addText)
               , Right line
-              , Right $ nest 4 $ printer (gapsAt (getTable cnf) missing)
+              , Right $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
               ]
 
 
