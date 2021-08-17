@@ -24,7 +24,7 @@ description PickInst{..} =
                      ,"Consider the following formula in conjunctive normal form:"
                      )
               , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
+              , Right $ nest 4 $ myText "F = " <+> printer (cnfs !! (correct - 1))
               , Right line
               , Left ("Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
                      ,"Which of these truth tables represents the formula? Specify the correct table by giving its number."

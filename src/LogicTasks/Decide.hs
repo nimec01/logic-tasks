@@ -26,7 +26,7 @@ description DecideInst{..} =
                       ,"Consider the following formula in conjunctive normal form:"
                       )
               , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty cnf
+              , Right $ nest 4 $ myText "F = " <+> printer cnf
               , Right line
               , Left ("Finden Sie alle Fehlerhaften Wahrheitswerte in der folgenden Wahrheitstafel."
                      ,"Find all faulty entries in the following truth table."
@@ -36,7 +36,7 @@ description DecideInst{..} =
                      )
               , Right $ myText (fromMaybe "" addText)
               , Right line
-              , Right $ nest 4 $ pretty (flipAt (getTable cnf) changed)
+              , Right $ nest 4 $ printer (flipAt (getTable cnf) changed)
               ]
 
 

@@ -4,6 +4,7 @@
 module Printing
        ( showIndexedList
        , myText
+       , Print(..)
        ) where
 
 
@@ -24,36 +25,44 @@ myText :: String -> Doc
 myText = text . pack
 
 
+class Print a where
+  printer :: a -> Doc
 
 
-instance Pretty Number where
-  pretty num = maybe empty pretty $ value num
+instance Print a => Print [a] where
+  printer xs = hcat [ char '[', innerPrint xs, char ']']
+    where
+      innerPrint ls = hsep $ intersperse (char ',') $ map printer ls
+
+
+instance Print Number where
+  printer num = maybe empty pretty $ value num
 
 
 
 
-instance Pretty Literal where
-   pretty (Literal x) = char x
-   pretty (Not x) = myText ['~', x]
+instance Print Literal where
+   printer (Literal x) = char x
+   printer (Not x) = myText ['~', x]
 
 
 
-instance Pretty Clause where
-    pretty clause = listShow $ literals clause
+instance Print Clause where
+    printer clause = listShow $ literals clause
       where
         listShow [] = empty
-        listShow [x] = pretty x
-        listShow (x:xs) = hsep [pretty x, text "\\/", listShow xs]
+        listShow [x] = printer x
+        listShow (x:xs) = hsep [printer x, text "\\/", listShow xs]
 
 
 
-instance Pretty Cnf where
-    pretty cnf = listShow $ getClauses cnf
+instance Print Cnf where
+    printer cnf = listShow $ getClauses cnf
       where
         listShow [] = empty
-        listShow [x] = hcat [char '(', pretty x, char ')']
+        listShow [x] = hcat [char '(', printer x, char ')']
         listShow (x:xs) = hsep
-                           [ hcat [char '(', pretty x, char ')']
+                           [ hcat [char '(', printer x, char ')']
                            , text "/\\"
                            , listShow xs
                            ]
@@ -61,16 +70,16 @@ instance Pretty Cnf where
 
 
 
-instance Pretty Table where
-  pretty t = myText (show t)
+instance Print Table where
+  printer t = myText (show t)
 
 
 
 
-instance Pretty PickInst where
-  pretty  PickInst{..} =
+instance Print PickInst where
+  printer  PickInst{..} =
       text "PickInst(" <> vcat
-                           [ nest 2 $ pretty cnfs
+                           [ nest 2 $ printer cnfs
                            , char ',' <+> pretty correct
                            , maybe empty (\s -> myText (", {" ++ s ++ "}")) addText
                            , char ')'

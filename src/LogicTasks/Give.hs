@@ -26,7 +26,7 @@ description GiveInst{..} =
                      ,"Consider the following truth table:"
                      )
               , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty (getTable cnf)
+              , Right $ nest 4 $ myText "F = " <+> printer (getTable cnf)
               , Right line
               , Left ("Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
                      ,"Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."

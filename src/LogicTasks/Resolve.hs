@@ -41,7 +41,7 @@ description ResolutionInst{..} =
                      ,"Consider the following formula in cnf:"
                      )
               , Right line
-              , Right $ nest 4 $ pretty $ mkCnf clauses
+              , Right $ nest 4 $ printer $ mkCnf clauses
               , Right line
               , Left ("Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
                      ,"Use the resolution technique on this formula to derive the empty clause."
