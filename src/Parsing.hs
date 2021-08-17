@@ -12,22 +12,22 @@ import Text.ParserCombinators.Parsec
 
 
 
-parserOr :: Parser ()
-parserOr = do
+parseOr :: Parser ()
+parseOr = do
     spaces
     string "\\/"
     spaces
 
 
-parserAnd :: Parser ()
-parserAnd = do
+parseAnd :: Parser ()
+parseAnd = do
     spaces
     string "/\\"
     spaces
 
 
-parserList :: Parser a -> Parser [a]
-parserList p = do
+parseList :: Parser a -> Parser [a]
+parseList p = do
     spaces
     char '['
     spaces
