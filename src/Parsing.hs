@@ -71,7 +71,7 @@ instance Parse Clause where
     spaces
     braces <- optionMaybe $ char '('
     spaces
-    lits <- sepBy parser parserOr
+    lits <- sepBy parser parseOr
     spaces
     case braces of Nothing -> return ' '
                    Just _ -> char ')'
@@ -83,7 +83,7 @@ instance Parse Clause where
 instance Parse Cnf where
   parser = do
       spaces
-      clauses <- sepBy parser parserAnd
+      clauses <- sepBy parser parseAnd
       spaces
       return $ mkCnf clauses
 
@@ -97,7 +97,7 @@ instance Parse PickInst where
   parser = do
       string "PickInst("
       spaces
-      cnfs <- parserList parser
+      cnfs <- parseList parser
       spaces
       char ','
       spaces
