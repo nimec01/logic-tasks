@@ -78,13 +78,7 @@ instance Pretty PickInst where
 
 
 
-instance Pretty BaseConfig
-instance Pretty CnfConfig
-instance Pretty FillInst
-instance Pretty DecideInst
-instance Pretty GiveInst
-instance Pretty StepInst
-instance Pretty ResolutionInst
+
 
 
 

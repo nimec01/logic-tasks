@@ -12,22 +12,22 @@ import Text.ParserCombinators.Parsec
 
 
 
-parseOr :: Parser ()
-parseOr = do
+parserOr :: Parser ()
+parserOr = do
     spaces
     string "\\/"
     spaces
 
 
-parseAnd :: Parser ()
-parseAnd = do
+parserAnd :: Parser ()
+parserAnd = do
     spaces
     string "/\\"
     spaces
 
 
-parseList :: Parser a -> Parser [a]
-parseList p = do
+parserList :: Parser a -> Parser [a]
+parserList p = do
     spaces
     char '['
     spaces
@@ -37,26 +37,25 @@ parseList p = do
     return xs
 
 
--- Instances of ToDoc and Reader
 
 
 
 
-class Reader a where
-  reader :: Parser a
+class Parse a where
+  parser :: Parser a
 
 
 
-instance Reader Number where
-  reader = do
+instance Parse Number where
+  parser = do
       result <- optionMaybe $ many1 digit
       return $ Number $ fmap read result
 
 
 
 
-instance Reader Literal where
-  reader = do
+instance Parse Literal where
+  parser = do
       spaces
       result <- optionMaybe $ char '~'
       var <- satisfy $ flip elem ['A'..'Z']
@@ -67,12 +66,12 @@ instance Reader Literal where
 
 
 
-instance Reader Clause where
- reader = do
+instance Parse Clause where
+ parser = do
     spaces
     braces <- optionMaybe $ char '('
     spaces
-    lits <- sepBy reader parseOr
+    lits <- sepBy parser parserOr
     spaces
     case braces of Nothing -> return ' '
                    Just _ -> char ')'
@@ -81,24 +80,24 @@ instance Reader Clause where
 
 
 
-instance Reader Cnf where
-  reader = do
+instance Parse Cnf where
+  parser = do
       spaces
-      clauses <- sepBy reader parseAnd
+      clauses <- sepBy parser parserAnd
       spaces
       return $ mkCnf clauses
 
 
 
-instance Reader Table
+instance Parse Table
 
 
 
-instance Reader PickInst where
-  reader = do
+instance Parse PickInst where
+  parser = do
       string "PickInst("
       spaces
-      cnfs <- parseList reader
+      cnfs <- parserList parser
       spaces
       char ','
       spaces
@@ -116,15 +115,6 @@ instance Reader PickInst where
           char '{'
 
 
-
-
-instance Reader BaseConfig
-instance Reader CnfConfig
-instance Reader FillInst
-instance Reader DecideInst
-instance Reader GiveInst
-instance Reader StepInst
-instance Reader ResolutionInst
 
 
 
