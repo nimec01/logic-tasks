@@ -17,7 +17,6 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-
 description :: PickInst -> [Either MText Doc]
 description PickInst{..} =
               [ Left ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
@@ -33,7 +32,6 @@ description PickInst{..} =
               , Right line
               , Right $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
               ]
-
 
 
 
@@ -58,7 +56,6 @@ verifyStatic PickInst{..}
 
 
 
-
 verifyQuiz :: PickConfig -> Maybe MText
 verifyQuiz PickConfig{..}
 
@@ -80,14 +77,13 @@ verifyQuiz PickConfig{..}
 
 
 
-
+start :: Number
+start = Number Nothing
 
 
 
 partialGrade :: PickInst -> Number -> Maybe MText
 partialGrade _ _ = Nothing
-
-
 
 
 
@@ -101,6 +97,3 @@ completeGrade PickInst{..} sol =
                                       else Just ("Der gewählte Index ist falsch."
                                                 ,"You submitted the wrong index."
                                                 )
-
-
-

@@ -4,7 +4,6 @@ module LogicTasks.Step where
 
 
 
-
 import Config (StepConfig(..), StepInst(..))
 import Printing
 import Types
@@ -16,7 +15,6 @@ import qualified Data.Set as Set
 import Data.Maybe (fromMaybe)
 
 import Text.PrettyPrint.Leijen.Text
-
 
 
 
@@ -57,8 +55,6 @@ description StepInst{..} =
 
 
 
-
-
 verifyStatic :: StepInst -> Maybe MText
 verifyStatic StepInst{..}
     | any isEmptyClause [clause1, clause2] =
@@ -74,10 +70,13 @@ verifyStatic StepInst{..}
 
 
 
-
 verifyQuiz :: StepConfig -> Maybe MText
 verifyQuiz StepConfig{..} = checkBaseConf baseConf
 
+
+
+start :: (Literal, Clause)
+start = (Literal ' ', mkClause [])
 
 
 
@@ -104,8 +103,6 @@ partialGrade StepInst{..} sol
 
 
 
-
-
 completeGrade :: StepInst -> (Literal, Clause) -> Maybe MText
 completeGrade StepInst{..} sol =
     case resolve clause1 clause2 (fst sol) of
@@ -117,12 +114,3 @@ completeGrade StepInst{..} sol =
                             else Just ("Resolvente ist nicht korrekt."
                                       ,"Resolvent is not correct."
                                       )
-
-
-
-
-
-
-
-
-

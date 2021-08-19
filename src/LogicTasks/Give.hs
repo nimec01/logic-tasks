@@ -90,7 +90,8 @@ verifyQuiz GiveConfig{..}
 
 
 
-
+start :: Cnf
+start = mkCnf []
 
 
 

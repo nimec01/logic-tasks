@@ -82,6 +82,8 @@ verifyQuiz DecideConfig{..}
 
 
 
+start :: [Int]
+start = []
 
 
 

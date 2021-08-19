@@ -96,7 +96,8 @@ verifyQuiz FillConfig{..}
 
 
 
-
+start :: [Int]
+start = []
 
 
 partialGrade :: FillInst -> [Int] -> Maybe MText

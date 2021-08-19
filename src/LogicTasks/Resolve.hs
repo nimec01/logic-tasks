@@ -19,7 +19,6 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-
 fst3 :: (a,b,c) -> a
 fst3 (a,_,_) = a
 
@@ -29,9 +28,6 @@ snd3 (_,b,_) = b
 
 thrd3 :: (a,b,c) -> c
 thrd3 (_,_,c) = c
-
-
-
 
 
 
@@ -70,8 +66,6 @@ description ResolutionInst{..} =
 
 
 
-
-
 verifyStatic :: ResolutionInst -> Maybe MText
 verifyStatic ResolutionInst{..}
     | any isEmptyClause clauses =
@@ -84,7 +78,6 @@ verifyStatic ResolutionInst{..}
              )
 
     | otherwise = Nothing
-
 
 
 
@@ -108,6 +101,9 @@ verifyQuiz ResolutionConfig{..}
     | otherwise = checkBaseConf baseConf
 
 
+
+start :: [(Clause,Clause,Clause)]
+start = []
 
 
 
@@ -142,9 +138,6 @@ partialGrade ResolutionInst{..} sol
 
 
 
-
-
-
 completeGrade :: ResolutionInst -> [(Clause,Clause,Clause)] -> Maybe MText
 completeGrade ResolutionInst{..} sol =
     case applySteps clauses sol of
@@ -156,12 +149,3 @@ completeGrade ResolutionInst{..} sol =
                             else Just ("Die Leere Klausel wurde nicht korrekt abgeleitet."
                                       ,"The Empty clause was not derived correctly."
                                       )
-
-
-
-
-
-
-
-
-
