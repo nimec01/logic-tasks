@@ -51,12 +51,16 @@ instance Pretty Cnf where
     pretty cnf = listShow $ getClauses cnf
       where
         listShow [] = empty
-        listShow [x] = hcat [char '(', pretty x, char ')']
+        listShow [x] = singlePrint x
         listShow (x:xs) = hsep
-                           [ hcat [char '(', pretty x, char ')']
+                           [ singlePrint x
                            , text "/\\"
                            , listShow xs
                            ]
+
+        singlePrint x = if amount x == 1
+                          then pretty x
+                          else hcat [char '(', pretty x, char ')']
 
 
 
