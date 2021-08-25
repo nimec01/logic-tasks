@@ -10,7 +10,7 @@ import Types
 import Formula
 import Util
 
-import Data.List (nub)
+import Data.Char (toLower)
 import Data.Maybe (fromMaybe, fromJust)
 
 import Text.PrettyPrint.Leijen.Text
@@ -96,15 +96,15 @@ verifyQuiz FillConfig{..}
 
 
 
-start :: [Int]
+start :: [String]
 start = []
 
 
-partialGrade :: FillInst -> [Int] -> Maybe MText
+partialGrade :: FillInst -> [String] -> Maybe MText
 partialGrade FillInst{..} sol
-    | not (null notBin) =
-        Just ("Lösung enthält Werte die nicht 0 oder 1 sind. Diese sind keine Wahrheitswerte: " ++ show notBin
-             ,"Your Solution contains values which are not 0 or 1. The following are not truth values: " ++ show notBin
+    | not (null notTruth) =
+        Just ("Lösung enthält Werte die nicht als Wahrheitswert erkannt wurden. Diese sind keine Wahrheitswerte: " ++ show notTruth
+             ,"Your Solution contains values which could not be recognized as truth values. The following are not truth values: " ++ show notTruth
              )
 
     | solLen > acLen =
@@ -125,14 +125,14 @@ partialGrade FillInst{..} sol
     solLen = length sol
     distance = abs (solLen - acLen)
     display = show distance
-    notBin = nub $ filter (> 1) sol
+    notTruth = filter (\s -> s `notElem` trueMatch ++ falseMatch) sol
     (ger, eng) = if distance == 1
       then ( "muss " ++ display ++ " Wert", display ++ " value")
       else ("müssen " ++ display ++ " Werte.", display ++ " values")
 
 
 
-completeGrade :: FillInst -> [Int] -> Maybe MText
+completeGrade :: FillInst -> [String] -> Maybe MText
 completeGrade FillInst{..} sol
 
     | not (null diff) =
@@ -144,10 +144,24 @@ completeGrade FillInst{..} sol
   where
     table = getTable cnf
     correct = [ fromJust (readEntries table !! i) | i <- map (\x -> x-1) missing]
-    boolSol = map toEnum sol
+    boolSol = map fromInput sol
     zipped = zip3 boolSol correct [1..]
     (_,diff) = pairwiseCheck zipped
     display = show (length diff)
 
 
 
+trueMatch :: [String]
+trueMatch = ["1", "true", "wahr"]
+
+falseMatch :: [String]
+falseMatch = ["0","false", "falsch"]
+
+
+
+fromInput :: String -> Bool
+fromInput s
+    | lower `elem` trueMatch = True
+    | lower `elem` falseMatch = False
+    | otherwise = error "no match"
+  where lower = map toLower s
