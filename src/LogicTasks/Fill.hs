@@ -96,7 +96,7 @@ verifyQuiz FillConfig{..}
 
 
 
-start :: [Int]
+start :: [String]
 start = []
 
 
