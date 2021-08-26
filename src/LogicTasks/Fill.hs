@@ -10,7 +10,6 @@ import Types
 import Formula
 import Util
 
-import Data.List (nub)
 import Data.Maybe (fromMaybe, fromJust)
 
 import Text.PrettyPrint.Leijen.Text
@@ -96,17 +95,12 @@ verifyQuiz FillConfig{..}
 
 
 
-start :: [Int]
+start :: [TruthValue]
 start = []
 
 
-partialGrade :: FillInst -> [Int] -> Maybe MText
+partialGrade :: FillInst -> [TruthValue] -> Maybe MText
 partialGrade FillInst{..} sol
-    | not (null notBin) =
-        Just ("Lösung enthält Werte die nicht 0 oder 1 sind. Diese sind keine Wahrheitswerte: " ++ show notBin
-             ,"Your Solution contains values which are not 0 or 1. The following are not truth values: " ++ show notBin
-             )
-
     | solLen > acLen =
         Just ("Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
              ,"Solution contains too many values. Please remove " ++ eng ++ " to proceed."
@@ -125,14 +119,13 @@ partialGrade FillInst{..} sol
     solLen = length sol
     distance = abs (solLen - acLen)
     display = show distance
-    notBin = nub $ filter (> 1) sol
     (ger, eng) = if distance == 1
       then ( "muss " ++ display ++ " Wert", display ++ " value")
       else ("müssen " ++ display ++ " Werte.", display ++ " values")
 
 
 
-completeGrade :: FillInst -> [Int] -> Maybe MText
+completeGrade :: FillInst -> [TruthValue] -> Maybe MText
 completeGrade FillInst{..} sol
 
     | not (null diff) =
@@ -144,10 +137,7 @@ completeGrade FillInst{..} sol
   where
     table = getTable cnf
     correct = [ fromJust (readEntries table !! i) | i <- map (\x -> x-1) missing]
-    boolSol = map toEnum sol
+    boolSol = map truth sol
     zipped = zip3 boolSol correct [1..]
     (_,diff) = pairwiseCheck zipped
     display = show (length diff)
-
-
-

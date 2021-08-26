@@ -4,6 +4,7 @@
 module Types
        (
          MText
+       , TruthValue(..)
        , Literal(..)
        , opposite
        , Clause(..)
@@ -33,7 +34,7 @@ import Test.QuickCheck
 
 
 
-
+newtype TruthValue = TruthValue {truth :: Bool} deriving (Typeable, Generic)
 type MText = (String,String)
 
 
@@ -410,3 +411,10 @@ getTable f = Table lits values
   where
     lits = atomics f
     values = map (`evaluate` f) $ possibleAllocations lits
+
+
+
+
+
+
+

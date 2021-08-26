@@ -7,6 +7,7 @@ import Config
 import Formula
 import Types
 
+import Data.Char (toLower)
 import Text.ParserCombinators.Parsec
 
 
@@ -26,18 +27,6 @@ parseAnd = do
     spaces
 
 
-parseList :: Parser a -> Parser [a]
-parseList p = do
-    spaces
-    char '['
-    spaces
-    xs <- p `sepBy` (char ',')
-    spaces
-    char ']'
-    return xs
-
-
-
 
 
 
@@ -46,10 +35,38 @@ class Parse a where
 
 
 
+instance Parse a => Parse [a] where
+  parser = do
+      spaces
+      char '['
+      spaces
+      xs <- parser `sepBy` (char ',')
+      spaces
+      char ']'
+      return xs
+
+
+
 instance Parse Number where
   parser = do
       result <- optionMaybe $ many1 digit
       return $ Number $ fmap read result
+
+
+
+
+instance Parse TruthValue where
+  parser = do
+      s <- getInput
+      setInput (map toLower s)
+      parseTrue <|> parseFalse
+    where
+      parseTrue = do
+          string "wahr" <|> string "true" <|> string "1" <|> string "w" <|> string "t"
+          return $ TruthValue True
+      parseFalse = do
+          string "falsch" <|> string "false" <|> string "0" <|> string "f"
+          return $ TruthValue False
 
 
 
@@ -97,7 +114,7 @@ instance Parse PickInst where
   parser = do
       string "PickInst("
       spaces
-      cnfs <- parseList parser
+      cnfs <- parser
       spaces
       char ','
       spaces
@@ -113,10 +130,4 @@ instance Parse PickInst where
           char ','
           spaces
           char '{'
-
-
-
-
-
-
 
