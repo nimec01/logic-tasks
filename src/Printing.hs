@@ -31,6 +31,9 @@ instance Pretty Number where
 
 
 
+instance Pretty TruthValue where
+  pretty tv = pretty $ truth tv
+
 
 instance Pretty Literal where
    pretty (Literal x) = char x
