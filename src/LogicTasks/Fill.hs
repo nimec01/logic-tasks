@@ -25,7 +25,7 @@ description FillInst{..} =
               , Right line
               , Right $ nest 4 $ myText "F = " <+> pretty cnf
               , Right line
-              , Left ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (True oder False)."
+              , Left ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
                      ,"Fill all blanks in the corresponding truth table with either True or False."
                      )
               , Left ("Geben Sie als Lösung eine Liste der fehlenden Werte an,"
