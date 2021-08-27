@@ -62,10 +62,10 @@ instance Parse TruthValue where
       parseTrue <|> parseFalse
     where
       parseTrue = do
-          string "wahr" <|> string "true" <|> string "1" <|> string "w" <|> string "t"
+          try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
           return $ TruthValue True
       parseFalse = do
-          string "falsch" <|> string "false" <|> string "0" <|> string "f"
+          try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
           return $ TruthValue False
 
 
