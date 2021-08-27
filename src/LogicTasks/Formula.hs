@@ -5,6 +5,7 @@ module LogicTasks.Formula
        , Clause
        , Cnf
        , Allocation
+       , TruthValue(..)
        , getClauses
        , Formula(..)
        , genLiteral
