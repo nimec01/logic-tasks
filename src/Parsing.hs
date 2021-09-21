@@ -13,6 +13,29 @@ import Text.ParserCombinators.Parsec
 
 
 
+
+newtype ResStep = Res (Clause,Clause,Clause)
+
+
+instance Parse ResStep where
+
+  parser = do
+    char '{'
+    [x,y,z] <- resClause `sepBy` (char ',')
+    char '}'
+    return $ Res (x,y,z)
+
+   where
+    resClause = do
+      char '{'
+      lits <- parser `sepBy` (char ',')
+      char '}'
+      return $ mkClause lits
+
+
+
+
+
 parseOr :: Parser ()
 parseOr = do
     spaces
