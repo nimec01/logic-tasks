@@ -36,10 +36,10 @@ instance Pretty TruthValue where
 
 
 instance Pretty ResStep where
-  pretty (Res (a,b,c)) = curlyBracesList (map curlyBracesList prep)
+  pretty (Res (a,b,c)) = tupled (map curlyBracesList litLists)
     where
       curlyBracesList = encloseSep (char '{') (char '}') (char ',')
-      prep = map (map pretty) $ map literals [a,b,c]
+      litLists = map (map pretty . literals) [a,b,c]
 
 
 instance Pretty Literal where

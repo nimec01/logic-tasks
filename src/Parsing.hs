@@ -16,9 +16,9 @@ import Text.ParserCombinators.Parsec
 instance Parse ResStep where
 
   parser = do
-    char '{'
+    char '('
     [x,y,z] <- resClause `sepBy` (char ',')
-    char '}'
+    char ')'
     return $ Res (x,y,z)
 
    where
