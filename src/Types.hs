@@ -18,6 +18,7 @@ module Types
        , genCnf
        , possibleAllocations
        , Formula(..)
+       , ResStep(..)
        ) where
 
 
@@ -33,6 +34,10 @@ import GHC.Generics
 import Test.QuickCheck
 
 
+
+
+
+newtype ResStep = Res {trip :: (Clause,Clause,Clause)}
 
 newtype TruthValue = TruthValue {truth :: Bool} deriving (Typeable, Generic)
 type MText = (String,String)

@@ -102,12 +102,12 @@ verifyQuiz ResolutionConfig{..}
 
 
 
-start :: [(Clause,Clause,Clause)]
+start :: [ResStep]
 start = []
 
 
 
-partialGrade :: ResolutionInst -> [(Clause,Clause,Clause)] -> Maybe MText
+partialGrade :: ResolutionInst -> [ResStep] -> Maybe MText
 partialGrade ResolutionInst{..} sol
     | not (null wrongLitsSteps) =
         Just ("Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
@@ -123,7 +123,7 @@ partialGrade ResolutionInst{..} sol
                 ++ show noResolveSteps
              )
 
-    | not (isEmptyClause $ thrd3 $ last sol) =
+    | not (isEmptyClause $ thrd3 $ last steps) =
         Just ("Im letzten Schritt muss die leere Klausel abgeleitet werden."
              ,"The last step must derive the empty clause."
              )
@@ -131,16 +131,17 @@ partialGrade ResolutionInst{..} sol
     | otherwise = Nothing
 
   where
+    steps = map trip sol
     availLits = Set.unions (map (Set.fromList . literals) clauses)
     stepLits (c1,c2,r) = Set.toList $ Set.unions $ map (Set.fromList . literals) [c1,c2,r]
-    wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) sol
-    noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x -> fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) sol
+    wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) steps
+    noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x -> fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
 
 
 
-completeGrade :: ResolutionInst -> [(Clause,Clause,Clause)] -> Maybe MText
+completeGrade :: ResolutionInst -> [ResStep] -> Maybe MText
 completeGrade ResolutionInst{..} sol =
-    case applySteps clauses sol of
+    case applySteps clauses (map trip sol) of
         Nothing -> Just ("In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
                         ,"In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
                         )

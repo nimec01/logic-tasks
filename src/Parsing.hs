@@ -13,10 +13,6 @@ import Text.ParserCombinators.Parsec
 
 
 
-
-newtype ResStep = Res (Clause,Clause,Clause)
-
-
 instance Parse ResStep where
 
   parser = do
