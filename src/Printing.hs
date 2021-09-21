@@ -35,6 +35,13 @@ instance Pretty TruthValue where
   pretty tv = pretty $ truth tv
 
 
+instance Pretty ResStep where
+  pretty (Res (a,b,c)) = curlyBracesList (map curlyBracesList prep)
+    where
+      curlyBracesList = encloseSep (char '{') (char '}') (char ',')
+      prep = map (map pretty) $ map literals [a,b,c]
+
+
 instance Pretty Literal where
    pretty (Literal x) = char x
    pretty (Not x) = myText ['~', x]
