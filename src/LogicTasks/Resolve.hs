@@ -131,7 +131,26 @@ partialGrade ResolutionInst{..} sol
     | otherwise = Nothing
 
   where
-    steps = map trip sol
+    baseMapping = [ (i,c) | c <- clauses, i <- [1..]]
+
+    correctMapping ((c1,c2,(c3,i)):xs) mapping = eitherChecker c1 mapping && eitherChecker c2 mapping
+                                                 && maybeChecker i mapping && correctMapping xs newMapping
+      where
+        newMapping = case i of Nothing      -> mapping
+                               (Just index) -> (i,c3) : mapping
+
+
+    eitherChecker (Left _) _ = True
+    eitherChecker (Right i) mapping = i `elem` (map snd mapping)
+
+    maybeChecker Nothing _ = True
+    maybeChecker (Just i) mapping = not (i `elem` (map snd mapping))
+
+
+
+
+
+    steps =  replaceAll (map trip sol) baseMapping
     availLits = Set.unions (map (Set.fromList . literals) clauses)
     stepLits (c1,c2,r) = Set.toList $ Set.unions $ map (Set.fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) steps
@@ -141,7 +160,7 @@ partialGrade ResolutionInst{..} sol
 
 completeGrade :: ResolutionInst -> [ResStep] -> Maybe MText
 completeGrade ResolutionInst{..} sol =
-    case applySteps clauses (map trip sol) of
+    case applySteps clauses steps of
         Nothing -> Just ("In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
                         ,"In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
                         )
@@ -150,3 +169,21 @@ completeGrade ResolutionInst{..} sol =
                             else Just ("Die Leere Klausel wurde nicht korrekt abgeleitet."
                                       ,"The Empty clause was not derived correctly."
                                       )
+
+      where
+        baseMapping = [ (i,c) | c <- clauses, i <- [1..]]
+        steps = replaceAll (map trip sol) baseMapping
+
+
+
+
+
+replaceAll :: [(Either Clause Int, Either Clause Int, (Clause,Maybe Int))] -> [(Int,Clause)] -> [(Clause,Clause,Clause)]
+replaceAll ((c1,c2,(c3,i)):xs) mapping = (replaceNum c1, replaceNum c2, c3) : replaceAll xs newMapping
+  where
+    newMapping = case i of Nothing      -> mapping
+                           (Just index) -> (index,c3) : mapping
+
+    replaceNum (Left c) = c
+    replaceNum (Right i) = case lookup i mapping of Nothing  -> error "no mapping"
+                                                    (Just c) -> c

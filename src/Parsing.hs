@@ -17,16 +17,31 @@ instance Parse ResStep where
 
   parser = do
     char '('
-    [x,y,z] <- resClause `sepBy` (char ',')
+    clause1 <- parseEither resClause parseNum
+    char ','
+    clause2 <- parseEither resClause parseNum
+    char ','
+    clause3 <- resClause
+    index <- optionMaybe indexParse
     char ')'
-    return $ Res (x,y,z)
+    return $ Res (clause1,clause2,(clause3,index))
 
    where
+    braces = between (char '{') (char '}')
+
+    indexParse = do
+      char '='
+      i <- parseNum
+      return i
+
     resClause = do
-      char '{'
-      lits <- parser `sepBy` (char ',')
-      char '}'
+      lits <- braces (parser `sepBy` (char ','))
       return $ mkClause lits
+
+    parseEither x y = (Left <$> try x) <|> (Right <$> y)
+    parseNum = do
+      i <- many1 digit
+      return (read i)
 
 
 
