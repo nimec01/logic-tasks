@@ -159,7 +159,7 @@ completeGrade ResolutionInst{..} sol =
 
 
 baseMapping :: [Clause] -> [(Int,Clause)]
-baseMapping xs = zip [1..] xs
+baseMapping xs = zip [1..] $ sort xs
 
 
 
