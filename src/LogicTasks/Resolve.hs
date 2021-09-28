@@ -132,20 +132,6 @@ partialGrade ResolutionInst{..} sol
     | otherwise = Nothing
 
   where
-    correctMapping [] _ = True
-    correctMapping ((c1,c2,(c3,i)):xs) mapping = eitherChecker c1 mapping && eitherChecker c2 mapping
-                                                 && maybeChecker i mapping && correctMapping xs newMapping
-      where
-        newMapping = case i of Nothing      -> mapping
-                               (Just index) -> (i,c3) : mapping
-
-
-    eitherChecker (Left _) _ = True
-    eitherChecker (Right i) mapping = i `elem` (map snd mapping)
-
-    maybeChecker Nothing _ = True
-    maybeChecker (Just i) mapping = not (i `elem` (map snd mapping))
-
 
     steps =  replaceAll (map trip sol) (baseMapping clauses)
     availLits = Set.unions (map (Set.fromList . literals) clauses)
@@ -173,7 +159,7 @@ completeGrade ResolutionInst{..} sol =
 
 
 baseMapping :: [Clause] -> [(Int,Clause)]
-baseMapping xs = [ (i,c) | c <- sort xs, i <- [1..]]
+baseMapping xs = zip [1..] xs
 
 
 
