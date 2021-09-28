@@ -13,6 +13,7 @@ import Util
 import Resolution
 
 import qualified Data.Set as Set
+import Data.List (sort)
 import Data.Maybe (fromMaybe, fromJust)
 
 import Text.PrettyPrint.Leijen.Text
@@ -131,8 +132,6 @@ partialGrade ResolutionInst{..} sol
     | otherwise = Nothing
 
   where
-    baseMapping = [ (i,c) | c <- clauses, i <- [1..]]
-
     correctMapping [] _ = True
     correctMapping ((c1,c2,(c3,i)):xs) mapping = eitherChecker c1 mapping && eitherChecker c2 mapping
                                                  && maybeChecker i mapping && correctMapping xs newMapping
@@ -148,10 +147,7 @@ partialGrade ResolutionInst{..} sol
     maybeChecker (Just i) mapping = not (i `elem` (map snd mapping))
 
 
-
-
-
-    steps =  replaceAll (map trip sol) baseMapping
+    steps =  replaceAll (map trip sol) (baseMapping clauses)
     availLits = Set.unions (map (Set.fromList . literals) clauses)
     stepLits (c1,c2,r) = Set.toList $ Set.unions $ map (Set.fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) steps
@@ -172,10 +168,12 @@ completeGrade ResolutionInst{..} sol =
                                       )
 
       where
-        baseMapping = [ (i,c) | c <- clauses, i <- [1..]]
-        steps = replaceAll (map trip sol) baseMapping
+        steps = replaceAll (map trip sol) (baseMapping clauses)
 
 
+
+baseMapping :: [Clause] -> [(Int,Clause)]
+baseMapping xs = [ (i,c) | c <- sort xs, i <- [1..]]
 
 
 
