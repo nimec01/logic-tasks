@@ -133,6 +133,7 @@ partialGrade ResolutionInst{..} sol
   where
     baseMapping = [ (i,c) | c <- clauses, i <- [1..]]
 
+    correctMapping [] _ = True
     correctMapping ((c1,c2,(c3,i)):xs) mapping = eitherChecker c1 mapping && eitherChecker c2 mapping
                                                  && maybeChecker i mapping && correctMapping xs newMapping
       where
@@ -179,6 +180,7 @@ completeGrade ResolutionInst{..} sol =
 
 
 replaceAll :: [(Either Clause Int, Either Clause Int, (Clause,Maybe Int))] -> [(Int,Clause)] -> [(Clause,Clause,Clause)]
+replaceAll [] _ = []
 replaceAll ((c1,c2,(c3,i)):xs) mapping = (replaceNum c1, replaceNum c2, c3) : replaceAll xs newMapping
   where
     newMapping = case i of Nothing      -> mapping
