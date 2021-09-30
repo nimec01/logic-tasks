@@ -14,7 +14,7 @@ import Resolution
 
 import qualified Data.Set as Set
 import Data.List (sort)
-import Data.Maybe (fromMaybe, fromJust)
+import Data.Maybe (fromMaybe, fromJust, isJust)
 
 import Text.PrettyPrint.Leijen.Text
 
@@ -110,6 +110,8 @@ start = []
 
 partialGrade :: ResolutionInst -> [ResStep] -> Maybe MText
 partialGrade ResolutionInst{..} sol
+    | isJust checkMapping  = checkMapping
+
     | not (null wrongLitsSteps) =
         Just ("Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
                 ++ show wrongLitsSteps
@@ -132,8 +134,8 @@ partialGrade ResolutionInst{..} sol
     | otherwise = Nothing
 
   where
-
-    steps =  replaceAll (map trip sol) (baseMapping clauses)
+    checkMapping = correctMapping sol $ baseMapping clauses
+    steps =  replaceAll sol $ baseMapping clauses
     availLits = Set.unions (map (Set.fromList . literals) clauses)
     stepLits (c1,c2,r) = Set.toList $ Set.unions $ map (Set.fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) steps
@@ -154,7 +156,7 @@ completeGrade ResolutionInst{..} sol =
                                       )
 
       where
-        steps = replaceAll (map trip sol) (baseMapping clauses)
+        steps = replaceAll sol $ baseMapping clauses
 
 
 
@@ -162,14 +164,40 @@ baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
 
 
+correctMapping :: [ResStep] -> [(Int,Clause)] -> Maybe MText
+correctMapping [] _ = Nothing
+correctMapping (Res (c1,c2,(c3,i)): rest) mapping
+    | checkIndices = Just ("Mindestens ein Schritt verwendet einen nicht vergebenen Index. "
+                          ,"At least one step is using an unknown index."
+                          )
+    | alreadyUsed i = Just ("Mindestens ein Schritt vergibt einen Index, welcher bereits verwendet wird. "
+                           ,"At least one step assigns an index, which is already in use. "
+                           )
+    | otherwise = correctMapping rest newMapping
 
-replaceAll :: [(Either Clause Int, Either Clause Int, (Clause,Maybe Int))] -> [(Int,Clause)] -> [(Clause,Clause,Clause)]
+
+  where
+    newMapping = case i of Nothing      -> mapping
+                           (Just index) -> (index,c3) : mapping
+
+
+    unknown (Left _) = False
+    unknown (Right n) = n `notElem` (map fst mapping)
+
+    checkIndices = unknown c1 || unknown c2
+
+    alreadyUsed Nothing = False
+    alreadyUsed (Just n) = n `elem` (map fst mapping)
+
+
+
+replaceAll :: [ResStep] -> [(Int,Clause)] -> [(Clause,Clause,Clause)]
 replaceAll [] _ = []
-replaceAll ((c1,c2,(c3,i)):xs) mapping = (replaceNum c1, replaceNum c2, c3) : replaceAll xs newMapping
+replaceAll (Res (c1,c2,(c3,i)) : rest) mapping = (replaceNum c1, replaceNum c2, c3) : replaceAll rest newMapping
   where
     newMapping = case i of Nothing      -> mapping
                            (Just index) -> (index,c3) : mapping
 
     replaceNum (Left c) = c
-    replaceNum (Right i) = case lookup i mapping of Nothing  -> error "no mapping"
+    replaceNum (Right n) = case lookup n mapping of Nothing  -> error "no mapping"
                                                     (Just c) -> c
