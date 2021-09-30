@@ -126,7 +126,7 @@ partialGrade ResolutionInst{..} sol
                 ++ show noResolveSteps
              )
 
-    | not (isEmptyClause $ thrd3 $ last steps) =
+    | not checkEmptyClause =
         Just ("Im letzten Schritt muss die leere Klausel abgeleitet werden."
              ,"The last step must derive the empty clause."
              )
@@ -136,6 +136,7 @@ partialGrade ResolutionInst{..} sol
   where
     checkMapping = correctMapping sol $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
+    checkEmptyClause = null steps || isEmptyClause (thrd3 (last steps))
     availLits = Set.unions (map (Set.fromList . literals) clauses)
     stepLits (c1,c2,r) = Set.toList $ Set.unions $ map (Set.fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) steps
