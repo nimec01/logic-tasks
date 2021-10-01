@@ -17,20 +17,20 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: PickInst -> [Either MText Doc]
+description :: PickInst -> [ProxyDoc]
 description PickInst{..} =
-              [ Left ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
+              [ PMult ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
                      ,"Consider the following formula in conjunctive normal form:"
                      )
-              , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
-              , Right line
-              , Left ("Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
+              , PDoc line
+              , PDoc $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
+              , PDoc line
+              , PMult ("Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
                      ,"Which of these truth tables represents the formula? Specify the correct table by giving its number."
                      )
-              , Right $ myText (fromMaybe "" addText)
-              , Right line
-              , Right $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
+              , PDoc $ myText (fromMaybe "" addText)
+              , PDoc line
+              , PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
               ]
 
 

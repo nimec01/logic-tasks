@@ -18,39 +18,41 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: StepInst -> [Either MText Doc]
+description :: StepInst -> [ProxyDoc]
 description StepInst{..} =
-              [ Left ("Betrachten Sie die zwei folgenden Klauseln:"
+              [ PMult ("Betrachten Sie die zwei folgenden Klauseln:"
                      ,"Consider the two following clauses:"
                      )
-              , Right line
-              , Right $ nest 4 $ pretty clause1
-              , Right line
-              , Right $ nest 4 $ pretty clause2
-              , Right line
-              , Left ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
+              , PDoc line
+              , PDoc $ nest 4 $ pretty clause1
+              , PDoc line
+              , PDoc $ nest 4 $ pretty clause2
+              , PDoc line
+              , PMult ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
                      ,"Resolve the clauses and give the resulting resolvent."
                      )
-              , Left ("Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an:"
+              , PMult ("Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an:"
                      ,"Provide the literal used for the step and the resolvent in the following tuple form:"
                      )
-              , Left ("(Literal, Resolvente als ASCII-basierte Klausel)."
+              , PMult ("(Literal, Resolvente als ASCII-basierte Klausel)."
                      ,"(literal, resolvent as ASCII based clause)."
                      )
-              , Left ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
+              , PMult ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
                      ,"Consider this key for the ASCII based formula:"
                      )
-              , Right line
-              , Left ("Negation"
-                     ,"negation"
-                     )
-              , Right $ myText ": ~"
-              , Left ("oder"
-                     ,"or"
-                     )
-              , Right $ myText ": \\/"
-              , Right line
-              , Right $ myText (fromMaybe "" addText)
+              , PDoc line
+              , Composite [ PMult ("Negation"
+                                  ,"negation"
+                                  )
+                          , PDoc $ myText ": ~"
+                          ]
+              , Composite [ PMult ("oder"
+                                  ,"or"
+                                  )
+                          , PDoc $ myText ": \\/"
+                          ]
+              , PDoc line
+              , PDoc $ myText (fromMaybe "" addText)
               ]
 
 

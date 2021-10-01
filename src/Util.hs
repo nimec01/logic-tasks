@@ -4,7 +4,7 @@ module Util where
 
 
 import Config (BaseConfig(..), CnfConfig(..))
-import Types
+import Printing (MText)
 
 
 

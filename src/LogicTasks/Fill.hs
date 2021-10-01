@@ -17,26 +17,26 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: FillInst -> [Either MText Doc]
+description :: FillInst -> [ProxyDoc]
 description FillInst{..} =
-              [ Left ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
+              [ PMult ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
                      ,"Consider the following formula in conjunctive normal form:"
                      )
-              , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty cnf
-              , Right line
-              , Left ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
+              , PDoc line
+              , PDoc $ nest 4 $ myText "F = " <+> pretty cnf
+              , PDoc line
+              , PMult ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
                      ,"Fill all blanks in the corresponding truth table with either True or False."
                      )
-              , Left ("Geben Sie als Lösung eine Liste der fehlenden Werte an,"
+              , PMult ("Geben Sie als Lösung eine Liste der fehlenden Werte an,"
                      ,"Provide the solution as a list."
                      )
-              , Left ("wobei das erste Element der Liste der ersten Zeile entspricht, das zweite Element der zweiten Zeile, etc."
+              , PMult ("wobei das erste Element der Liste der ersten Zeile entspricht, das zweite Element der zweiten Zeile, etc."
                      ,"The first element of the list fills the first blank, the second element fills the second blank, etc."
                      )
-              , Right $ myText (fromMaybe "" addText)
-              , Right line
-              , Right $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
+              , PDoc $ myText (fromMaybe "" addText)
+              , PDoc line
+              , PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
               ]
 
 

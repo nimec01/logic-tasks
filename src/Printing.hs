@@ -4,6 +4,8 @@
 module Printing
        ( showIndexedList
        , myText
+       , MText
+       , ProxyDoc(..)
        ) where
 
 
@@ -15,6 +17,10 @@ import Data.Text.Lazy (pack)
 
 
 import Text.PrettyPrint.Leijen.Text
+
+
+type MText = (String,String)
+data ProxyDoc = PDoc Doc| PMult MText | Composite [ProxyDoc]
 
 
 

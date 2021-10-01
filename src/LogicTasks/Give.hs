@@ -20,38 +20,41 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: GiveInst -> [Either MText Doc]
+description :: GiveInst -> [ProxyDoc]
 description GiveInst{..} =
-              [ Left ("Betrachten Sie die folgende Wahrheitstafel:"
+              [ PMult ("Betrachten Sie die folgende Wahrheitstafel:"
                      ,"Consider the following truth table:"
                      )
-              , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty (getTable cnf)
-              , Right line
-              , Left ("Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
+              , PDoc line
+              , PDoc $ nest 4 $ myText "F = " <+> pretty (getTable cnf)
+              , PDoc line
+              , PMult ("Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
                      ,"Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
                      )
-              , Left ("Reichen Sie ihre Lösung als ascii-basierte Formel ein."
+              , PMult ("Reichen Sie ihre Lösung als ascii-basierte Formel ein."
                      ,"Provide the solution as an ascii based formula."
                      )
-              , Left ("Beachten Sie dabei die folgende Legende:"
+              , PMult ("Beachten Sie dabei die folgende Legende:"
                      ,"Use the following key:"
                      )
-              , Right line
-              , Left ("Negation"
-                     ,"negation"
-                     )
-              , Right $ myText ": ~"
-              , Left ("oder"
-                     ,"or"
-                     )
-              , Right $ myText ": \\/"
-              , Left ("und"
-                     ,"and"
-                     )
-              , Right $ myText ": /\\"
-              , Right line
-              , Right $ myText (fromMaybe "" addText)
+              , PDoc line
+              , Composite [ PMult ("Negation"
+                                  ,"negation"
+                                  )
+                          , PDoc $ myText ": ~"
+                          ]
+              , Composite [ PMult ("oder"
+                                  ,"or"
+                                  )
+                          , PDoc $ myText ": \\/"
+                          ]
+              , Composite [ PMult ("und"
+                                  ,"and"
+                                  )
+                          , PDoc $ myText ": /\\"
+                          ]
+              , PDoc line
+              , PDoc $ myText (fromMaybe "" addText)
               ]
 
 

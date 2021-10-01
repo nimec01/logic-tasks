@@ -32,37 +32,39 @@ thrd3 (_,_,c) = c
 
 
 
-description :: ResolutionInst -> [Either MText Doc]
+description :: ResolutionInst -> [ProxyDoc]
 description ResolutionInst{..} =
-              [ Left ("Betrachten Sie die folgende Formel in KNF:"
+              [ PMult ("Betrachten Sie die folgende Formel in KNF:"
                      ,"Consider the following formula in cnf:"
                      )
-              , Right line
-              , Right $ nest 4 $ pretty $ mkCnf clauses
-              , Right line
-              , Left ("Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
+              , PDoc line
+              , PDoc $ nest 4 $ pretty $ mkCnf clauses
+              , PDoc line
+              , PMult ("Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
                      ,"Use the resolution technique on this formula to derive the empty clause."
                      )
-              , Left ("Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind:"
+              , PMult ("Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind:"
                      ,"Provide the solution as a list of triples with this structure:"
                      )
-              , Left ("(Erste Klausel, Zweite Klausel, Resolvente)"
+              , PMult ("(Erste Klausel, Zweite Klausel, Resolvente)"
                      ,"(first clause, second clause, resolvent)."
                      )
-              , Left ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
+              , PMult ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
                      ,"Consider this key for the ASCII based formula:"
                      )
-              , Right line
-              , Left ("Negation"
-                     ,"negation"
-                     )
-              , Right $ myText ": ~"
-              , Left ("oder"
-                     ,"or"
-                     )
-              , Right $ myText ": \\/"
-              , Right line
-              , Right $ myText (fromMaybe "" addText)
+              , PDoc line
+              , Composite [ PMult ("Negation"
+                                  ,"negation"
+                                  )
+                          , PDoc $ myText ": ~"
+                          ]
+              , Composite [ PMult ("oder"
+                                  ,"or"
+                                  )
+                                  , PDoc $ myText ": \\/"
+                                  ]
+              , PDoc line
+              , PDoc $ myText (fromMaybe "" addText)
               ]
 
 

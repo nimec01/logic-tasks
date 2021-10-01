@@ -20,23 +20,23 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: DecideInst -> [Either MText Doc]
+description :: DecideInst -> [ProxyDoc]
 description DecideInst{..} =
-              [ Left  ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
+              [ PMult ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
                       ,"Consider the following formula in conjunctive normal form:"
                       )
-              , Right line
-              , Right $ nest 4 $ myText "F = " <+> pretty cnf
-              , Right line
-              , Left ("Finden Sie alle Fehlerhaften Wahrheitswerte in der folgenden Wahrheitstafel."
-                     ,"Find all faulty entries in the following truth table."
-                     )
-              , Left ("Geben Sie die Lösung als eine Liste der Indices der fehlerhaften Zeilen an."
-                     ,"Provide the solution as a list of indices of the faulty rows."
-                     )
-              , Right $ myText (fromMaybe "" addText)
-              , Right line
-              , Right $ nest 4 $ pretty (flipAt (getTable cnf) changed)
+              , PDoc line
+              , PDoc $ nest 4 $ myText "F = " <+> pretty cnf
+              , PDoc line
+              , PMult ("Finden Sie alle Fehlerhaften Wahrheitswerte in der folgenden Wahrheitstafel."
+                      ,"Find all faulty entries in the following truth table."
+                      )
+              , PMult ("Geben Sie die Lösung als eine Liste der Indices der fehlerhaften Zeilen an."
+                      ,"Provide the solution as a list of indices of the faulty rows."
+                      )
+              , PDoc $ myText (fromMaybe "" addText)
+              , PDoc line
+              , PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)
               ]
 
 

@@ -3,8 +3,7 @@
 -- | Some basic types for propositional logic
 module Types
        (
-         MText
-       , TruthValue(..)
+         TruthValue(..)
        , Literal(..)
        , opposite
        , Clause(..)
@@ -40,7 +39,6 @@ import Test.QuickCheck
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))}
 
 newtype TruthValue = TruthValue {truth :: Bool} deriving (Typeable, Generic)
-type MText = (String,String)
 
 
 
