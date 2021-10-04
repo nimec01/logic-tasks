@@ -17,44 +17,35 @@ import Text.ParserCombinators.Parsec
 instance Parse ResStep where
 
   parser = do
-    char '('
+    trailSpaces $ char '('
     clause1 <- parseEither resClause parseNum
-    char ','
+    trailSpaces $ char ','
     clause2 <- parseEither resClause parseNum
-    char ','
+    trailSpaces $ char ','
     clause3 <- resClause
     index <- optionMaybe indexParse
-    char ')'
+    trailSpaces $ char ')'
     return $ Res (clause1,clause2,(clause3,index))
 
    where
-    braces = between (char '{') (char '}')
+    braces = between (trailSpaces $ char '{') (trailSpaces $ char '}')
 
-    indexParse = do
-      char '='
-      i <- parseNum
-      return i
+    indexParse = trailSpaces (char '=') >> trailSpaces parseNum
 
-    resClause = do
-      lits <- braces (parser `sepBy` (char ','))
-      return $ mkClause lits
+    resClause = mkClause <$> braces (parser `sepBy` (char ','))
 
-    parseEither x y = (Left <$> try x) <|> (Right <$> y)
+    parseEither x y = trailSpaces ((Left <$> try x) <|> (Right <$> y))
+
     parseNum = do
       i <- many1 digit
       return (read i)
 
 
 
-leadingSpaces :: Parser a -> Parser a
-leadingSpaces p = spaces >> p
-
 
 trailSpaces :: Parser a -> Parser a
-trailSpaces p = do
-    res <- p
-    spaces
-    return res
+trailSpaces p = p <* spaces
+
 
 
 parseOr :: Parser ()
@@ -74,11 +65,10 @@ class Parse a where
 
 
 instance Parse a => Parse [a] where
-  parser = leadingSpaces $ trailSpaces listParse
+  parser = trailSpaces listParse
     where
       listParse = do
-        char '['
-        spaces
+        trailSpaces $ char '['
         xs <- parser `sepBy` (char ',')
         char ']'
         return xs
@@ -126,8 +116,7 @@ instance Parse Clause where
  parser = trailSpaces clauseParse
    where
      clauseParse = do
-       braces <- optionMaybe $ char '('
-       spaces
+       braces <- trailSpaces $ optionMaybe $ char '('
        lits <- sepBy parser parseOr
        case braces of Nothing -> return ' '
                       Just _ -> char ')'
@@ -154,9 +143,8 @@ instance Parse PickInst where
       instParse = do
         string "PickInst("
         cnfs <- parser
-        char ','
-        spaces
-        index <- many1 digit
+        trailSpaces $ char ','
+        index <- trailSpaces $ many1 digit
         text <- optionMaybe $ trailSpaces extraText
         char ')'
         return $ PickInst cnfs (read index) text
