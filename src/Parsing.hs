@@ -7,6 +7,7 @@ import Config
 import Formula
 import Types
 
+import Control.Monad (void)
 import Data.Char (toLower)
 import Text.ParserCombinators.Parsec
 
@@ -45,21 +46,24 @@ instance Parse ResStep where
 
 
 
+leadingSpaces :: Parser a -> Parser a
+leadingSpaces p = spaces >> p
+
+
+trailSpaces :: Parser a -> Parser a
+trailSpaces p = do
+    res <- p
+    spaces
+    return res
 
 
 parseOr :: Parser ()
-parseOr = do
-    spaces
-    string "\\/"
-    spaces
+parseOr = trailSpaces $ void $ string "\\/"
+
 
 
 parseAnd :: Parser ()
-parseAnd = do
-    spaces
-    string "/\\"
-    spaces
-
+parseAnd = trailSpaces $ void $ string "/\\"
 
 
 
@@ -70,21 +74,22 @@ class Parse a where
 
 
 instance Parse a => Parse [a] where
-  parser = do
-      spaces
-      char '['
-      spaces
-      xs <- parser `sepBy` (char ',')
-      spaces
-      char ']'
-      return xs
+  parser = leadingSpaces $ trailSpaces listParse
+    where
+      listParse = do
+        char '['
+        spaces
+        xs <- parser `sepBy` (char ',')
+        char ']'
+        return xs
 
 
 
 instance Parse Number where
-  parser = do
-      result <- optionMaybe $ many1 digit
-      return $ Number $ fmap read result
+  parser = trailSpaces numParse
+    where numParse = do
+            result <- optionMaybe $ many1 digit
+            return $ Number $ fmap read result
 
 
 
@@ -106,37 +111,36 @@ instance Parse TruthValue where
 
 
 instance Parse Literal where
-  parser = do
-      spaces
-      result <- optionMaybe $ char '~'
-      var <- satisfy $ flip elem ['A'..'Z']
-      spaces
-      case result of Nothing -> return (Literal var)
-                     Just _  -> return (Not var)
+  parser = trailSpaces litParse
+    where
+      litParse = do
+        result <- optionMaybe $ char '~'
+        var <- satisfy $ flip elem ['A'..'Z']
+        case result of Nothing -> return (Literal var)
+                       Just _  -> return (Not var)
 
 
 
 
 instance Parse Clause where
- parser = do
-    spaces
-    braces <- optionMaybe $ char '('
-    spaces
-    lits <- sepBy parser parseOr
-    spaces
-    case braces of Nothing -> return ' '
-                   Just _ -> char ')'
-    spaces
-    return $ mkClause lits
+ parser = trailSpaces clauseParse
+   where
+     clauseParse = do
+       braces <- optionMaybe $ char '('
+       spaces
+       lits <- sepBy parser parseOr
+       case braces of Nothing -> return ' '
+                      Just _ -> char ')'
+       return $ mkClause lits
 
 
 
 instance Parse Cnf where
-  parser = do
-      spaces
-      clauses <- sepBy parser parseAnd
-      spaces
-      return $ mkCnf clauses
+  parser = trailSpaces parseCnf
+    where
+      parseCnf = do
+        clauses <- sepBy parser parseAnd
+        return $ mkCnf clauses
 
 
 
@@ -145,23 +149,21 @@ instance Parse Table
 
 
 instance Parse PickInst where
-  parser = do
-      string "PickInst("
-      spaces
-      cnfs <- parser
-      spaces
-      char ','
-      spaces
-      index <- many1 digit
-      spaces
-      text <- optionMaybe extraText
-      spaces
-      char ')'
-      return $ PickInst cnfs (read index) text
+  parser = trailSpaces instParse
     where
-      extraText = between start (char '}') $ many1 $ satisfy ( /= '}')
-      start = do
-          char ','
-          spaces
-          char '{'
+      instParse = do
+        string "PickInst("
+        cnfs <- parser
+        char ','
+        spaces
+        index <- many1 digit
+        text <- optionMaybe $ trailSpaces extraText
+        char ')'
+        return $ PickInst cnfs (read index) text
+          where
+            extraText = between start (char '}') $ many1 $ satisfy ( /= '}')
+            start = do
+              char ','
+              spaces
+              char '{'
 
