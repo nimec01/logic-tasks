@@ -30,7 +30,6 @@ description FillInst{..} =
                      )
               , PDoc line
               , PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
-              , PDoc line
               , PMult ("Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an,"
                      ,"Provide the solution as a list of truth values."
                      )
@@ -45,6 +44,7 @@ description FillInst{..} =
                                   , "A valid solution could look like this: ")
                           , PDoc $ myText "[t,w,w,w]"
                           ]
+              , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]
 

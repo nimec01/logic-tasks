@@ -30,7 +30,6 @@ description PickInst{..} =
                       )
               , PDoc line
               , PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
-              , PDoc line
               , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
                                   , "A valid solution could look like this: ")
                           , PDoc $ myText "1"

@@ -41,6 +41,7 @@ description DecideInst{..} =
                                   , "A valid solution could look like this: ")
                           , PDoc $ myText "[1,4,5]"
                           ]
+              , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]
 

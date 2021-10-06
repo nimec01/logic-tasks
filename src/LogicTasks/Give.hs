@@ -27,7 +27,6 @@ description GiveInst{..} =
                      )
               , PDoc line
               , PDoc $ nest 4 $ pretty (getTable cnf)
-              , PDoc line
               , PMult ("Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
                      ,"Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
                      )
