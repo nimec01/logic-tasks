@@ -34,6 +34,11 @@ description DecideInst{..} =
               , PMult ("Geben Sie die Lösung als eine Liste der Indices der fehlerhaften Zeilen an."
                       ,"Provide the solution as a list of indices of the faulty rows."
                       )
+              , PDoc line
+              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
+                                  , "A valid solution could look like this: ")
+                          , PDoc $ myText "[1,4,5]"
+                          ]
               , PDoc $ myText (fromMaybe "" addText)
               , PDoc line
               , PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)

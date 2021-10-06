@@ -26,8 +26,13 @@ description PickInst{..} =
               , PDoc $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
               , PDoc line
               , PMult ("Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
-                     ,"Which of these truth tables represents the formula? Specify the correct table by giving its number."
-                     )
+                      ,"Which of these truth tables represents the formula? Specify the correct table by giving its number."
+                      )
+              , PDoc line
+              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
+                                  , "A valid solution could look like this: ")
+                          , PDoc $ myText "1"
+                          ]
               , PDoc $ myText (fromMaybe "" addText)
               , PDoc line
               , PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs

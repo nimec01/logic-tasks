@@ -35,23 +35,23 @@ thrd3 (_,_,c) = c
 description :: ResolutionInst -> [ProxyDoc]
 description ResolutionInst{..} =
               [ PMult ("Betrachten Sie die folgende Formel in KNF:"
-                     ,"Consider the following formula in cnf:"
-                     )
+                      ,"Consider the following formula in cnf:"
+                      )
               , PDoc line
               , PDoc $ nest 4 $ pretty $ mkCnf clauses
               , PDoc line
               , PMult ("Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
-                     ,"Use the resolution technique on this formula to derive the empty clause."
-                     )
+                      ,"Use the resolution technique on this formula to derive the empty clause."
+                      )
               , PMult ("Geben Sie die Lösung als eine Liste von Tripeln an, wobei diese folgendermaßen aufgebaut sind:"
-                     ,"Provide the solution as a list of triples with this structure:"
-                     )
+                      ,"Provide the solution as a list of triples with this structure:"
+                      )
               , PMult ("(Erste Klausel, Zweite Klausel, Resolvente)"
-                     ,"(first clause, second clause, resolvent)."
-                     )
+                      ,"(first clause, second clause, resolvent)."
+                      )
               , PMult ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
-                     ,"Consider this key for the ASCII based formula:"
-                     )
+                      ,"Consider this key for the ASCII based formula:"
+                      )
               , PDoc line
               , Composite [ PMult ("Negation"
                                   ,"negation"
@@ -63,6 +63,29 @@ description ResolutionInst{..} =
                                   )
                                   , PDoc $ myText ": \\/"
                                   ]
+              , PDoc line
+              , Composite [ PMult ("leere Klausel"
+                                  ,"empty clause"
+                                  )
+                                  , PDoc $ myText ": { }"
+                                  ]
+              , PDoc line
+              , PMult ("Optional können Sie Klauseln auch durch Nummern substituieren."
+                      ,"You can optionally substitute clauses with numbers"
+                      )
+              , PDoc line
+              , PMult ("Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)"
+                      ,"Clauses in the starting formula are already numbered by their order. (first clause = 1, second clause = 2, ...)"
+                      )
+              , PDoc line
+              , PMult ("neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
+                      ,"Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
+                      )
+              , PDoc line
+              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
+                                  , "A valid solution could look like this: ")
+                          , PDoc $ myText "[(1, 2, {A, ~B} = 5), (4, 5, { })]"
+                          ]
               , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]

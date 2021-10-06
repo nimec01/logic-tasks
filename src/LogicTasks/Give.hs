@@ -54,6 +54,11 @@ description GiveInst{..} =
                           , PDoc $ myText ": /\\"
                           ]
               , PDoc line
+              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
+                                  , "A valid solution could look like this: ")
+                          , PDoc $ pretty $ mkCnf $ [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+                          ]
+              , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]
 

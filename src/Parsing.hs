@@ -17,20 +17,20 @@ import Text.ParserCombinators.Parsec
 instance Parse ResStep where
 
   parser = do
-    trailSpaces $ char '('
+    withSpaces '('
     clause1 <- parseEither resClause parseNum
-    trailSpaces $ char ','
+    withSpaces ','
     clause2 <- parseEither resClause parseNum
-    trailSpaces $ char ','
+    withSpaces ','
     clause3 <- resClause
     index <- optionMaybe indexParse
-    trailSpaces $ char ')'
+    withSpaces ')'
     return $ Res (clause1,clause2,(clause3,index))
 
    where
-    braces = between (trailSpaces $ char '{') (trailSpaces $ char '}')
+    braces = between (withSpaces '{') (withSpaces '}')
 
-    indexParse = trailSpaces (char '=') >> trailSpaces parseNum
+    indexParse = withSpaces '=' >> trailSpaces parseNum
 
     resClause = mkClause <$> braces (parser `sepBy` (char ','))
 
@@ -46,6 +46,9 @@ instance Parse ResStep where
 trailSpaces :: Parser a -> Parser a
 trailSpaces p = p <* spaces
 
+
+withSpaces :: Char -> Parser Char
+withSpaces = trailSpaces . char
 
 
 parseOr :: Parser ()
@@ -65,18 +68,18 @@ class Parse a where
 
 
 instance Parse a => Parse [a] where
-  parser = trailSpaces listParse
+  parser = trailSpaces listParse <?> "List"
     where
       listParse = do
-        trailSpaces $ char '['
+        withSpaces '['
         xs <- parser `sepBy` (char ',')
-        char ']'
+        withSpaces ']'
         return xs
 
 
 
 instance Parse Number where
-  parser = trailSpaces numParse
+  parser = trailSpaces numParse <?> "Number"
     where numParse = do
             result <- optionMaybe $ many1 digit
             return $ Number $ fmap read result
@@ -85,23 +88,24 @@ instance Parse Number where
 
 
 instance Parse TruthValue where
-  parser = do
-      s <- getInput
-      setInput (map toLower s)
-      parseTrue <|> parseFalse
-    where
-      parseTrue = do
-          try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
-          return $ TruthValue True
-      parseFalse = do
-          try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
-          return $ TruthValue False
+  parser = trailSpaces truthParse <?> "TruthValue"
+    where truthParse = do
+            s <- getInput
+            setInput (map toLower s)
+            parseTrue <|> parseFalse
+              where
+                parseTrue = do
+                  try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
+                  return $ TruthValue True
+                parseFalse = do
+                  try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
+                  return $ TruthValue False
 
 
 
 
 instance Parse Literal where
-  parser = trailSpaces litParse
+  parser = trailSpaces litParse <?> "Literal"
     where
       litParse = do
         result <- optionMaybe $ char '~'
@@ -113,7 +117,7 @@ instance Parse Literal where
 
 
 instance Parse Clause where
- parser = trailSpaces clauseParse
+ parser = trailSpaces clauseParse <?> "Clause"
    where
      clauseParse = do
        braces <- trailSpaces $ optionMaybe $ char '('
@@ -125,7 +129,7 @@ instance Parse Clause where
 
 
 instance Parse Cnf where
-  parser = trailSpaces parseCnf
+  parser = trailSpaces parseCnf <?> "CNF"
     where
       parseCnf = do
         clauses <- sepBy parser parseAnd
@@ -143,7 +147,7 @@ instance Parse PickInst where
       instParse = do
         string "PickInst("
         cnfs <- parser
-        trailSpaces $ char ','
+        withSpaces ','
         index <- trailSpaces $ many1 digit
         text <- optionMaybe $ trailSpaces extraText
         char ')'

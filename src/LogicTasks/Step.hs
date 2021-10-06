@@ -52,6 +52,11 @@ description StepInst{..} =
                           , PDoc $ myText ": \\/"
                           ]
               , PDoc line
+              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
+                                  , "A valid solution could look like this: ")
+                          , PDoc $ myText "(A, ~B \\/ C)"
+                          ]
+              , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]
 
