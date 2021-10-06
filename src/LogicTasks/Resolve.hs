@@ -71,7 +71,7 @@ description ResolutionInst{..} =
                                   ]
               , PDoc line
               , PMult ("Optional können Sie Klauseln auch durch Nummern substituieren."
-                      ,"You can optionally substitute clauses with numbers"
+                      ,"You can optionally substitute clauses with numbers."
                       )
               , PDoc line
               , PMult ("Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)"
