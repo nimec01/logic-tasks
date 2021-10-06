@@ -51,51 +51,51 @@ description FillInst{..} =
 
 
 
-verifyStatic :: FillInst -> Maybe MText
+verifyStatic :: FillInst -> Maybe ProxyDoc
 verifyStatic FillInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
-        Just ("Geben Sie bitte eine nicht-leere Formel an."
-             , "Please give a non empty formula."
-             )
+        Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
+                     , "Please give a non empty formula."
+                     )
 
     | any (> 2^length (atomics cnf)) missing =
-        Just ("Mindestens ein gegebener Index ist zu hoch."
-             , "At least one given index is too high."
-             )
+        Just $ PMult ("Mindestens ein gegebener Index ist zu hoch."
+                     , "At least one given index is too high."
+                     )
 
     | any (<= 0) missing =
-        Just ("Mindestens ein gegebener Index ist null oder negativ."
-             , "At least one given index is zero or negative."
-             )
+        Just $ PMult ("Mindestens ein gegebener Index ist null oder negativ."
+                     , "At least one given index is zero or negative."
+                     )
 
     | null missing =
-        Just ("Es muss mindestens eine Lücke geben."
-             , "At least one blank has to be specified."
-             )
+        Just $ PMult ("Es muss mindestens eine Lücke geben."
+                     , "At least one blank has to be specified."
+                     )
 
     | otherwise = Nothing
 
 
 
 
-verifyQuiz :: FillConfig -> Maybe MText
+verifyQuiz :: FillConfig -> Maybe ProxyDoc
 verifyQuiz FillConfig{..}
 
 
     | isOutside 1 100 percentageOfGaps =
-        Just ("Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
-             , "The percentile of gaps has to be set between 1 and 100."
-             )
+        Just $ PMult ("Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
+                     , "The percentile of gaps has to be set between 1 and 100."
+                     )
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        Just ("Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-             , "The given restriction on true entries are not in the range of 0 to 100 percent."
-             )
+        Just $ PMult ("Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
+                     , "The given restriction on true entries are not in the range of 0 to 100 percent."
+                     )
 
     | low > high =
-        Just ("Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-             , "The given restriction on true entries are not a valid range."
-             )
+        Just $ PMult ("Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
+                     , "The given restriction on true entries are not a valid range."
+                     )
 
     | otherwise = checkCnfConf cnfConf
 
@@ -108,17 +108,17 @@ start :: [TruthValue]
 start = []
 
 
-partialGrade :: FillInst -> [TruthValue] -> Maybe MText
+partialGrade :: FillInst -> [TruthValue] -> Maybe ProxyDoc
 partialGrade FillInst{..} sol
     | solLen > acLen =
-        Just ("Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
-             ,"Solution contains too many values. Please remove " ++ eng ++ " to proceed."
-             )
+        Just $ PMult ("Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
+                     ,"Solution contains too many values. Please remove " ++ eng ++ " to proceed."
+                     )
 
     | acLen > solLen =
-        Just ("Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
-             , "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
-             )
+        Just $ PMult ("Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
+                     , "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
+                     )
 
     | otherwise = Nothing
 
@@ -134,13 +134,13 @@ partialGrade FillInst{..} sol
 
 
 
-completeGrade :: FillInst -> [TruthValue] -> Maybe MText
+completeGrade :: FillInst -> [TruthValue] -> Maybe ProxyDoc
 completeGrade FillInst{..} sol
 
     | not (null diff) =
-        Just ("Die Lösung beinhaltet " ++ display ++ " Fehler."
-             ,"Your solution contains " ++ display ++ " mistakes."
-             )
+        Just $ PMult ("Die Lösung beinhaltet " ++ display ++ " Fehler."
+                     ,"Your solution contains " ++ display ++ " mistakes."
+                     )
     | otherwise = Nothing
 
   where

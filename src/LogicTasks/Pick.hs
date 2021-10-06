@@ -40,40 +40,40 @@ description PickInst{..} =
 
 
 
-verifyStatic :: PickInst -> Maybe MText
+verifyStatic :: PickInst -> Maybe ProxyDoc
 verifyStatic PickInst{..}
     | null cnfs =
-        Just ("Die Liste der Formeln ist leer."
-             ,"The list of formulae is empty."
-             )
+        Just $ PMult ("Die Liste der Formeln ist leer."
+                     ,"The list of formulae is empty."
+                     )
 
     | mkCnf [] `elem` cnfs =
-        Just ("Für mindestens eine Formel kann keine Wahrheitstafel erstellt werden."
-             ,"For at least one given formula there is no corresponding truth table."
-             )
+        Just $ PMult ("Für mindestens eine Formel kann keine Wahrheitstafel erstellt werden."
+                     ,"For at least one given formula there is no corresponding truth table."
+                     )
 
     | length cnfs < correct || correct <= 0 =
-        Just ("Der angegebene Index existiert nicht."
-             ,"The given index does not exist."
-             )
+        Just $ PMult ("Der angegebene Index existiert nicht."
+                     ,"The given index does not exist."
+                     )
 
     | otherwise = Nothing
 
 
 
-verifyQuiz :: PickConfig -> Maybe MText
+verifyQuiz :: PickConfig -> Maybe ProxyDoc
 verifyQuiz PickConfig{..}
 
 
     | amountOfOptions < 2 =
-        Just ("Es muss mindestens zwei Optionen geben."
-             ,"At least two options need to be given."
-             )
+        Just $ PMult ("Es muss mindestens zwei Optionen geben."
+                     ,"At least two options need to be given."
+                     )
 
     | amountOfOptions > 4*2^ length (usedLiterals base) =
-        Just ("Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
-             ,"The amount of options is higher than the amount of possible, distinct formulae."
-             )
+        Just $ PMult ("Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
+                     ,"The amount of options is higher than the amount of possible, distinct formulae."
+                     )
 
     | otherwise = checkCnfConf cnfConf
 
@@ -87,18 +87,18 @@ start = Number Nothing
 
 
 
-partialGrade :: PickInst -> Number -> Maybe MText
+partialGrade :: PickInst -> Number -> Maybe ProxyDoc
 partialGrade _ _ = Nothing
 
 
 
-completeGrade :: PickInst -> Number -> Maybe MText
+completeGrade :: PickInst -> Number -> Maybe ProxyDoc
 completeGrade PickInst{..} sol =
-    case sol of Number Nothing -> Just ("Es wurde kein Index angegeben."
-                                       ,"You did not give an index."
-                                       )
+    case sol of Number Nothing -> Just $ PMult ("Es wurde kein Index angegeben."
+                                               ,"You did not give an index."
+                                               )
                 Number (Just index) ->
                   if index == correct then Nothing
-                                      else Just ("Der gewählte Index ist falsch."
-                                                ,"You submitted the wrong index."
-                                                )
+                                      else Just $ PMult ("Der gewählte Index ist falsch."
+                                                        ,"You submitted the wrong index."
+                                                        )

@@ -89,37 +89,37 @@ description ResolutionInst{..} =
 
 
 
-verifyStatic :: ResolutionInst -> Maybe MText
+verifyStatic :: ResolutionInst -> Maybe ProxyDoc
 verifyStatic ResolutionInst{..}
     | any isEmptyClause clauses =
-        Just ("Mindestens eine der Klauseln ist leer."
-             ,"At least one of the clauses is empty."
-             )
+        Just $ PMult ("Mindestens eine der Klauseln ist leer."
+                     ,"At least one of the clauses is empty."
+                     )
     | sat $ mkCnf clauses =
-        Just ("Die Formel ist erfüllbar."
-             ,"This formula is satisfiable."
-             )
+        Just $ PMult ("Die Formel ist erfüllbar."
+                     ,"This formula is satisfiable."
+                     )
 
     | otherwise = Nothing
 
 
 
-verifyQuiz :: ResolutionConfig -> Maybe MText
+verifyQuiz :: ResolutionConfig -> Maybe ProxyDoc
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
-        Just ("Die Mindestschritte müssen größer als 0 sein."
-             ,"The minimal amount of steps must be greater than 0."
-             )
+        Just $ PMult ("Die Mindestschritte müssen größer als 0 sein."
+                     ,"The minimal amount of steps must be greater than 0."
+                     )
 
     | maxClauseLength baseConf == 1 && minSteps > 1 =
-        Just ("Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
-             ,"More than one step using only length 1 clauses is not possible."
-             )
+        Just $ PMult ("Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
+                     ,"More than one step using only length 1 clauses is not possible."
+                     )
 
     | minSteps > 2 * length (usedLiterals baseConf) =
-        Just ("Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
-             ,"This amount of steps is impossible with the given amount of literals."
-             )
+        Just $ PMult ("Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
+                     ,"This amount of steps is impossible with the given amount of literals."
+                     )
 
     | otherwise = checkBaseConf baseConf
 
@@ -130,28 +130,28 @@ start = []
 
 
 
-partialGrade :: ResolutionInst -> [ResStep] -> Maybe MText
+partialGrade :: ResolutionInst -> [ResStep] -> Maybe ProxyDoc
 partialGrade ResolutionInst{..} sol
     | isJust checkMapping  = checkMapping
 
     | not (null wrongLitsSteps) =
-        Just ("Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
-                ++ show wrongLitsSteps
-             ,"At least one step contains literals not found in the original formula. "
-                ++ show wrongLitsSteps
-             )
+        Just $ Composite [ PMult ("Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
+                                 ,"At least one step contains literals not found in the original formula. "
+                                 )
+                         , PDoc $ pretty wrongLitsSteps
+                         ]
 
     | not (null noResolveSteps) =
-        Just ("Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-                ++ show noResolveSteps
-             ,"At least one step is not a valid resolution step. "
-                ++ show noResolveSteps
-             )
+        Just $ Composite [ PMult ("Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
+                                 ,"At least one step is not a valid resolution step. "
+                                 )
+                         , PDoc $ pretty noResolveSteps
+                         ]
 
     | checkEmptyClause =
-        Just ("Im letzten Schritt muss die leere Klausel abgeleitet werden."
-             ,"The last step must derive the empty clause."
-             )
+        Just $ PMult ("Im letzten Schritt muss die leere Klausel abgeleitet werden."
+                     ,"The last step must derive the empty clause."
+                     )
 
     | otherwise = Nothing
 
@@ -166,17 +166,19 @@ partialGrade ResolutionInst{..} sol
 
 
 
-completeGrade :: ResolutionInst -> [ResStep] -> Maybe MText
+completeGrade :: ResolutionInst -> [ResStep] -> Maybe ProxyDoc
 completeGrade ResolutionInst{..} sol =
     case applySteps clauses steps of
-        Nothing -> Just ("In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
-                        ,"In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
-                        )
+        Nothing -> Just $ PMult ("In mindestens einem Schritt werden Klauseln resolviert, "
+                                  ++ "die nicht in der Formel sind oder noch nicht abgeleitet wurden."
+                                ,"In at least one step clauses are used, that are not part of the original formula "
+                                  ++ "and are not derived from previous steps."
+                                )
         Just solClauses -> if (any isEmptyClause solClauses)
                             then Nothing
-                            else Just ("Die Leere Klausel wurde nicht korrekt abgeleitet."
-                                      ,"The Empty clause was not derived correctly."
-                                      )
+                            else Just $ PMult ("Die Leere Klausel wurde nicht korrekt abgeleitet."
+                                              ,"The Empty clause was not derived correctly."
+                                              )
 
       where
         steps = replaceAll sol $ baseMapping clauses
@@ -187,15 +189,15 @@ baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
 
 
-correctMapping :: [ResStep] -> [(Int,Clause)] -> Maybe MText
+correctMapping :: [ResStep] -> [(Int,Clause)] -> Maybe ProxyDoc
 correctMapping [] _ = Nothing
 correctMapping (Res (c1,c2,(c3,i)): rest) mapping
-    | checkIndices = Just ("Mindestens ein Schritt verwendet einen nicht vergebenen Index. "
-                          ,"At least one step is using an unknown index."
-                          )
-    | alreadyUsed i = Just ("Mindestens ein Schritt vergibt einen Index, welcher bereits verwendet wird. "
-                           ,"At least one step assigns an index, which is already in use. "
-                           )
+    | checkIndices = Just $ PMult ("Mindestens ein Schritt verwendet einen nicht vergebenen Index. "
+                                  ,"At least one step is using an unknown index."
+                                  )
+    | alreadyUsed i = Just $ PMult ("Mindestens ein Schritt vergibt einen Index, welcher bereits verwendet wird. "
+                                   ,"At least one step assigns an index, which is already in use. "
+                                   )
     | otherwise = correctMapping rest newMapping
 
 

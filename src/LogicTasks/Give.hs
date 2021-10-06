@@ -23,20 +23,20 @@ import Text.PrettyPrint.Leijen.Text
 description :: GiveInst -> [ProxyDoc]
 description GiveInst{..} =
               [ PMult ("Betrachten Sie die folgende Wahrheitstafel:"
-                     ,"Consider the following truth table:"
-                     )
+                      ,"Consider the following truth table:"
+                      )
               , PDoc line
               , PDoc $ nest 4 $ pretty (getTable cnf)
               , PMult ("Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
-                     ,"Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
-                     )
+                      ,"Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
+                      )
               , PMult ("Reichen Sie ihre Lösung als ascii-basierte Formel ein."
-                     ,"Provide the solution as an ascii based formula."
-                     )
+                      ,"Provide the solution as an ascii based formula."
+                      )
               , PDoc line
               , PMult ("Beachten Sie dabei die folgende Legende:"
-                     ,"Use the following key:"
-                     )
+                      ,"Use the following key:"
+                      )
               , PDoc line
               , Composite [ PMult ("Negation"
                                   ,"negation"
@@ -55,7 +55,7 @@ description GiveInst{..} =
                           ]
               , PDoc line
               , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
-                                  , "A valid solution could look like this: ")
+                                  ,"A valid solution could look like this: ")
                           , PDoc $ pretty $ mkCnf $ [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
                           ]
               , PDoc line
@@ -65,31 +65,31 @@ description GiveInst{..} =
 
 
 
-verifyStatic :: GiveInst -> Maybe MText
+verifyStatic :: GiveInst -> Maybe ProxyDoc
 verifyStatic GiveInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
-        Just ("Geben Sie bitte eine nicht-leere Formel an."
-             ,"Please give a non empty formula."
-             )
+        Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
+                     ,"Please give a non empty formula."
+                     )
 
     | otherwise = Nothing
 
 
 
 
-verifyQuiz :: GiveConfig -> Maybe MText
+verifyQuiz :: GiveConfig -> Maybe ProxyDoc
 verifyQuiz GiveConfig{..}
 
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        Just ("Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-             ,"The given restriction on true entries are not in the range of 0 to 100 percent."
-             )
+        Just $ PMult ("Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
+                     ,"The given restriction on true entries are not in the range of 0 to 100 percent."
+                     )
 
     | low > high =
-        Just ("Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-             ,"The given restriction on true entries are not a valid range."
-             )
+        Just $ PMult ("Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
+                     ,"The given restriction on true entries are not a valid range."
+                     )
 
     | otherwise = checkCnfConf cnfConf
 
@@ -103,38 +103,42 @@ start = mkCnf []
 
 
 
-partialGrade :: GiveInst -> Cnf -> Maybe MText
+partialGrade :: GiveInst -> Cnf -> Maybe ProxyDoc
 partialGrade GiveInst{..} sol
     | not (null extra) =
-        Just ("Es sind unbekannte Literale enthalten. "
-                ++ "Diese Literale kommen in der korrekten Lösung nicht vor: "
-                ++ show extra
-             ,"Your submission contains unknown literals. "
-                ++ "These do not appear in a correct solution: "
-                ++ show extra
-             )
+        Just $ Composite [ PMult ("Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
+                                 ,"Your submission contains unknown literals. These do not appear in a correct solution: "
+                                 )
+                         , PDoc $ pretty extra
+                         ]
 
     | not (null missing) =
-        Just ("Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
-                ++ show missing
-             ,"Some literals are missing. Add these literals to your submission: "
-                ++ show missing
-             )
+        Just $ Composite [ PMult ("Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
+                                 ,"Some literals are missing. Add these literals to your submission: "
+                                 )
+                         , PDoc $ pretty missing
+                         ]
 
     | not  (all (\c -> amount c == length corLits) (getClauses sol)) =
-        Just ("Nicht alle Klauseln sind Maxterme!"
-             ,"Not all clauses are maxterms!"
-             )
+        Just $ PMult ("Nicht alle Klauseln sind Maxterme!"
+                     ,"Not all clauses are maxterms!"
+                     )
 
     | solLen < corrLen =
-        Just ("Die angegebene Formel enthält zu wenige Maxterme. Fügen sie " ++ diff ++ " hinzu!"
-             ,"The formula does not contain enough maxterms. Add " ++ diff ++ "!"
-             )
+        Just $ Composite [ PMult ("Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
+                                 ,"The formula does not contain enough maxterms. Add "
+                                 )
+                         , PDoc $ pretty diff
+                         , PMult (" hinzu!"
+                                 ,"!")
+                         ]
 
     | solLen > corrLen =
-        Just ("Die angegebene Formel enthält zu viele Maxterme. Entfernen sie " ++ diff ++ "!"
-             ,"The formula contains too many maxterms. Remove " ++ diff ++ "!"
-             )
+        Just $ Composite [ PMult ("Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
+                                 ,"The formula contains too many maxterms. Remove "
+                                 )
+                         , PDoc $ pretty diff <+> myText "!"
+                         ]
 
     | otherwise = Nothing
 
@@ -152,17 +156,17 @@ partialGrade GiveInst{..} sol
 
 
 
-completeGrade :: GiveInst -> Cnf -> Maybe MText
+completeGrade :: GiveInst -> Cnf -> Maybe ProxyDoc
 completeGrade GiveInst{..} sol
 
     | not (null diff) =
-        Just ("Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-                ++ show diff
-             ,"The following rows are not correct: "
-                ++ show diff
-             )
-    | otherwise = Nothing
+        Just $ Composite [ PMult ("Es existieren falsche Einträge in den folgenden Tabellenspalten: "
+                                 ,"The following rows are not correct: "
+                                 )
+                         , PDoc $ pretty diff
+                         ]
 
+    | otherwise = Nothing
   where
     solTable = getTable sol
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable cnf) [1..])

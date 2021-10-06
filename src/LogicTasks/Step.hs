@@ -62,22 +62,22 @@ description StepInst{..} =
 
 
 
-verifyStatic :: StepInst -> Maybe MText
+verifyStatic :: StepInst -> Maybe ProxyDoc
 verifyStatic StepInst{..}
     | any isEmptyClause [clause1, clause2] =
-        Just ("Mindestens eine der Klauseln ist leer."
-             ,"At least one of the clauses is empty."
-             )
+        Just $ PMult ("Mindestens eine der Klauseln ist leer."
+                     ,"At least one of the clauses is empty."
+                     )
     | not $ resolvable clause1 clause2 =
-        Just ("Die Klauseln sind nicht resolvierbar."
-             ,"The clauses are not resolvable."
-             )
+        Just $ PMult ("Die Klauseln sind nicht resolvierbar."
+                     ,"The clauses are not resolvable."
+                     )
 
     | otherwise = Nothing
 
 
 
-verifyQuiz :: StepConfig -> Maybe MText
+verifyQuiz :: StepConfig -> Maybe ProxyDoc
 verifyQuiz StepConfig{..} = checkBaseConf baseConf
 
 
@@ -87,19 +87,19 @@ start = (Literal ' ', mkClause [])
 
 
 
-partialGrade :: StepInst -> (Literal, Clause) -> Maybe MText
+partialGrade :: StepInst -> (Literal, Clause) -> Maybe ProxyDoc
 partialGrade StepInst{..} sol
     | not (fst sol `Set.member` availLits) =
-        Just ("Das gewählte Literal kommt in den Klauseln nicht vor."
-             ,"The chosen literal is not contained in any of the clauses."
-             )
+        Just $ PMult ("Das gewählte Literal kommt in den Klauseln nicht vor."
+                     ,"The chosen literal is not contained in any of the clauses."
+                     )
 
     | not (null extra) =
-        Just ("In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
-                ++ show extra
-             ,"The resolvent contains unknown literals. These literals are incorrect:"
-                ++ show extra
-             )
+        Just $ Composite [ PMult ("In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
+                                 ,"The resolvent contains unknown literals. These literals are incorrect:"
+                                 )
+                         , PDoc $ pretty extra
+                         ]
 
     | otherwise = Nothing
 
@@ -110,14 +110,14 @@ partialGrade StepInst{..} sol
 
 
 
-completeGrade :: StepInst -> (Literal, Clause) -> Maybe MText
+completeGrade :: StepInst -> (Literal, Clause) -> Maybe ProxyDoc
 completeGrade StepInst{..} sol =
     case resolve clause1 clause2 (fst sol) of
-        Nothing -> Just ("Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                        ,"This literal can not be used for a resolution step!"
-                        )
+        Nothing -> Just $ PMult ("Mit diesem Literal kann kein Schritt durchgeführt werden!"
+                                ,"This literal can not be used for a resolution step!"
+                                )
         Just solClause -> if (solClause == snd sol)
                             then Nothing
-                            else Just ("Resolvente ist nicht korrekt."
-                                      ,"Resolvent is not correct."
-                                      )
+                            else Just $ PMult ("Resolvente ist nicht korrekt."
+                                              ,"Resolvent is not correct."
+                                              )
