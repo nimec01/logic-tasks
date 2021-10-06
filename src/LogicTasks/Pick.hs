@@ -29,13 +29,14 @@ description PickInst{..} =
                       ,"Which of these truth tables represents the formula? Specify the correct table by giving its number."
                       )
               , PDoc line
+              , PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
+              , PDoc line
               , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
                                   , "A valid solution could look like this: ")
                           , PDoc $ myText "1"
                           ]
-              , PDoc $ myText (fromMaybe "" addText)
               , PDoc line
-              , PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
+              , PDoc $ myText (fromMaybe "" addText)
               ]
 
 

@@ -34,6 +34,7 @@ description GiveInst{..} =
               , PMult ("Reichen Sie ihre Lösung als ascii-basierte Formel ein."
                      ,"Provide the solution as an ascii based formula."
                      )
+              , PDoc line
               , PMult ("Beachten Sie dabei die folgende Legende:"
                      ,"Use the following key:"
                      )

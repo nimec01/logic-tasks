@@ -28,13 +28,15 @@ description FillInst{..} =
               , PMult ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
                      ,"Fill all blanks in the corresponding truth table with truth values (True or False)."
                      )
+              , PDoc line
+              , PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
+              , PDoc line
               , PMult ("Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an,"
                      ,"Provide the solution as a list of truth values."
                      )
               , PMult ("wobei das erste Element der Liste der ersten Zeile entspricht, das zweite Element der zweiten Zeile, etc."
                      ,"The first element of the list fills the first blank, the second element fills the second blank, etc."
                      )
-              , PDoc line
               , PMult ("Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben oder als Kurzform (f oder w) erfolgen."
                       ,"Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word or by giving a shorthand (f or t)."
                       )
@@ -44,8 +46,6 @@ description FillInst{..} =
                           , PDoc $ myText "[t,w,w,w]"
                           ]
               , PDoc $ myText (fromMaybe "" addText)
-              , PDoc line
-              , PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
               ]
 
 

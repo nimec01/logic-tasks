@@ -31,6 +31,8 @@ description DecideInst{..} =
               , PMult ("Finden Sie alle Fehlerhaften Wahrheitswerte in der folgenden Wahrheitstafel."
                       ,"Find all faulty entries in the following truth table."
                       )
+              , PDoc line
+              , PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)
               , PMult ("Geben Sie die Lösung als eine Liste der Indices der fehlerhaften Zeilen an."
                       ,"Provide the solution as a list of indices of the faulty rows."
                       )
@@ -40,8 +42,6 @@ description DecideInst{..} =
                           , PDoc $ myText "[1,4,5]"
                           ]
               , PDoc $ myText (fromMaybe "" addText)
-              , PDoc line
-              , PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)
               ]
 
 

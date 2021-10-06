@@ -31,12 +31,12 @@ description StepInst{..} =
               , PMult ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
                      ,"Resolve the clauses and give the resulting resolvent."
                      )
-              , PMult ("Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an:"
-                     ,"Provide the literal used for the step and the resolvent in the following tuple form:"
+              , PMult ("Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: "
+                        ++ "(Literal, Resolvente als ASCII-basierte Klausel)."
+                     ,"Provide the literal used for the step and the resolvent in the following tuple form: "
+                        ++ "(literal, resolvent as ASCII based clause)."
                      )
-              , PMult ("(Literal, Resolvente als ASCII-basierte Klausel)."
-                     ,"(literal, resolvent as ASCII based clause)."
-                     )
+              , PDoc line
               , PMult ("Beachten Sie dabei für die ASCII-Formel diese Legende:"
                      ,"Consider this key for the ASCII based formula:"
                      )
