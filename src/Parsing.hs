@@ -104,8 +104,8 @@ instance Parse TruthValue where
                   noFollowing
                   return $ TruthValue False
 
-                noFollowing = notFollowedBy alphaNum
-                              <|> fail "A truth value was appended with additional characters or misstyped."
+                noFollowing = notFollowedBy (alphaNum
+                              <|> fail "A truth value was appended with additional characters or misstyped.")
 
 
 
