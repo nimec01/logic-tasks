@@ -92,7 +92,7 @@ instance Parse TruthValue where
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
-            (parseTrue <|> parseFalse) <|> fail "Could not read a truth value. Please enter values as described in the exercise description."
+            try (parseTrue <|> parseFalse) <|> fail "Could not read a truth value. Please enter values as described in the exercise description."
               where
                 parseTrue = do
                   try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
