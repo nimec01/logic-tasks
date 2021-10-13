@@ -93,7 +93,7 @@ instance Parse TruthValue where
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
-            parseTrue <|> parseFalse
+            try (parseTrue <|> parseFalse) <|> fail "A truth value was appended with additional characters or misstyped."
               where
                 parseTrue = do
                   try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
