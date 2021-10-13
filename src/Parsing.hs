@@ -93,16 +93,19 @@ instance Parse TruthValue where
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
-            try (parseTrue <|> parseFalse) <|> fail "A truth value was appended with additional characters or misstyped."
+            parseTrue <|> parseFalse
               where
                 parseTrue = do
                   try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
-                  notFollowedBy alphaNum
+                  noFollowing
                   return $ TruthValue True
                 parseFalse = do
                   try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
-                  notFollowedBy alphaNum
+                  noFollowing
                   return $ TruthValue False
+
+                noFollowing = notFollowedBy alphaNum
+                              <|> fail "A truth value was appended with additional characters or misstyped."
 
 
 
