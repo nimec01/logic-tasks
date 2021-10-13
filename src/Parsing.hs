@@ -88,17 +88,20 @@ instance Parse Number where
 
 
 instance Parse TruthValue where
-  parser = trailSpaces truthParse <?> "Truth Value"
+  parser = (trailSpaces truthParse <?> "Truth Value")
+           <|> fail "Could not read a truth value. Please enter values as described in the exercise description."
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
-            try (parseTrue <|> parseFalse) <|> fail "Could not read a truth value. Please enter values as described in the exercise description."
+            parseTrue <|> parseFalse
               where
                 parseTrue = do
                   try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
+                  notFollowedBy alphaNum
                   return $ TruthValue True
                 parseFalse = do
                   try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
+                  notFollowedBy alphaNum
                   return $ TruthValue False
 
 
