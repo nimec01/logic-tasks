@@ -107,10 +107,10 @@ instance Parse TruthValue where
                   noFollowing
                   return $ TruthValue False
 
-                noFollowing = notFollowedByElse (alphaNum) (\c -> fail $ unlines ["unexpected " ++ [c]
-                                                                                 ,"Additional characters were appended to this truth value."
+                noFollowing = notFollowedByElse (many1 alphaNum) $ \s -> fail $ unlines ["unexpected " ++ s
+                                                                                 ,"Additional characters were appended to this truth value or it was mistyped."
                                                                                  ]
-                                                           )
+
 
 
 
