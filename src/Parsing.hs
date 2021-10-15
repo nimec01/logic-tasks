@@ -60,6 +60,9 @@ parseAnd :: Parser ()
 parseAnd = trailSpaces $ void $ string "/\\"
 
 
+notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
+notFollowedByElse p f = try ((try p >>= f) <|> pure ())
+
 
 
 class Parse a where
@@ -104,8 +107,10 @@ instance Parse TruthValue where
                   noFollowing
                   return $ TruthValue False
 
-                noFollowing = notFollowedBy (alphaNum
-                              <|> fail "A truth value was appended with additional characters or misstyped.")
+                noFollowing = notFollowedByElse (alphaNum) (\c -> fail $ unlines ["unexpected " ++ [c]
+                                                                                 ,"Additional characters were appended to this truth value."
+                                                                                 ]
+                                                           )
 
 
 
