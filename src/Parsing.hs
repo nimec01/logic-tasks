@@ -92,7 +92,7 @@ instance Parse Number where
 
 instance Parse TruthValue where
   parser = (trailSpaces truthParse <?> "Truth Value")
-           <|> fail "Could not read a truth value. Please enter values as described in the exercise description."
+           <|> fail "Could not parse a truth value. Please enter values as described in the exercise description."
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
@@ -107,7 +107,7 @@ instance Parse TruthValue where
                   noFollowing
                   return $ TruthValue False
 
-                noFollowing = notFollowedByElse (many1 alphaNum) $ \s -> fail $ unlines ["unexpected " ++ s
+                noFollowing = notFollowedByElse alphaNum $ \c -> fail $ unlines ["unexpected " ++ [c]
                                                                                  ,"Additional characters were appended to this truth value or it was mistyped."
                                                                                  ]
 
@@ -116,7 +116,8 @@ instance Parse TruthValue where
 
 
 instance Parse Literal where
-  parser = trailSpaces litParse <?> "Literal"
+  parser = (trailSpaces litParse <?> "Literal")
+           <|> fail "Could not parse a literal. Literals are denoted by capital letters, negation is denoted by a '~'."
     where
       litParse = do
         result <- optionMaybe $ char '~'
@@ -128,7 +129,8 @@ instance Parse Literal where
 
 
 instance Parse Clause where
- parser = trailSpaces clauseParse <?> "Clause"
+ parser = (trailSpaces clauseParse <?> "Clause")
+          <|> fail "Could not parse a clause. Clauses are composed out of literals and disjunctions (\\/)."
    where
      clauseParse = do
        braces <- trailSpaces $ optionMaybe $ char '('
@@ -140,7 +142,8 @@ instance Parse Clause where
 
 
 instance Parse Cnf where
-  parser = trailSpaces parseCnf <?> "CNF"
+  parser = (trailSpaces parseCnf <?> "CNF")
+           <|> fail "Could not parse a CNF. CNFs are composed out of clauses and conjunctions (/\\)."
     where
       parseCnf = do
         clauses <- sepBy parser parseAnd
