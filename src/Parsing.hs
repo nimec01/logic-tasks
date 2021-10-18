@@ -25,7 +25,7 @@ instance Parse ResStep where
     clause3 <- resClause
     index <- optionMaybe indexParse
     withSpaces ')'
-    return $ Res (clause1,clause2,(clause3,index))
+    pure $ Res (clause1,clause2,(clause3,index))
 
    where
     braces = between (withSpaces '{') (withSpaces '}')
@@ -38,7 +38,7 @@ instance Parse ResStep where
 
     parseNum = do
       i <- many1 digit
-      return (read i)
+      pure (read i)
 
 
 
@@ -52,12 +52,12 @@ withSpaces = trailSpaces . char
 
 
 parseOr :: Parser ()
-parseOr = trailSpaces $ void $ string "\\/"
+parseOr = ((trailSpaces $ void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
 
 
 
 parseAnd :: Parser ()
-parseAnd = trailSpaces $ void $ string "/\\"
+parseAnd = ((trailSpaces $ void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
 
 
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
@@ -71,21 +71,22 @@ class Parse a where
 
 
 instance Parse a => Parse [a] where
-  parser = trailSpaces listParse <?> "List"
+  parser = (trailSpaces listParse <?> "List")
+           <|> fail "Could not parse a list of values. The elements of a list are enclosed by square brackets '[ ]' and separated by commas."
     where
       listParse = do
-        withSpaces '['
-        xs <- parser `sepBy` (char ',')
-        withSpaces ']'
-        return xs
+        withSpaces '[' <|> fail "could not parse an opening '['"
+        xs <- try (parser `sepBy` (char ',')) <|> fail "parsed a wrong separator. Lists are comma-separated."
+        withSpaces ']' <|> fail "could not parse an enclosing ']'"
+        pure xs
 
 
 
 instance Parse Number where
-  parser = trailSpaces numParse <?> "Number"
+  parser = (trailSpaces numParse <?> "Number") <|> fail "Could not parse a number"
     where numParse = do
             result <- optionMaybe $ many1 digit
-            return $ Number $ fmap read result
+            pure $ Number $ fmap read result
 
 
 
@@ -101,15 +102,16 @@ instance Parse TruthValue where
                 parseTrue = do
                   try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
                   noFollowing
-                  return $ TruthValue True
+                  pure $ TruthValue True
                 parseFalse = do
                   try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
                   noFollowing
-                  return $ TruthValue False
+                  pure $ TruthValue False
 
-                noFollowing = notFollowedByElse alphaNum $ \c -> fail $ unlines ["unexpected " ++ [c]
-                                                                                 ,"Additional characters were appended to this truth value or it was mistyped."
-                                                                                 ]
+                noFollowing = notFollowedByElse alphaNum $
+                                \c -> fail $ unlines ["unexpected " ++ [c]
+                                                     ,"Additional characters were appended to this truth value or it was mistyped."
+                                                     ]
 
 
 
@@ -122,8 +124,8 @@ instance Parse Literal where
       litParse = do
         result <- optionMaybe $ char '~'
         var <- satisfy $ flip elem ['A'..'Z']
-        case result of Nothing -> return (Literal var)
-                       Just _  -> return (Not var)
+        case result of Nothing -> pure (Literal var)
+                       Just _  -> pure (Not var)
 
 
 
@@ -135,9 +137,9 @@ instance Parse Clause where
      clauseParse = do
        braces <- trailSpaces $ optionMaybe $ char '('
        lits <- sepBy parser parseOr
-       case braces of Nothing -> return ' '
+       case braces of Nothing -> pure ' '
                       Just _ -> char ')'
-       return $ mkClause lits
+       pure $ mkClause lits
 
 
 
@@ -147,7 +149,7 @@ instance Parse Cnf where
     where
       parseCnf = do
         clauses <- sepBy parser parseAnd
-        return $ mkCnf clauses
+        pure $ mkCnf clauses
 
 
 
@@ -165,7 +167,7 @@ instance Parse PickInst where
         index <- trailSpaces $ many1 digit
         text <- optionMaybe $ trailSpaces extraText
         char ')'
-        return $ PickInst cnfs (read index) text
+        pure $ PickInst cnfs (read index) text
           where
             extraText = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
