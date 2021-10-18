@@ -76,7 +76,7 @@ instance Parse a => Parse [a] where
     where
       listParse = do
         withSpaces '[' <|> fail "could not parse an opening '['"
-        xs <- parser `sepBy` (withSpaces ',') <|> fail "parsed a wrong separator. Lists are comma-separated."
+        xs <- parser `sepBy` (withSpaces ',' <|> fail "parsed a wrong separator. Lists are comma-separated.")
         withSpaces ']' <|> fail "could not parse an enclosing ']'"
         pure xs
 
