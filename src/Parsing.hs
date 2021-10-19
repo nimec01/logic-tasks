@@ -100,11 +100,11 @@ instance Parse TruthValue where
             parseTrue <|> parseFalse
               where
                 parseTrue = do
-                  try (string "wahr") <|> try (string "true") <|> string "1" <|> string "w" <|> string "t"
+                  try (string "wahr") <|> try (string "true") <|> single "1" <|> single "w" <|> single "t"
                   noFollowing
                   pure $ TruthValue True
                 parseFalse = do
-                  try (string "falsch") <|> try (string "false") <|> string "0" <|> string "f"
+                  try (string "falsch") <|> try (string "false") <|> single "0" <|> single "f"
                   noFollowing
                   pure $ TruthValue False
 
@@ -112,6 +112,10 @@ instance Parse TruthValue where
                                 \c -> fail $ unlines ["unexpected " ++ [c]
                                                      ,"Additional characters were appended to this truth value or it was mistyped."
                                                      ]
+                single s = do
+                    res <- string s
+                    (notFollowedBy alphaNum) :: Parser ()
+                    return res
 
 
 
