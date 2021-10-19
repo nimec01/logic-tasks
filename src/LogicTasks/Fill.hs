@@ -40,10 +40,9 @@ description FillInst{..} =
                       ,"Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word or by giving a shorthand (f or t)."
                       )
               , PDoc line
-              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
-                                  , "A valid solution could look like this: ")
-                          , PDoc $ myText "[t,w,w,w]"
-                          ]
+              , PMult ( "Ein Lösungsversuch könnte beispielsweise so aussehen: [f,w,w,w]"
+                      , "A valid solution could look like this: [f,t,t,t]"
+                      )
               , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]
