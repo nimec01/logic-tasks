@@ -93,28 +93,29 @@ instance Parse Number where
 
 instance Parse TruthValue where
   parser = (trailSpaces truthParse <?> "Truth Value")
-           <|> fail "Could not parse a truth value: Please enter values as described in the exercise description."
+
     where truthParse = do
             s <- getInput
             setInput (map toLower s)
-            parseTrue <|> parseFalse
+            t <- try (parseTrue <|> parseFalse <|> fail "Could not parse a truth value: Please enter values as described in the exercise description.")
+                      <|> fail "The truth value was mistyped."
+            notFollowedByElse alphaNum (\c -> fail $ unlines
+                                               ["unexpected " ++ [c]
+                                               ,"Additional characters were appended to this truth value or it was mistyped."
+                                               ])
+            pure t
               where
                 parseTrue = do
-                  try (string "wahr") <|> try (string "true") <|> single "1" <|> single "w" <|> single "t"
-                  noFollowing
+                  string "1" <|> try (single "w") <|> try (single "t") <|> string "wahr" <|> string "true"
                   pure $ TruthValue True
                 parseFalse = do
-                  try (string "falsch") <|> try (string "false") <|> single "0" <|> single "f"
-                  noFollowing
+                  string "0" <|> try (single "f") <|> try (string "falsch") <|> string "false"
                   pure $ TruthValue False
 
-                noFollowing = notFollowedByElse alphaNum $
-                                \c -> fail $ unlines ["unexpected " ++ [c]
-                                                     ,"Additional characters were appended to this truth value or it was mistyped."
-                                                     ]
+                single :: String -> Parser String
                 single s = do
                     res <- string s
-                    (notFollowedBy alphaNum) :: Parser ()
+                    notFollowedBy alphaNum
                     return res
 
 
