@@ -106,17 +106,25 @@ instance Parse TruthValue where
             pure t
               where
                 parseTrue = do
-                  string "1" <|> try (single "w") <|> try (single "t") <|> string "wahr" <|> string "true"
+                  char '1' <|> try (single 'w') <|> try (single 't') <|> trueDe <|> trueEn
                   pure $ TruthValue True
                 parseFalse = do
-                  string "0" <|> try (single "f") <|> try (string "falsch") <|> string "false"
+                  char '0' <|> try (single 'f') <|> eitherDeEn
                   pure $ TruthValue False
 
-                single :: String -> Parser String
-                single s = do
-                    res <- string s
+                single :: Char -> Parser Char
+                single c = do
+                    res <- char c
                     notFollowedBy alphaNum
                     return res
+
+                trueDe = char 'w' >> char 'a' >> char 'h' >> char 'r'
+
+                trueEn = char 't' >> char 'r' >> char 'u' >> char 'e'
+
+
+                eitherDeEn = char 'f' >> char 'a' >> char 'l' >> char 's'
+                              >> (try (char 'e') <|> (char 'c' >> char 'h'))
 
 
 
