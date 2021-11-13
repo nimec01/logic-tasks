@@ -3,8 +3,10 @@ module Formula
        (
          isPositive
        , mkClause
+       , mkDisj
        , isEmptyClause
        , mkCnf
+       , mkDnf
        , isEmptyCnf
        , hasEmptyClause
        , xorSat
@@ -55,6 +57,20 @@ isEmptyCnf (Cnf set) = Set.null set
 -- | Does the cnf contain an empty clause?
 hasEmptyClause :: Cnf -> Bool
 hasEmptyClause (Cnf set) = Clause Set.empty `Set.member` set
+
+
+
+---------------------------------------------------------------------------------------------------
+
+
+-- | Builds a disjunction containing the given literals.
+mkDisj :: [Literal] -> Disj
+mkDisj xs = Disj $ Set.fromList xs
+
+
+-- | Builds a formula in dnf containing the given disjunctions.
+mkDnf :: [Disj] -> Dnf
+mkDnf xs = Dnf $ Set.fromList xs
 
 
 
