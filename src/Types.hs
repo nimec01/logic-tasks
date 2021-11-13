@@ -8,10 +8,11 @@ module Types
        , Literal(..)
        , opposite
        , Clause(..)
-       , Disj(..)
+       , Con(..)
        , Cnf(..)
        , Dnf(..)
        , getClauses
+       , getConjunctions
        , Table(..)
        , getTable
        , Allocation
@@ -343,14 +344,14 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
 
 ------------------------------------------------------------
 
--- | A datatype representing a disjunction
-newtype Disj = Disj { literalSet :: Set Literal}
+-- | A datatype representing a conjunction
+newtype Con = Con { literalSet :: Set Literal}
     deriving (Eq,Typeable,Generic)
 
 
 
-instance Ord Disj where
-   compare (Disj set1) (Disj set2)
+instance Ord Con where
+   compare (Con set1) (Con set2)
        | size1 /= size2 = compare size1 size2
        | otherwise = compare set1 set2
      where
@@ -359,8 +360,8 @@ instance Ord Disj where
 
 
 
-instance Show Disj where
-   show (Disj set) = listShow (Set.toList set)
+instance Show Con where
+   show (Con set) = listShow (Set.toList set)
      where
        listShow :: [Literal] -> String
        listShow [] = "True"
@@ -369,16 +370,16 @@ instance Show Disj where
 
 
 
-instance Formula Disj where
-   convert (Disj set)
+instance Formula Con where
+   convert (Con set)
         | Set.null set = Sat.Yes
         | otherwise = Sat.All (map convert (Set.toList set))
 
-   literals (Disj set) = Set.toList set
+   literals (Con set) = Set.toList set
 
-   atomics (Disj set) = concat $ Set.toList $ Set.map atomics set
+   atomics (Con set) = concat $ Set.toList $ Set.map atomics set
 
-   amount (Disj set) = Set.size set
+   amount (Con set) = Set.size set
 
    evaluate xs ys = and <$> sequence lits
      where
@@ -388,13 +389,13 @@ instance Formula Disj where
 
 
 
-partEvalDisj :: Disj -> (Literal,Bool) -> Either Bool Disj
-partEvalDisj (Disj set) x
+partEvalCon :: Con -> (Literal,Bool) -> Either Bool Con
+partEvalCon (Con set) x
     | Set.null set = Left True
     | isIn || negIsIn =
-     if snd x then if isIn then Right (Disj setWithout) else Right (Disj set)
-              else if isIn then Left False else Right (Disj setWithoutNeg)
-    | otherwise = Right (Disj set)
+     if snd x then if isIn then Right (Con setWithout) else Right (Con set)
+              else if isIn then Left False else Right (Con setWithoutNeg)
+    | otherwise = Right (Con set)
   where
     next = fst x
     negNext = opposite next
@@ -405,23 +406,23 @@ partEvalDisj (Disj set) x
 
 
 
-instance Arbitrary Disj where
+instance Arbitrary Con where
    arbitrary = sized disj
      where
-       disj :: Int -> Gen Disj
-       disj 0 = genDisj (0,0) []
-       disj n = genDisj (1,maxBound) (take n ['A'..'Z'])
+       disj :: Int -> Gen Con
+       disj 0 = genCon (0,0) []
+       disj n = genCon (1,maxBound) (take n ['A'..'Z'])
 
 
--- | Generates a random disjunction. The length of the generated disjunction lies in the given length bounds.
+-- | Generates a random conjunction. The length of the generated conjunction lies in the given length bounds.
 --   The used atomic formulae are drawn from the list of chars.
-genDisj :: (Int,Int) -> [Char] -> Gen Disj
-genDisj (minlen,maxlen) lits
-    | null lits || minlen > length nLits || invalidLen = pure (Disj empty)
+genCon :: (Int,Int) -> [Char] -> Gen Con
+genCon (minlen,maxlen) lits
+    | null lits || minlen > length nLits || invalidLen = pure (Con empty)
     | otherwise = do
         len <- choose (minlen,minimum [length nLits, maxlen])
         genLits <- generateLiterals nLits empty len
-        pure (Disj genLits)
+        pure (Con genLits)
   where
     nLits = nub lits
     invalidLen = minlen > maxlen || minlen <= 0
@@ -441,7 +442,7 @@ genDisj (minlen,maxlen) lits
 --------------------------------------------------------------
 
 -- | A datatype representing a formula in disjunctive normalform.
-newtype Dnf = Dnf { clauseSet :: Set Disj}
+newtype Dnf = Dnf { clauseSet :: Set Con}
      deriving (Eq,Typeable,Generic)
 
 
@@ -458,8 +459,8 @@ instance Ord Dnf where
 
 
 -- | Retrieves the contained conjunctions of the dnf.
-getDisjunctions :: Dnf -> [Disj]
-getDisjunctions (Dnf set) = Set.toList set
+getConjunctions :: Dnf -> [Con]
+getConjunctions (Dnf set) = Set.toList set
 
 
 
@@ -470,15 +471,15 @@ partEvalDnf dnf tup
     | otherwise = result (thin applied)
   where
     lits = literals dnf
-    disjs = getDisjunctions dnf
-    applied = map (`partEvalDisj` tup) disjs
-    thin :: [Either Bool Disj] -> [Either Bool Disj]
+    disjs = getConjunctions dnf
+    applied = map (`partEvalCon` tup) disjs
+    thin :: [Either Bool Con] -> [Either Bool Con]
     thin [] = []
     thin (x:xs) =
       case x of Left False   -> thin xs
                 Left True    -> [Left True]
                 Right disj -> Right disj : thin xs
-    result :: [Either Bool Disj] -> Either Bool Dnf
+    result :: [Either Bool Con] -> Either Bool Dnf
     result xs
       | null xs = Left False
       | Left True `elem` xs = Left True
@@ -488,7 +489,7 @@ partEvalDnf dnf tup
 instance Show Dnf where
     show (Dnf set) = listShow (Set.toList set)
       where
-        listShow :: [Disj] -> String
+        listShow :: [Con] -> String
         listShow [] = "False"
         listShow [x] = show x
         listShow (x:xs) = "(" ++ show x ++ ") OR (" ++ listShow xs ++ ")"
@@ -505,9 +506,9 @@ instance Formula Dnf where
 
     amount (Dnf set) = Set.size set
 
-    evaluate alloc dnf = or <$> sequence disjs
+    evaluate alloc dnf = or <$> sequence cons
       where
-        disjs = map (evaluate alloc) (getDisjunctions dnf)
+        cons = map (evaluate alloc) (getConjunctions dnf)
 
 
 
@@ -527,7 +528,7 @@ instance Arbitrary Dnf where
 
 
 -- | Generates a random dnf satisfying the given bounds
---   for the amount and the length of the contained disjunctions.
+--   for the amount and the length of the contained conjunctions.
 --   The used atomic formulae are drawn from the list of chars.
 
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
@@ -535,7 +536,7 @@ genDnf (minNum,maxNum) (minLen,maxLen) lits
     | null nLits || invalidLen || invalidNum = pure (Dnf empty)
     | otherwise = do
         num <- choose (minNum, minimum [maxNum,upperBound])
-        dnf <- generateDisjs nLits empty num
+        dnf <- generateCons nLits empty num
         pure (Dnf dnf)
   where
     nLits = nub lits
@@ -549,12 +550,12 @@ genDnf (minNum,maxNum) (minLen,maxLen) lits
         | otherwise = 2^n * len + lengthBound (n-1) len
     upperBound = lengthBound maxLen (length nLits)
 
-    generateDisjs :: [Char] -> Set Disj -> Int -> Gen (Set Disj)
-    generateDisjs usedLits set num
+    generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
+    generateCons usedLits set num
         | Set.size set == num = pure set
         | otherwise = do
-            disj <- genDisj (minLen,maxLen) usedLits
-            generateDisjs usedLits (Set.insert disj set) num
+            con <- genCon (minLen,maxLen) usedLits
+            generateCons usedLits (Set.insert con set) num
 
 
 ------------------------------------------------------------

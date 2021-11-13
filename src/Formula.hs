@@ -3,7 +3,7 @@ module Formula
        (
          isPositive
        , mkClause
-       , mkDisj
+       , mkCon
        , isEmptyClause
        , mkCnf
        , mkDnf
@@ -63,13 +63,13 @@ hasEmptyClause (Cnf set) = Clause Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 
--- | Builds a disjunction containing the given literals.
-mkDisj :: [Literal] -> Disj
-mkDisj xs = Disj $ Set.fromList xs
+-- | Builds a conjunction containing the given literals.
+mkCon :: [Literal] -> Con
+mkCon xs = Con $ Set.fromList xs
 
 
--- | Builds a formula in dnf containing the given disjunctions.
-mkDnf :: [Disj] -> Dnf
+-- | Builds a formula in dnf containing the given conjunctions.
+mkDnf :: [Con] -> Dnf
 mkDnf xs = Dnf $ Set.fromList xs
 
 
