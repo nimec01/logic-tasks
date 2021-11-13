@@ -139,7 +139,7 @@ instance Parse Literal where
 
 instance Parse Clause where
  parser = (trailSpaces clauseParse <?> "Clause")
-          <|> fail "Could not parse a clause: Clauses are composed out of literals and disjunctions (\\/)."
+          <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
    where
      clauseParse = do
        braces <- trailSpaces $ optionMaybe $ char '('
@@ -150,13 +150,37 @@ instance Parse Clause where
 
 
 
+instance Parse Con where
+ parser = (trailSpaces conParse <?> "Conjunction")
+          <|> fail "Could not parse a conjunction: Conjunctions are composed out of literals and the 'and operator' (/\\)."
+   where
+     conParse = do
+       braces <- trailSpaces $ optionMaybe $ char '('
+       lits <- sepBy parser parseAnd
+       case braces of Nothing -> pure ' '
+                      Just _ -> char ')'
+       pure $ mkCon lits
+
+
+
 instance Parse Cnf where
   parser = (trailSpaces parseCnf <?> "CNF")
-           <|> fail "Could not parse a CNF: CNFs are composed out of clauses and conjunctions (/\\)."
+           <|> fail "Could not parse a CNF: CNFs are composed out of clauses and the 'and operator' (/\\)."
     where
       parseCnf = do
         clauses <- sepBy parser parseAnd
         pure $ mkCnf clauses
+
+
+
+instance Parse Dnf where
+  parser = (trailSpaces parseDnf <?> "DNF")
+           <|> fail "Could not parse a DNF: DNFs are composed out of clauses and the 'or operator' (\\/)."
+    where
+      parseDnf = do
+        cons <- sepBy parser parseOr
+        pure $ mkDnf cons
+
 
 
 
