@@ -9,6 +9,8 @@ module Formula
        , mkDnf
        , isEmptyCnf
        , hasEmptyClause
+       , isEmptyDnf
+       , hasEmptyCon
        , xorSat
        , orSat
        , andSat
@@ -71,6 +73,17 @@ mkCon xs = Con $ Set.fromList xs
 -- | Builds a formula in dnf containing the given conjunctions.
 mkDnf :: [Con] -> Dnf
 mkDnf xs = Dnf $ Set.fromList xs
+
+
+-- | Is the input the empty clause?
+isEmptyDnf :: Dnf -> Bool
+isEmptyDnf (Dnf set) = Set.null set
+
+
+-- | Does the dnf contain an empty conjunction?
+hasEmptyCon :: Dnf -> Bool
+hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
+
 
 
 
