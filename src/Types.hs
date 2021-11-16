@@ -18,7 +18,9 @@ module Types
        , Allocation
        , genLiteral
        , genClause
+       , genCon
        , genCnf
+       , genDnf
        , possibleAllocations
        , Formula(..)
        , ResStep(..)
