@@ -45,6 +45,21 @@ dGiveInst =  GiveInst
 
 
 
+
+data MinInst = MinInst {
+                 dnf     :: ! Dnf
+               , addText :: ! (Maybe String)
+               }
+               deriving (Typeable, Generic)
+
+dMinInst :: MinInst
+dMinInst =  MinInst
+          { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
+          , addText = Just "Put additional text here or delete this parameter."
+          }
+
+
+
 data FillInst = FillInst {
                  cnf     :: ! Cnf
                , missing :: ! [Int]
@@ -134,6 +149,7 @@ dCnfConf = CnfConfig
     , minClauseAmount = 2
     , maxClauseAmount = 3
     }
+
 
 
 

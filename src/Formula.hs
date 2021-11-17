@@ -3,12 +3,14 @@ module Formula
        (
          isPositive
        , mkClause
-       , mkDisj
+       , mkCon
        , isEmptyClause
        , mkCnf
        , mkDnf
        , isEmptyCnf
        , hasEmptyClause
+       , isEmptyDnf
+       , hasEmptyCon
        , xorSat
        , orSat
        , andSat
@@ -63,14 +65,25 @@ hasEmptyClause (Cnf set) = Clause Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 
--- | Builds a disjunction containing the given literals.
-mkDisj :: [Literal] -> Disj
-mkDisj xs = Disj $ Set.fromList xs
+-- | Builds a conjunction containing the given literals.
+mkCon :: [Literal] -> Con
+mkCon xs = Con $ Set.fromList xs
 
 
--- | Builds a formula in dnf containing the given disjunctions.
-mkDnf :: [Disj] -> Dnf
+-- | Builds a formula in dnf containing the given conjunctions.
+mkDnf :: [Con] -> Dnf
 mkDnf xs = Dnf $ Set.fromList xs
+
+
+-- | Is the input the empty clause?
+isEmptyDnf :: Dnf -> Bool
+isEmptyDnf (Dnf set) = Set.null set
+
+
+-- | Does the dnf contain an empty conjunction?
+hasEmptyCon :: Dnf -> Bool
+hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
+
 
 
 

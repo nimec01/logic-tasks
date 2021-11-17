@@ -23,6 +23,7 @@ library:
     - LogicTasks.Pick
     - LogicTasks.Decide
     - LogicTasks.Give
+    - LogicTasks.Min
     - LogicTasks.Step
     - LogicTasks.Resolve
     - LogicTasks.Printing

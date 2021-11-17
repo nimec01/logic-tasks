@@ -65,6 +65,16 @@ instance Pretty Clause where
 
 
 
+instance Pretty Con where
+    pretty con = listShow $ literals con
+      where
+        listShow [] = empty
+        listShow [x] = pretty x
+        listShow (x:xs) = hsep [pretty x, text "/\\", listShow xs]
+
+
+
+
 instance Pretty Cnf where
     pretty cnf = listShow $ getClauses cnf
       where
@@ -73,6 +83,23 @@ instance Pretty Cnf where
         listShow (x:xs) = hsep
                            [ singlePrint x
                            , text "/\\"
+                           , listShow xs
+                           ]
+
+        singlePrint x = if amount x == 1
+                          then pretty x
+                          else hcat [char '(', pretty x, char ')']
+
+
+
+instance Pretty Dnf where
+    pretty dnf = listShow $ getConjunctions dnf
+      where
+        listShow [] = empty
+        listShow [x] = singlePrint x
+        listShow (x:xs) = hsep
+                           [ singlePrint x
+                           , text "\\/"
                            , listShow xs
                            ]
 
