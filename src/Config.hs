@@ -31,14 +31,14 @@ dPickInst =  PickInst
 
 
 
-data GiveInst = GiveInst {
+data MaxInst = MaxInst {
                  cnf     :: ! Cnf
                , addText :: ! (Maybe String)
                }
                deriving (Typeable, Generic)
 
-dGiveInst :: GiveInst
-dGiveInst =  GiveInst
+dMaxInst :: MaxInst
+dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , addText = Just "Put additional text here or delete this parameter."
           }
@@ -189,15 +189,15 @@ dFillConf = FillConfig
 
 
 
-data GiveConfig = GiveConfig {
+data MinMaxConfig = MinMaxConfig {
       cnfConf :: CnfConfig
     , percentTrueEntries :: Maybe (Int,Int)
     , extraText :: Maybe String
     }
     deriving (Typeable, Generic)
 
-dGiveConf :: GiveConfig
-dGiveConf = GiveConfig
+dMinMaxConf :: MinMaxConfig
+dMinMaxConf = MinMaxConfig
     { cnfConf = dCnfConf
     , percentTrueEntries = Just (50,70)
     , extraText = Nothing

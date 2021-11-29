@@ -77,8 +77,8 @@ verifyStatic MinInst{..}
 
 
 
-verifyQuiz :: GiveConfig -> Maybe ProxyDoc
-verifyQuiz GiveConfig{..}
+verifyQuiz :: MinMaxConfig -> Maybe ProxyDoc
+verifyQuiz MinMaxConfig{..}
 
 
     | isOutside 0 100 low || isOutside 0 100 high =

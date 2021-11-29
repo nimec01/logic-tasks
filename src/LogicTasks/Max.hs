@@ -20,8 +20,8 @@ import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: GiveInst -> [ProxyDoc]
-description GiveInst{..} =
+description :: MaxInst -> [ProxyDoc]
+description MaxInst{..} =
               [ PMult ("Betrachten Sie die folgende Wahrheitstafel:"
                       ,"Consider the following truth table:"
                       )
@@ -65,8 +65,8 @@ description GiveInst{..} =
 
 
 
-verifyStatic :: GiveInst -> Maybe ProxyDoc
-verifyStatic GiveInst{..}
+verifyStatic :: MaxInst -> Maybe ProxyDoc
+verifyStatic MaxInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
         Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
                      ,"Please give a non empty formula."
@@ -77,8 +77,8 @@ verifyStatic GiveInst{..}
 
 
 
-verifyQuiz :: GiveConfig -> Maybe ProxyDoc
-verifyQuiz GiveConfig{..}
+verifyQuiz :: MinMaxConfig -> Maybe ProxyDoc
+verifyQuiz MinMaxConfig{..}
 
 
     | isOutside 0 100 low || isOutside 0 100 high =
@@ -103,8 +103,8 @@ start = mkCnf []
 
 
 
-partialGrade :: GiveInst -> Cnf -> Maybe ProxyDoc
-partialGrade GiveInst{..} sol
+partialGrade :: MaxInst -> Cnf -> Maybe ProxyDoc
+partialGrade MaxInst{..} sol
     | not (null extra) =
         Just $ Composite [ PMult ("Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
                                  ,"Your submission contains unknown literals. These do not appear in a correct solution: "
@@ -156,8 +156,8 @@ partialGrade GiveInst{..} sol
 
 
 
-completeGrade :: GiveInst -> Cnf -> Maybe ProxyDoc
-completeGrade GiveInst{..} sol
+completeGrade :: MaxInst -> Cnf -> Maybe ProxyDoc
+completeGrade MaxInst{..} sol
 
     | not (null diff) =
         Just $ Composite [ PMult ("Es existieren falsche Einträge in den folgenden Tabellenspalten: "
