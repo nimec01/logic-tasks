@@ -25,6 +25,7 @@ description FillInst{..} =
               , PDoc line
               , PDoc $ nest 4 $ myText "F = " <+> pretty cnf
               , PDoc line
+              , PDoc line
               , PMult ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
                      ,"Fill all blanks in the corresponding truth table with truth values (True or False)."
                      )
@@ -33,15 +34,15 @@ description FillInst{..} =
               , PMult ("Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an,"
                      ,"Provide the solution as a list of truth values."
                      )
-              , PMult ("wobei das erste Element der Liste der ersten Zeile entspricht, das zweite Element der zweiten Zeile, etc."
-                     ,"The first element of the list fills the first blank, the second element fills the second blank, etc."
+              , PMult ("wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
+                     ,"The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
                      )
-              , PMult ("Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben oder als Kurzform (f oder w) erfolgen."
-                      ,"Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word or by giving a shorthand (f or t)."
+              , PMult ("Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (wahr, falsch) oder als Kurzform (f, w) erfolgen."
+                      ,"Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (true, false) or by giving a shorthand (f or t)."
                       )
               , PDoc line
-              , PMult ( "Ein Lösungsversuch könnte beispielsweise so aussehen: [f,w,w,w]"
-                      , "A valid solution could look like this: [f,t,t,t]"
+              , PMult ( "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen: [f,w,w,w]."
+                      , "A valid solution for four blanks could look like this: [f,t,t,t]."
                       )
               , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
@@ -129,7 +130,7 @@ partialGrade FillInst{..} sol
     display = show distance
     (ger, eng) = if distance == 1
       then ( "muss " ++ display ++ " Wert", display ++ " value")
-      else ("müssen " ++ display ++ " Werte.", display ++ " values")
+      else ("müssen " ++ display ++ " Werte", display ++ " values")
 
 
 
