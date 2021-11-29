@@ -22,8 +22,8 @@ import Text.PrettyPrint.Leijen.Text
 
 description :: DecideInst -> [ProxyDoc]
 description DecideInst{..} =
-              [ PMult ("Betrachten Sie die folgende Formel in konjunktiver Normalform:"
-                      ,"Consider the following formula in conjunctive normal form:"
+              [ PMult ("Betrachten Sie die folgende Formel:"
+                      ,"Consider the following formula:"
                       )
               , PDoc line
               , PDoc $ nest 4 $ myText "F = " <+> pretty cnf
