@@ -1,6 +1,6 @@
 {-# language RecordWildCards #-}
 
-module LogicTasks.Give where
+module LogicTasks.Max where
 
 
 

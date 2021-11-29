@@ -17,7 +17,7 @@ library
       LogicTasks.Fill
       LogicTasks.Pick
       LogicTasks.Decide
-      LogicTasks.Give
+      LogicTasks.Max
       LogicTasks.Min
       LogicTasks.Step
       LogicTasks.Resolve
