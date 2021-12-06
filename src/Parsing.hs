@@ -183,6 +183,23 @@ instance Parse Dnf where
 
 
 
+instance Parse Predicate where
+  parser = (trailSpaces predParse <?> "Predicate")
+           <|> fail "Could not parse a predicate."
+    where
+      predParse = do
+        polarity <- optionMaybe $ string "not("
+        name <- strParse
+        char '('
+        facts <- sepBy strParse (char ',')
+        char ')'
+        case polarity of Nothing -> pure (Predicate True name facts)
+                         Just _  -> do char ')'
+                                       pure (Predicate False name facts)
+        where
+          strParse = many1 $ satisfy $ flip elem ['A'..'z']
+
+
 
 instance Parse Table
 

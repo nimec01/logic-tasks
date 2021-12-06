@@ -115,6 +115,23 @@ instance Pretty Table where
 
 
 
+instance Pretty Predicate where
+    pretty p = hsep
+                [ begin
+                , myText (name p)
+                , char '('
+                , separated
+                , char ')'
+                , end
+                ]
+      where
+        separated = myText $ concat $ intersperse "," $ constants p
+        (begin,end) = if polarity p then (empty,empty) else (text "not(", char ')')
+
+
+
+
+
 
 instance Pretty PickInst where
   pretty  PickInst{..} =
