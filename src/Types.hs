@@ -24,6 +24,8 @@ module Types
        , possibleAllocations
        , Formula(..)
        , ResStep(..)
+       , Predicate(..)
+       , PrologClause(..)
        ) where
 
 
@@ -32,7 +34,7 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Either(rights)
-import Data.List(transpose, nub, delete)
+import Data.List(transpose, nub, delete, intersperse)
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
@@ -642,6 +644,22 @@ getTable f = Table lits values
 
 
 
+-------------------------------------------------------------------
+
+data Predicate = Predicate
+    { polarity :: Bool
+    , name :: String
+    , constants :: [String]
+    } deriving (Eq,Typeable,Generic)
 
 
+instance Ord Predicate where
+  compare p1 p2 = compare (name p1) (name p2)
 
+
+instance Show Predicate where
+  show p = begin ++ name p ++ "(" ++ separated ++ ")" ++ end
+    where separated = concat $ intersperse "," $ constants p
+          (begin,end) = if polarity p then ("","") else ("not(",")")
+
+newtype PrologClause = PrologClause {predicates :: Set Predicate}

@@ -27,6 +27,7 @@ library
   other-modules:
       Config
       Formula
+      LogicTasks.Prolog
       Parsing
       Printing
       Resolution

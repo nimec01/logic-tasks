@@ -7,6 +7,7 @@ module Formula
        , isEmptyClause
        , mkCnf
        , mkDnf
+       , mkPrologClause
        , isEmptyCnf
        , hasEmptyClause
        , isEmptyDnf
@@ -22,6 +23,8 @@ module Formula
 
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
+
+import Data.Maybe(fromJust)
 
 import Types
 
@@ -126,3 +129,19 @@ equivSat = logOpSat (Sat.:<->:)
 -- | Indicates whether the given formula is satisfiable
 sat :: Formula a => a -> Bool
 sat f = Sat.satisfiable $ convert f
+
+
+----------------------------------------------------------------------------------------------------------
+
+mkPrologClause :: [Predicate] -> PrologClause
+mkPrologClause ps = PrologClause (Set.fromList ps)
+
+
+transformProlog :: PrologClause -> Clause
+transformProlog pc = mkClause $ map (fromJust . (flip lookup mapping)) preds
+  where
+    preds = Set.toList (predicates pc)
+    zipped = zip preds ['A'..'Z']
+    mapping = map (\(p,c) -> (p, if polarity p then Literal c else Not c)) zipped
+
+
