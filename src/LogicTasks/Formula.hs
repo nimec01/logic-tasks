@@ -8,6 +8,9 @@ module LogicTasks.Formula
        , Dnf
        , Allocation
        , TruthValue(..)
+       , Predicate
+       , PrologClause
+       , terms
        , getClauses
        , getConjunctions
        , Formula(..)
