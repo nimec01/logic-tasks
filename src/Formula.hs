@@ -18,6 +18,7 @@ module Formula
        , implSat
        , equivSat
        , sat
+       , transformProlog
        ) where
 
 
@@ -133,15 +134,15 @@ sat f = Sat.satisfiable $ convert f
 
 ----------------------------------------------------------------------------------------------------------
 
+
 mkPrologClause :: [Predicate] -> PrologClause
 mkPrologClause ps = PrologClause (Set.fromList ps)
 
 
-transformProlog :: PrologClause -> Clause
-transformProlog pc = mkClause $ map (fromJust . (flip lookup mapping)) preds
+transformProlog :: PrologClause -> [(Predicate,Literal)] -> Clause
+transformProlog pc mapping = mkClause $ map (fromJust . (flip lookup mapping)) preds
   where
     preds = Set.toList (predicates pc)
-    zipped = zip preds ['A'..'Z']
-    mapping = map (\(p,c) -> (p, if polarity p then Literal c else Not c)) zipped
+
 
 

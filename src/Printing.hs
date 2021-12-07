@@ -131,6 +131,9 @@ instance Pretty Predicate where
 
 
 
+instance Pretty PrologClause where
+    pretty pc = hsep $ punctuate (text " \\/ ") $ map pretty $ terms pc
+
 
 
 instance Pretty PickInst where

@@ -26,6 +26,7 @@ module Types
        , ResStep(..)
        , Predicate(..)
        , PrologClause(..)
+       , terms
        ) where
 
 
@@ -663,3 +664,7 @@ instance Show Predicate where
           (begin,end) = if polarity p then ("","") else ("not(",")")
 
 newtype PrologClause = PrologClause {predicates :: Set Predicate}
+
+
+terms :: PrologClause -> [Predicate]
+terms (PrologClause set) = Set.toList set
