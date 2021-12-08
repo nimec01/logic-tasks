@@ -201,6 +201,20 @@ instance Parse Predicate where
 
 
 
+instance Parse PrologClause where
+ parser = (trailSpaces clauseParse <?> "Clause")
+          <|> fail "Could not parse a clause: Clauses are composed out of terms and the 'or operator' (\\/)."
+   where
+     clauseParse = do
+       braces <- trailSpaces $ optionMaybe $ char '('
+       terms <- sepBy parser parseOr
+       case braces of Nothing -> pure ' '
+                      Just _ -> char ')'
+       pure $ mkPrologClause terms
+
+
+
+
 instance Parse Table
 
 
