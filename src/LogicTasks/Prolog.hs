@@ -141,10 +141,18 @@ completeGrade PrologInst{..} sol =
 transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(Predicate,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
-    allPreds = Set.union (predicates pc1) (predicates pc2)
-    noDups = Set.map (\(Predicate _ n f) -> Predicate True n f) allPreds
-    mapping = zip (Set.toList noDups) ['A'..'Z']
-    applyPol = map (\(p,c) -> (p, if polarity p then Literal c else Not c)) mapping
+    allPreds = Set.toList (Set.union (predicates pc1) (predicates pc2))
+    noDups = map (\(Predicate _ n f) -> Predicate True n f) allPreds
+    mapping = zip noDups ['A'..'Z']
+
+    polLookup p = (p,lit)
+      where lit = case lookup p mapping of
+                    Just l1  -> Literal l1
+                    Nothing  -> case lookup (flipPol p) mapping of
+                                  Just l2 -> Not l2
+                                  Nothing -> error "each term should have a mapping."
+
+    applyPol = map polLookup allPreds
     clause1 = transformProlog pc1 applyPol
     clause2 = transformProlog pc2 applyPol
 
