@@ -188,7 +188,7 @@ instance Parse Predicate where
            <|> fail "Could not parse a predicate."
     where
       predParse = do
-        polarity <- optionMaybe $ string "not("
+        polarity <- trailSpaces $ optionMaybe $ string "not("
         name <- strParse
         char '('
         facts <- sepBy strParse (char ',')

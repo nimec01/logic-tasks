@@ -116,7 +116,7 @@ instance Pretty Table where
 
 
 instance Pretty Predicate where
-    pretty p = hsep
+    pretty p = hcat
                 [ begin
                 , myText (name p)
                 , char '('
