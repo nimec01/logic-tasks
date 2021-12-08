@@ -19,6 +19,7 @@ module Formula
        , equivSat
        , sat
        , transformProlog
+       , flipPol
        ) where
 
 
@@ -133,6 +134,10 @@ sat f = Sat.satisfiable $ convert f
 
 
 ----------------------------------------------------------------------------------------------------------
+
+
+flipPol :: Predicate -> Predicate
+flipPol (Predicate b n f) = Predicate (not b) n f
 
 
 mkPrologClause :: [Predicate] -> PrologClause
