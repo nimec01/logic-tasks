@@ -655,7 +655,10 @@ data Predicate = Predicate
 
 
 instance Ord Predicate where
-  compare p1 p2 = compare (name p1) (name p2)
+  compare (Predicate b1 n1 f1) (Predicate b2 n2 f2)
+      | n1 /= n2 = compare n1 n2
+      | f1 /= f2 = compare f1 f2
+      | otherwise = compare b1 b2
 
 
 instance Show Predicate where
@@ -663,7 +666,7 @@ instance Show Predicate where
     where separated = concat $ intersperse "," $ constants p
           (begin,end) = if polarity p then ("","") else ("not(",")")
 
-newtype PrologClause = PrologClause {predicates :: Set Predicate}
+newtype PrologClause = PrologClause {predicates :: Set Predicate} deriving (Eq,Typeable,Generic)
 
 
 terms :: PrologClause -> [Predicate]

@@ -163,4 +163,3 @@ revertMapping ls mapping = map fromJust getPreds
     reverseM = map swap mapping
     getPreds = map (flip lookup reverseM) ls
 
-
