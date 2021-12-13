@@ -24,7 +24,7 @@ module Types
        , possibleAllocations
        , Formula(..)
        , ResStep(..)
-       , Predicate(..)
+       , PrologLiteral(..)
        , PrologClause(..)
        , terms
        ) where
@@ -647,27 +647,27 @@ getTable f = Table lits values
 
 -------------------------------------------------------------------
 
-data Predicate = Predicate
+data PrologLiteral = PrologLiteral
     { polarity :: Bool
     , name :: String
     , constants :: [String]
     } deriving (Eq,Typeable,Generic)
 
 
-instance Ord Predicate where
-  compare (Predicate b1 n1 f1) (Predicate b2 n2 f2)
+instance Ord PrologLiteral where
+  compare (PrologLiteral b1 n1 f1) (PrologLiteral b2 n2 f2)
       | n1 /= n2 = compare n1 n2
       | f1 /= f2 = compare f1 f2
       | otherwise = compare b1 b2
 
 
-instance Show Predicate where
+instance Show PrologLiteral where
   show p = begin ++ name p ++ "(" ++ separated ++ ")" ++ end
     where separated = concat $ intersperse "," $ constants p
           (begin,end) = if polarity p then ("","") else ("not(",")")
 
-newtype PrologClause = PrologClause {predicates :: Set Predicate} deriving (Eq,Typeable,Generic)
+newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
 
 
-terms :: PrologClause -> [Predicate]
+terms :: PrologClause -> [PrologLiteral]
 terms (PrologClause set) = Set.toList set

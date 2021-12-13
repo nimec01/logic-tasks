@@ -115,7 +115,7 @@ instance Pretty Table where
 
 
 
-instance Pretty Predicate where
+instance Pretty PrologLiteral where
     pretty p = hcat
                 [ begin
                 , myText (name p)

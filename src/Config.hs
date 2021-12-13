@@ -124,8 +124,8 @@ dResInst =  ResolutionInst
 
 
 data PrologInst = PrologInst {
-                 predicates1 :: ! PrologClause
-               , predicates2 :: ! PrologClause
+                 literals1 :: ! PrologClause
+               , literals2 :: ! PrologClause
                , addText :: ! (Maybe String)
                }
                deriving (Typeable, Generic)
@@ -133,8 +133,8 @@ data PrologInst = PrologInst {
 
 dPrologInst :: PrologInst
 dPrologInst =  PrologInst
-          { predicates1 = mkPrologClause [Predicate True "pred" ["fact"]]
-          , predicates2 = mkPrologClause [Predicate False "pred" ["fact"]]
+          { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
+          , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
           , addText = Just "Put additional text here or delete this parameter."
           }
 
@@ -258,7 +258,7 @@ dStepConf = StepConfig
 data PrologConfig = PrologConfig {
       minClauseLength :: Int
     , maxClauseLength :: Int
-    , usedPredicates :: [Predicate]
+    , usedPredicates :: [PrologLiteral]
     , extraText :: Maybe String
     }
     deriving (Typeable, Generic)
@@ -267,7 +267,7 @@ dPrologConf :: PrologConfig
 dPrologConf = PrologConfig
     { minClauseLength = 1
     , maxClauseLength = 3
-    , usedPredicates = [Predicate True "pred" ["fact"]]
+    , usedPredicates = [PrologLiteral True "pred" ["fact"]]
     , extraText = Nothing
     }
 

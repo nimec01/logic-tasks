@@ -136,18 +136,18 @@ sat f = Sat.satisfiable $ convert f
 ----------------------------------------------------------------------------------------------------------
 
 
-flipPol :: Predicate -> Predicate
-flipPol (Predicate b n f) = Predicate (not b) n f
+flipPol :: PrologLiteral -> PrologLiteral
+flipPol (PrologLiteral b n f) = PrologLiteral (not b) n f
 
 
-mkPrologClause :: [Predicate] -> PrologClause
-mkPrologClause ps = PrologClause (Set.fromList ps)
+mkPrologClause :: [PrologLiteral] -> PrologClause
+mkPrologClause ls = PrologClause (Set.fromList ls)
 
 
-transformProlog :: PrologClause -> [(Predicate,Literal)] -> Clause
-transformProlog pc mapping = mkClause $ map (fromJust . (flip lookup mapping)) preds
+transformProlog :: PrologClause -> [(PrologLiteral,Literal)] -> Clause
+transformProlog pc mapping = mkClause $ map (fromJust . (flip lookup mapping)) lits
   where
-    preds = Set.toList (predicates pc)
+    lits = Set.toList (pliterals pc)
 
 
 

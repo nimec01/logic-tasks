@@ -183,7 +183,7 @@ instance Parse Dnf where
 
 
 
-instance Parse Predicate where
+instance Parse PrologLiteral where
   parser = (trailSpaces predParse <?> "Predicate")
            <|> fail "Could not parse a predicate."
     where
@@ -193,9 +193,9 @@ instance Parse Predicate where
         char '('
         facts <- sepBy strParse (char ',')
         char ')'
-        case polarity of Nothing -> pure (Predicate True name facts)
+        case polarity of Nothing -> pure (PrologLiteral True name facts)
                          Just _  -> do char ')'
-                                       pure (Predicate False name facts)
+                                       pure (PrologLiteral False name facts)
         where
           strParse = many1 $ satisfy $ flip elem ['A'..'z']
 

@@ -8,7 +8,6 @@ import Config (PrologConfig(..), PrologInst(..))
 import Printing
 import Types
 import Formula
-import Util
 import Resolution
 
 import qualified Data.Set as Set
@@ -25,9 +24,9 @@ description PrologInst{..} =
                      ,"Consider the two following clauses:"
                      )
               , PDoc line
-              , PDoc $ nest 4 $ pretty predicates1
+              , PDoc $ nest 4 $ pretty literals1
               , PDoc line
-              , PDoc $ nest 4 $ pretty predicates2
+              , PDoc $ nest 4 $ pretty literals2
               , PDoc line
               , PMult ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
                      ,"Resolve the clauses and give the resulting resolvent."
@@ -56,7 +55,7 @@ verifyStatic PrologInst{..}
 
     | otherwise = Nothing
   where
-    (clause1, clause2, _) = transform (predicates1, predicates2)
+    (clause1, clause2, _) = transform (literals1, literals2)
 
 
 
@@ -87,12 +86,12 @@ verifyQuiz PrologConfig{..}
 
 
 
-start :: (Predicate, PrologClause)
-start = (Predicate True " " [], mkPrologClause [])
+start :: (PrologLiteral, PrologClause)
+start = (PrologLiteral True " " [], mkPrologClause [])
 
 
 
-partialGrade :: PrologInst -> (Predicate, PrologClause) -> Maybe ProxyDoc
+partialGrade :: PrologInst -> (PrologLiteral, PrologClause) -> Maybe ProxyDoc
 partialGrade PrologInst{..} sol
     | not (transSol1 `Set.member` availLits) =
         Just $ PMult ("Der gewählte Term kommt in den Klauseln nicht vor."
@@ -109,7 +108,7 @@ partialGrade PrologInst{..} sol
     | otherwise = Nothing
 
   where
-     (clause1, clause2, mapping) = transform (predicates1, predicates2)
+     (clause1, clause2, mapping) = transform (literals1, literals2)
      transSol1 = fromJust $ lookup (fst sol) mapping
      transSol2 = transformProlog (snd sol) mapping
      availLits = Set.fromList (literals clause1) `Set.union` Set.fromList (literals clause2)
@@ -118,7 +117,7 @@ partialGrade PrologInst{..} sol
 
 
 
-completeGrade :: PrologInst -> (Predicate, PrologClause) -> Maybe ProxyDoc
+completeGrade :: PrologInst -> (PrologLiteral, PrologClause) -> Maybe ProxyDoc
 completeGrade PrologInst{..} sol =
     case resolve clause1 clause2 (transSol1) of
         Nothing -> Just $ PMult ("Mit diesem Literal kann kein Schritt durchgeführt werden!"
@@ -130,7 +129,7 @@ completeGrade PrologInst{..} sol =
                                               ,"Resolvent is not correct."
                                               )
   where
-    (clause1, clause2, mapping) = transform (predicates1, predicates2)
+    (clause1, clause2, mapping) = transform (literals1, literals2)
     transSol1 = fromJust $ lookup (fst sol) mapping
     transSol2 = transformProlog (snd sol) mapping
 
@@ -138,11 +137,11 @@ completeGrade PrologInst{..} sol =
 
 
 
-transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(Predicate,Literal)])
+transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(PrologLiteral,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
-    allPreds = Set.toList (Set.union (predicates pc1) (predicates pc2))
-    noDups = map (\(Predicate _ n f) -> Predicate True n f) allPreds
+    allPreds = Set.toList (Set.union (pliterals pc1) (pliterals pc2))
+    noDups = map (\(PrologLiteral _ n f) -> PrologLiteral True n f) allPreds
     mapping = zip noDups ['A'..'Z']
 
     polLookup p = (p,lit)
@@ -157,7 +156,7 @@ transform (pc1,pc2) = (clause1, clause2, applyPol)
     clause2 = transformProlog pc2 applyPol
 
 
-revertMapping :: [Literal] -> [(Predicate,Literal)] -> [Predicate]
+revertMapping :: [Literal] -> [(PrologLiteral,Literal)] -> [PrologLiteral]
 revertMapping ls mapping = map fromJust getPreds
   where
     reverseM = map swap mapping

@@ -8,7 +8,7 @@ module LogicTasks.Formula
        , Dnf
        , Allocation
        , TruthValue(..)
-       , Predicate
+       , PrologLiteral
        , PrologClause
        , terms
        , getClauses
