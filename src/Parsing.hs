@@ -202,7 +202,7 @@ instance Parse PrologLiteral where
 
 
 instance Parse PrologClause where
- parser = (trailSpaces clauseParse <?> "Clause")
+ parser = (trailSpaces (emptyParse <|> clauseParse) <?> "Clause")
           <|> fail "Could not parse a clause: Clauses are composed out of terms and the 'or operator' (\\/)."
    where
      clauseParse = do
@@ -211,8 +211,11 @@ instance Parse PrologClause where
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkPrologClause terms
-
-
+     emptyParse = do
+       char '{'
+       spaces
+       char '}'
+       pure $ mkPrologClause []
 
 
 instance Parse Table
