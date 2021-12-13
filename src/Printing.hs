@@ -12,9 +12,9 @@ module Printing
 import Config
 import Types
 
-import Data.List (intersperse)
+import Data.List (intersperse,nub)
 import Data.Text.Lazy (pack)
-
+import qualified Data.Set as Set (null)
 
 import Text.PrettyPrint.Leijen.Text
 
@@ -116,23 +116,28 @@ instance Pretty Table where
 
 
 instance Pretty PrologLiteral where
-    pretty p = hcat
-                [ begin
-                , myText (name p)
-                , char '('
-                , separated
-                , char ')'
-                , end
-                ]
+    pretty (PrologLiteral b n f)
+        | n == "" || nub n == " " = empty
+        | otherwise =
+           hcat
+             [ begin
+             , myText n
+             , char '('
+             , separated
+             , char ')'
+             , end
+             ]
       where
-        separated = myText $ concat $ intersperse "," $ constants p
-        (begin,end) = if polarity p then (empty,empty) else (text "not(", char ')')
+        separated = myText $ concat $ intersperse "," $ f
+        (begin,end) = if b then (empty,empty) else (text "not(", char ')')
 
 
 
 
 instance Pretty PrologClause where
-    pretty pc = hsep $ punctuate (text " \\/ ") $ map pretty $ terms pc
+    pretty pc
+        | Set.null (pliterals pc) = text "{ }"
+        | otherwise = hsep $ punctuate (text " \\/ ") $ map pretty $ terms pc
 
 
 
