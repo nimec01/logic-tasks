@@ -93,7 +93,7 @@ start = (PrologLiteral True " " [], mkPrologClause [])
 
 partialGrade :: PrologInst -> (PrologLiteral, PrologClause) -> Maybe ProxyDoc
 partialGrade PrologInst{..} sol
-    | not (transSol1 `Set.member` availLits) =
+    | not (fst sol `Set.member` availLits) =
         Just $ PMult ("Der gewählte Term kommt in den Klauseln nicht vor."
                      ,"The chosen term is not contained in any of the clauses."
                      )
@@ -108,12 +108,9 @@ partialGrade PrologInst{..} sol
     | otherwise = Nothing
 
   where
-     (clause1, clause2, mapping) = transform (literals1, literals2)
-     transSol1 = fromJust $ lookup (fst sol) mapping
-     transSol2 = transformProlog (snd sol) mapping
-     availLits = Set.fromList (literals clause1) `Set.union` Set.fromList (literals clause2)
-     solLits = Set.fromList $ literals $ transSol2
-     extra = revertMapping (Set.toList (solLits `Set.difference` availLits)) mapping
+     availLits = pliterals literals1 `Set.union` pliterals literals2
+     solLits = pliterals $ snd sol
+     extra = Set.toList $ solLits `Set.difference` availLits
 
 
 
