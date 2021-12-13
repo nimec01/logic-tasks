@@ -184,8 +184,8 @@ instance Parse Dnf where
 
 
 instance Parse PrologLiteral where
-  parser = (trailSpaces predParse <?> "Predicate")
-           <|> fail "Could not parse a predicate."
+  parser = (trailSpaces predParse <?> "Literal")
+           <|> fail "Could not parse a literal."
     where
       predParse = do
         polarity <- trailSpaces $ optionMaybe $ string "not("
