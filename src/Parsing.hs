@@ -197,7 +197,8 @@ instance Parse PrologLiteral where
                          Just _  -> do char ')'
                                        pure (PrologLiteral False name facts)
         where
-          strParse = many1 $ satisfy $ flip elem ['A'..'z']
+          strParse = do spaces
+                        many1 $ satisfy $ flip elem ['A'..'z']
 
 
 
