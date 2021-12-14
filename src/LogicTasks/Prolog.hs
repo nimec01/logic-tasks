@@ -29,13 +29,17 @@ description PrologInst{..} =
               , PDoc $ nest 4 $ pretty literals2
               , PDoc line
               , PMult ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
-                     ,"Resolve the clauses and give the resulting resolvent."
-                     )
-              , PMult ("Geben Sie den in dem Resolutionsschritt genutzten Term und das Ergebnis in der folgenden Tupelform an: "
-                        ++ "(Literal, Term)."
-                     ,"Provide the term used for the step and the resolvent in the following tuple form: "
-                        ++ "(literal, term)."
-                     )
+                      ,"Resolve the clauses and give the resulting resolvent."
+                      )
+              , PMult ("Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: "
+                        ++ "(Literal, Resolvente)."
+                      ,"Provide the literal used for the step and the resolvent in the following tuple form: "
+                        ++ "(literal, resolvent)."
+                      )
+              , PDoc line
+              , PMult ("Die leere Klausel kann durch geschweifte Klammern '{}' dargestellt werden."
+                      ,"The empty clause can be denoted by curly braces '{}'."
+                      )
               , PDoc line
               , PDoc $ myText (fromMaybe "" addText)
               ]
@@ -78,8 +82,8 @@ verifyQuiz PrologConfig{..}
                      )
 
     | null usedPredicates =
-        Just $ PMult ("Es wurden keine Terme angegeben."
-                     ,"You did not specify which terms should be used."
+        Just $ PMult ("Es wurden keine Literale angegeben."
+                     ,"You did not specify which literals should be used."
                      )
 
     | otherwise = Nothing
@@ -94,13 +98,13 @@ start = (PrologLiteral True " " [], mkPrologClause [])
 partialGrade :: PrologInst -> (PrologLiteral, PrologClause) -> Maybe ProxyDoc
 partialGrade PrologInst{..} sol
     | not (fst sol `Set.member` availLits) =
-        Just $ PMult ("Der gewählte Term kommt in den Klauseln nicht vor."
-                     ,"The chosen term is not contained in any of the clauses."
+        Just $ PMult ("Das gewählte Literal kommt in den Klauseln nicht vor."
+                     ,"The chosen literal is not contained in any of the clauses."
                      )
 
     | not (null extra) =
-        Just $ Composite [ PMult ("In der Resolvente sind unbekannte Terme enthalten. Diese Terme sind falsch: "
-                                 ,"The resolvent contains unknown terms. These terms are incorrect:"
+        Just $ Composite [ PMult ("In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
+                                 ,"The resolvent contains unknown literals. These are incorrect:"
                                  )
                          , PDoc $ pretty extra
                          ]
@@ -146,7 +150,7 @@ transform (pc1,pc2) = (clause1, clause2, applyPol)
                     Just l1  -> Literal l1
                     Nothing  -> case lookup (flipPol p) mapping of
                                   Just l2 -> Not l2
-                                  Nothing -> error "each term should have a mapping."
+                                  Nothing -> error "each literal should have a mapping."
 
     applyPol = map polLookup allPreds
     clause1 = transformProlog pc1 applyPol
