@@ -191,14 +191,14 @@ instance Parse PrologLiteral where
         polarity <- trailSpaces $ optionMaybe $ string "not("
         name <- strParse
         trailSpaces $ char '('
-        facts <- trailSpaces $ sepBy strParse (char ',')
+        facts <- trailSpaces $ sepBy (trailSpaces strParse) (trailSpaces $ char ',')
         trailSpaces $ char ')'
         case polarity of Nothing -> pure (PrologLiteral True name facts)
                          Just _  -> do char ')'
                                        pure (PrologLiteral False name facts)
         where
-          strParse = do spaces
-                        many1 $ satisfy $ flip elem ['A'..'z']
+          strParse = many1 $ satisfy $ flip elem ['A'..'z']
+
 
 
 
