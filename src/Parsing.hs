@@ -190,9 +190,9 @@ instance Parse PrologLiteral where
       litParse = do
         polarity <- trailSpaces $ optionMaybe $ string "not("
         name <- strParse
-        char '('
-        facts <- sepBy strParse (char ',')
-        char ')'
+        trailSpaces $ char '('
+        facts <- trailSpaces $ sepBy strParse (char ',')
+        trailSpaces $ char ')'
         case polarity of Nothing -> pure (PrologLiteral True name facts)
                          Just _  -> do char ')'
                                        pure (PrologLiteral False name facts)
