@@ -3,6 +3,8 @@ extra-source-files: []
 dependencies:
   - base
   - extra
+  - parsec
+
 default-extensions:
   - TupleSections
   - DuplicateRecordFields

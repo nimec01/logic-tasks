@@ -4,10 +4,9 @@ import Text.Parsec (ParseError)
 import Text.Parsec.String 
 import Text.Parsec.String.Parsec (try)
 import Text.Parsec.String.Char 
-import Text.Parsec.String.Combinator (many1, choice, chainl1)
 import Control.Applicative ((<|>), many)
 import Control.Monad (void)
-import Data.Char (isLetter, isDigit)
+import Data.Char (isLetter)
 import FunctionsAndTypesForParsing
 
 
@@ -47,26 +46,26 @@ parenthE = lexeme $ do
 simpleAndE :: Parser SynTree
 simpleAndE = lexeme $ do 
             left <- simpleExpr
-            string "/\\"
+            _ <-string "/\\"
             right <- simpleExpr
             return (And left right)
 
 simpleOrE :: Parser SynTree
 simpleOrE = lexeme $ do 
             left <- simpleExpr
-            string "\\/"
+            _ <-string "\\/"
             right <- simpleExpr
             return (And left right)
 simpleImplE :: Parser SynTree
 simpleImplE = lexeme $ do 
             left <- simpleExpr
-            string "=>"
+            _ <-string "=>"
             right <- simpleExpr
             return (Impl left right)
 simpleEquiE:: Parser SynTree
 simpleEquiE = lexeme $ do 
             left <- simpleExpr
-            string "<=>"
+            _ <-string "<=>"
             right <- simpleExpr
             return (Impl left right)
 simpleBothE :: Parser SynTree
