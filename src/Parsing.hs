@@ -1,4 +1,6 @@
-module Parsing where
+module Parsing(
+  normParse
+) where
 import Types
 import Text.Parsec (ParseError)
 import Text.Parsec.String 

@@ -2,3 +2,5 @@ resolver: lts-16.31
 packages:
   - .
 extra-deps:
+  - QuickCheck-2.14
+  - minisat-solver-0.1
