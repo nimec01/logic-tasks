@@ -29,7 +29,7 @@ lexeme p = do
 
 leafE :: Parser SynTree
 leafE = lexeme $ do
-            a <- satisfy (\a -> isLetter a) 
+            a <- satisfy (isLetter) 
             return $ Leaf $ Literal a
 notE :: Parser SynTree
 notE = lexeme $ do
@@ -49,27 +49,23 @@ simpleAndE :: Parser SynTree
 simpleAndE = lexeme $ do 
             left <- simpleExpr
             _ <-string "/\\"
-            right <- simpleExpr
-            return (And left right)
+            And left <$> simpleExpr
 
 simpleOrE :: Parser SynTree
 simpleOrE = lexeme $ do 
             left <- simpleExpr
             _ <-string "\\/"
-            right <- simpleExpr
-            return (And left right)
+            Or left <$> simpleExpr
 simpleImplE :: Parser SynTree
 simpleImplE = lexeme $ do 
             left <- simpleExpr
             _ <-string "=>"
-            right <- simpleExpr
-            return (Impl left right)
+            Impl left <$> simpleExpr
 simpleEquiE:: Parser SynTree
 simpleEquiE = lexeme $ do 
             left <- simpleExpr
             _ <-string "<=>"
-            right <- simpleExpr
-            return (Impl left right)
+            Equi left <$> simpleExpr
 simpleBothE :: Parser SynTree
 simpleBothE= lexeme $ do 
             void $ lexeme $ char '('
