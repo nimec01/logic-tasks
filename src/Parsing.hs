@@ -29,7 +29,7 @@ lexeme p = do
 
 leafE :: Parser SynTree
 leafE = lexeme $ do
-            a <- satisfy (isLetter) 
+            a <- satisfy isLetter 
             return $ Leaf $ Literal a
 notE :: Parser SynTree
 notE = lexeme $ do
