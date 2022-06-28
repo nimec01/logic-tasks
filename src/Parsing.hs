@@ -33,38 +33,38 @@ leafE = lexeme $ do
             return $ Leaf $ Literal a
 notE :: Parser SynTree
 notE = lexeme $ do
-            void $ lexeme $ char '~'
+            _<- lexeme $ char '~'
             void $ lexeme $ char '('
             e <- simpleExpr
-            void $ lexeme $ char ')'
+            _<- lexeme $ char ')'
             return $ Not e
 parenthE :: Parser SynTree
 parenthE = lexeme $ do
-            void $ lexeme $ char '('
+            _<- lexeme $ char '('
             e <- simpleExpr
-            void $ lexeme $ char ')'
+            _<- lexeme $ char ')'
             return e
 
 simpleAndE :: Parser SynTree
 simpleAndE = lexeme $ do 
             left <- simpleExpr
-            _ <-string "/\\"
+            _ <-lexeme $ string "/\\"
             And left <$> simpleExpr
 
 simpleOrE :: Parser SynTree
 simpleOrE = lexeme $ do 
             left <- simpleExpr
-            _ <-string "\\/"
+            _ <-lexeme $ string "\\/"
             Or left <$> simpleExpr
 simpleImplE :: Parser SynTree
 simpleImplE = lexeme $ do 
             left <- simpleExpr
-            _ <-string "=>"
+            _ <-lexeme $ string "=>"
             Impl left <$> simpleExpr
 simpleEquiE:: Parser SynTree
 simpleEquiE = lexeme $ do 
             left <- simpleExpr
-            _ <-string "<=>"
+            _ <-lexeme $ string "<=>"
             Equi left <$> simpleExpr
 simpleBothE :: Parser SynTree
 simpleBothE= lexeme $ do 
