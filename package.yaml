@@ -16,7 +16,9 @@ default-extensions:
   - ScopedTypeVariables
 library:
   source-dirs: src
-  exposed-modules: []
+  exposed-modules: 
+    - Types
+    - Parsing
   ghc-options:
     - -Wall
     - -Werror
@@ -26,6 +28,7 @@ executables:
     source-dirs: app
     dependencies:
       - ba-tongxi-xu
+
 tests:
   ba-tongxi-xu-test:
     main: Spec.hs

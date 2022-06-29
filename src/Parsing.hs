@@ -30,7 +30,7 @@ lexeme p = do
 leafE :: Parser SynTree
 leafE = lexeme $ do
             a <- satisfy isLetter 
-            return $ Leaf $ Literal a
+            return $ Leaf  a
 notE :: Parser SynTree
 notE = lexeme $ do
             _<- lexeme $ char '~'
