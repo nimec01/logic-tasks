@@ -12,7 +12,7 @@ import Data.Maybe ( fromJust, isNothing )
 -- chooseletter False _ = False
 -- chooseletter _ t =isLetter t
 
-invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,[Char])
+invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,String)
 invalidBoundsSyntr = do
     validChars <- sublistOf ['A'..'Z']
     minnode <- chooseInt (2,100)
@@ -20,7 +20,7 @@ invalidBoundsSyntr = do
     maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
     pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars)
 
-validBoundsSyntr :: Gen ((Integer,Integer),Integer,[Char])
+validBoundsSyntr :: Gen ((Integer,Integer),Integer,String)
 validBoundsSyntr = do
     validChars <- sublistOf ['A'..'Z']
     minnode <- chooseInt (1,100)
@@ -29,8 +29,7 @@ validBoundsSyntr = do
     pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars)
 
 spec :: Spec
-spec = do
-    describe "genSyntaxTree" $ do
+spec = describe "genSyntaxTree" $ do
         it "should generate a random SyntaxTree from the given parament and can be parsed by normParse" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> normParse (show (fromJust synTree))==Right  (fromJust synTree)
         it "should throw an error call" $

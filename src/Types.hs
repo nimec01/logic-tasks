@@ -31,8 +31,7 @@ nodewidep depth= (2 ^ depth)-1
 
 genSynTree :: (Integer , Integer) -> Integer ->String-> Gen (Maybe SynTree)
 genSynTree (minnode, maxnode) maxdepth lits --choose 一个以下三个函数
-    | maxdepth<=0 || maxnode<=0||null lits || maxnode< minnode || fst ( depwinode minnode) > maxdepth= do
-      return Nothing
+    | maxdepth<=0 || maxnode<=0||null lits || maxnode< minnode || fst ( depwinode minnode) > maxdepth= return Nothing
     | otherwise =  do
       re<-generSynTree (a,maxnode) maxdepth lits
       return ( Just re)
@@ -67,7 +66,7 @@ genSynTreewithonesub (minnode, maxnode) maxdepth lits = do
   e<-generSynTree (minnode-1,maxnode-1) (maxdepth-1) lits
   return (Not e)
 
-genSynTreenosub::[Char] ->Gen SynTree
+genSynTreenosub::String ->Gen SynTree
 genSynTreenosub lits = do
   e<- elements lits
   return (Leaf e)

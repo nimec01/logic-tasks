@@ -11,12 +11,6 @@ import Control.Applicative ((<|>), many)
 import Data.Char (isLetter)
 import Text.Parsec(ParseError,parse,eof)
 
-eof :: Parser ()
-eof = P.eof
-
-parse :: Parser a -> P.SourceName -> String -> Either P.ParseError a
-parse = P.parse
-
 parseWithEof :: Parser a -> String -> Either ParseError a
 parseWithEof p = parse (p <* eof) ""
 whitespace :: Parser ()
