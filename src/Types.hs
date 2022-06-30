@@ -5,8 +5,10 @@ module Types
     genSynTree
   )
 where
+
 import Test.QuickCheck
     ( choose, elements, oneof, sized, Arbitrary(arbitrary), Gen )
+
 data SynTree
     = And {lefttree :: SynTree , righttree :: SynTree}
     | Or {lefttree :: SynTree , righttree :: SynTree}
@@ -27,7 +29,6 @@ depwinode node =(mindepth ,maxdepth)
 nodewidep :: Integer ->Integer
 nodewidep depth= (2 ^ depth)-1
 
-
 genSynTree :: (Integer , Integer) -> Integer ->String-> Gen (Maybe SynTree)
 genSynTree (minnode, maxnode) maxdepth lits --choose 一个以下三个函数
     | maxdepth<=0 || maxnode<=0||null lits || maxnode< minnode || fst ( depwinode minnode) > maxdepth= do
@@ -39,6 +40,7 @@ genSynTree (minnode, maxnode) maxdepth lits --choose 一个以下三个函数
       a=maximum [0,minnode]
 --若要添加最小深度可以把最少分配量提前算出来
 --map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi]
+
 generSynTree::(Integer , Integer) -> Integer ->String->Gen SynTree
 generSynTree (minnode, maxnode) maxdepth lits
   | maxdepth ==1 =genSynTreenosub lits
@@ -65,12 +67,10 @@ genSynTreewithonesub (minnode, maxnode) maxdepth lits = do
   e<-generSynTree (minnode-1,maxnode-1) (maxdepth-1) lits
   return (Not e)
 
-
 genSynTreenosub::[Char] ->Gen SynTree
 genSynTreenosub lits = do
   e<- elements lits
   return (Leaf e)
-
 
 instance Show SynTree where
   show (And a b) = "(" ++ show a ++"/\\"++ show b++")"

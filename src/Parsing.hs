@@ -2,16 +2,14 @@
 module Parsing(
   normParse
 ) where
-import Types
-import Text.Parsec (ParseError)
+
+import Types ( SynTree(Equi, Leaf, Not, And, Or, Impl) )
 import Text.Parsec.String ( Parser )
 import Text.ParserCombinators.Parsec(try)
-import qualified Text.Parsec.Char as C
+import Text.Parsec.Char ( char, oneOf, satisfy, string )
 import Control.Applicative ((<|>), many)
 import Data.Char (isLetter)
-import qualified Text.Parsec as P
-
--- import FunctionsAndTypesForParsing
+import Text.Parsec(ParseError,parse,eof)
 
 eof :: Parser ()
 eof = P.eof
@@ -23,7 +21,7 @@ parseWithEof :: Parser a -> String -> Either ParseError a
 parseWithEof p = parse (p <* eof) ""
 whitespace :: Parser ()
 whitespace = do
-  many $ C.oneOf " \n\t"
+  many $ oneOf " \n\t"
   return ()
 parseWithWhitespace :: Parser a -> String -> Either ParseError a
 parseWithWhitespace p = parseWithEof wrapper
@@ -40,49 +38,55 @@ lexeme p = do
 
 leafE :: Parser SynTree
 leafE = lexeme $ do
-            a <- C.satisfy isLetter
+            a <- satisfy isLetter
             return $ Leaf  a
+
 notE :: Parser SynTree
 notE = lexeme $ do
-            lexeme $ C.char '~'
-            lexeme $ C.char '('
+            lexeme $ char '~'
+            lexeme $ char '('
             e <- simpleExpr
-            lexeme $ C.char ')'
+            lexeme $ char ')'
             return $ Not e
+
 parenthE :: Parser SynTree
 parenthE = lexeme $ do
-            lexeme $ C.char '('
+            lexeme $ char '('
             e <- simpleExpr
-            lexeme $ C.char ')'
+            lexeme $ char ')'
             return e
 
 simpleAndE :: Parser SynTree
 simpleAndE = lexeme $ do
             left <- simpleExpr
-            lexeme $ C.string "/\\"
+            lexeme $ string "/\\"
             And left <$> simpleExpr
 
 simpleOrE :: Parser SynTree
 simpleOrE = lexeme $ do
             left <- simpleExpr
-            lexeme $ C.string "\\/"
+            lexeme $ string "\\/"
             Or left <$> simpleExpr
+
 simpleImplE :: Parser SynTree
 simpleImplE = lexeme $ do
             left <- simpleExpr
-            lexeme $ C.string "=>"
+            lexeme $ string "=>"
             Impl left <$> simpleExpr
+
 simpleEquiE:: Parser SynTree
 simpleEquiE = lexeme $ do
             left <- simpleExpr
-            lexeme $ C.string "<=>"
+            lexeme $ string "<=>"
             Equi left <$> simpleExpr
+
 simpleBothE :: Parser SynTree
 simpleBothE= lexeme $ do
-            lexeme $ C.char '('
+            lexeme $ char '('
             e <- try simpleAndE <|> try simpleOrE <|> try simpleImplE <|> simpleEquiE
-            lexeme $ C.char ')'
+            lexeme $ char ')'
             return e
+
 simpleExpr :: Parser SynTree
 simpleExpr = try leafE <|> try simpleBothE <|> try parenthE <|> notE
 

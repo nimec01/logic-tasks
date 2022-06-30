@@ -1,14 +1,17 @@
 module SynTreeSpec where
-import Test.Hspec
-import Test.QuickCheck
+
+import Test.Hspec ( describe, it, Spec )
+import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen )
 import Types ( depwinode, genSynTree )
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
-import Data.Maybe
+import Data.Maybe ( fromJust, isNothing )
+
 -- chooseletter :: Bool -> Char ->Bool
 -- chooseletter False _ = False
 -- chooseletter _ t =isLetter t
+
 invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,[Char])
 invalidBoundsSyntr = do
     validChars <- sublistOf ['A'..'Z']
@@ -31,4 +34,4 @@ spec = do
         it "should generate a random SyntaxTree from the given parament and can be parsed by normParse" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> normParse (show (fromJust synTree))==Right  (fromJust synTree)
         it "should throw an error call" $
-            forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> synTree==Nothing
+            forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> isNothing synTree
