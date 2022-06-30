@@ -47,15 +47,15 @@ generSynTree (minnode, maxnode) maxdepth lits
   | minnode == 2 &&maxnode < 3 =genSynTreewithonesub (2, maxnode) maxdepth lits
   | minnode == 2 && maxnode >= 3= do
     e <-elements [True,False]
-    if e then  genSynTreewithonesub (2, maxnode) maxdepth lits  else oneof twosubtree3
+    if e then  genSynTreewithonesub (2, maxnode) maxdepth lits  else oneof $ gentwoSub 3
   | minnode == 1 && maxnode >= 3= do
     e <-elements [True,False]
-    if e then  genSynTreenosub lits  else oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits : twosubtree3 )
-  | (minnode-1)>= nodewidep ( maxdepth-1) =oneof twosubtree
-  | otherwise = oneof ( genSynTreewithonesub (minnode, maxnode) maxdepth lits : twosubtree)
+    if e then  genSynTreenosub lits  else oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits :  gentwoSub 3 )
+  | (minnode-1)>= nodewidep ( maxdepth-1) =oneof $ gentwoSub minnode
+  | otherwise = oneof ( genSynTreewithonesub (minnode, maxnode) maxdepth lits : gentwoSub minnode)
   where
-    twosubtree = map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi]
-    twosubtree3 = map (genSynTreewithtwosub (3, maxnode) maxdepth lits) [And, Or, Impl, Equi]
+    gentwoSub m = map (genSynTreewithtwosub (m, maxnode) maxdepth lits) [And, Or, Impl, Equi]
+
 genSynTreewithtwosub::(Integer , Integer) -> Integer ->String->(SynTree -> SynTree -> SynTree)->Gen SynTree
 genSynTreewithtwosub(minnode, maxnode) maxdepth lits oper  = let a=maximum[0,minnode-1-nodewidep(maxdepth-1)] in do   --choose一个Impl之类的
   radmin <-choose (1+a,minnode-2-a)
