@@ -5,7 +5,7 @@ import Types ( depwinode, genSynTree )
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
-import Data.Maybe 
+import Data.Maybe
 -- chooseletter :: Bool -> Char ->Bool
 -- chooseletter False _ = False
 -- chooseletter _ t =isLetter t
@@ -32,5 +32,3 @@ spec = do
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> normParse (show (fromJust synTree))==Right  (fromJust synTree)
         it "should throw an error call" $
             forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> synTree==Nothing
-            
-    

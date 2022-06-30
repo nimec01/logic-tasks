@@ -40,15 +40,15 @@ genSynTree (minnode, maxnode) maxdepth lits --choose 一个以下三个函数
 --若要添加最小深度可以把最少分配量提前算出来
 --map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi]
 generSynTree::(Integer , Integer) -> Integer ->String->Gen SynTree
-generSynTree (minnode, maxnode) maxdepth lits 
+generSynTree (minnode, maxnode) maxdepth lits
   | maxdepth ==1 =genSynTreenosub lits
   | minnode == 1 &&maxnode < 3 = genSynTreenosub lits
   | minnode == 2 &&maxnode < 3 =genSynTreewithonesub (2, maxnode) maxdepth lits
   | minnode == 2 && maxnode >= 3= do
-    e <-elements [True,False] 
+    e <-elements [True,False]
     if e then  genSynTreewithonesub (2, maxnode) maxdepth lits  else oneof $ map (genSynTreewithtwosub (3, maxnode) maxdepth lits) [And, Or, Impl, Equi]
   | minnode == 1 && maxnode >= 3= do
-    e <-elements [True,False] 
+    e <-elements [True,False]
     if e then  genSynTreenosub lits  else oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits : map (genSynTreewithtwosub (3, maxnode) maxdepth lits) [And, Or, Impl, Equi] )
   | (minnode-1)> nodewidep ( maxdepth-1) =oneof $ map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi]
   | otherwise = oneof ( genSynTreewithonesub (minnode, maxnode) maxdepth lits : map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi] )
@@ -62,21 +62,21 @@ genSynTreewithtwosub(minnode, maxnode) maxdepth lits oper  = let a=maximum[0,min
 
 genSynTreewithonesub::(Integer , Integer) -> Integer->String->Gen SynTree
 genSynTreewithonesub (minnode, maxnode) maxdepth lits = do
-  e<-generSynTree (minnode-1,maxnode-1) (maxdepth-1) lits 
+  e<-generSynTree (minnode-1,maxnode-1) (maxdepth-1) lits
   return (Not e)
 
 
 genSynTreenosub::[Char] ->Gen SynTree
 genSynTreenosub lits = do
   e<- elements lits
-  return (Leaf e) 
+  return (Leaf e)
 
 
 instance Show SynTree where
   show (And a b) = "(" ++ show a ++"/\\"++ show b++")"
-  show (Leaf a)=  a:"" 
+  show (Leaf a)=  a:""
   show (Or a b) = "(" ++ show a ++"\\/"++ show b++")"
-  show (Not a) = "~(" ++ show a ++")" 
+  show (Not a) = "~(" ++ show a ++")"
   show (Impl a b) = "(" ++ show a ++"=>"++ show b ++")"
   show (Equi a b) = "(" ++ show a ++"<=>"++ show b ++")"
 
@@ -85,7 +85,7 @@ instance Arbitrary SynTree where
   arbitrary= sized syntr
     where
       syntr :: Int -> Gen SynTree
-      syntr n 
+      syntr n
        |n==0 = generSynTree (1,1) 1 ['A']
        |otherwise = do
          let
@@ -98,5 +98,5 @@ instance Arbitrary SynTree where
     -- a <- choose (1,20)
     -- b <- choose (a,20)
     -- genSynTree (a,b) depth [list]
-    -- where 
+    -- where
     --   depth=fst (depwinode a)

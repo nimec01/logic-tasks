@@ -4,8 +4,8 @@ module Parsing(
 ) where
 import Types
 import Text.Parsec (ParseError)
-import Text.Parsec.String ( Parser ) 
-import Text.ParserCombinators.Parsec(try) 
+import Text.Parsec.String ( Parser )
+import Text.ParserCombinators.Parsec(try)
 import qualified Text.Parsec.Char as C
 import Control.Applicative ((<|>), many)
 import Data.Char (isLetter)
@@ -40,7 +40,7 @@ lexeme p = do
 
 leafE :: Parser SynTree
 leafE = lexeme $ do
-            a <- C.satisfy isLetter 
+            a <- C.satisfy isLetter
             return $ Leaf  a
 notE :: Parser SynTree
 notE = lexeme $ do
@@ -57,28 +57,28 @@ parenthE = lexeme $ do
             return e
 
 simpleAndE :: Parser SynTree
-simpleAndE = lexeme $ do 
+simpleAndE = lexeme $ do
             left <- simpleExpr
             lexeme $ C.string "/\\"
             And left <$> simpleExpr
 
 simpleOrE :: Parser SynTree
-simpleOrE = lexeme $ do 
+simpleOrE = lexeme $ do
             left <- simpleExpr
             lexeme $ C.string "\\/"
             Or left <$> simpleExpr
 simpleImplE :: Parser SynTree
-simpleImplE = lexeme $ do 
+simpleImplE = lexeme $ do
             left <- simpleExpr
             lexeme $ C.string "=>"
             Impl left <$> simpleExpr
 simpleEquiE:: Parser SynTree
-simpleEquiE = lexeme $ do 
+simpleEquiE = lexeme $ do
             left <- simpleExpr
             lexeme $ C.string "<=>"
             Equi left <$> simpleExpr
 simpleBothE :: Parser SynTree
-simpleBothE= lexeme $ do 
+simpleBothE= lexeme $ do
             lexeme $ C.char '('
             e <- try simpleAndE <|> try simpleOrE <|> try simpleImplE <|> simpleEquiE
             lexeme $ C.char ')'
@@ -87,8 +87,6 @@ simpleExpr :: Parser SynTree
 simpleExpr = try leafE <|> try simpleBothE <|> try parenthE <|> notE
 
 normParse :: String ->Either ParseError SynTree
-normParse str = parseWithWhitespace simpleExpr str1 where 
+normParse str = parseWithWhitespace simpleExpr str1 where
                                             str2 = '(' : str
                                             str1 = str2 ++ ")"
-
-
