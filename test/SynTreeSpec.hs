@@ -2,7 +2,7 @@ module SynTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen )
-import Types ( depwinode, genSynTree )
+import Types ( depwinode, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf) )
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
@@ -11,6 +11,16 @@ import Data.Maybe ( fromJust, isNothing )
 -- chooseletter :: Bool -> Char ->Bool
 -- chooseletter False _ = False
 -- chooseletter _ t =isLetter t
+nodenum :: SynTree -> Integer
+nodenum (Not a) = 1+nodenum a
+nodenum (Leaf a)= 1
+nodenum (And a b) = 1+nodenum a+nodenum b
+nodenum (Or a b) = 1+nodenum a+nodenum b
+nodenum (Impl a b) = 1+nodenum a+nodenum b
+nodenum (Equi a b) = 1+nodenum a+nodenum b
+
+
+
 
 invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,String)
 invalidBoundsSyntr = do
@@ -34,3 +44,5 @@ spec = describe "genSyntaxTree" $ do
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> normParse (show (fromJust synTree))==Right  (fromJust synTree)
         it "should throw an error call" $
             forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> isNothing synTree
+        it "should generate a random SyntaxTree from the given parament and in the node area" $
+            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> nodenum (fromJust synTree)>=minnode &&nodenum (fromJust synTree) <=maxnode

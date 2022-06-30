@@ -37,11 +37,8 @@ leafE = lexeme $ do
 
 notE :: Parser SynTree
 notE = lexeme $ do
-            lexeme $ char '~'
-            lexeme $ char '('
-            e <- simpleExpr
-            lexeme $ char ')'
-            return $ Not e
+   lexeme $ char '~'
+   Not <$> simpleExpr
 
 parenthE :: Parser SynTree
 parenthE = lexeme $ do

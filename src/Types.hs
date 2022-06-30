@@ -27,7 +27,7 @@ depwinode node =(mindepth ,maxdepth)
         maxdepth=node
 
 nodewidep :: Integer ->Integer
-nodewidep depth= (2 ^ depth)-1
+nodewidep depth= 2 ^ depth
 
 genSynTree :: (Integer , Integer) -> Integer ->String-> Gen (Maybe SynTree)
 genSynTree (minnode, maxnode) maxdepth lits --choose 一个以下三个函数
@@ -47,12 +47,15 @@ generSynTree (minnode, maxnode) maxdepth lits
   | minnode == 2 &&maxnode < 3 =genSynTreewithonesub (2, maxnode) maxdepth lits
   | minnode == 2 && maxnode >= 3= do
     e <-elements [True,False]
-    if e then  genSynTreewithonesub (2, maxnode) maxdepth lits  else oneof $ map (genSynTreewithtwosub (3, maxnode) maxdepth lits) [And, Or, Impl, Equi]
+    if e then  genSynTreewithonesub (2, maxnode) maxdepth lits  else oneof twosubtree3
   | minnode == 1 && maxnode >= 3= do
     e <-elements [True,False]
-    if e then  genSynTreenosub lits  else oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits : map (genSynTreewithtwosub (3, maxnode) maxdepth lits) [And, Or, Impl, Equi] )
-  | (minnode-1)> nodewidep ( maxdepth-1) =oneof $ map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi]
-  | otherwise = oneof ( genSynTreewithonesub (minnode, maxnode) maxdepth lits : map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi] )
+    if e then  genSynTreenosub lits  else oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits : twosubtree3 )
+  | (minnode-1)>= nodewidep ( maxdepth-1) =oneof twosubtree
+  | otherwise = oneof ( genSynTreewithonesub (minnode, maxnode) maxdepth lits : twosubtree)
+  where
+    twosubtree = map (genSynTreewithtwosub (minnode, maxnode) maxdepth lits) [And, Or, Impl, Equi]
+    twosubtree3 = map (genSynTreewithtwosub (3, maxnode) maxdepth lits) [And, Or, Impl, Equi]
 genSynTreewithtwosub::(Integer , Integer) -> Integer ->String->(SynTree -> SynTree -> SynTree)->Gen SynTree
 genSynTreewithtwosub(minnode, maxnode) maxdepth lits oper  = let a=maximum[0,minnode-1-nodewidep(maxdepth-1)] in do   --choose一个Impl之类的
   radmin <-choose (1+a,minnode-2-a)
@@ -75,7 +78,7 @@ instance Show SynTree where
   show (And a b) = "(" ++ show a ++"/\\"++ show b++")"
   show (Leaf a)=  a:""
   show (Or a b) = "(" ++ show a ++"\\/"++ show b++")"
-  show (Not a) = "~(" ++ show a ++")"
+  show (Not a) = "~" ++ show a ++""
   show (Impl a b) = "(" ++ show a ++"=>"++ show b ++")"
   show (Equi a b) = "(" ++ show a ++"<=>"++ show b ++")"
 
