@@ -1,19 +1,30 @@
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Parsing(
   normParse
 ) where
 import Types
 import Text.Parsec (ParseError)
-import Text.Parsec.String 
-import Text.Parsec.String.Parsec (try)
-import Text.Parsec.String.Char 
+import Text.Parsec.String ( Parser ) 
+import Text.ParserCombinators.Parsec(try) 
+import qualified Text.Parsec.Char as C
 import Control.Applicative ((<|>), many)
-import Control.Monad (void)
 import Data.Char (isLetter)
-import FunctionsAndTypesForParsing
+import qualified Text.Parsec as P
 
+-- import FunctionsAndTypesForParsing
 
+eof :: Parser ()
+eof = P.eof
+
+parse :: Parser a -> P.SourceName -> String -> Either P.ParseError a
+parse = P.parse
+
+parseWithEof :: Parser a -> String -> Either ParseError a
+parseWithEof p = parse (p <* eof) ""
 whitespace :: Parser ()
-whitespace = void $ many $ oneOf " \n\t"
+whitespace = do
+  many $ C.oneOf " \n\t"
+  return ()
 parseWithWhitespace :: Parser a -> String -> Either ParseError a
 parseWithWhitespace p = parseWithEof wrapper
   where
@@ -29,48 +40,48 @@ lexeme p = do
 
 leafE :: Parser SynTree
 leafE = lexeme $ do
-            a <- satisfy isLetter 
+            a <- C.satisfy isLetter 
             return $ Leaf  a
 notE :: Parser SynTree
 notE = lexeme $ do
-            _<- lexeme $ char '~'
-            void $ lexeme $ char '('
+            lexeme $ C.char '~'
+            lexeme $ C.char '('
             e <- simpleExpr
-            _<- lexeme $ char ')'
+            lexeme $ C.char ')'
             return $ Not e
 parenthE :: Parser SynTree
 parenthE = lexeme $ do
-            _<- lexeme $ char '('
+            lexeme $ C.char '('
             e <- simpleExpr
-            _<- lexeme $ char ')'
+            lexeme $ C.char ')'
             return e
 
 simpleAndE :: Parser SynTree
 simpleAndE = lexeme $ do 
             left <- simpleExpr
-            _ <-lexeme $ string "/\\"
+            lexeme $ C.string "/\\"
             And left <$> simpleExpr
 
 simpleOrE :: Parser SynTree
 simpleOrE = lexeme $ do 
             left <- simpleExpr
-            _ <-lexeme $ string "\\/"
+            lexeme $ C.string "\\/"
             Or left <$> simpleExpr
 simpleImplE :: Parser SynTree
 simpleImplE = lexeme $ do 
             left <- simpleExpr
-            _ <-lexeme $ string "=>"
+            lexeme $ C.string "=>"
             Impl left <$> simpleExpr
 simpleEquiE:: Parser SynTree
 simpleEquiE = lexeme $ do 
             left <- simpleExpr
-            _ <-lexeme $ string "<=>"
+            lexeme $ C.string "<=>"
             Equi left <$> simpleExpr
 simpleBothE :: Parser SynTree
 simpleBothE= lexeme $ do 
-            void $ lexeme $ char '('
+            lexeme $ C.char '('
             e <- try simpleAndE <|> try simpleOrE <|> try simpleImplE <|> simpleEquiE
-            void $ lexeme $ char ')'
+            lexeme $ C.char ')'
             return e
 simpleExpr :: Parser SynTree
 simpleExpr = try leafE <|> try simpleBothE <|> try parenthE <|> notE
@@ -80,57 +91,4 @@ normParse str = parseWithWhitespace simpleExpr str1 where
                                             str2 = '(' : str
                                             str1 = str2 ++ ")"
 
--- remainingCells :: GenParser Char st [String]
--- remainingCells =
---     (char ',' >> cells)            -- Found comma?  More cells coming
---     <|> (return [])                -- No comma?  Return [], no more cells
---遇到括号时可以使用
 
-
--- simpleAndE :: Parser SynTree
--- simpleAndE = lexeme $ do 
---             void $ lexeme $ char '('
---             left <- simpleExpr
---             string "/\\"
---             right <- simpleExpr
---             void $ lexeme $ char ')'
---             return (And left right)
-
--- simpleOrE :: Parser SynTree
--- simpleOrE = lexeme $ do 
---             void $ lexeme $ char '('
---             left <- simpleExpr
---             string "\\/"
---             right <- simpleExpr
---             void $ lexeme $ char ')'
---             return (And left right)
--- simpleImplE :: Parser SynTree
--- simpleImplE = lexeme $ do 
---             void $ lexeme $ char '('
---             left <- simpleExpr
---             string "=>"
---             right <- simpleExpr
---             void $ lexeme $ char ')'
---             return (Impl left right)
--- simpleEquiE:: Parser SynTree
--- simpleEquiE = lexeme $ do 
---             void $ lexeme $ char '('
---             left <- simpleExpr
---             string "<=>"
---             right <- simpleExpr
---             void $ lexeme $ char ')'
---             return (Impl left right)
-
--- import Text.Parsec (ParseError)
--- import Text.Parsec.String 
--- import Text.Parsec.String.Char (anyChar)
--- import Text.Parsec.String.Char
--- import FunctionsAndTypesForParsing (regularParse, parseWithEof, parseWithLeftOver)
--- import Data.Char
--- import Text.Parsec.String.Combinator (many1)
--- import Control.Monad (void, Monad (return))
--- import Control.Applicative ((<|>), many)
--- import Foreign.C (eFTYPE)
--- import Control.Arrow (ArrowChoice(left, right))
--- import Control.Exception (try)
--- import Data.String (String)
