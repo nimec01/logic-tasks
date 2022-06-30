@@ -1,7 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Parsing(
   normParse,
-  normParse2
 ) where
 
 import Types ( SynTree(Equi, Leaf, Not, And, Or, Impl) )
@@ -86,8 +85,6 @@ specBothE :: Parser SynTree
 specBothE= lexeme $ try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
 
 specExpr :: Parser SynTree
-specExpr = try leafE <|> try notE <|> try parenthE <|>simpleEquiE
+specExpr = try  specBothE <|>try leafE <|> try notE <|> parenthE
 normParse :: String ->Either ParseError SynTree
-normParse= parseWithWhitespace simpleEquiE
-normParse2 :: String ->Either ParseError SynTree
-normParse2 = parseWithWhitespace specExpr
+normParse = parseWithWhitespace specExpr

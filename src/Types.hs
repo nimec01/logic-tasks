@@ -83,12 +83,12 @@ instance Show SynTree where
   show (Equi a b) = normalshow a ++"<=>"++ normalshow b
 
 normalshow:: SynTree-> String
-normalshow (And a b) = "(" ++ show a ++"/\\"++ show b++")"
+normalshow (And a b) = "(" ++ normalshow a ++"/\\"++ normalshow b++")"
 normalshow (Leaf a)=  a:""
-normalshow (Or a b) = "(" ++ show a ++"\\/"++ show b++")"
-normalshow (Not a) = "~" ++ show a ++""
-normalshow (Impl a b) = "(" ++ show a ++"=>"++ show b ++")"
-normalshow (Equi a b) = "(" ++ show a ++"<=>"++ show b ++")"
+normalshow (Or a b) = "(" ++ normalshow a ++"\\/"++ normalshow b++")"
+normalshow (Not a) = "~" ++ normalshow a ++""
+normalshow (Impl a b) = "(" ++ normalshow a ++"=>"++ normalshow b ++")"
+normalshow (Equi a b) = "(" ++ normalshow a ++"<=>"++ normalshow b ++")"
 
 instance Arbitrary SynTree where
     -- arbitrary= genSynTree (8,10) 5 ['A','B','C']
