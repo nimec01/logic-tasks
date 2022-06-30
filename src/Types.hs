@@ -75,12 +75,20 @@ genSynTreenosub lits = do
   return (Leaf e)
 
 instance Show SynTree where
-  show (And a b) = "(" ++ show a ++"/\\"++ show b++")"
+  show (And a b) = normalshow a ++"/\\"++ normalshow b
   show (Leaf a)=  a:""
-  show (Or a b) = "(" ++ show a ++"\\/"++ show b++")"
-  show (Not a) = "~" ++ show a ++""
-  show (Impl a b) = "(" ++ show a ++"=>"++ show b ++")"
-  show (Equi a b) = "(" ++ show a ++"<=>"++ show b ++")"
+  show (Or a b) = normalshow a ++"\\/"++ normalshow b
+  show (Not a) = "~" ++ normalshow a ++""
+  show (Impl a b) = normalshow a ++"=>"++ normalshow b
+  show (Equi a b) = normalshow a ++"<=>"++ normalshow b
+
+normalshow:: SynTree-> String
+normalshow (And a b) = "(" ++ show a ++"/\\"++ show b++")"
+normalshow (Leaf a)=  a:""
+normalshow (Or a b) = "(" ++ show a ++"\\/"++ show b++")"
+normalshow (Not a) = "~" ++ show a ++""
+normalshow (Impl a b) = "(" ++ show a ++"=>"++ show b ++")"
+normalshow (Equi a b) = "(" ++ show a ++"<=>"++ show b ++")"
 
 instance Arbitrary SynTree where
     -- arbitrary= genSynTree (8,10) 5 ['A','B','C']

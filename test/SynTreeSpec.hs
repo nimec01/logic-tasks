@@ -33,8 +33,8 @@ invalidBoundsSyntr = do
 validBoundsSyntr :: Gen ((Integer,Integer),Integer,String)
 validBoundsSyntr = do
     validChars <- sublistOf ['A'..'Z']
-    minnode <- chooseInt (1,100)
-    maxnode <- chooseInt (minnode,100)
+    minnode <- chooseInt (1,10)
+    maxnode <- chooseInt (minnode,10)
     maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
     pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars)
 
