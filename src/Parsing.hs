@@ -40,29 +40,11 @@ notE =  do
    lexeme $ char '~'
    Not <$> parserT
 
-simpleAndE :: Parser SynTree
-simpleAndE = do
-            left <- parserT
-            lexeme $ string "/\\"
-            And left <$> parserT
-
-simpleOrE :: Parser SynTree
-simpleOrE = do
-            left <- parserT
-            lexeme $ string "\\/"
-            Or left <$> parserT
-
-simpleImplE :: Parser SynTree
-simpleImplE = do
-            left <- parserT
-            lexeme $ string "=>"
-            Impl left <$> parserT
-
-simpleEquiE:: Parser SynTree
-simpleEquiE = do
-            left <- parserT
-            lexeme $ string "<=>"
-            Equi left <$> parserT
+simpleBothE::(Parser String,SynTree -> SynTree -> SynTree) ->Parser SynTree
+simpleBothE (bothparse,oper) = do
+  left <- parserT
+  lexeme bothparse
+  oper left <$> parserT
 
 parserTtoS :: Parser SynTree
 parserTtoS=  do
@@ -75,7 +57,7 @@ parserT :: Parser SynTree
 parserT = try leafE <|>try parserTtoS  <|> notE
 
 parserBothT :: Parser SynTree
-parserBothT= try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
+parserBothT= (try $ simpleBothE (string "/\\",And) )<|> (try $ simpleBothE (string "\\/",Or))<|>(try $ simpleBothE (string "=>",Impl)) <|> (simpleBothE (string "<=>",Equi))
 
 parserS :: Parser SynTree
 parserS = try  parserBothT <|> parserT
