@@ -19,7 +19,13 @@ nodenum (Or a b) = 1+nodenum a+nodenum b
 nodenum (Impl a b) = 1+nodenum a+nodenum b
 nodenum (Equi a b) = 1+nodenum a+nodenum b
 
-
+treedepth:: SynTree-> Integer
+treedepth (Not a) = 1 + treedepth a
+treedepth (Leaf a)= 1
+treedepth (And a b) = 1 + maximum [treedepth a,treedepth b]
+treedepth (Or a b) = 1 + maximum [treedepth a,treedepth b]
+treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
+treedepth (Equi a b) = 1 + maximum [treedepth a,treedepth b]
 
 
 invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,String)
@@ -46,3 +52,5 @@ spec = describe "genSyntaxTree" $ do
             forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> isNothing synTree
         it "should generate a random SyntaxTree from the given parament and in the node area" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> nodenum (fromJust synTree)>=minnode &&nodenum (fromJust synTree) <=maxnode
+        it "should generate a random SyntaxTree from the given parament and not deeper than the maxdepth" $
+            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> treedepth (fromJust synTree)<= maxdepth
