@@ -6,7 +6,7 @@ import Types ( depwinode, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf) )
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
-import Data.Maybe ( fromJust, isNothing )
+import Data.Maybe ( fromJust, isNothing,fromMaybe )
 
 -- chooseletter :: Bool -> Char ->Bool
 -- chooseletter False _ = False
@@ -44,13 +44,17 @@ validBoundsSyntr = do
     maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
     pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars)
 
+genNothing ::Gen SynTree
+genNothing =return $  Leaf '1'
+
+-- genSynTree :: (Integer , Integer) -> Integer ->String-> Maybe (Gen SynTree)
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
         it "should generate a random SyntaxTree from the given parament and can be parsed by normParse" $
-            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> normParse (show (fromJust synTree))==Right  (fromJust synTree)
+            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> normParse (show (synTree))==Right  (synTree)
         it "should throw an error call" $
-            forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> isNothing synTree
+            forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll (fromMaybe genNothing $ genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> synTree== Leaf '1'
         it "should generate a random SyntaxTree from the given parament and in the node area" $
-            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> nodenum (fromJust synTree)>=minnode &&nodenum (fromJust synTree) <=maxnode
+            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> nodenum (synTree)>=minnode &&nodenum (synTree) <=maxnode
         it "should generate a random SyntaxTree from the given parament and not deeper than the maxdepth" $
-            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll ( genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> treedepth (fromJust synTree)<= maxdepth
+            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars)  $ \synTree -> treedepth (synTree)<= maxdepth
