@@ -38,53 +38,47 @@ leafE = do
 notE :: Parser SynTree
 notE =  do
    lexeme $ char '~'
-   Not <$> simpleExpr
-
-parenthE :: Parser SynTree
-parenthE =  do
-            lexeme $ char '('
-            e <- simpleExpr
-            lexeme $ char ')'
-            return e
+   Not <$> parserT
 
 simpleAndE :: Parser SynTree
 simpleAndE = do
-            left <- simpleExpr
+            left <- parserT
             lexeme $ string "/\\"
-            And left <$> simpleExpr
+            And left <$> parserT
 
 simpleOrE :: Parser SynTree
 simpleOrE = do
-            left <- simpleExpr
+            left <- parserT
             lexeme $ string "\\/"
-            Or left <$> simpleExpr
+            Or left <$> parserT
 
 simpleImplE :: Parser SynTree
 simpleImplE = do
-            left <- simpleExpr
+            left <- parserT
             lexeme $ string "=>"
-            Impl left <$> simpleExpr
+            Impl left <$> parserT
 
 simpleEquiE:: Parser SynTree
 simpleEquiE = do
-            left <- simpleExpr
+            left <- parserT
             lexeme $ string "<=>"
-            Equi left <$> simpleExpr
+            Equi left <$> parserT
 
-simpleBothE :: Parser SynTree
-simpleBothE=  do
+parserTtoS :: Parser SynTree
+parserTtoS=  do
             lexeme $ char '('
-            e <- try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
+            e <- parserS
             lexeme $ char ')'
             return e
 
-simpleExpr :: Parser SynTree
-simpleExpr = try leafE <|> try simpleBothE <|> try parenthE <|> notE
+parserT :: Parser SynTree
+parserT = try leafE <|>try parserTtoS  <|> notE
 
-specBothE :: Parser SynTree
-specBothE= try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
+parserBothT :: Parser SynTree
+parserBothT= try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
 
-specExpr :: Parser SynTree
-specExpr = try  specBothE <|>try leafE <|> try notE <|> parenthE
+parserS :: Parser SynTree
+parserS = try  parserBothT <|> parserT
+
 normParse :: String ->Either ParseError SynTree
-normParse = parseWithWhitespace specExpr
+normParse = parseWithWhitespace parserS
