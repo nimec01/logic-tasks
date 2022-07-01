@@ -31,48 +31,48 @@ lexeme p = do
            return x
 
 leafE :: Parser SynTree
-leafE = lexeme $ do
+leafE = do
             a <- satisfy isLetter
             return $ Leaf  a
 
 notE :: Parser SynTree
-notE = lexeme $ do
+notE =  do
    lexeme $ char '~'
    Not <$> simpleExpr
 
 parenthE :: Parser SynTree
-parenthE = lexeme $ do
+parenthE =  do
             lexeme $ char '('
             e <- simpleExpr
             lexeme $ char ')'
             return e
 
 simpleAndE :: Parser SynTree
-simpleAndE = lexeme $ do
+simpleAndE = do
             left <- simpleExpr
             lexeme $ string "/\\"
             And left <$> simpleExpr
 
 simpleOrE :: Parser SynTree
-simpleOrE = lexeme $ do
+simpleOrE = do
             left <- simpleExpr
             lexeme $ string "\\/"
             Or left <$> simpleExpr
 
 simpleImplE :: Parser SynTree
-simpleImplE = lexeme $ do
+simpleImplE = do
             left <- simpleExpr
             lexeme $ string "=>"
             Impl left <$> simpleExpr
 
 simpleEquiE:: Parser SynTree
-simpleEquiE = lexeme $ do
+simpleEquiE = do
             left <- simpleExpr
             lexeme $ string "<=>"
             Equi left <$> simpleExpr
 
 simpleBothE :: Parser SynTree
-simpleBothE= lexeme $ do
+simpleBothE=  do
             lexeme $ char '('
             e <- try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
             lexeme $ char ')'
@@ -82,7 +82,7 @@ simpleExpr :: Parser SynTree
 simpleExpr = try leafE <|> try simpleBothE <|> try parenthE <|> notE
 
 specBothE :: Parser SynTree
-specBothE= lexeme $ try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
+specBothE= try simpleAndE <|> try simpleOrE <|> try simpleImplE <|>simpleEquiE
 
 specExpr :: Parser SynTree
 specExpr = try  specBothE <|>try leafE <|> try notE <|> parenthE
