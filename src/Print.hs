@@ -22,5 +22,5 @@ transfer (Equi a b) = "[ $\\Leftrightarrow  $ " ++ transfer a++ transfer b++"  ]
 
 main :: IO ()
 main = do
-    tree <- generate $ fromJust $genSynTree ((4, 10)) 5 "ABCD" ""
+    tree <- generate $ fromJust $genSynTree (4, 10) 5 "ABCD" ""
     print (transfer tree)
