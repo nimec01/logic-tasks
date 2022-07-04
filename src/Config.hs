@@ -2,8 +2,10 @@
 module Config (
     SynTreeConfig(..),
     PickInst(..) ,
+    SubInst(..),
     dSynTreeConfig,
-    dPickInst
+    dPickInst,
+    dSubInst
 ) where
 import Data.Typeable
 import GHC.Generics
@@ -39,4 +41,17 @@ dPickInst = PickInst{
     insSyntree = Not $ Leaf 'A',
     image = transfer $ insSyntree dPickInst,
     correct =show $ insSyntree dPickInst
+    }
+
+data SubInst = SubInst
+    {
+        insofSyntree::SynTree,
+        allsubtree:: [SynTree]
+    }
+
+dSubInst ::SubInst
+dSubInst = SubInst
+    {
+        insofSyntree = Not $ Leaf 'A',
+        allsubtree =  allsubtre $ Not $ Leaf 'A'
     }

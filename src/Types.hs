@@ -3,14 +3,14 @@ module Types
     SynTree(..),
     depwinode ,
     genSynTree,
-    maxleafnode
+    maxleafnode,
+    allsubtre
   )
 where
 
 import Test.QuickCheck
     ( choose, elements, oneof, Gen )-- , sized, Arbitrary(arbitrary))
-import Data.List (isSubsequenceOf, (\\))
-
+import Data.List (isSubsequenceOf, (\\),sort)
 data SynTree
     = And {lefttree :: SynTree , righttree :: SynTree}
     | Or {lefttree :: SynTree , righttree :: SynTree}
@@ -18,7 +18,7 @@ data SynTree
     | Equi {lefttree :: SynTree , righttree :: SynTree}
     | Not {folltree :: SynTree}
     | Leaf { leaf :: Char}
-    deriving (Eq)
+    deriving (Eq,Ord )
 
 --刚开始就进行syntree的解析直到
 -- 先检查括号是否合法
@@ -148,3 +148,13 @@ normalshow (Equi a b) = "(" ++ normalshow a ++"<=>"++ normalshow b ++")"
     -- genSynTree (a,b) depth [list]
     -- where
     --   depth=fst (depwinode a)
+gitSubTree :: SynTree -> [SynTree]
+gitSubTree (And a b) = gitSubTree a ++ (And a b:gitSubTree b)
+gitSubTree (Leaf a)=  [Leaf a]
+gitSubTree (Or a b) = gitSubTree a ++ (Or a b:gitSubTree b)
+gitSubTree (Not a) = Not a:gitSubTree a
+gitSubTree (Impl a b) =gitSubTree a ++ (Impl a b:gitSubTree b)
+gitSubTree (Equi a b) = gitSubTree a ++ (Equi a b:gitSubTree b)
+
+allsubtre:: SynTree -> [SynTree]
+allsubtre a = sort $ gitSubTree a
