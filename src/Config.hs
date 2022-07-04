@@ -32,7 +32,7 @@ data PickInst = PickInst
     { insSyntree :: SynTree,
     image:: String,
     correct :: String
-    }
+    } deriving(Show)
 
 dPickInst :: PickInst
 dPickInst = PickInst{
