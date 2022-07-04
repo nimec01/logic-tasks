@@ -31,15 +31,12 @@ dSynTreeConfig = SynTreeConfig {
 data PickInst = PickInst
     { insSyntree :: SynTree,
     image:: String,
-    correct :: String,
-    addText :: Maybe String
+    correct :: String
     }
 
 dPickInst :: PickInst
 dPickInst = PickInst{
     insSyntree = Not $ Leaf 'A',
     image = transfer $ insSyntree dPickInst,
-    correct =show $ insSyntree dPickInst,
-    addText =Just "Put additional text here or delete this parameter."
-}
-
+    correct =show $ insSyntree dPickInst
+    }
