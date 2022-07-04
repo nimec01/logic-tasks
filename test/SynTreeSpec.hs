@@ -2,7 +2,7 @@ module SynTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen )
-import Types ( depwinode, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf),maxleafnode )
+import Types ( deptharea, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf),maxleafnode )
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
@@ -42,7 +42,7 @@ invalidBoundsSyntr = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (2,100)
  maxnode <- chooseInt (1,minnode-1)
- maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
+ maxdepth <- chooseInt (fromInteger $ fst(deptharea $toInteger  minnode),maxnode)
  pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,validChars)
 
 validBoundsSyntr :: Gen ((Integer,Integer),Integer,String,String)
@@ -50,7 +50,7 @@ validBoundsSyntr = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (1,100)
  maxnode <- chooseInt (minnode,100)
- maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
+ maxdepth <- chooseInt (fromInteger $ fst(deptharea $toInteger  minnode),maxnode)
  pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars)
 
 

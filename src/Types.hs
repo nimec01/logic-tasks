@@ -1,7 +1,7 @@
 module Types
  (
  SynTree(..),
- depwinode ,
+ deptharea ,
  genSynTree,
  maxleafnode,
  allsubtre
@@ -20,13 +20,13 @@ data SynTree
   | Leaf { leaf :: Char}
   deriving (Eq,Ord )
 
-depwinode :: Integer -> (Integer ,Integer)
-depwinode node =(mindepth ,maxdepth)
+deptharea :: Integer -> (Integer ,Integer)
+deptharea node =(mindepth ,maxdepth)
   where mindepth=head[m |m <-[1,2..], (2 ^ m)-1>=node ]
         maxdepth=node
 
-nodewidep :: Integer ->Integer
-nodewidep depth= 2 ^ depth
+maxofnode :: Integer ->Integer
+maxofnode depth= 2 ^ depth
 
 maxleafnode :: Integer -> Integer
 maxleafnode maxnode
@@ -35,7 +35,7 @@ maxleafnode maxnode
 
 genSynTree :: (Integer , Integer) -> Integer ->String->String-> Maybe (Gen SynTree)
 genSynTree (minnode, maxnode) maxdepth lits minuse
- | maxdepth<=0 || maxnode<=0||null lits || maxnode< minnode || fst ( depwinode minnode) > maxdepth||(not $ isSubsequenceOf minuse lits) ||(maxleafnode maxnode)< (toInteger $ length minuse)= Nothing
+ | maxdepth<=0 || maxnode<=0||null lits || maxnode< minnode || fst ( deptharea minnode) > maxdepth||(not $ isSubsequenceOf minuse lits) ||(maxleafnode maxnode)< (toInteger $ length minuse)= Nothing
  | otherwise =  Just $ generSynTree (a,maxnode) maxdepth lits minuse
   where
   a=maximum [0,minnode]
@@ -54,14 +54,14 @@ generSynTree (minnode, maxnode) maxdepth lits minuse
     e <-elements [True,False]
     if e then  genSynTreenosub lits minuse else oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits minuse :  gentwoSub 3 )
  | minnode == 1 && maxnode >= 3 && length minuse > 1= oneof ( genSynTreewithonesub (2, maxnode) maxdepth lits minuse :  gentwoSub 3 )
- | (minnode-1)>= nodewidep ( maxdepth-1) =oneof $ gentwoSub minnode
+ | (minnode-1)>= maxofnode ( maxdepth-1) =oneof $ gentwoSub minnode
  | otherwise = oneof ( genSynTreewithonesub (minnode, maxnode) maxdepth lits minuse : gentwoSub minnode)
  where
   gentwoSub m = map (genSynTreewithtwosub (m, maxnode) maxdepth lits minuse) [And, Or, Impl, Equi]
   gentwoSub2 m = map (genSynTreewithtwosub2 (m, maxnode) maxdepth lits minuse) [And, Or, Impl, Equi]
 
 genSynTreewithtwosub::(Integer , Integer) -> Integer ->String->String->(SynTree -> SynTree -> SynTree)->Gen SynTree
-genSynTreewithtwosub(minnode, maxnode) maxdepth lits minuse oper  = let a=maximum[0,minnode-1-nodewidep(maxdepth-1)]  in do   --choose一个Impl之类的
+genSynTreewithtwosub(minnode, maxnode) maxdepth lits minuse oper  = let a=maximum[0,minnode-1-maxofnode(maxdepth-1)]  in do   --choose一个Impl之类的
  radmin <-choose (1+a,minnode-2-a)
  radmax <- choose (radmin,maxnode-minnode+radmin)
  left <- generSynTree (radmin,radmax) (maxdepth-1) lits (take (fromInteger $ maxleafnode radmax) minuse)
@@ -69,7 +69,7 @@ genSynTreewithtwosub(minnode, maxnode) maxdepth lits minuse oper  = let a=maximu
  return $ oper left right
 
 genSynTreewithtwosub2::(Integer , Integer) -> Integer ->String->String->(SynTree -> SynTree -> SynTree)->Gen SynTree
-genSynTreewithtwosub2(minnode, maxnode) maxdepth lits minuse oper  = let a=maximum[0,minnode-1-nodewidep(maxdepth-1)]  in do   --choose一个Impl之类的
+genSynTreewithtwosub2(minnode, maxnode) maxdepth lits minuse oper  = let a=maximum[0,minnode-1-maxofnode(maxdepth-1)]  in do   --choose一个Impl之类的
  radmin <-elements (filter odd [1+a..minnode-2-a])
  radmax <- elements (filter odd [radmin..maxnode-minnode+radmin])
  left <- generSynTree (radmin,radmax) (maxdepth-1) lits (take (fromInteger $ maxleafnode radmax) minuse)

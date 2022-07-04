@@ -2,7 +2,6 @@
 {-# LANGUAGE BlockArguments #-}
 module Parsing(
   normParse,
-  subnormParse
 ) where
 
 import Types ( SynTree(Equi, Leaf, Not, And, Or, Impl) )
@@ -12,7 +11,6 @@ import Text.Parsec.Char ( char, oneOf, satisfy, string )
 import Control.Applicative ((<|>), many)
 import Data.Char (isLetter)
 import Text.Parsec(ParseError,parse,eof)
-import Data.List (sort)
 
 parseWithEof :: Parser a -> String -> Either ParseError a
 parseWithEof p = parse (p <* eof) ""
@@ -67,17 +65,3 @@ parserS = try  parserBothT <|> parserT
 
 normParse :: String ->Either ParseError SynTree
 normParse = parseWithWhitespace parserS
-------------------------------------------------------------------------------------------------------------------------
-
-subTreeParse ::Parser [SynTree]
-subTreeParse = do
-  lexeme $ char '['
-  e<-parserS
-  resu<-many do
-            lexeme $ char ','
-            parserS
-  lexeme $ char ']'
-  return $ sort $ e:resu
-
-subnormParse :: String -> Either ParseError [SynTree]
-subnormParse = parseWithWhitespace subTreeParse
