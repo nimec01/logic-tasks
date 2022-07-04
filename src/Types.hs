@@ -57,8 +57,8 @@ generSynTree (minnode, maxnode) maxdepth lits minuse
   | minnode == 2 &&maxnode < 3 =genSynTreewithonesub (2, maxnode) maxdepth lits minuse
   | minnode <= 2 && (maxleafnode maxnode)== (toInteger $ length minuse) = oneof $ gentwoSub2 3
   | (maxleafnode maxnode)== (toInteger $ length minuse) = oneof $ gentwoSub2 minnode
-  | minnode <= 2 && (maxleafnode (maxnode-1))< (toInteger $ length minuse) = oneof $ gentwoSub 3
-  | (maxleafnode (maxnode-1))< (toInteger $ length minuse) = oneof $ gentwoSub minnode
+  -- | minnode <= 2 && (maxleafnode (maxnode-1))< (toInteger $ length minuse) = oneof $ gentwoSub 3
+  -- | (maxleafnode (maxnode-1))< (toInteger $ length minuse) = oneof $ gentwoSub minnode
   | minnode == 2 && maxnode >= 3 = do
     e <-elements [True,False]
     if e then  genSynTreewithonesub (2, maxnode) maxdepth lits minuse  else oneof $ gentwoSub 3
