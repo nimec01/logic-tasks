@@ -71,13 +71,13 @@ normParse = parseWithWhitespace parserS
 
 subTreeParse ::Parser [SynTree]
 subTreeParse = do
- lexeme $ char '['
- e<-parserS
- resu<-many do
-  lexeme $ char ','
-  parserS
- lexeme $ char ']'
- return $ sort $ e:resu
+  lexeme $ char '['
+  e<-parserS
+  resu<-many do
+            lexeme $ char ','
+            parserS
+  lexeme $ char ']'
+  return $ sort $ e:resu
 
 subnormParse :: String -> Either ParseError [SynTree]
 subnormParse = parseWithWhitespace subTreeParse
