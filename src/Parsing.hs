@@ -22,39 +22,39 @@ whitespace = do
   return ()
 parseWithWhitespace :: Parser a -> String -> Either ParseError a
 parseWithWhitespace p = parseWithEof wrapper
-  where
-    wrapper = do
-        whitespace
-        p
+ where
+ wrapper = do
+  whitespace
+  p
 
-lexeme :: Parser a -> Parser a--作用为读取后去掉所有空格
+lexeme :: Parser a -> Parser a
 lexeme p = do
-           x <- p
-           whitespace
-           return x
+ x <- p
+ whitespace
+ return x
 
 leafE :: Parser SynTree
 leafE = do
-            a <- lexeme $ satisfy isLetter
-            return $ Leaf  a
+ a <- lexeme $ satisfy isLetter
+ return $ Leaf  a
 
 notE :: Parser SynTree
 notE =  do
-   lexeme $ char '~'
-   Not <$> parserT
+ lexeme $ char '~'
+ Not <$> parserT
 
 simpleBothE::(Parser String,SynTree -> SynTree -> SynTree) ->Parser SynTree
 simpleBothE (bothparse,oper) = do
-  left <- parserT
-  lexeme bothparse
-  oper left <$> parserT
+ left <- parserT
+ lexeme bothparse
+ oper left <$> parserT
 
 parserTtoS :: Parser SynTree
 parserTtoS=  do
-            lexeme $ char '('
-            e <- parserS
-            lexeme $ char ')'
-            return e
+ lexeme $ char '('
+ e <- parserS
+ lexeme $ char ')'
+ return e
 
 parserT :: Parser SynTree
 parserT = try leafE <|>try parserTtoS  <|> notE
@@ -71,13 +71,13 @@ normParse = parseWithWhitespace parserS
 
 subTreeParse ::Parser [SynTree]
 subTreeParse = do
-  lexeme $ char '['
-  e<-parserS
-  resu<-many do
-        lexeme $ char ','
-        parserS
-  lexeme $ char ']'
-  return $ sort $ e:resu
+ lexeme $ char '['
+ e<-parserS
+ resu<-many do
+  lexeme $ char ','
+  parserS
+ lexeme $ char ']'
+ return $ sort $ e:resu
 
 subnormParse :: String -> Either ParseError [SynTree]
 subnormParse = parseWithWhitespace subTreeParse

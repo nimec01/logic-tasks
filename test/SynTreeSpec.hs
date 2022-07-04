@@ -9,9 +9,6 @@ import qualified Control.Exception as Exc (evaluate)
 import Data.Maybe ( fromJust, isNothing,fromMaybe )
 import Data.List (intersect)
 
--- chooseletter :: Bool -> Char ->Bool
--- chooseletter False _ = False
--- chooseletter _ t =isLetter t
 nodenum :: SynTree -> Integer
 nodenum (Not a) = 1+nodenum a
 nodenum (Leaf a)= 1
@@ -28,8 +25,6 @@ treedepth (Or a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Equi a b) = 1 + maximum [treedepth a,treedepth b]
 
-
---takeWhile :: (a -> Bool) -> [a] -> [a]  intersect :: Eq a => [a] -> [a] -> [a]
 usestring :: String ->SynTree->Bool
 usestring str synTree = str ==(intersect str (catchstr synTree))
 
@@ -44,37 +39,33 @@ catchstr (Equi a b) =  catchstr a ++ catchstr b
 
 invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,String,String)
 invalidBoundsSyntr = do
-    validChars <- sublistOf ['A'..'Z']
-    minnode <- chooseInt (2,100)
-    maxnode <- chooseInt (1,minnode-1)
-    maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
-    pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,validChars)
+ validChars <- sublistOf ['A'..'Z']
+ minnode <- chooseInt (2,100)
+ maxnode <- chooseInt (1,minnode-1)
+ maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
+ pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,validChars)
 
 validBoundsSyntr :: Gen ((Integer,Integer),Integer,String,String)
 validBoundsSyntr = do
-    validChars <- sublistOf ['A'..'Z']
-    minnode <- chooseInt (1,100)
-    maxnode <- chooseInt (minnode,100)
-    maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
-    pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars)
+ validChars <- sublistOf ['A'..'Z']
+ minnode <- chooseInt (1,100)
+ maxnode <- chooseInt (minnode,100)
+ maxdepth <- chooseInt (fromInteger $ fst(depwinode $toInteger  minnode),maxnode)
+ pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars)
 
 
 validBoundsSyntr2 :: Gen ((Integer,Integer),Integer,String,String)
 validBoundsSyntr2 = do
-    validChars <- sublistOf ['A'..'Z']
-    minnode <- chooseInt (1,100)
-    maxnode <- chooseInt (minnode,100)
-    pure ((toInteger minnode,toInteger maxnode), toInteger maxnode ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars)
+ validChars <- sublistOf ['A'..'Z']
+ minnode <- chooseInt (1,100)
+ maxnode <- chooseInt (minnode,100)
+ pure ((toInteger minnode,toInteger maxnode), toInteger maxnode ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars)
 
--- genNothing ::Gen SynTree
--- genNothing =return $  Leaf '1'
-
--- genSynTree :: (Integer , Integer) -> Integer ->String-> Maybe (Gen SynTree)
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
         it "should generate a random SyntaxTree from the given parament and can be parsed by normParse" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars minuse)  $ \synTree -> normParse (show synTree)==Right synTree
-        -- it "should throw an error call" $
+        -- it "should throw an error call" $ statement this test use invalid paraments so this makes no sense
         --     forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse)->forAll (fromMaybe genNothing $ genSynTree (minnode,maxnode) maxdepth validChars minuse)  $ \synTree -> synTree== Leaf '1'
         it "should generate a random SyntaxTree from the given parament and in the node area" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars minuse)  $ \synTree -> nodenum synTree>=minnode &&nodenum synTree<=maxnode

@@ -7,9 +7,9 @@ module Config (
     dPickInst,
     dSubInst
 ) where
-import Data.Typeable
-import GHC.Generics
-import Types
+import Data.Typeable ( Typeable )
+import GHC.Generics ( Generic )
+import Types ( SynTree(Leaf, Not), allsubtre )
 import Print (transfer)
 
 data SynTreeConfig = SynTreeConfig
