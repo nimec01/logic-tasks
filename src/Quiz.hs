@@ -19,13 +19,10 @@ roll SynTreeConfig{maxnode=maxnode , minnode=minnode ,..} = do
     return (tree,imag,corr)
 
 -- instance Generator Pick PickConfig PickInst where
-genPickInst :: SynTreeConfig -> Gen PickInst
+genPickInst :: SynTreeConfig -> IO PickInst
 genPickInst SynTreeConfig{maxnode=maxnode , minnode=minnode ,..} = do
-    tree <-  fromJust (genSynTree (minnode,maxnode) maxdepth electliteral  mustcontain)
-    let
-        imag = transfer tree
-        corr = show tree
-    return $ PickInst { insSyntree=tree
-                       , image=imag
-                       , correct =corr
+    (a,b,c) <-  roll SynTreeConfig{..}
+    return $ PickInst { insSyntree=a
+                       , image=b
+                       , correct =c
                         }
