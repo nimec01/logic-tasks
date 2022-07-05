@@ -2,7 +2,7 @@ module SynTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen )
-import Types ( deptharea, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf),maxleafnode )
+import Types ( deptharea, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf),maxleafnode, display )
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
@@ -64,7 +64,7 @@ validBoundsSyntr2 = do
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
         it "should generate a random SyntaxTree from the given parament and can be parsed by normParse" $
-            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars minuse)  $ \synTree -> normParse (show synTree)==Right synTree
+            forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars minuse)  $ \synTree -> normParse (display synTree)==Right synTree
         -- it "should throw an error call" $ statement this test use invalid paraments so this makes no sense
         --     forAll invalidBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse)->forAll (fromMaybe genNothing $ genSynTree (minnode,maxnode) maxdepth validChars minuse)  $ \synTree -> synTree== Leaf '1'
         it "should generate a random SyntaxTree from the given parament and in the node area" $

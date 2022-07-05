@@ -1,16 +1,12 @@
 {-# LANGUAGE DeriveGeneric #-}
 module Config (
     SynTreeConfig(..),
-    PickInst(..) ,
+    SynTreeInst(..) ,
     SubInst(..),
     dSynTreeConfig,
-    dPickInst,
     dSubInst
 ) where
-import Data.Typeable ( Typeable )
-import GHC.Generics ( Generic )
 import Types ( SynTree(Leaf, Not), allsubtre )
-import Print (transfer)
 
 data SynTreeConfig = SynTreeConfig
     {maxnode::Integer,
@@ -18,7 +14,7 @@ data SynTreeConfig = SynTreeConfig
     maxdepth :: Integer,
     electliteral::String,
     mustcontain ::String
-    }deriving (Typeable, Generic)
+    } deriving Show
 
 dSynTreeConfig :: SynTreeConfig
 dSynTreeConfig = SynTreeConfig {
@@ -30,18 +26,11 @@ dSynTreeConfig = SynTreeConfig {
 
 }
 
-data PickInst = PickInst
+data SynTreeInst = SynTreeInst
     { insSyntree :: SynTree,
     image:: String,
     correct :: String
     } deriving(Show)
-
-dPickInst :: PickInst
-dPickInst = PickInst{
-    insSyntree = Not $ Leaf 'A',
-    image = transfer $ insSyntree dPickInst,
-    correct =show $ insSyntree dPickInst
-    }
 
 data SubInst = SubInst
     {

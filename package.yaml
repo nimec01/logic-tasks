@@ -16,18 +16,26 @@ default-extensions:
   - ScopedTypeVariables
 library:
   source-dirs: src
-  exposed-modules: 
+  exposed-modules:
+    - Config
     - Types
     - Parsing
+    - Quiz
   ghc-options:
     - -Wall
     - -Werror
 executables:
-  default:
-    main: default.hs
+  formulaFromSyntaxTree:
+    main: formulaFromSyntaxTree.hs
     source-dirs: app
     dependencies:
       - ba-tongxi-xu
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Werror
 
 tests:
   ba-tongxi-xu-test:

@@ -1,6 +1,7 @@
 module Types
  (
  SynTree(..),
+ display,
  deptharea ,
  genSynTree,
  maxleafnode,
@@ -18,7 +19,7 @@ data SynTree
   | Equi {lefttree :: SynTree , righttree :: SynTree}
   | Not {folltree :: SynTree}
   | Leaf { leaf :: Char}
-  deriving (Eq,Ord )
+  deriving (Eq, Ord, Show)
 
 deptharea :: Integer -> (Integer ,Integer)
 deptharea node =(mindepth ,maxdepth)
@@ -90,13 +91,13 @@ genSynTreenosub lits minus =
   e <- elements minus
   return (Leaf e)
 
-instance Show SynTree where
- show (And a b) = normalshow a ++"/\\"++ normalshow b
- show (Leaf a)=  a:""
- show (Or a b) = normalshow a ++"\\/"++ normalshow b
- show (Not a) = "~" ++ normalshow a ++""
- show (Impl a b) = normalshow a ++"=>"++ normalshow b
- show (Equi a b) = normalshow a ++"<=>"++ normalshow b
+display :: SynTree-> String
+display (And a b) = normalshow a ++"/\\"++ normalshow b
+display (Leaf a)=  a:""
+display (Or a b) = normalshow a ++"\\/"++ normalshow b
+display (Not a) = "~" ++ normalshow a ++""
+display (Impl a b) = normalshow a ++"=>"++ normalshow b
+display (Equi a b) = normalshow a ++"<=>"++ normalshow b
 
 normalshow:: SynTree-> String
 normalshow (And a b) = "(" ++ normalshow a ++"/\\"++ normalshow b++")"
