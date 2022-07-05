@@ -7,6 +7,7 @@ import Quiz (genSynTreeInst)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
+import Parsing (normParse)
 
 main :: IO ()
 main = do
@@ -29,4 +30,4 @@ main = do
   feedbackLoop
 
 feedback :: SynTreeInst -> String -> Bool
-feedback _ _ = False
+feedback syntreeInst input = Right (insSyntree syntreeInst) ==  normParse input
