@@ -2,12 +2,11 @@
 
 module Main (main) where
 
-import Config (dSynTreeConfig, SynTreeInst(..))
-import Quiz (genSynTreeInst)
+import Tasks.SynTree.Config (dSynTreeConfig, SynTreeInst(..))
+import Tasks.SynTree.Quiz (genSynTreeInst, feedback)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
-import Parsing (normParse)
 
 main :: IO ()
 main = do
@@ -28,6 +27,3 @@ main = do
           putStrLn $ "Your submission is " ++ show (feedback inst input)
           feedbackLoop
   feedbackLoop
-
-feedback :: SynTreeInst -> String -> Bool
-feedback syntreeInst input = Right (insSyntree syntreeInst) ==  normParse input

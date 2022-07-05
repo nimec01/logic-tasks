@@ -17,10 +17,10 @@ default-extensions:
 library:
   source-dirs: src
   exposed-modules:
-    - Config
+    - Tasks.SynTree.Config
     - Types
     - Parsing
-    - Quiz
+    - Tasks.SynTree.Quiz
   ghc-options:
     - -Wall
     - -Werror
