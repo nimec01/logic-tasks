@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 {-# LANGUAGE BlockArguments #-}
 module Parsing(
-  normParse,
+  normParse
 ) where
 
 import Types ( SynTree(Equi, Leaf, Not, And, Or, Impl) )
