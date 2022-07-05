@@ -7,10 +7,10 @@ module Tasks.SynTree.Quiz (
 
 import Test.QuickCheck (generate)
 import Parsing (normParse)
-import Print (transfer)
-import Types (genSynTree, display)
+import Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
 import Data.Maybe (fromJust)
+import Print ( transfer, display )
 
 genSynTreeInst :: SynTreeConfig -> IO SynTreeInst
 genSynTreeInst SynTreeConfig{..} = do

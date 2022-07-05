@@ -20,6 +20,8 @@ library:
     - Tasks.SynTree.Config
     - Types
     - Parsing
+    - Generate
+    - Print
     - Tasks.SynTree.Quiz
   ghc-options:
     - -Wall

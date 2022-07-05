@@ -2,12 +2,14 @@ module SynTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen )
-import Types ( deptharea, genSynTree, SynTree (And ,Not, Or,Impl,Equi,Leaf),maxleafnode, display )
+import Types (  SynTree (And ,Not, Or,Impl,Equi,Leaf))
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
 import Data.Maybe ( fromJust, isNothing,fromMaybe )
 import Data.List (intersect)
+import Generate(deptharea, genSynTree,maxleafnode)
+import Print (display)
 
 nodenum :: SynTree -> Integer
 nodenum (Not a) = 1+nodenum a
