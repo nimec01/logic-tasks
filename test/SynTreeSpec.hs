@@ -28,7 +28,7 @@ treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Equi a b) = 1 + maximum [treedepth a,treedepth b]
 
 usestring :: String ->SynTree->Bool
-usestring str synTree = str ==(intersect str (catchstr synTree))
+usestring str synTree = str == intersect str (catchstr synTree)
 
 catchstr :: SynTree-> String
 catchstr (Not a) = catchstr a
