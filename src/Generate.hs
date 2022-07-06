@@ -1,4 +1,3 @@
-{-# LANGUAGE BlockArguments #-}
 module Generate(
  deptharea ,
  genSynTree,
@@ -44,9 +43,12 @@ syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
     | (minnode-1) >= maxofnode ( maxdepth-1) = oneof $ binaryOper minnode addoper False
     | otherwise = oneof ( negativeFormula (minnode, maxnode) maxdepth lits minuse addoper: binaryOper minnode addoper False)
       where
-        binaryOper m adder choosodd = map (binaryOperator (m, maxnode) maxdepth lits minuse addoper choosodd) if adder
-            then [And, Or, Impl, Equi]
-            else [And, Or]
+        binaryOper m adder choosodd = map (binaryOperator (m, maxnode) maxdepth lits minuse addoper choosodd) $ chooseList adder
+
+chooseList :: Bool ->[SynTree -> SynTree -> SynTree]
+chooseList addoper = if addoper
+    then [And, Or, Impl, Equi]
+    else [And, Or]
 
 binaryOperator::(Integer , Integer) -> Integer -> String -> String -> Bool -> Bool -> (SynTree -> SynTree -> SynTree) -> Gen SynTree
 binaryOperator(minnode, maxnode) maxdepth lits minuse addoper choosodd oper = let a = maximum[0, minnode-1-maxofnode( maxdepth - 1 )]  in do
