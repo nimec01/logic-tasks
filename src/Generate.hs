@@ -36,12 +36,8 @@ syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
     | minnode == 2 && maxnode < 3 = negativeLiteral lits minuse
     | minnode <= 2 && (maxleafnode maxnode) == (toInteger $ length minuse) = oneof $ binaryOper 3 addoper True
     | (maxleafnode maxnode) == (toInteger $ length minuse) = oneof $ binaryOper minnode addoper True
-    | minnode == 2 && maxnode >= 3 = do
-        e <-elements [True,False]
-        if e then  negativeFormula (2, maxnode) maxdepth lits minuse addoper  else oneof $ binaryOper 3 addoper False
-    | minnode == 1 && maxnode >= 3 && length minuse <= 1 = do
-        e <-elements [True,False]
-        if e then  leafnode lits minuse else oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)
+    | minnode == 2 && maxnode >= 3 = oneof [negativeFormula (2, maxnode) maxdepth lits minuse addoper, oneof $ binaryOper 3 addoper False]
+    | minnode == 1 && maxnode >= 3 && length minuse <= 1 = oneof [leafnode lits minuse , oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)]
     | minnode == 1 && maxnode >= 3 && length minuse > 1= oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)
     | (minnode-1) >= maxofnode ( maxdepth-1) = oneof $ binaryOper minnode addoper False
     | otherwise = oneof ( negativeFormula (minnode, maxnode) maxdepth lits minuse addoper: binaryOper minnode addoper False)
