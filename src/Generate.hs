@@ -48,8 +48,9 @@ generSynTree (minnode, maxnode) maxdepth lits minuse addoper
   gentwoSub m adder choosodd
    | adder = map (genSynTreewithtwosub (m, maxnode) maxdepth lits minuse addoper choosodd) [And, Or, Impl, Equi]
    | otherwise=map (genSynTreewithtwosub (m, maxnode) maxdepth lits minuse addoper choosodd) [And, Or]
+
 genSynTreewithtwosub::(Integer , Integer) -> Integer ->String->String->Bool -> Bool->(SynTree -> SynTree -> SynTree)->Gen SynTree
-genSynTreewithtwosub(minnode, maxnode) maxdepth lits minuse addoper choosodd oper   = let a=maximum[0,minnode-1-maxofnode(maxdepth-1)]  in do   --choose一个Impl之类的
+genSynTreewithtwosub(minnode, maxnode) maxdepth lits minuse addoper choosodd oper   = let a=maximum[0,minnode-1-maxofnode(maxdepth-1)]  in do
  radmin <-if choosodd
   then elements (filter odd [1+a..minnode-2-a])
   else choose (1+a,minnode-2-a)
