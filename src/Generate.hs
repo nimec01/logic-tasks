@@ -8,6 +8,7 @@ module Generate(
 import Types (SynTree(..))
 import Test.QuickCheck (choose, elements, oneof, Gen)
 import Data.List (isSubsequenceOf, (\\))
+import Data.Maybe (isJust, fromJust)
 
 deptharea :: Integer -> (Integer, Integer)
 deptharea node = (mindepth, maxdepth)
@@ -32,13 +33,13 @@ genSynTree (minnode, maxnode) maxdepth lits minuse addoper
 
 syntaxTree :: (Integer , Integer) -> Integer -> String -> String -> Bool -> Gen SynTree
 syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
-    | maxdepth == 1 || maxnode == 1 = leafnode lits minuse
-    | minnode == 1 && maxnode == 2 = oneof [ leafnode lits minuse , negativeLiteral lits minuse]
+    | maxdepth == 1 || maxnode == 1 = leafnode lits $ judgminuse minuse
+    | minnode == 1 && maxnode == 2 = oneof [ leafnode lits $ judgminuse minuse , negativeLiteral lits minuse]
     | minnode == 2 && maxnode < 3 = negativeLiteral lits minuse
     | minnode <= 2 && maxleafnode maxnode == toInteger (length minuse) = oneof $ binaryOper 3 addoper True
     | maxleafnode maxnode == toInteger (length minuse) = oneof $ binaryOper minnode addoper True
     | minnode == 2 && maxnode >= 3 = oneof [negativeFormula (2, maxnode) maxdepth lits minuse addoper, oneof $ binaryOper 3 addoper False]
-    | minnode == 1 && maxnode >= 3 && length minuse <= 1 = oneof [leafnode lits minuse , oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)]
+    | minnode == 1 && maxnode >= 3 && length minuse <= 1 = oneof [leafnode lits $ judgminuse minuse , oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)]
     | minnode == 1 && maxnode >= 3 && length minuse > 1= oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)
     | (minnode-1) >= maxofnode ( maxdepth-1) = oneof $ binaryOper minnode addoper False
     | otherwise = oneof ( negativeFormula (minnode, maxnode) maxdepth lits minuse addoper: binaryOper minnode addoper False)
@@ -66,14 +67,18 @@ negativeFormula (minnode, maxnode) maxdepth lits minus addoper = do
 
 negativeLiteral :: String -> String -> Gen SynTree
 negativeLiteral lits minus = do
-    e <- leafnode lits minus
+    e <- leafnode lits $ judgminuse minus
     return (Not e)
 
-leafnode::String -> String -> Gen SynTree
+leafnode::String -> Maybe Char -> Gen SynTree
 leafnode lits minus =
-    if minus=="" then do
+    if isJust minus then do
+        return (Leaf (fromJust minus))
+    else do
         e <- elements lits
         return (Leaf e)
-    else do
-        e <- elements minus
-        return (Leaf e)
+
+judgminuse :: String -> Maybe Char
+judgminuse char
+    |length char == 1 = Just $ head char
+    |otherwise = Nothing
