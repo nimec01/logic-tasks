@@ -5,7 +5,7 @@ module Generate(
 ) where
 
 import Types (SynTree(..))
-import Test.QuickCheck (choose, elements, oneof, Gen)
+import Test.QuickCheck (choose, elements, oneof, Gen, frequency)
 import Data.List (isSubsequenceOf, (\\))
 import Data.Maybe (isJust, fromJust)
 
@@ -37,8 +37,8 @@ syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
     | minnode == 2 && maxnode < 3 = negativeLiteral lits minuse
     | minnode <= 2 && maxleafnode maxnode == toInteger (length minuse) = oneof $ binaryOper 3 addoper True
     | maxleafnode maxnode == toInteger (length minuse) = oneof $ binaryOper minnode addoper True
-    | minnode == 2 && maxnode >= 3 = oneof [negativeFormula (2, maxnode) maxdepth lits minuse addoper, oneof $ binaryOper 3 addoper False]
-    | minnode == 1 && maxnode >= 3 && length minuse <= 1 = oneof [leafnode lits $ judgminuse minuse , oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)]
+    | minnode == 2 && maxnode >= 3 = frequency [(1,negativeFormula (2, maxnode) maxdepth lits minuse addoper), (fromInteger (maxnode - minnode - 1), oneof $ binaryOper 3 addoper False)]
+    | minnode == 1 && maxnode >= 3 && length minuse <= 1 = frequency [(1,leafnode lits $ judgminuse minuse), (fromInteger (maxnode - minnode - 1), oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False))]
     | minnode == 1 && maxnode >= 3 && length minuse > 1= oneof ( negativeFormula (2, maxnode) maxdepth lits minuse addoper :  binaryOper 3 addoper False)
     | (minnode-1) >= maxofnode ( maxdepth-1) = oneof $ binaryOper minnode addoper False
     | otherwise = oneof ( negativeFormula (minnode, maxnode) maxdepth lits minuse addoper: binaryOper minnode addoper False)
