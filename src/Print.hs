@@ -13,7 +13,6 @@ transfer (Not a) = "[ $\\neg $ " ++ transfer a ++"  ]"
 transfer (Impl a b) = "[ $\\to  $ " ++ transfer a++ transfer b++"  ]"
 transfer (Equi a b) = "[ $\\Leftrightarrow  $ " ++ transfer a++ transfer b++"  ]"
 
-
 display :: SynTree-> String
 display (And a b) = normalshow a ++"/\\"++ normalshow b
 display (Leaf a)=  a:""

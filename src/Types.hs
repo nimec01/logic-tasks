@@ -13,7 +13,7 @@ data SynTree
   | Equi {lefttree :: SynTree , righttree :: SynTree}
   | Not {folltree :: SynTree}
   | Leaf { leaf :: Char}
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord,Show )
 
 gitSubTree :: SynTree -> [SynTree]
 gitSubTree (And a b) = gitSubTree a ++ (And a b:gitSubTree b)
