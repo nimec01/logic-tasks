@@ -74,8 +74,7 @@ negativeLiteral lits minus = do
 
 leafnode::String -> Maybe Char -> Gen SynTree
 leafnode lits minus =
-    if isJust minus then do
-        return (Leaf (fromJust minus))
+    if isJust minus then return (Leaf (fromJust minus))
     else do
         e <- elements lits
         return (Leaf e)
