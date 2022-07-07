@@ -29,7 +29,7 @@ dSynTreeConfig =
 
 data SynTreeInst =
   SynTreeInst
-  { insSyntree :: SynTree
+  { insSyntree :: SynTree Char
   , image :: String
   , correct :: String
   } deriving Show

@@ -7,8 +7,8 @@ import Types ( SynTree(Leaf, Not), allsubtre )
 
 data SubInst = SubInst
     {
-        insofSyntree::SynTree,
-        allsubtree:: [SynTree]
+        insofSyntree :: SynTree Char,
+        allsubtree :: [SynTree Char]
     }
 
 dSubInst ::SubInst

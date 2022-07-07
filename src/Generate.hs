@@ -23,7 +23,7 @@ maxNodesForDepth depth = 2 ^ depth - 1
 maxLeavesForNodes :: Int -> Int
 maxLeavesForNodes nodes = (nodes + 1) `div` 2
 
-genSynTree :: (Int, Int) -> Int -> String -> Int -> Bool -> Maybe (Gen SynTree)
+genSynTree :: (Int, Int) -> Int -> String -> Int -> Bool -> Maybe (Gen (SynTree Char))
 genSynTree (minnode, maxnode) maxdepth lits minuse addoper
     | maxdepth <= 0 || maxnode <= 0 || null lits || length lits < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse || 2 ^ (maxdepth - 1) < minuse = Nothing
     | otherwise =  Just $ do
@@ -32,7 +32,7 @@ genSynTree (minnode, maxnode) maxdepth lits minuse addoper
       where
         a=maximum [0,minnode]
 
-syntaxTree :: (Int , Int) -> Int -> String -> String -> Bool -> Gen SynTree
+syntaxTree :: Eq c => (Int, Int) -> Int -> [c] -> [c] -> Bool -> Gen (SynTree c)
 syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
     | maxdepth == 1 || maxnode == 1 = leafNd
     | minnode == 1 && maxnode == 2 = oneof [ leafNd , negativeLiteral lits minuse]
@@ -49,12 +49,12 @@ syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
         negativeForm = negativeFormula (minnode, maxnode) maxdepth lits minuse addoper
         leafNd = leafnode lits $ judgeError minuse
 
-chooseList :: Bool ->[SynTree -> SynTree -> SynTree]
+chooseList :: Bool -> [SynTree c -> SynTree c -> SynTree c]
 chooseList addoper = if addoper
     then [And, Or, Impl, Equi]
     else [And, Or]
 
-binaryOperator::(Int , Int) -> Int -> String -> String ->  Bool -> (SynTree -> SynTree -> SynTree) -> Gen SynTree
+binaryOperator :: Eq c => (Int, Int) -> Int -> [c] -> [c] ->  Bool -> (SynTree c -> SynTree c -> SynTree c) -> Gen (SynTree c)
 binaryOperator(minnode, maxnode) maxdepth lits minuse addoper  oper =
     let avoidoveralloc = maximum [0, minnode - 2 - maxNodesForDepth (maxdepth - 1)]
         correctminnode = maximum [3,minnode]
@@ -70,25 +70,25 @@ binaryOperator(minnode, maxnode) maxdepth lits minuse addoper  oper =
       right <- syntaxTree (correctminnode - radmin - 1, maxnode - radmax - 1) (maxdepth-1) lits (minuse \\ take (maxLeavesForNodes radmax) minuse) addoper
       return $ oper left right
 
-negativeFormula::(Int , Int) -> Int -> String -> String -> Bool -> Gen SynTree
+negativeFormula :: Eq c => (Int, Int) -> Int -> [c] -> [c] -> Bool -> Gen (SynTree c)
 negativeFormula (minnode, maxnode) maxdepth lits minus addoper =
     let correctminnode = maximum [2,minnode]
     in do
       e <- syntaxTree (correctminnode - 1, maxnode - 1) (maxdepth - 1) lits minus addoper
       return (Not e)
 
-negativeLiteral :: String -> String -> Gen SynTree
+negativeLiteral :: [c] -> [c] -> Gen (SynTree c)
 negativeLiteral lits minus = do
     e <- leafnode lits $ judgeError  minus
     return (Not e)
 
-leafnode::String -> Maybe Char -> Gen SynTree
+leafnode :: [c] -> Maybe c -> Gen (SynTree c)
 leafnode lits Nothing =do
         e <- elements lits
         return (Leaf e)
 leafnode _ (Just minus) = return (Leaf minus)
 
-judgeError :: String  -> Maybe Char
+judgeError :: [c] -> Maybe c
 judgeError minuse
     | length minuse > 1 =  error "should not large than 1"
     | otherwise = listToMaybe minuse

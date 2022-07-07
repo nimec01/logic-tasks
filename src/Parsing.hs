@@ -22,26 +22,26 @@ lexeme p = do
  whitespace
  return x
 
-leafE :: Parser SynTree
+leafE :: Parser (SynTree Char)
 leafE =
  Leaf <$> lexeme (satisfy isLetter)
 
-notE :: Parser SynTree
+notE :: Parser (SynTree Char)
 notE = do
  lexeme $ char '~'
  Not <$> parserT
 
-parserTtoS :: Parser SynTree
+parserTtoS :: Parser (SynTree Char)
 parserTtoS = do
  lexeme $ char '('
  e <- parserS
  lexeme $ char ')'
  return e
 
-parserT :: Parser SynTree
+parserT :: Parser (SynTree Char)
 parserT = leafE <|> parserTtoS <|> notE
 
-parserS :: Parser SynTree
+parserS :: Parser (SynTree Char)
 parserS = do
   firstT <- parserT
   (lexeme (string "/\\") >> And firstT <$> parserT) <|>
@@ -50,5 +50,5 @@ parserS = do
     (lexeme (string "<=>") >> Equi firstT <$> parserT) <|>
     return firstT
 
-normParse :: String -> Either ParseError SynTree
+normParse :: String -> Either ParseError (SynTree Char)
 normParse = parse (whitespace >> parserS <* eof) ""

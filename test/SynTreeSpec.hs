@@ -11,7 +11,7 @@ import Data.List.Extra (nubOrd)
 import Generate (genSynTree, rangeDepthForNodes, maxLeavesForNodes, maxNodesForDepth)
 import Print (display)
 
-nodenum :: SynTree -> Int
+nodenum :: SynTree c -> Int
 nodenum (Not a) = 1+nodenum a
 nodenum (Leaf a)= 1
 nodenum (And a b) = 1+nodenum a+nodenum b
@@ -19,7 +19,7 @@ nodenum (Or a b) = 1+nodenum a+nodenum b
 nodenum (Impl a b) = 1+nodenum a+nodenum b
 nodenum (Equi a b) = 1+nodenum a+nodenum b
 
-treedepth:: SynTree-> Int
+treedepth :: SynTree c -> Int
 treedepth (Not a) = 1 + treedepth a
 treedepth (Leaf a)= 1
 treedepth (And a b) = 1 + maximum [treedepth a,treedepth b]
@@ -27,7 +27,7 @@ treedepth (Or a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Equi a b) = 1 + maximum [treedepth a,treedepth b]
 
-catchstr :: SynTree-> String
+catchstr :: SynTree Char -> String
 catchstr (Not a) = catchstr a
 catchstr (Leaf a)= a:""
 catchstr (And a b) = catchstr a ++ catchstr b
