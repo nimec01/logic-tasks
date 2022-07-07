@@ -1,6 +1,7 @@
 module Types
  (
  SynTree(..),
+ collectLeaves,
  allsubtre
  )
 where
@@ -15,6 +16,14 @@ data SynTree c
   | Not {folltree :: SynTree c}
   | Leaf {leaf :: c}
   deriving (Eq, Ord, Show)
+
+collectLeaves :: SynTree c -> [c]
+collectLeaves (Not a) = collectLeaves a
+collectLeaves (Leaf a)= [a]
+collectLeaves (And a b) = collectLeaves a ++ collectLeaves b
+collectLeaves (Or a b) = collectLeaves a ++ collectLeaves b
+collectLeaves (Impl a b) = collectLeaves a ++ collectLeaves b
+collectLeaves (Equi a b) = collectLeaves a ++ collectLeaves b
 
 gitSubTree :: SynTree c -> [SynTree c]
 gitSubTree (And a b) = gitSubTree a ++ (And a b:gitSubTree b)

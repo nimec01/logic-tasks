@@ -2,7 +2,7 @@ module SynTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen,elements )
-import Types (  SynTree (And ,Not, Or,Impl,Equi,Leaf))
+import Types (SynTree(..), collectLeaves)
 import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
@@ -26,14 +26,6 @@ treedepth (And a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Or a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Equi a b) = 1 + maximum [treedepth a,treedepth b]
-
-catchstr :: SynTree Char -> String
-catchstr (Not a) = catchstr a
-catchstr (Leaf a)= a:""
-catchstr (And a b) = catchstr a ++ catchstr b
-catchstr (Or a b) =  catchstr a ++ catchstr b
-catchstr (Impl a b) =  catchstr a ++ catchstr b
-catchstr (Equi a b) =  catchstr a ++ catchstr b
 
 
 invalidBoundsSyntr :: Gen ((Int, Int), Int, String, Int)
@@ -75,4 +67,4 @@ spec = describe "genSyntaxTree" $ do
         it "should generate a random SyntaxTree from the given parament and not deeper than the maxdepth" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse,addoper)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars  minuse addoper)  $ \synTree -> treedepth synTree<= maxdepth
         it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-            forAll validBoundsSyntr2 $ \((minnode, maxnode),maxdepth, validChars, minuse, addoper) -> forAll (fromJust $ genSynTree (minnode, maxnode) maxdepth validChars minuse addoper) $ \synTree -> length (nubOrd (catchstr synTree)) >= minuse
+            forAll validBoundsSyntr2 $ \((minnode, maxnode),maxdepth, validChars, minuse, addoper) -> forAll (fromJust $ genSynTree (minnode, maxnode) maxdepth validChars minuse addoper) $ \synTree -> length (nubOrd (collectLeaves synTree)) >= minuse
