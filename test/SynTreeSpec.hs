@@ -65,7 +65,7 @@ validBoundsSyntr2 = do
  minnode <- chooseInt (1,60)
  maxnode <- chooseInt (minnode,60)
  useChars <- chooseInt (0, maxLeavesForNodes maxnode)
- pure ((minnode, maxnode), maxnode, validChars, take useChars validChars, booer)
+ pure ((minnode, maxnode), maxnode , validChars, take useChars validChars, booer)
 
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
