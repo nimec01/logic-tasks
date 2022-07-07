@@ -5,6 +5,7 @@ dependencies:
   - extra
   - parsec
   - containers
+  - mtl
   - QuickCheck >= 2.14
 default-extensions:
   - TupleSections

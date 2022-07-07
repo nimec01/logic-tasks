@@ -1,12 +1,17 @@
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleContexts #-}
+
 module Types
  (
  SynTree(..),
  collectLeaves,
+ relabelShape,
  allsubtre
  )
 where
 
 import Data.List (sort)
+import Control.Monad.State (get, put, runState)
 
 data SynTree c
   = And {lefttree :: SynTree c, righttree :: SynTree c}
@@ -15,15 +20,16 @@ data SynTree c
   | Equi {lefttree :: SynTree c, righttree :: SynTree c}
   | Not {folltree :: SynTree c}
   | Leaf {leaf :: c}
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
 collectLeaves :: SynTree c -> [c]
-collectLeaves (Not a) = collectLeaves a
-collectLeaves (Leaf a)= [a]
-collectLeaves (And a b) = collectLeaves a ++ collectLeaves b
-collectLeaves (Or a b) = collectLeaves a ++ collectLeaves b
-collectLeaves (Impl a b) = collectLeaves a ++ collectLeaves b
-collectLeaves (Equi a b) = collectLeaves a ++ collectLeaves b
+collectLeaves = foldMap (:[])
+
+relabelShape :: SynTree () -> [c] -> SynTree c
+relabelShape t l = let (r,[]) = runState (traverse adorn t) l
+                   in r
+  where
+    adorn _ = do {ys <- get; put (tail ys); return (head ys)}
 
 gitSubTree :: SynTree c -> [SynTree c]
 gitSubTree (And a b) = gitSubTree a ++ (And a b:gitSubTree b)
