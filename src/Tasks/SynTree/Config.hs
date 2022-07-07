@@ -12,7 +12,7 @@ data SynTreeConfig =
   , minnode :: Int
   , maxdepth :: Int
   , electliteral :: String
-  , mustcontain :: String
+  , mustcontain :: Int
   ,addoper::Bool
   } deriving Show
 
@@ -23,7 +23,7 @@ dSynTreeConfig =
   , minnode = 6
   , maxdepth = 6
   , electliteral = "ABCDE"
-  , mustcontain = "ABC"
+  , mustcontain = 3
   ,addoper = False
   }
 

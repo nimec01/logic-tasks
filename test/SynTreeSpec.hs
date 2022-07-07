@@ -7,7 +7,7 @@ import Parsing ( normParse )
 import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
 import Data.Maybe ( fromJust, isNothing,fromMaybe )
-import Data.List (intersect)
+import Data.List.Extra (nubOrd)
 import Generate (rangeDepthForNodes, genSynTree, maxLeavesForNodes)
 import Print (display)
 
@@ -27,9 +27,6 @@ treedepth (Or a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Equi a b) = 1 + maximum [treedepth a,treedepth b]
 
-usestring :: String ->SynTree->Bool
-usestring str synTree = str == intersect str (catchstr synTree)
-
 catchstr :: SynTree-> String
 catchstr (Not a) = catchstr a
 catchstr (Leaf a)= a:""
@@ -39,15 +36,15 @@ catchstr (Impl a b) =  catchstr a ++ catchstr b
 catchstr (Equi a b) =  catchstr a ++ catchstr b
 
 
-invalidBoundsSyntr :: Gen ((Int,Int),Int,String,String)
+invalidBoundsSyntr :: Gen ((Int, Int), Int, String, Int)
 invalidBoundsSyntr = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (2,100)
  maxnode <- chooseInt (1,minnode-1)
  maxdepth <- chooseInt (fst (rangeDepthForNodes minnode), maxnode)
- pure ((minnode, maxnode), maxdepth ,validChars,validChars)
+ pure ((minnode, maxnode), maxdepth, validChars, length validChars)
 
-validBoundsSyntr :: Gen ((Int,Int),Int,String,String,Bool)
+validBoundsSyntr :: Gen ((Int, Int), Int, String, Int, Bool)
 validBoundsSyntr = do
  booer <- elements [True,False]
  validChars <- sublistOf ['A'..'Z']
@@ -55,17 +52,17 @@ validBoundsSyntr = do
  maxnode <- chooseInt (minnode,60)
  maxdepth <- chooseInt (fst (rangeDepthForNodes minnode), maxnode)
  useChars <- chooseInt (0, maxLeavesForNodes maxnode)
- pure ((minnode, maxnode), maxnode, validChars, take useChars validChars, booer)
+ pure ((minnode, maxnode), maxnode, validChars, min useChars (length validChars), booer)
 
 
-validBoundsSyntr2 :: Gen ((Int,Int),Int,String,String,Bool)
+validBoundsSyntr2 :: Gen ((Int, Int), Int, String, Int, Bool)
 validBoundsSyntr2 = do
  booer <- elements [True,False]
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (1,60)
  maxnode <- chooseInt (minnode,60)
  useChars <- chooseInt (0, maxLeavesForNodes maxnode)
- pure ((minnode, maxnode), maxnode , validChars, take useChars validChars, booer)
+ pure ((minnode, maxnode), maxnode , validChars, min useChars (length validChars), booer)
 
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
@@ -77,5 +74,5 @@ spec = describe "genSyntaxTree" $ do
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse,addoper)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars minuse addoper)  $ \synTree -> nodenum synTree>=minnode &&nodenum synTree<=maxnode
         it "should generate a random SyntaxTree from the given parament and not deeper than the maxdepth" $
             forAll validBoundsSyntr $ \((minnode,maxnode), maxdepth ,validChars,minuse,addoper)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars  minuse addoper)  $ \synTree -> treedepth synTree<= maxdepth
-        it "should generate a random SyntaxTree from the given parament and use all of the string it must use" $
-            forAll validBoundsSyntr2 $ \((minnode,maxnode), maxdepth ,validChars,minuse,addoper)->forAll (fromJust $ genSynTree (minnode,maxnode) maxdepth validChars  minuse addoper)  $ usestring minuse
+        it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
+            forAll validBoundsSyntr2 $ \((minnode, maxnode),maxdepth, validChars, minuse, addoper) -> forAll (fromJust $ genSynTree (minnode, maxnode) maxdepth validChars minuse addoper) $ \synTree -> length (nubOrd (catchstr synTree)) >= minuse

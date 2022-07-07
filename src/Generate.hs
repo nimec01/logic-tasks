@@ -5,8 +5,8 @@ module Generate(
 ) where
 
 import Types (SynTree(..))
-import Test.QuickCheck (choose, elements, oneof, Gen, frequency)
-import Data.List (isSubsequenceOf, (\\))
+import Test.QuickCheck (choose, elements, oneof, Gen, frequency, shuffle)
+import Data.List ((\\))
 import Data.Maybe(listToMaybe)
 
 
@@ -22,10 +22,12 @@ maxNodesForDepth depth = 2 ^ depth - 1
 maxLeavesForNodes :: Int -> Int
 maxLeavesForNodes nodes = (nodes + 1) `div` 2
 
-genSynTree :: (Int , Int) -> Int ->String->String ->Bool-> Maybe (Gen SynTree)
+genSynTree :: (Int, Int) -> Int -> String -> Int -> Bool -> Maybe (Gen SynTree)
 genSynTree (minnode, maxnode) maxdepth lits minuse addoper
-    | maxdepth <= 0 || maxnode<=0 || null lits || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || not (isSubsequenceOf minuse lits) || maxLeavesForNodes maxnode < length minuse = Nothing
-    | otherwise =  Just $ syntaxTree (a,maxnode) maxdepth lits minuse addoper
+    | maxdepth <= 0 || maxnode <= 0 || null lits || length lits < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse = Nothing
+    | otherwise =  Just $ do
+        toUse <- take minuse <$> shuffle lits
+        syntaxTree (a,maxnode) maxdepth lits toUse addoper
       where
         a=maximum [0,minnode]
 
