@@ -2,6 +2,7 @@ module Generate(
  rangeDepthForNodes,
  genSynTree,
  maxLeavesForNodes,
+ maxNodesForDepth,
 ) where
 
 import Types (SynTree(..))

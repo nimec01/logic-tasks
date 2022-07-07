@@ -8,7 +8,7 @@ import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
 import Data.Maybe ( fromJust, isNothing,fromMaybe )
 import Data.List.Extra (nubOrd)
-import Generate (rangeDepthForNodes, genSynTree, maxLeavesForNodes)
+import Generate (genSynTree, rangeDepthForNodes, maxLeavesForNodes, maxNodesForDepth)
 import Print (display)
 
 nodenum :: SynTree -> Int
@@ -51,8 +51,8 @@ validBoundsSyntr = do
  minnode <- chooseInt (1,60)
  maxnode <- chooseInt (minnode,60)
  maxdepth <- chooseInt (fst (rangeDepthForNodes minnode), maxnode)
- useChars <- chooseInt (0, maxLeavesForNodes maxnode)
- pure ((minnode, maxnode), maxnode, validChars, min useChars (length validChars), booer)
+ useChars <- chooseInt (0, maxLeavesForNodes (min maxnode (maxNodesForDepth maxdepth)))
+ pure ((minnode, maxnode), maxdepth, validChars, min useChars (length validChars), booer)
 
 
 validBoundsSyntr2 :: Gen ((Int, Int), Int, String, Int, Bool)
