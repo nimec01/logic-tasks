@@ -24,7 +24,7 @@ maxLeavesForNodes nodes = (nodes + 1) `div` 2
 
 genSynTree :: (Int, Int) -> Int -> String -> Int -> Bool -> Maybe (Gen SynTree)
 genSynTree (minnode, maxnode) maxdepth lits minuse addoper
-    | maxdepth <= 0 || maxnode <= 0 || null lits || length lits < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse = Nothing
+    | maxdepth <= 0 || maxnode <= 0 || null lits || length lits < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse || 2 ^ (maxdepth - 1) < minuse = Nothing
     | otherwise =  Just $ do
         toUse <- take minuse <$> shuffle lits
         syntaxTree (a,maxnode) maxdepth lits toUse addoper
