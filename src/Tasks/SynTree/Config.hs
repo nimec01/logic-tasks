@@ -8,9 +8,9 @@ import Types (SynTree)
 
 data SynTreeConfig =
   SynTreeConfig
-  { maxnode :: Integer
-  , minnode :: Integer
-  , maxdepth :: Integer
+  { maxnode :: Int
+  , minnode :: Int
+  , maxdepth :: Int
   , electliteral :: String
   , mustcontain :: String
   ,addoper::Bool

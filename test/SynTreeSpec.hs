@@ -11,7 +11,7 @@ import Data.List (intersect)
 import Generate (rangeDepthForNodes, genSynTree, maxLeavesForNodes)
 import Print (display)
 
-nodenum :: SynTree -> Integer
+nodenum :: SynTree -> Int
 nodenum (Not a) = 1+nodenum a
 nodenum (Leaf a)= 1
 nodenum (And a b) = 1+nodenum a+nodenum b
@@ -19,7 +19,7 @@ nodenum (Or a b) = 1+nodenum a+nodenum b
 nodenum (Impl a b) = 1+nodenum a+nodenum b
 nodenum (Equi a b) = 1+nodenum a+nodenum b
 
-treedepth:: SynTree-> Integer
+treedepth:: SynTree-> Int
 treedepth (Not a) = 1 + treedepth a
 treedepth (Leaf a)= 1
 treedepth (And a b) = 1 + maximum [treedepth a,treedepth b]
@@ -39,31 +39,31 @@ catchstr (Impl a b) =  catchstr a ++ catchstr b
 catchstr (Equi a b) =  catchstr a ++ catchstr b
 
 
-invalidBoundsSyntr :: Gen ((Integer,Integer),Integer,String,String)
+invalidBoundsSyntr :: Gen ((Int,Int),Int,String,String)
 invalidBoundsSyntr = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (2,100)
  maxnode <- chooseInt (1,minnode-1)
- maxdepth <- chooseInt (fromInteger $ fst (rangeDepthForNodes $ toInteger minnode), maxnode)
- pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,validChars)
+ maxdepth <- chooseInt (fst (rangeDepthForNodes minnode), maxnode)
+ pure ((minnode, maxnode), maxdepth ,validChars,validChars)
 
-validBoundsSyntr :: Gen ((Integer,Integer),Integer,String,String,Bool)
+validBoundsSyntr :: Gen ((Int,Int),Int,String,String,Bool)
 validBoundsSyntr = do
  booer <- elements [True,False]
  validChars <- sublistOf ['A'..'Z']
- minnode <- chooseInt (1,100)
- maxnode <- chooseInt (minnode,100)
- maxdepth <- chooseInt (fromInteger $ fst (rangeDepthForNodes $ toInteger minnode), maxnode)
- pure ((toInteger minnode, toInteger maxnode), toInteger maxdepth, validChars, take (fromInteger (maxLeavesForNodes $ toInteger maxnode)) validChars, booer)
+ minnode <- chooseInt (1,60)
+ maxnode <- chooseInt (minnode,60)
+ maxdepth <- chooseInt (fst (rangeDepthForNodes minnode), maxnode)
+ pure ((minnode, maxnode), maxdepth, validChars, take (maxLeavesForNodes maxnode) validChars, booer)
 
 
-validBoundsSyntr2 :: Gen ((Integer,Integer),Integer,String,String,Bool)
+validBoundsSyntr2 :: Gen ((Int,Int),Int,String,String,Bool)
 validBoundsSyntr2 = do
  booer <- elements [True,False]
  validChars <- sublistOf ['A'..'Z']
- minnode <- chooseInt (1,100)
- maxnode <- chooseInt (minnode,100)
- pure ((toInteger minnode, toInteger maxnode), toInteger maxnode, validChars, take (fromInteger (maxLeavesForNodes $ toInteger maxnode)) validChars, booer)
+ minnode <- chooseInt (1,60)
+ maxnode <- chooseInt (minnode,60)
+ pure ((minnode, maxnode), maxnode, validChars, take (maxLeavesForNodes maxnode) validChars, booer)
 
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
