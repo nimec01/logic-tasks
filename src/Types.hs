@@ -26,10 +26,14 @@ collectLeaves :: SynTree c -> [c]
 collectLeaves = foldMap (:[])
 
 relabelShape :: SynTree () -> [c] -> SynTree c
-relabelShape t l = let (r,[]) = runState (traverse adorn t) l
-                   in r
+relabelShape shape contents =
+  let (tree,[])
+        = runState (traverse adorn shape) contents
+  in
+    tree
   where
-    adorn _ = do {ys <- get; put (tail ys); return (head ys)}
+    adorn _ =
+      do {current <- get; put (tail current); return (head current)}
 
 gitSubTree :: SynTree c -> [SynTree c]
 gitSubTree (And a b) = gitSubTree a ++ (And a b:gitSubTree b)
