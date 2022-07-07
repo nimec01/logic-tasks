@@ -8,7 +8,7 @@ import Data.Char (isLetter)
 import qualified Control.Exception as Exc (evaluate)
 import Data.Maybe ( fromJust, isNothing,fromMaybe )
 import Data.List (intersect)
-import Generate(deptharea, genSynTree,maxleafnode)
+import Generate (rangeDepthForNodes, genSynTree, maxLeavesForNodes)
 import Print (display)
 
 nodenum :: SynTree -> Integer
@@ -44,7 +44,7 @@ invalidBoundsSyntr = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (2,100)
  maxnode <- chooseInt (1,minnode-1)
- maxdepth <- chooseInt (fromInteger $ fst(deptharea $toInteger  minnode),maxnode)
+ maxdepth <- chooseInt (fromInteger $ fst (rangeDepthForNodes $ toInteger minnode), maxnode)
  pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,validChars)
 
 validBoundsSyntr :: Gen ((Integer,Integer),Integer,String,String,Bool)
@@ -53,8 +53,8 @@ validBoundsSyntr = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (1,100)
  maxnode <- chooseInt (minnode,100)
- maxdepth <- chooseInt (fromInteger $ fst(deptharea $toInteger  minnode),maxnode)
- pure ((toInteger minnode,toInteger maxnode), toInteger maxdepth ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars,booer)
+ maxdepth <- chooseInt (fromInteger $ fst (rangeDepthForNodes $ toInteger minnode), maxnode)
+ pure ((toInteger minnode, toInteger maxnode), toInteger maxdepth, validChars, take (fromInteger (maxLeavesForNodes $ toInteger maxnode)) validChars, booer)
 
 
 validBoundsSyntr2 :: Gen ((Integer,Integer),Integer,String,String,Bool)
@@ -63,7 +63,7 @@ validBoundsSyntr2 = do
  validChars <- sublistOf ['A'..'Z']
  minnode <- chooseInt (1,100)
  maxnode <- chooseInt (minnode,100)
- pure ((toInteger minnode,toInteger maxnode), toInteger maxnode ,validChars,(take $ fromInteger(maxleafnode $ toInteger maxnode)) validChars,booer)
+ pure ((toInteger minnode, toInteger maxnode), toInteger maxnode, validChars, take (fromInteger (maxLeavesForNodes $ toInteger maxnode)) validChars, booer)
 
 spec :: Spec
 spec = describe "genSyntaxTree" $ do
