@@ -7,6 +7,8 @@ module Generate(
 import Types (SynTree(..))
 import Test.QuickCheck (choose, elements, oneof, Gen, frequency)
 import Data.List (isSubsequenceOf, (\\))
+import Data.Maybe(listToMaybe)
+
 
 rangeDepthForNodes :: Int -> (Int, Int)
 rangeDepthForNodes nodes = (minDepth, maxDepth)
@@ -42,7 +44,7 @@ syntaxTree (minnode, maxnode) maxdepth lits minuse addoper
       where
         binaryOper = map (binaryOperator (minnode, maxnode) maxdepth lits minuse addoper ) $ chooseList addoper
         negativeForm = negativeFormula (minnode, maxnode) maxdepth lits minuse addoper
-        leafNd = leafnode lits $ judgminuse minuse
+        leafNd = leafnode lits $ judgeError minuse
 
 chooseList :: Bool ->[SynTree -> SynTree -> SynTree]
 chooseList addoper = if addoper
@@ -74,7 +76,7 @@ negativeFormula (minnode, maxnode) maxdepth lits minus addoper =
 
 negativeLiteral :: String -> String -> Gen SynTree
 negativeLiteral lits minus = do
-    e <- leafnode lits $ judgminuse minus
+    e <- leafnode lits $ judgeError  minus
     return (Not e)
 
 leafnode::String -> Maybe Char -> Gen SynTree
@@ -83,7 +85,7 @@ leafnode lits Nothing =do
         return (Leaf e)
 leafnode _ (Just minus) = return (Leaf minus)
 
-judgminuse :: String -> Maybe Char
-judgminuse char
-    |length char == 1 = Just $ head char
-    |otherwise = Nothing
+judgeError :: String  -> Maybe Char
+judgeError minuse
+    | length minuse > 1 =  error "should not large than 1"
+    | otherwise = listToMaybe minuse

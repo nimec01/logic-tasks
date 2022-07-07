@@ -55,7 +55,7 @@ validBoundsSyntr = do
  maxnode <- chooseInt (minnode,60)
  maxdepth <- chooseInt (fst (rangeDepthForNodes minnode), maxnode)
  useChars <- chooseInt (0, maxLeavesForNodes maxnode)
- pure ((minnode, maxnode), maxdepth, validChars, take useChars validChars, booer)
+ pure ((minnode, maxnode), maxnode, validChars, take useChars validChars, booer)
 
 
 validBoundsSyntr2 :: Gen ((Int,Int),Int,String,String,Bool)
