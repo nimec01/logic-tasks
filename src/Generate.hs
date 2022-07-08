@@ -31,25 +31,15 @@ randomuse lits minuse len = let
     in
       shuffle (take (fromIntegral len) uselist)
 
-genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Maybe (Gen (SynTree Char))
-genSynTree (minnode, maxnode) maxdepth lits minuse addoper
-    | maxdepth <= 0 || maxnode <= 0 || null lits || fromIntegral (length lits) < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse || 2 ^ (maxdepth - 1) < minuse = Nothing
-    | otherwise =  Just $ do
-        toUse <- take (fromIntegral minuse) <$> shuffle lits
-        syntaxTree (a,maxnode) maxdepth lits toUse addoper
-      where
-        a=max 0 minnode
-
-syntaxTree :: (Integer, Integer) -> Integer -> [c] -> [c] -> Bool -> Gen (SynTree c)
-syntaxTree (minnode, maxnode) maxdepth lits minuse addoper =
-    let minuseNode = lenMinuse * 2 - 1
+genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Gen (SynTree Char)
+genSynTree (minnode, maxnode) maxdepth lits minuse addoper =
+    let minuseNode = minuse * 2 - 1
         finalMinuse = max minnode minuseNode
-        lenMinuse = fromIntegral (length minuse)
         maxnodeWithdepth = min maxnode $ maxNodesForDepth maxdepth
     in  do
     nodenum <- choose (finalMinuse , maxnodeWithdepth)
-    sample <- syntaxShape nodenum maxdepth addoper `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= lenMinuse
-    usedlist <- randomuse lits minuse $ fromIntegral $ length $ collectLeaves sample
+    sample <- syntaxShape nodenum maxdepth addoper `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= minuse
+    usedlist <- randomuse lits (take (fromIntegral minuse) lits) $ fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedlist )
 
 syntaxShape :: Integer -> Integer -> Bool -> Gen (SynTree ())
