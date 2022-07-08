@@ -4,16 +4,16 @@ import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck ( chooseInt, sublistOf, forAll, Gen,elements )
 import Types (SynTree(..), collectLeaves)
 import Parsing ( normParse )
-import Data.Char (isLetter)
-import qualified Control.Exception as Exc (evaluate)
-import Data.Maybe ( fromJust, isNothing,fromMaybe )
+-- import Data.Char (isLetter)
+-- import qualified Control.Exception as Exc (evaluate)
+import Data.Maybe ( fromJust, isNothing)--,fromMaybe 
 import Data.List.Extra (nubOrd)
 import Generate (genSynTree, rangeDepthForNodes, maxLeavesForNodes, maxNodesForDepth)
 import Print (display)
 
 nodenum :: SynTree c -> Int
 nodenum (Not a) = 1+nodenum a
-nodenum (Leaf a)= 1
+nodenum (Leaf _)= 1
 nodenum (And a b) = 1+nodenum a+nodenum b
 nodenum (Or a b) = 1+nodenum a+nodenum b
 nodenum (Impl a b) = 1+nodenum a+nodenum b
@@ -21,7 +21,7 @@ nodenum (Equi a b) = 1+nodenum a+nodenum b
 
 treedepth :: SynTree c -> Int
 treedepth (Not a) = 1 + treedepth a
-treedepth (Leaf a)= 1
+treedepth (Leaf _)= 1
 treedepth (And a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Or a b) = 1 + maximum [treedepth a,treedepth b]
 treedepth (Impl a b) = 1 + maximum [treedepth a,treedepth b]
