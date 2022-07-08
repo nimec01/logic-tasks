@@ -6,18 +6,18 @@ module Generate(
 ) where
 
 import Types (SynTree(..),collectLeaves, relabelShape)
-import Test.QuickCheck (choose, oneof, Gen, shuffle, suchThat,chooseInt)
+import Test.QuickCheck (choose, oneof, Gen, shuffle, suchThat)
 
-rangeDepthForNodes :: Int -> (Int, Int)
+rangeDepthForNodes :: Integer -> (Integer, Integer)
 rangeDepthForNodes nodes = (minDepth, maxDepth)
   where
     minDepth = head [ depth | depth <- [1..], maxNodesForDepth depth >= nodes ]
     maxDepth = nodes
 
-maxNodesForDepth :: Int -> Int
+maxNodesForDepth :: Integer -> Integer
 maxNodesForDepth depth = 2 ^ depth - 1
 
-maxLeavesForNodes :: Int -> Int
+maxLeavesForNodes :: Integer -> Integer
 maxLeavesForNodes nodes = (nodes + 1) `div` 2
 
 chooseList :: Bool -> [SynTree c -> SynTree c -> SynTree c]
@@ -25,34 +25,34 @@ chooseList addoper = if addoper
     then [And, Or, Impl, Equi]
     else [And, Or]
 
-randomuse :: [c] -> [c] -> Int -> Gen [c]
+randomuse :: [c] -> [c] -> Integer -> Gen [c]
 randomuse lits minuse len = let
     uselist = minuse ++ cycle lits
     in
-      shuffle (take len uselist)
+      shuffle (take (fromIntegral len) uselist)
 
-genSynTree :: (Int, Int) -> Int -> String -> Int -> Bool -> Maybe (Gen (SynTree Char))
+genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Maybe (Gen (SynTree Char))
 genSynTree (minnode, maxnode) maxdepth lits minuse addoper
-    | maxdepth <= 0 || maxnode <= 0 || null lits || length lits < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse || 2 ^ (maxdepth - 1) < minuse = Nothing
+    | maxdepth <= 0 || maxnode <= 0 || null lits || fromIntegral (length lits) < minuse || maxnode < minnode || fst (rangeDepthForNodes minnode) > maxdepth || maxLeavesForNodes maxnode < minuse || 2 ^ (maxdepth - 1) < minuse = Nothing
     | otherwise =  Just $ do
-        toUse <- take minuse <$> shuffle lits
+        toUse <- take (fromIntegral minuse) <$> shuffle lits
         syntaxTree (a,maxnode) maxdepth lits toUse addoper
       where
         a=max 0 minnode
 
-syntaxTree :: (Int, Int) -> Int -> [c] -> [c] -> Bool -> Gen (SynTree c)
-syntaxTree (minnode, maxnode) maxdepth lits minuse addoper = 
-    let minuseNode = (length minuse *2 - 1)
+syntaxTree :: (Integer, Integer) -> Integer -> [c] -> [c] -> Bool -> Gen (SynTree c)
+syntaxTree (minnode, maxnode) maxdepth lits minuse addoper =
+    let minuseNode = lenMinuse * 2 - 1
         finalMinuse = max minnode minuseNode
-        lenMinuse = length minuse
+        lenMinuse = fromIntegral (length minuse)
         maxnodeWithdepth = min maxnode $ maxNodesForDepth maxdepth
     in  do
-    nodenum <- chooseInt (finalMinuse , maxnodeWithdepth)
-    sample <- syntaxShape nodenum maxdepth  addoper `suchThat` (\synTree -> length ( collectLeaves synTree) >= lenMinuse)
-    usedlist <- randomuse lits minuse (length $ collectLeaves sample)
+    nodenum <- choose (finalMinuse , maxnodeWithdepth)
+    sample <- syntaxShape nodenum maxdepth addoper `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= lenMinuse
+    usedlist <- randomuse lits minuse $ fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedlist )
 
-syntaxShape :: Int -> Int -> Bool -> Gen (SynTree ())
+syntaxShape :: Integer -> Integer -> Bool -> Gen (SynTree ())
 syntaxShape nodenum maxdepth addoper
     | nodenum == 1 = positiveLiteral
     | nodenum == 2 = negativeLiteral
@@ -62,7 +62,7 @@ syntaxShape nodenum maxdepth addoper
         binaryOper = map (binaryOperator nodenum maxdepth addoper) $ chooseList addoper
         negativeForm = negativeFormula nodenum maxdepth addoper
 
-binaryOperator :: Int -> Int -> Bool -> (SynTree () -> SynTree () -> SynTree ()) -> Gen (SynTree ())
+binaryOperator :: Integer -> Integer -> Bool -> (SynTree () -> SynTree () -> SynTree ()) -> Gen (SynTree ())
 binaryOperator nodenum maxdepth addoper operator =
     let minNodesPerSide = max 1 (restNodes - maxNodesForDepth newMaxDepth)
         restNodes = nodenum - 1
@@ -73,7 +73,7 @@ binaryOperator nodenum maxdepth addoper operator =
         rightTre <- syntaxShape (restNodes - leftNodenum ) newMaxDepth addoper
         return (operator leftTre rightTre)
 
-negativeFormula :: Int -> Int -> Bool -> Gen (SynTree ())
+negativeFormula :: Integer -> Integer -> Bool -> Gen (SynTree ())
 negativeFormula nodenum maxdepth addoper =
   let restNodes = nodenum - 1
       newMaxDepth = maxdepth - 1
