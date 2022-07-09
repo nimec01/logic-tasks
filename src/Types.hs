@@ -6,12 +6,13 @@ module Types
  SynTree(..),
  collectLeaves,
  relabelShape,
- allsubtre
+ allSubtre,
  )
 where
 
 import Data.List (sort)
 import Control.Monad.State (get, put, runState)
+import Data.Set(fromList, Set)
 
 data SynTree c
   = And {lefttree :: SynTree c, righttree :: SynTree c}
@@ -43,5 +44,5 @@ gitSubTree (Not a) = Not a:gitSubTree a
 gitSubTree (Impl a b) =gitSubTree a ++ (Impl a b:gitSubTree b)
 gitSubTree (Equi a b) = gitSubTree a ++ (Equi a b:gitSubTree b)
 
-allsubtre:: Ord c => SynTree c -> [SynTree c]
-allsubtre a = sort $ gitSubTree a
+allSubtre:: Ord c => SynTree c -> Set (SynTree c)
+allSubtre a = fromList (sort $ gitSubTree a)

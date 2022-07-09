@@ -3,10 +3,13 @@ module Generate(
  genSynTree,
  maxLeavesForNodes,
  maxNodesForDepth,
+ genSynTreeSubtreeExc
 ) where
 
-import Types (SynTree(..),collectLeaves, relabelShape)
+import Types (SynTree(..),collectLeaves, relabelShape, allSubtre)
 import Test.QuickCheck (choose, oneof, Gen, shuffle, suchThat)
+import Data.List (nub)
+import Data.Set (size)
 
 rangeDepthForNodes :: Integer -> (Integer, Integer)
 rangeDepthForNodes nodes = (minDepth, maxDepth)
@@ -76,3 +79,13 @@ negativeLiteral = Not <$> positiveLiteral
 
 positiveLiteral :: Gen (SynTree ())
 positiveLiteral = return (Leaf ())
+
+--------------------------------------------------------------------------------------------------------------
+judgeDupTree :: Eq c => SynTree c -> Bool
+judgeDupTree synTree = let treeList = collectLeaves synTree
+    in
+        treeList == nub treeList
+-- generate subtree exercise
+genSynTreeSubtreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Gen (SynTree Char)
+genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = do
+    genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
