@@ -87,5 +87,4 @@ judgeDupTree synTree = let treeList = collectLeaves synTree
         treeList == nub treeList
 -- generate subtree exercise
 genSynTreeSubtreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Gen (SynTree Char)
-genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = do
-    genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
+genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
