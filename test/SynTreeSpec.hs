@@ -41,7 +41,7 @@ invalidBoundsSyntr = do
    , maxdepth = maxdepth
    , electliteral = validChars
    , mustcontain = fromIntegral (length validChars)
-   , addoper = True
+   , useImplEqui = True
    }
 
 validBoundsSyntr :: Gen SynTreeConfig
@@ -58,7 +58,7 @@ validBoundsSyntr = do
    , maxdepth = maxdepth
    , electliteral = validChars
    , mustcontain = min useChars (fromIntegral (length validChars))
-   , addoper = booer
+   , useImplEqui = booer
    }
 
 validBoundsSyntr2 :: Gen SynTreeConfig
@@ -74,7 +74,7 @@ validBoundsSyntr2 = do
    , maxdepth = maxnode
    , electliteral = validChars
    , mustcontain = min useChars (fromIntegral (length validChars))
-   , addoper = booer
+   , useImplEqui = booer
    }
 
 spec :: Spec
@@ -88,10 +88,10 @@ spec = do
             forAll validBoundsSyntr2 (isNothing . checkSynTreeConfig)
     describe "genSyntaxTree" $ do
         it "should generate a random SyntaxTree from the given parament and can be parsed by normParse" $
-            forAll validBoundsSyntr $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode,maxnode) maxdepth validChars minuse addoper)  $ \synTree -> normParse (display synTree) == Right synTree
+            forAll validBoundsSyntr $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode,maxnode) maxdepth validChars minuse useImplEqui)  $ \synTree -> normParse (display synTree) == Right synTree
         it "should generate a random SyntaxTree from the given parament and in the node area" $
-            forAll validBoundsSyntr $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode,maxnode) maxdepth validChars minuse addoper)  $ \synTree -> nodenum synTree >= minnode && nodenum synTree <= maxnode
+            forAll validBoundsSyntr $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode,maxnode) maxdepth validChars minuse useImplEqui)  $ \synTree -> nodenum synTree >= minnode && nodenum synTree <= maxnode
         it "should generate a random SyntaxTree from the given parament and not deeper than the maxdepth" $
-            forAll validBoundsSyntr $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode,maxnode) maxdepth validChars minuse addoper) $ \synTree -> treedepth synTree <= maxdepth
+            forAll validBoundsSyntr $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode,maxnode) maxdepth validChars minuse useImplEqui) $ \synTree -> treedepth synTree <= maxdepth
         it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-            forAll validBoundsSyntr2 $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode, maxnode) maxdepth validChars minuse addoper) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= minuse
+            forAll validBoundsSyntr2 $ \SynTreeConfig{electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTree (minnode, maxnode) maxdepth validChars minuse useImplEqui) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= minuse

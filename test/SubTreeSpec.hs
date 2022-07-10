@@ -12,7 +12,7 @@ import Data.Set (size)
 
 validBoundsSubtree :: Gen SubtreeConfig --
 validBoundsSubtree = do
-    addoper <- elements [True,False]
+    useImplEqui <- elements [True,False]
     -- useDupTree <- elements [True,False]
     minnode <- choose (1,20)
     maxnode <- choose (minnode,20)
@@ -27,14 +27,14 @@ validBoundsSubtree = do
       , maxdepth = maxdepth
       , electliteral = validChars
       , mustcontain = min useChars (fromIntegral (length validChars))
-      , addoper = addoper
+      , useImplEqui = useImplEqui
       , useDupTree = False
       , subtreeNub = subtreeNub
       }
 
 validBoundsSubtreeDup :: Gen SubtreeConfig --
 validBoundsSubtreeDup = do
-    addoper <- elements [True,False]
+    useImplEqui <- elements [True,False]
     -- useDupTree <- elements [True,False]
     minnode <- choose (1,10)
     maxnode <- choose (minnode,10)
@@ -49,17 +49,17 @@ validBoundsSubtreeDup = do
       , maxdepth = maxdepth
       , electliteral = validChars
       , mustcontain = min useChars (fromIntegral (length validChars))
-      , addoper = addoper
+      , useImplEqui = useImplEqui
       , useDupTree = True
       , subtreeNub = subtreeNub
       }
 
--- genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
+-- genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse useImplEqui useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse useImplEqui `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
 spec :: Spec
 spec = do
     describe "genSynTreeSubtreeExc" $
         it "it should generate the same Syntax Sub tree number as excepted when don't allow Duple tree" $
-            forAll validBoundsSubtree $ \SubtreeConfig {electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTreeSubtreeExc (minnode, maxnode) maxdepth validChars minuse addoper useDupTree subtreeNub) $ \synTree -> size ( allSubtre synTree) == fromIntegral subtreeNub
+            forAll validBoundsSubtree $ \SubtreeConfig {electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTreeSubtreeExc (minnode, maxnode) maxdepth validChars minuse useImplEqui useDupTree subtreeNub) $ \synTree -> size ( allSubtre synTree) == fromIntegral subtreeNub
     describe "genSynTreeSubtreeExc" $
         it "it should generate the same Syntax Sub tree number as excepted when allow Duple Tree" $
-            forAll validBoundsSubtreeDup $ \SubtreeConfig {electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTreeSubtreeExc (minnode, maxnode) maxdepth validChars minuse addoper useDupTree subtreeNub) $ \synTree -> size ( allSubtre synTree) == fromIntegral subtreeNub
+            forAll validBoundsSubtreeDup $ \SubtreeConfig {electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTreeSubtreeExc (minnode, maxnode) maxdepth validChars minuse useImplEqui useDupTree subtreeNub) $ \synTree -> size ( allSubtre synTree) == fromIntegral subtreeNub

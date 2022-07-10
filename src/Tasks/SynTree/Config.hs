@@ -17,7 +17,7 @@ data SynTreeConfig =
   , maxdepth :: Integer
   , electliteral :: String
   , mustcontain :: Integer
-  ,addoper::Bool
+  ,useImplEqui::Bool
   } deriving Show
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
@@ -48,7 +48,7 @@ dSynTreeConfig =
   , maxdepth = 6
   , electliteral = "ABCDE"
   , mustcontain = 3
-  ,addoper = False
+  , useImplEqui = False
   }
 
 data SynTreeInst =

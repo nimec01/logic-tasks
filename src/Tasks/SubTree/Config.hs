@@ -17,7 +17,7 @@ data SubtreeConfig =
   , maxdepth :: Integer
   , electliteral :: String
   , mustcontain :: Integer
-  , addoper :: Bool
+  , useImplEqui :: Bool
   , useDupTree :: Bool
   , subtreeNub :: Integer
   } deriving Show
@@ -30,7 +30,7 @@ dSubtreeConfig =
     , maxdepth =4
     , electliteral ="ABCDE"
     , mustcontain = 3
-    , addoper = True
+    , useImplEqui = True
     , useDupTree = True
     , subtreeNub = 5
     }

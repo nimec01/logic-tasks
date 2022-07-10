@@ -11,7 +11,7 @@ import Types (allSubtre)
 
 genSubtreeInst :: SubtreeConfig -> IO SubtreeInst
 genSubtreeInst SubtreeConfig{..} = do
- tree <- generate (genSynTreeSubtreeExc (minnode,maxnode) maxdepth electliteral mustcontain addoper useDupTree subtreeNub)
+ tree <- generate (genSynTreeSubtreeExc (minnode,maxnode) maxdepth electliteral mustcontain useImplEqui useDupTree subtreeNub)
  return $ SubtreeInst
    { insSynTree = tree
    , formula = display tree

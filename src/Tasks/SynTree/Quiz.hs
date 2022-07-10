@@ -13,7 +13,7 @@ import Print ( transfer, display )
 
 genSynTreeInst :: SynTreeConfig -> IO SynTreeInst
 genSynTreeInst SynTreeConfig{..} = do
- tree <- generate (genSynTree (minnode,maxnode) maxdepth electliteral mustcontain addoper)
+ tree <- generate (genSynTree (minnode,maxnode) maxdepth electliteral mustcontain useImplEqui)
  return $ SynTreeInst
    { insSyntree = tree
    , image = transfer tree
