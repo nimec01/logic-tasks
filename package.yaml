@@ -19,6 +19,7 @@ library:
   source-dirs: src
   exposed-modules:
     - Tasks.SynTree.Config
+    - Tasks.SubTree.Config
     - Types
     - Parsing
     - Generate

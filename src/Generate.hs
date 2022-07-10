@@ -3,7 +3,8 @@ module Generate(
  genSynTree,
  maxLeavesForNodes,
  maxNodesForDepth,
- genSynTreeSubtreeExc
+ genSynTreeSubtreeExc,
+ judgeDupTree
 ) where
 
 import Types (SynTree(..),collectLeaves, relabelShape, allSubtre)
@@ -30,7 +31,7 @@ chooseList addoper = if addoper
 
 randomuse :: [c] -> [c] -> Integer -> Gen [c]
 randomuse lits minuse len = let
-    uselist = minuse ++ cycle lits
+    uselist = minuse ++ cycle ( reverse lits)
     in
       shuffle (take (fromIntegral len) uselist)
 
@@ -87,4 +88,4 @@ judgeDupTree synTree = let treeList = collectLeaves synTree
         treeList == nub treeList
 -- generate subtree exercise
 genSynTreeSubtreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Gen (SynTree Char)
-genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
+genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> (judgeDupTree synTree || useDupTree) && size (allSubtre synTree) == fromIntegral subtreeNum
