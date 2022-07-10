@@ -57,9 +57,9 @@ validBoundsSubtreeDup = do
 -- genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse addoper useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse addoper `suchThat` \synTree -> judgeDupTree synTree == useDupTree && size (allSubtre synTree) == fromIntegral subtreeNum
 spec :: Spec
 spec = do
-    describe "genSynTreeSubtreeExc" $ do
+    describe "genSynTreeSubtreeExc" $
         it "it should generate the same Syntax Sub tree number as excepted when don't allow Duple tree" $
             forAll validBoundsSubtree $ \SubtreeConfig {electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTreeSubtreeExc (minnode, maxnode) maxdepth validChars minuse addoper useDupTree subtreeNub) $ \synTree -> size ( allSubtre synTree) == fromIntegral subtreeNub
-    describe "genSynTreeSubtreeExc" $ do
+    describe "genSynTreeSubtreeExc" $
         it "it should generate the same Syntax Sub tree number as excepted when allow Duple Tree" $
             forAll validBoundsSubtreeDup $ \SubtreeConfig {electliteral = validChars, mustcontain = minuse, ..} -> forAll (genSynTreeSubtreeExc (minnode, maxnode) maxdepth validChars minuse addoper useDupTree subtreeNub) $ \synTree -> size ( allSubtre synTree) == fromIntegral subtreeNub
