@@ -3,6 +3,7 @@
 module Tasks.SubTree.Quiz(
     genSubtreeInst
 ) where
+
 import Test.QuickCheck (generate)
 import Generate (genSynTreeSubtreeExc)
 

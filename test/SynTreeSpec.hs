@@ -32,7 +32,7 @@ invalidBoundsSyntr :: Gen SynTreeConfig
 invalidBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z']
   minNode <- choose (2, 100)
-  maxNode <- choose (1, minNode -1)
+  maxNode <- choose (1, minNode - 1)
   maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
   return $
     SynTreeConfig

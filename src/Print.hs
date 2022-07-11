@@ -1,10 +1,9 @@
-{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Print(
     transferToPicture,
     display
     ) where
-import Types (SynTree(..))
 
+import Types (SynTree(..))
 
 transferToPicture :: SynTree Char -> String
 transferToPicture (And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"

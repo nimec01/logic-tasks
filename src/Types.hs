@@ -37,12 +37,12 @@ relabelShape shape contents =
         do {current <- get; put (tail current); return (head current)}
 
 getSubTree :: SynTree c -> [SynTree c]
-getSubTree (And a b) = getSubTree a ++ (And a b:getSubTree b)
+getSubTree (And a b) = getSubTree a ++ (And a b : getSubTree b)
 getSubTree (Leaf a) =  [Leaf a]
-getSubTree (Or a b) = getSubTree a ++ (Or a b:getSubTree b)
+getSubTree (Or a b) = getSubTree a ++ (Or a b : getSubTree b)
 getSubTree (Not a) = Not a : getSubTree a
-getSubTree (Impl a b) = getSubTree a ++ (Impl a b:getSubTree b)
-getSubTree (Equi a b) = getSubTree a ++ (Equi a b:getSubTree b)
+getSubTree (Impl a b) = getSubTree a ++ (Impl a b : getSubTree b)
+getSubTree (Equi a b) = getSubTree a ++ (Equi a b : getSubTree b)
 
 allSubtree :: Ord c => SynTree c -> Set (SynTree c)
 allSubtree a = fromList (sort $ getSubTree a)

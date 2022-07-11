@@ -11,7 +11,7 @@ import Data.Set (Set)
 import Types (SynTree)
 
 data SubtreeConfig =
-  SubtreeConfig 
+  SubtreeConfig
     {
       maxNode :: Integer
     , minNode :: Integer
