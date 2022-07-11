@@ -7,10 +7,11 @@ module Generate(
  judgeDupTree
 ) where
 
-import Types (SynTree(..),collectLeaves, relabelShape, allSubtre)
-import Test.QuickCheck (choose, oneof, Gen, shuffle, suchThat)
-import Data.List (nub)
+import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat)
+import Data.List.Extra (nubOrd)
 import Data.Set (size)
+
+import Types (SynTree(..), collectLeaves, relabelShape, allSubtree)
 
 rangeDepthForNodes :: Integer -> (Integer, Integer)
 rangeDepthForNodes nodes = (minDepth, maxDepth)
@@ -29,48 +30,47 @@ chooseList useImplEqui = if useImplEqui
         then [And, Or, Impl, Equi]
         else [And, Or]
 
-randomuse :: [c] -> [c] -> Integer -> Gen [c]
-randomuse lits minuse len = let
-    uselist = minuse ++ cycle ( reverse lits)
+randomList :: [c] -> [c] -> Integer -> Gen [c]
+randomList availableLetters atLeastOccurring len = let
+    useList = atLeastOccurring ++ cycle ( reverse availableLetters)
     in
-      shuffle (take (fromIntegral len) uselist)
+    shuffle (take (fromIntegral len) useList)
 
 genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Gen (SynTree Char)
-genSynTree (minnode, maxnode) maxdepth lits minuse useImplEqui =
-  do
-    nodenum <- choose (minnode, maxnode)
-    sample <- syntaxShape nodenum maxdepth useImplEqui `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= minuse
-    usedlist <- randomuse lits (take (fromIntegral minuse) lits) $ fromIntegral $ length $ collectLeaves sample
-    return (relabelShape sample usedlist )
+genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui = do
+    nodeNum <- choose (minNode, maxNode)
+    sample <- syntaxShape nodeNum maxDepth useImplEqui `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
+    usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
+    return (relabelShape sample usedList )
 
 syntaxShape :: Integer -> Integer -> Bool -> Gen (SynTree ())
-syntaxShape nodenum maxdepth useImplEqui
-    | nodenum == 1 = positiveLiteral
-    | nodenum == 2 = negativeLiteral
-    | maxNodesForDepth (maxdepth - 1) < nodenum - 1 = oneof binaryOper
+syntaxShape nodeNum maxDepth useImplEqui
+    | nodeNum == 1 = positiveLiteral
+    | nodeNum == 2 = negativeLiteral
+    | maxNodesForDepth (maxDepth - 1) < nodeNum - 1 = oneof binaryOper
     | otherwise = oneof $ negativeForm : binaryOper
     where
-        binaryOper = map (binaryOperator nodenum maxdepth useImplEqui) $ chooseList useImplEqui
-        negativeForm = negativeFormula nodenum maxdepth useImplEqui
+        binaryOper = map (binaryOperator nodeNum maxDepth useImplEqui) $ chooseList useImplEqui
+        negativeForm = negativeFormula nodeNum maxDepth useImplEqui
 
 binaryOperator :: Integer -> Integer -> Bool -> (SynTree () -> SynTree () -> SynTree ()) -> Gen (SynTree ())
-binaryOperator nodenum maxdepth useImplEqui operator =
+binaryOperator nodeNum maxDepth useImplEqui operator =
     let minNodesPerSide = max 1 (restNodes - maxNodesForDepth newMaxDepth)
-        restNodes = nodenum - 1
-        newMaxDepth = maxdepth - 1
+        restNodes = nodeNum - 1
+        newMaxDepth = maxDepth - 1
     in  do
-        leftNodenum <- choose (minNodesPerSide , restNodes - minNodesPerSide)
-        leftTre <- syntaxShape leftNodenum newMaxDepth useImplEqui
-        rightTre <- syntaxShape (restNodes - leftNodenum ) newMaxDepth useImplEqui
-        return (operator leftTre rightTre)
+        leftNodeNum <- choose (minNodesPerSide , restNodes - minNodesPerSide)
+        leftTree <- syntaxShape leftNodeNum newMaxDepth useImplEqui
+        rightTree <- syntaxShape (restNodes - leftNodeNum ) newMaxDepth useImplEqui
+        return (operator leftTree rightTree)
 
 negativeFormula :: Integer -> Integer -> Bool -> Gen (SynTree ())
-negativeFormula nodenum maxdepth useImplEqui =
-  let restNodes = nodenum - 1
-      newMaxDepth = maxdepth - 1
-  in  do
-      e <- syntaxShape restNodes newMaxDepth useImplEqui
-      return (Not e)
+negativeFormula nodeNum maxDepth useImplEqui =
+    let restNodes = nodeNum - 1
+        newMaxDepth = maxDepth - 1
+    in  do
+        e <- syntaxShape restNodes newMaxDepth useImplEqui
+        return (Not e)
 
 negativeLiteral ::  Gen (SynTree ())
 negativeLiteral = Not <$> positiveLiteral
@@ -79,10 +79,14 @@ positiveLiteral :: Gen (SynTree ())
 positiveLiteral = return (Leaf ())
 
 --------------------------------------------------------------------------------------------------------------
-judgeDupTree :: Eq c => SynTree c -> Bool
+judgeDupTree :: Ord c => SynTree c -> Bool
 judgeDupTree synTree = let treeList = collectLeaves synTree
     in
-        treeList == nub treeList
+        treeList == nubOrd treeList
 -- generate subtree exercise
 genSynTreeSubtreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Gen (SynTree Char)
-genSynTreeSubtreeExc (minnode, maxnode) maxdepth lits minuse useImplEqui useDupTree subtreeNum = genSynTree (minnode, maxnode) maxdepth lits minuse useImplEqui `suchThat` \synTree -> (judgeDupTree synTree || useDupTree) && size (allSubtre synTree) == fromIntegral subtreeNum
+genSynTreeSubtreeExc (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui useDupelTree subtreeNub =
+    let
+        syntaxTree = genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui
+    in
+        syntaxTree `suchThat` \synTree -> (judgeDupTree synTree || useDupelTree) && size (allSubtree synTree) == fromIntegral subtreeNub

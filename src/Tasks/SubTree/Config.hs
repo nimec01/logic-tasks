@@ -1,38 +1,39 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Tasks.SubTree.Config (
+    SubtreeInst(..),
     SubtreeConfig(..),
     dSubtreeConfig,
-    SubtreeInst(..)
   ) where
 
-import Types (SynTree)
 import Data.Set (Set)
+
+import Types (SynTree)
 
 data SubtreeConfig =
   SubtreeConfig 
-  {
-    maxnode :: Integer
-  , minnode :: Integer
-  , maxdepth :: Integer
-  , electliteral :: String
-  , mustcontain :: Integer
-  , useImplEqui :: Bool
-  , useDupTree :: Bool
-  , subtreeNub :: Integer
-  } deriving Show
+    {
+      maxNode :: Integer
+    , minNode :: Integer
+    , maxDepth :: Integer
+    , usedLiterals :: String
+    , atLeastOccurring :: Integer
+    , useImplEqui :: Bool
+    , useDupelTree :: Bool
+    , subtreeNum :: Integer
+    } deriving Show
 
 dSubtreeConfig :: SubtreeConfig
 dSubtreeConfig =
     SubtreeConfig
-    { maxnode = 8
-    , minnode = 4
-    , maxdepth =4
-    , electliteral ="ABCDE"
-    , mustcontain = 3
+    { maxNode = 8
+    , minNode = 4
+    , maxDepth = 4
+    , usedLiterals = "ABCDE"
+    , atLeastOccurring = 3
     , useImplEqui = True
-    , useDupTree = True
-    , subtreeNub = 5
+    , useDupelTree = True
+    , subtreeNum = 5
     }
 
 data SubtreeInst =

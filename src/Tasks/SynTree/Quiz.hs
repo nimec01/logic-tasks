@@ -1,25 +1,26 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module Tasks.SynTree.Quiz (
-  genSynTreeInst,
-  feedback,
-  ) where
+    feedback,
+    genSynTreeInst,
+    ) where
 
 import Test.QuickCheck (generate)
-import Parsing (normParse)
-import Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
-import Print ( transfer, display )
+
+import Print (display, transferToPicture)
+import Parsing (formulaParse)
+import Generate (genSynTree)
 
 genSynTreeInst :: SynTreeConfig -> IO SynTreeInst
-genSynTreeInst SynTreeConfig{..} = do
- tree <- generate (genSynTree (minnode,maxnode) maxdepth electliteral mustcontain useImplEqui)
- return $ SynTreeInst
-   { insSyntree = tree
-   , image = transfer tree
-   , correct = display tree
-   }
+genSynTreeInst SynTreeConfig {..} = do
+    tree <- generate (genSynTree (minNode,maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui)
+    return $ SynTreeInst
+      { instSyntree = tree
+      , latexImage = transferToPicture tree
+      , correct = display tree
+      }
 
 feedback :: SynTreeInst -> String -> Bool
-feedback SynTreeInst{insSyntree} input =
-  normParse input == Right insSyntree
+feedback SynTreeInst {instSyntree} input =
+  formulaParse input == Right instSyntree

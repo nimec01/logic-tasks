@@ -1,30 +1,31 @@
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 module Print(
-    transfer,
+    transferToPicture,
     display
     ) where
-import Types ( SynTree(Equi, And, Leaf, Or, Not, Impl) )
+import Types (SynTree(..))
 
 
-transfer :: SynTree Char -> String
-transfer (And a b) = "[ $\\wedge $ " ++ transfer a++ transfer b++"  ]"
-transfer (Leaf a)= "[" ++ (a:"]")
-transfer (Or a b) = "[ $\\vee   $ " ++ transfer a++ transfer b++"  ]"
-transfer (Not a) = "[ $\\neg $ " ++ transfer a ++"  ]"
-transfer (Impl a b) = "[ $\\to  $ " ++ transfer a++ transfer b++"  ]"
-transfer (Equi a b) = "[ $\\Leftrightarrow  $ " ++ transfer a++ transfer b++"  ]"
+transferToPicture :: SynTree Char -> String
+transferToPicture (And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
+transferToPicture (Leaf a) = "[" ++ (a:"]")
+transferToPicture (Or a b) = "[ $\\vee   $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
+transferToPicture (Not a) = "[ $\\neg $ " ++ transferToPicture a ++ "  ]"
+transferToPicture (Impl a b) = "[ $\\to  $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
+transferToPicture (Equi a b) = "[ $\\Leftrightarrow  $ " ++ transferToPicture a ++ transferToPicture b ++"  ]"
 
 display :: SynTree Char -> String
-display (And a b) = normalshow a ++"/\\"++ normalshow b
-display (Leaf a)=  a:""
-display (Or a b) = normalshow a ++"\\/"++ normalshow b
-display (Not a) = "~" ++ normalshow a ++""
-display (Impl a b) = normalshow a ++"=>"++ normalshow b
-display (Equi a b) = normalshow a ++"<=>"++ normalshow b
+display (And a b) = normalShow a ++ "/\\" ++ normalShow b
+display (Leaf a)=  a : ""
+display (Or a b) = normalShow a ++ "\\/" ++ normalShow b
+display (Not a) = "~" ++ normalShow a ++ ""
+display (Impl a b) = normalShow a ++ "=>" ++ normalShow b
+display (Equi a b) = normalShow a ++ "<=>" ++ normalShow b
 
-normalshow :: SynTree Char -> String
-normalshow (And a b) = "(" ++ normalshow a ++"/\\"++ normalshow b++")"
-normalshow (Leaf a)=  a:""
-normalshow (Or a b) = "(" ++ normalshow a ++"\\/"++ normalshow b++")"
-normalshow (Not a) = "~" ++ normalshow a ++""
-normalshow (Impl a b) = "(" ++ normalshow a ++"=>"++ normalshow b ++")"
-normalshow (Equi a b) = "(" ++ normalshow a ++"<=>"++ normalshow b ++")"
+normalShow :: SynTree Char -> String
+normalShow (And a b) = "(" ++ normalShow a ++ "/\\" ++ normalShow b++ ")"
+normalShow (Leaf a)=  a : ""
+normalShow (Or a b) = "(" ++ normalShow a ++ "\\/" ++ normalShow b++ ")"
+normalShow (Not a) = "~" ++ normalShow a ++ ""
+normalShow (Impl a b) = "(" ++ normalShow a ++ "=>" ++ normalShow b ++ ")"
+normalShow (Equi a b) = "(" ++ normalShow a ++ "<=>" ++ normalShow b ++ ")"
