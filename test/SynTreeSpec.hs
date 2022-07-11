@@ -86,6 +86,8 @@ spec = do
   describe "checkSynTreeConfig" $ do
     it "should reject invalid bounds" $
       forAll invalidBoundsSyntr (isJust . checkSynTreeConfig)
+    it "should reject a corner case configuration" $
+      isJust (checkSynTreeConfig (SynTreeConfig 1 1 2 "A" 1 True))
     it "should accept the default config" $
       isNothing (checkSynTreeConfig dSynTreeConfig)
     it "should accept valid bounds" $

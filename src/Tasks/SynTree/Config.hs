@@ -43,6 +43,8 @@ checkSynTreeConfig SynTreeConfig {..}
       = Just "Your minimum number of nodes does not permit enough leaves for all desired literals."
     | maxNode > maxNodesForDepth maxDepth
       = Just "Your minimum number of nodes is larger than what your maximum depth enables."
+    | maxDepth > maxNode
+      = Just "A tree cannot be deeper than its size."
     | otherwise = Nothing
 
 dSynTreeConfig :: SynTreeConfig
