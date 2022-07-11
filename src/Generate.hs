@@ -37,11 +37,8 @@ randomuse lits minuse len = let
 
 genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Gen (SynTree Char)
 genSynTree (minnode, maxnode) maxdepth lits minuse useImplEqui =
-    let minuseNode = minuse * 2 - 1
-        finalMinuse = max minnode minuseNode
-        maxnodeWithdepth = min maxnode $ maxNodesForDepth maxdepth
-    in  do
-    nodenum <- choose (finalMinuse , maxnodeWithdepth)
+  do
+    nodenum <- choose (minnode, maxnode)
     sample <- syntaxShape nodenum maxdepth useImplEqui `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= minuse
     usedlist <- randomuse lits (take (fromIntegral minuse) lits) $ fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedlist )

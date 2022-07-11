@@ -20,13 +20,14 @@ validBoundsSubtree = do
     validChars <- sublistOf ['A'..'Z'] `suchThat` (\str ->fromInteger ( maxLeavesForNodes subtreeNub) <= length str)
     maxdepth <- choose (fst (rangeDepthForNodes minnode), minnode)
     useChars <- choose (1, maxLeavesForNodes (min minnode (maxNodesForDepth maxdepth)))
+    let minuse = min useChars (fromIntegral (length validChars))
     return $ SubtreeConfig
       {
-        maxnode = maxnode
-      , minnode = minnode
+        maxnode = min maxnode (maxNodesForDepth maxdepth)
+      , minnode = max minnode (minuse * 2 - 1)
       , maxdepth = maxdepth
       , electliteral = validChars
-      , mustcontain = min useChars (fromIntegral (length validChars))
+      , mustcontain = minuse
       , useImplEqui = useImplEqui
       , useDupTree = False
       , subtreeNub = subtreeNub
@@ -42,13 +43,14 @@ validBoundsSubtreeDup = do
     validChars <- sublistOf ['A'..'Z'] -- `suchThat` (\str ->fromInteger ( maxLeavesForNodes subtreeNub) <= length str)
     maxdepth <- choose (fst (rangeDepthForNodes maxnode), maxnode)
     useChars <- choose (1, maxLeavesForNodes (min minnode (maxNodesForDepth maxdepth)))
+    let minuse = min useChars (fromIntegral (length validChars))
     return $ SubtreeConfig
       {
-        maxnode = maxnode
-      , minnode = minnode
+        maxnode = min maxnode (maxNodesForDepth maxdepth)
+      , minnode = max minnode (minuse * 2 - 1)
       , maxdepth = maxdepth
       , electliteral = validChars
-      , mustcontain = min useChars (fromIntegral (length validChars))
+      , mustcontain = minuse
       , useImplEqui = useImplEqui
       , useDupTree = True
       , subtreeNub = subtreeNub

@@ -5,7 +5,7 @@ module SynTreeSpec where
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (choose, sublistOf, forAll, Gen, elements, suchThat)
 import Types (SynTree(..), collectLeaves)
-import Tasks.SynTree.Config (SynTreeConfig(..), checkSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig(..), checkSynTreeConfig, dSynTreeConfig)
 import Parsing ( normParse )
 import Data.Maybe (isJust, isNothing)
 import Data.List.Extra (nubOrd)
@@ -52,12 +52,13 @@ validBoundsSyntr = do
  maxnode <- choose (minnode,60)
  maxdepth <- choose (fst (rangeDepthForNodes minnode), maxnode)
  useChars <- choose (1, maxLeavesForNodes (min maxnode (maxNodesForDepth maxdepth)))
+ let minuse = min useChars (fromIntegral (length validChars))
  return $ SynTreeConfig
-   { maxnode = maxnode
-   , minnode = minnode
+   { maxnode = min maxnode (maxNodesForDepth maxdepth)
+   , minnode = max minnode (minuse * 2 - 1)
    , maxdepth = maxdepth
    , electliteral = validChars
-   , mustcontain = min useChars (fromIntegral (length validChars))
+   , mustcontain = minuse
    , useImplEqui = booer
    }
 
@@ -68,9 +69,10 @@ validBoundsSyntr2 = do
  minnode <- choose (1,60)
  maxnode <- choose (minnode,60)
  useChars <- choose (1, maxLeavesForNodes maxnode)
+ let minuse = min useChars (fromIntegral (length validChars))
  return $ SynTreeConfig
    { maxnode = maxnode
-   , minnode = minnode
+   , minnode = max minnode (minuse * 2 - 1)
    , maxdepth = maxnode
    , electliteral = validChars
    , mustcontain = min useChars (fromIntegral (length validChars))
@@ -82,6 +84,8 @@ spec = do
     describe "checkSynTreeConfig" $ do
         it "should reject invalid bounds" $
             forAll invalidBoundsSyntr (isJust . checkSynTreeConfig)
+        it "should accept the default config" $
+            isNothing (checkSynTreeConfig dSynTreeConfig)
         it "should accept valid bounds" $
             forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
         it "should accept valid bounds" $
