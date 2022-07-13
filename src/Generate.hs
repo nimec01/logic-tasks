@@ -4,12 +4,13 @@ module Generate(
  maxLeavesForNodes,
  maxNodesForDepth,
  genSynTreeSubtreeExc,
- judgeDupTree
+ noSameSubTree,
 ) where
 
-import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat)
+import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
 import Data.List.Extra (nubOrd)
 import Data.Set (size)
+import Test.QuickCheck.Gen (vectorOf)
 
 import Types (SynTree(..), collectLeaves, relabelShape, allSubtree)
 
@@ -32,9 +33,10 @@ chooseList useImplEqui = if useImplEqui
 
 randomList :: [c] -> [c] -> Integer -> Gen [c]
 randomList availableLetters atLeastOccurring len = let
-    useList = atLeastOccurring ++ cycle ( reverse availableLetters)
-    in
-    shuffle (take (fromIntegral len) useList)
+    restLength = fromIntegral len - length atLeastOccurring
+    in do
+        randomRest <- vectorOf restLength (elements availableLetters)
+        shuffle (atLeastOccurring ++ randomRest)
 
 genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Gen (SynTree Char)
 genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui = do
@@ -79,14 +81,16 @@ positiveLiteral :: Gen (SynTree ())
 positiveLiteral = return (Leaf ())
 
 --------------------------------------------------------------------------------------------------------------
-judgeDupTree :: Ord c => SynTree c -> Bool
-judgeDupTree synTree = let treeList = collectLeaves synTree
+noSameSubTree :: Ord c => SynTree c -> Bool
+noSameSubTree synTree = let treeList = collectLeaves synTree
     in
         treeList == nubOrd treeList
 -- generate subtree exercise
 genSynTreeSubtreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Gen (SynTree Char)
-genSynTreeSubtreeExc (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui useDupelTree subtreeNub =
+genSynTreeSubtreeExc (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui useDupelTree minSubtreeNum =
     let
-        syntaxTree = genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui
+        syntaxTree = if not useDupelTree && minSubtreeNum > minNode
+            then  genSynTree (minSubtreeNum, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui
+            else  genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui
     in
-        syntaxTree `suchThat` \synTree -> (judgeDupTree synTree || useDupelTree) && size (allSubtree synTree) == fromIntegral subtreeNub
+        syntaxTree `suchThat` \synTree -> (noSameSubTree synTree || useDupelTree) && size (allSubtree synTree) >= fromIntegral minSubtreeNum

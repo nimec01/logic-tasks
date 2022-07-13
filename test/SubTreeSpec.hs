@@ -8,62 +8,44 @@ import Data.Set (size)
 
 import Tasks.SubTree.Config (SubtreeConfig(..))
 import Types (allSubtree)
-import Generate (maxLeavesForNodes, genSynTreeSubtreeExc, maxNodesForDepth, rangeDepthForNodes)
+import Generate (maxLeavesForNodes, noSameSubTree, genSynTreeSubtreeExc, maxNodesForDepth, rangeDepthForNodes)
+import Tasks.SynTree.Config (SynTreeConfig(..))
 
 validBoundsSubtree :: Gen SubtreeConfig
 validBoundsSubtree = do
+    useDupelTree <- elements [True,False]
     useImplEqui <- elements [True,False]
-    -- useDupelTree <- elements [True,False]
-    minNode <- choose (1,20)
-    maxNode <- choose (minNode,20)
-    subtreeNum <- choose (minNode, minNode)--如果是False必须和minNode相等
-    usedLiterals <- sublistOf ['A'..'Z'] `suchThat` (\str ->fromIntegral ( maxLeavesForNodes subtreeNum) <= length str)
-    maxDepth <- choose (fst (rangeDepthForNodes minNode), minNode)
+    minNode <- choose (1, 20)
+    maxNode <- choose (minNode, 20)
+    usedLiterals <- sublistOf ['A'..'Z'] `suchThat` (not . null)
+    maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
     useChars <- choose (1, maxLeavesForNodes (min minNode (maxNodesForDepth maxDepth)))
+    minSubtreeNum <- choose (1,  min maxNode (maxNodesForDepth maxDepth))
     let minUse = min useChars (fromIntegral (length usedLiterals))
     return $ SubtreeConfig
       {
-        maxNode = min maxNode (maxNodesForDepth maxDepth)
-      , minNode = max minNode (minUse * 2 - 1)
-      , maxDepth = maxDepth
-      , usedLiterals = usedLiterals
-      , atLeastOccurring = minUse
-      , useImplEqui = useImplEqui
-      , useDupelTree = False
-      , subtreeNum = subtreeNum
-      }
-
-validBoundsSubtreeDup :: Gen SubtreeConfig
-validBoundsSubtreeDup = do
-    useImplEqui <- elements [True,False]  -- useDupelTree <- elements [True,False]
-    minNode <- choose (1,10)
-    maxNode <- choose (minNode,10)
-    subtreeNum <- choose (minNode, maxNode)
-    usedLiterals <- sublistOf ['A'..'Z']   -- `suchThat` (\str ->fromInteger ( maxLeavesForNodes subtreeNum) <= length str)
-    maxDepth <- choose (fst (rangeDepthForNodes maxNode), maxNode)
-    useChars <- choose (1, maxLeavesForNodes (min minNode (maxNodesForDepth maxDepth)))
-    let minUse = min useChars (fromIntegral (length usedLiterals))
-    return $ SubtreeConfig
-      {
-        maxNode = min maxNode (maxNodesForDepth maxDepth)
-      , minNode = max minNode (minUse * 2 - 1)
-      , maxDepth = maxDepth
-      , usedLiterals = usedLiterals
-      , atLeastOccurring = minUse
-      , useImplEqui = useImplEqui
-      , useDupelTree = True
-      , subtreeNum = subtreeNum
+        syntaxTreeConfig = SynTreeConfig
+          {
+            maxNode = min maxNode (maxNodesForDepth maxDepth)
+          , minNode = max minNode (minUse * 2 - 1)
+          , maxDepth = maxDepth
+          , usedLiterals = usedLiterals
+          , atLeastOccurring = minUse
+          , useImplEqui = useImplEqui
+          }
+      , useDupelTree = useDupelTree
+      , minSubtreeNum = minSubtreeNum
       }
 
 spec :: Spec
 spec = do
     describe "genSynTreeSubtreeExc" $
         it "it should generate the same Syntax Sub tree number as excepted when don't allow Duple tree" $
-            forAll validBoundsSubtree $ \SubtreeConfig {..}
-            -> forAll (genSynTreeSubtreeExc (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree subtreeNum) $
-                \synTree -> size ( allSubtree synTree) == fromIntegral subtreeNum
+            forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+            -> forAll (genSynTreeSubtreeExc (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $
+                \synTree -> size ( allSubtree synTree) >= fromIntegral minSubtreeNum
     describe "genSynTreeSubtreeExc" $
-        it "it should generate the same Syntax Sub tree number as excepted when allow Duple Tree" $
-            forAll validBoundsSubtreeDup $ \SubtreeConfig {..}
-            -> forAll (genSynTreeSubtreeExc (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree subtreeNum) $
-                \synTree -> size ( allSubtree synTree) == fromIntegral subtreeNum
+        it "it should generate the Syntax tree without Duple tree when don't allow Duple Tree" $
+            forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+            -> forAll (genSynTreeSubtreeExc (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $
+                \synTree -> useDupelTree || noSameSubTree synTree

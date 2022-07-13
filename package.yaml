@@ -25,12 +25,24 @@ library:
     - Generate
     - Print
     - Tasks.SynTree.Quiz
+    - Tasks.SubTree.Quiz
   ghc-options:
     - -Wall
     - -Werror
 executables:
   formulaFromSyntaxTree:
     main: formulaFromSyntaxTree.hs
+    source-dirs: app
+    dependencies:
+      - ba-tongxi-xu
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Werror
+  allSubformulaFromFormula:
+    main: allSubformulaFromFormula.hs
     source-dirs: app
     dependencies:
       - ba-tongxi-xu
