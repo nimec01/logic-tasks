@@ -34,6 +34,7 @@ checkSubTreeConfig :: SynTreeConfig -> SubtreeConfig -> Maybe String
 checkSubTreeConfig synConfig subConfig =
     checkSynTreeConfig synConfig
     <|> checkAdditionalConfig subConfig
+
 checkAdditionalConfig :: SubtreeConfig -> Maybe String
 checkAdditionalConfig SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
     | maxNode < minSubtreeNum
