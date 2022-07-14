@@ -1,6 +1,7 @@
 module Print(
     transferToPicture,
-    display
+    display,
+    displaySubtree
     ) where
 
 import Types (SynTree(..))
@@ -28,3 +29,13 @@ normalShow (Or a b) = "(" ++ normalShow a ++ "\\/" ++ normalShow b++ ")"
 normalShow (Not a) = "~" ++ normalShow a ++ ""
 normalShow (Impl a b) = "(" ++ normalShow a ++ "=>" ++ normalShow b ++ ")"
 normalShow (Equi a b) = "(" ++ normalShow a ++ "<=>" ++ normalShow b ++ ")"
+
+displaySubtree :: [SynTree Char] -> String
+displaySubtree trees = "{" ++ showTrees trees ++ "}"
+
+showTrees :: [SynTree Char] -> String
+showTrees (tree : trees) =
+    if null trees
+    then display tree
+    else display tree ++ "," ++ showTrees trees
+showTrees [] ="{}"
