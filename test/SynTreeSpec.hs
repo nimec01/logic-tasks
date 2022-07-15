@@ -10,15 +10,7 @@ import Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, dSynTreeConfig)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
-import Types (SynTree (..), collectLeaves)
-
-nodenum :: SynTree c -> Integer
-nodenum (Not a) = 1 + nodenum a
-nodenum (Leaf _) = 1
-nodenum (And a b) = 1 + nodenum a + nodenum b
-nodenum (Or a b) = 1 + nodenum a + nodenum b
-nodenum (Impl a b) = 1 + nodenum a + nodenum b
-nodenum (Equi a b) = 1 + nodenum a + nodenum b
+import Types (SynTree (..), collectLeaves, treeNodeNum)
 
 treedepth :: SynTree c -> Integer
 treedepth (Not a) = 1 + treedepth a
@@ -100,7 +92,7 @@ spec = do
         forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> formulaParse (display synTree) == Right synTree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> nodenum synTree >= minNode && nodenum synTree <= maxNode
+        forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> treeNodeNum synTree >= fromIntegral minNode && treeNodeNum synTree <= fromIntegral maxNode
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
         forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> treedepth synTree <= maxDepth
