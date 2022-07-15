@@ -20,12 +20,15 @@ library:
   exposed-modules:
     - Tasks.SynTree.Config
     - Tasks.SubTree.Config
+    - Tasks.LegalProposition.Config
     - Types
     - Parsing
     - Generate
     - Print
     - Tasks.SynTree.Quiz
     - Tasks.SubTree.Quiz
+    - Tasks.LegalProposition.Quiz
+    - Tasks.LegalProposition.PrintIllegal
   ghc-options:
     - -Wall
     - -Werror
@@ -52,7 +55,17 @@ executables:
       - -Wmissing-signatures
       - -Wunused-matches
       - -Werror
-
+  illegalPseudoFormulasSelect:
+    main: illegalPseudoFormulasSelect.hs
+    source-dirs: app
+    dependencies:
+      - ba-tongxi-xu
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Werror
 tests:
   ba-tongxi-xu-test:
     main: Spec.hs

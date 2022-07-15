@@ -1,10 +1,11 @@
 module Print(
     transferToPicture,
     display,
+    normalShow,
     displaySubtree
     ) where
 
-import Types (SynTree(..))
+import Types (SynTree(..),)
 
 transferToPicture :: SynTree Char -> String
 transferToPicture (And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
@@ -23,9 +24,9 @@ display (Impl a b) = normalShow a ++ "=>" ++ normalShow b
 display (Equi a b) = normalShow a ++ "<=>" ++ normalShow b
 
 normalShow :: SynTree Char -> String
-normalShow (And a b) = "(" ++ normalShow a ++ "/\\" ++ normalShow b++ ")"
+normalShow (And a b) = "(" ++ normalShow a ++ "/\\" ++ normalShow b ++ ")"
 normalShow (Leaf a)=  a : ""
-normalShow (Or a b) = "(" ++ normalShow a ++ "\\/" ++ normalShow b++ ")"
+normalShow (Or a b) = "(" ++ normalShow a ++ "\\/" ++ normalShow b ++ ")"
 normalShow (Not a) = "~" ++ normalShow a ++ ""
 normalShow (Impl a b) = "(" ++ normalShow a ++ "=>" ++ normalShow b ++ ")"
 normalShow (Equi a b) = "(" ++ normalShow a ++ "<=>" ++ normalShow b ++ ")"

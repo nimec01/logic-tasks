@@ -8,6 +8,7 @@ module Types
     collectLeaves,
     relabelShape,
     allSubtree,
+    treeNodeNum,
     ) where
 
 import Data.List (sort)
@@ -46,3 +47,11 @@ getSubTree (Equi a b) = getSubTree a ++ (Equi a b : getSubTree b)
 
 allSubtree :: Ord c => SynTree c -> Set (SynTree c)
 allSubtree a = fromList (sort $ getSubTree a)
+
+treeNodeNum :: SynTree c -> Int
+treeNodeNum (And a b) = 1 + treeNodeNum a + treeNodeNum b
+treeNodeNum (Leaf _) =  1
+treeNodeNum (Or a b) = 1 + treeNodeNum a + treeNodeNum b
+treeNodeNum (Not a) = 1 + treeNodeNum a
+treeNodeNum (Impl a b) = 1 + treeNodeNum a + treeNodeNum b
+treeNodeNum (Equi a b) = 1 + treeNodeNum a + treeNodeNum b
