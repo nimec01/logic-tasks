@@ -33,52 +33,24 @@ validBoundsSyntr = do
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
-    useImplEqui <- elements [True,False]
-    minNode <- choose (1, 20)
-    maxNode <- choose (minNode, 20)
-    usedLiterals <- sublistOf ['A'..'Z'] `suchThat` (not . null)
-    maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
-    useChars <- choose (1, maxLeavesForNodes (min minNode (maxNodesForDepth maxDepth)))
+    synTreeConfig <- validBoundsSyntr
     formulaNum <- choose (1, 20)
     illegalNum <- choose (1, formulaNum)
-    let minUse = min useChars (fromIntegral (length usedLiterals))
     return $ LegalPropositionConfig
         {
-            formulaConfig = SynTreeConfig
-              {
-                maxNode = min maxNode (maxNodesForDepth maxDepth)
-              , minNode = max minNode (minUse * 2 - 1)
-              , maxDepth = maxDepth
-              , usedLiterals = usedLiterals
-              , atLeastOccurring = minUse
-              , useImplEqui = useImplEqui
-              }
+            formulaConfig = synTreeConfig
             , formulaNum = formulaNum
             , illegalNum = illegalNum
         }
 
 invalidBoundsLegalProposition :: Gen LegalPropositionConfig
 invalidBoundsLegalProposition = do
-    useImplEqui <- elements [True,False]
-    minNode <- choose (1, 20)
-    maxNode <- choose (minNode, 20)
-    usedLiterals <- sublistOf ['A'..'Z'] `suchThat` (not . null)
-    maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
-    useChars <- choose (1, maxLeavesForNodes (min minNode (maxNodesForDepth maxDepth)))
+    synTreeConfig <- validBoundsSyntr
     formulaNum <- choose (1, 19)
     illegalNum <- choose (formulaNum + 1, 20)
-    let minUse = min useChars (fromIntegral (length usedLiterals))
     return $ LegalPropositionConfig
         {
-            formulaConfig = SynTreeConfig
-              {
-                maxNode = min maxNode (maxNodesForDepth maxDepth)
-              , minNode = max minNode (minUse * 2 - 1)
-              , maxDepth = maxDepth
-              , usedLiterals = usedLiterals
-              , atLeastOccurring = minUse
-              , useImplEqui = useImplEqui
-              }
+            formulaConfig = synTreeConfig
             , formulaNum = formulaNum
             , illegalNum = illegalNum
         }

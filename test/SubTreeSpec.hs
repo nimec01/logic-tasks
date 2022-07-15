@@ -4,7 +4,7 @@ module SubTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, sublistOf, forAll, elements, suchThat)
-import Data.Set (size)
+import Data.Set (size, toList)
 
 import Tasks.SubTree.Config (SubtreeConfig(..), checkSubTreeConfig, dSubtreeConfig)
 import Types (allSubtree)
@@ -13,28 +13,40 @@ import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
 import Print (displaySubtree)
 import Parsing (subtreeStringParse)
-import Data.Set (toList)
+
+validBoundsSyntr :: Gen SynTreeConfig
+validBoundsSyntr = do
+  useImplEqui <- elements [True, False]
+  usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
+  minNode <- choose (1, 20)
+  maxNode <- choose (minNode, 20)
+  maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
+  useChars <- choose (1, maxLeavesForNodes (min maxNode (maxNodesForDepth maxDepth)))
+  let minUse = min useChars (fromIntegral (length usedLiterals))
+  return $
+    SynTreeConfig
+      { maxNode = min maxNode (maxNodesForDepth maxDepth),
+        minNode = max minNode (minUse * 2 - 1),
+        maxDepth = maxDepth,
+        usedLiterals = usedLiterals,
+        atLeastOccurring = minUse,
+        useImplEqui = useImplEqui
+      }
 
 validBoundsSubtree :: Gen SubtreeConfig
 validBoundsSubtree = do
     useDupelTree <- elements [True,False]
-    useImplEqui <- elements [True,False]
-    minNode <- choose (1, 20)
-    maxNode <- choose (minNode, 20)
-    usedLiterals <- sublistOf ['A'..'Z'] `suchThat` (not . null)
-    maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
-    useChars <- choose (1, maxLeavesForNodes (min minNode (maxNodesForDepth maxDepth)))
+    SynTreeConfig {..} <- validBoundsSyntr
     minSubtreeNum <- choose (1,  min maxNode (maxNodesForDepth maxDepth))
-    let minUse = min useChars (fromIntegral (length usedLiterals))
     return $ SubtreeConfig
       {
         syntaxTreeConfig = SynTreeConfig
           {
             maxNode = min maxNode (maxNodesForDepth maxDepth)
-          , minNode = max minNode (minUse * 2 - 1)
+          , minNode = max minNode (atLeastOccurring * 2 - 1)
           , maxDepth = maxDepth
           , usedLiterals = usedLiterals
-          , atLeastOccurring = minUse
+          , atLeastOccurring = atLeastOccurring
           , useImplEqui = useImplEqui
           }
       , useDupelTree = useDupelTree
@@ -44,23 +56,17 @@ validBoundsSubtree = do
 invalidBoundsSubtree :: Gen SubtreeConfig
 invalidBoundsSubtree = do
     useDupelTree <- elements [True,False]
-    useImplEqui <- elements [True,False]
-    minNode <- choose (1, 20)
-    maxNode <- choose (minNode, 20)
-    usedLiterals <- sublistOf ['A'..'Z'] `suchThat` (not . null)
-    maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
-    useChars <- choose (1, maxLeavesForNodes (min minNode (maxNodesForDepth maxDepth)))
+    SynTreeConfig {..} <- validBoundsSyntr
     minSubtreeNum <- choose (maxNode + 1, 100)
-    let minUse = min useChars (fromIntegral (length usedLiterals))
     return $ SubtreeConfig
       {
         syntaxTreeConfig = SynTreeConfig
           {
             maxNode = min maxNode (maxNodesForDepth maxDepth)
-          , minNode = max minNode (minUse * 2 - 1)
+          , minNode = max minNode (atLeastOccurring * 2 - 1)
           , maxDepth = maxDepth
           , usedLiterals = usedLiterals
-          , atLeastOccurring = minUse
+          , atLeastOccurring = atLeastOccurring
           , useImplEqui = useImplEqui
           }
       , useDupelTree = useDupelTree

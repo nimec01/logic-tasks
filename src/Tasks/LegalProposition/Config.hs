@@ -27,8 +27,8 @@ checkAdditionalConfig LegalPropositionConfig {..}
       = Nothing
 
 checkLegalPropositionConfig :: LegalPropositionConfig -> Maybe String
-checkLegalPropositionConfig lPConfig@LegalPropositionConfig {formulaConfig = SynTreeConfig {..}, ..} =
-    checkSynTreeConfig (formulaConfig lPConfig)
+checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
+    checkSynTreeConfig formulaConfig
     <|> checkAdditionalConfig lPConfig
 
 dLegalPropositionConfig :: LegalPropositionConfig

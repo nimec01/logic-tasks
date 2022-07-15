@@ -6,6 +6,7 @@ module Print(
     ) where
 
 import Types (SynTree(..),)
+import Data.List (intercalate)
 
 transferToPicture :: SynTree Char -> String
 transferToPicture (And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
@@ -35,8 +36,4 @@ displaySubtree :: [SynTree Char] -> String
 displaySubtree trees = "{" ++ showTrees trees ++ "}"
 
 showTrees :: [SynTree Char] -> String
-showTrees (tree : trees) =
-    if null trees
-    then display tree
-    else display tree ++ "," ++ showTrees trees
-showTrees [] ="{}"
+showTrees synTreeList = intercalate ", " (map display synTreeList)

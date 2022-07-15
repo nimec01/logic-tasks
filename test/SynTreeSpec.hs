@@ -46,7 +46,7 @@ invalidBoundsSyntr = do
 
 validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
-  booer <- elements [True, False]
+  useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNode <- choose (1, 60)
   maxNode <- choose (minNode, 60)
@@ -60,12 +60,12 @@ validBoundsSyntr = do
         maxDepth = maxDepth,
         usedLiterals = usedLiterals,
         atLeastOccurring = minUse,
-        useImplEqui = booer
+        useImplEqui = useImplEqui
       }
 
 validBoundsSyntr2 :: Gen SynTreeConfig
 validBoundsSyntr2 = do
-  booer <- elements [True, False]
+  useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNode <- choose (1, 60)
   maxNode <- choose (minNode, 60)
@@ -78,7 +78,7 @@ validBoundsSyntr2 = do
         maxDepth = maxNode,
         usedLiterals = usedLiterals,
         atLeastOccurring = min useChars (fromIntegral (length usedLiterals)),
-        useImplEqui = booer
+        useImplEqui = useImplEqui
       }
 
 spec :: Spec

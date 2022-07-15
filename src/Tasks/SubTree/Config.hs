@@ -31,8 +31,8 @@ dSubtreeConfig =
     }
 
 checkSubTreeConfig :: SubtreeConfig -> Maybe String
-checkSubTreeConfig subConfig@SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} =
-    checkSynTreeConfig (syntaxTreeConfig subConfig)
+checkSubTreeConfig subConfig@SubtreeConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig
     <|> checkAdditionalConfig subConfig
 
 checkAdditionalConfig :: SubtreeConfig -> Maybe String
