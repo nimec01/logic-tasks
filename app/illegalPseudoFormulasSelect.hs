@@ -2,7 +2,7 @@
 
 module Main (main) where
 
-import Tasks.LegalProposition.Config (dLegalPropositionConfig, LegalPropositionInst(..))
+import Tasks.LegalProposition.Config (defaultLegalPropositionConfig, LegalPropositionInst(..))
 import Tasks.LegalProposition.Quiz (genLegalPropositionInst, feedback)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
@@ -12,9 +12,9 @@ main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
   putStrLn "\nThe following is the default config:\n"
-  pPrint dLegalPropositionConfig
+  pPrint defaultLegalPropositionConfig
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@LegalPropositionInst{ serialNumOfWrong } <- genLegalPropositionInst dLegalPropositionConfig
+  inst@LegalPropositionInst{ serialNumOfWrong } <- genLegalPropositionInst defaultLegalPropositionConfig
   pPrint inst
   let
     feedbackLoop = do

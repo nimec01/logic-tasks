@@ -4,12 +4,12 @@ module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
     LegalPropositionInst (..),
 
-    dLegalPropositionConfig,
+    defaultLegalPropositionConfig,
     checkLegalPropositionConfig
 ) where
 
 import Control.Applicative              (Alternative ((<|>)))
-import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, dSynTreeConfig)
+import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 
 data LegalPropositionConfig =
     LegalPropositionConfig
@@ -31,11 +31,11 @@ checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
     checkSynTreeConfig formulaConfig
     <|> checkAdditionalConfig lPConfig
 
-dLegalPropositionConfig :: LegalPropositionConfig
-dLegalPropositionConfig =
+defaultLegalPropositionConfig :: LegalPropositionConfig
+defaultLegalPropositionConfig =
     LegalPropositionConfig
     {
-      formulaConfig = dSynTreeConfig
+      formulaConfig = defaultSynTreeConfig
     , formulaNum = 5
     , illegalNum = 2
     }

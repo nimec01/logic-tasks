@@ -2,7 +2,7 @@
 
 module Main (main) where
 
-import Tasks.SubTree.Config (dSubtreeConfig, SubtreeInst(..))
+import Tasks.SubTree.Config (defaultSubtreeConfig, SubtreeInst(..))
 import Tasks.SubTree.Quiz (genSubtreeInst, feedback)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
@@ -12,9 +12,9 @@ main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
   putStrLn "\nThe following is the default config:\n"
-  pPrint dSubtreeConfig
+  pPrint defaultSubtreeConfig
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SubtreeInst{ correct } <- genSubtreeInst dSubtreeConfig
+  inst@SubtreeInst{ correct } <- genSubtreeInst defaultSubtreeConfig
   pPrint inst
   let
     feedbackLoop = do

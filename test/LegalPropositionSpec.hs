@@ -3,7 +3,7 @@
 module LegalPropositionSpec where
 
 import Test.Hspec (Spec, describe, it)
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), checkLegalPropositionConfig, dLegalPropositionConfig)
+import Tasks.LegalProposition.Config (LegalPropositionConfig (..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
 import Test.QuickCheck (Gen, choose, forAll, elements, sublistOf, suchThat)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -61,7 +61,7 @@ spec = do
         it "should reject invalid bounds" $
             forAll invalidBoundsLegalProposition (isJust . checkLegalPropositionConfig)
         it "should accept the default config" $
-            isNothing (checkLegalPropositionConfig dLegalPropositionConfig)
+            isNothing (checkLegalPropositionConfig defaultLegalPropositionConfig)
         it "should accept valid bounds" $
             forAll validBoundsLegalProposition (isNothing . checkLegalPropositionConfig)
     describe "illegalDisplay" $

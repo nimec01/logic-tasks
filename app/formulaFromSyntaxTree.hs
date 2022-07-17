@@ -2,7 +2,7 @@
 
 module Main (main) where
 
-import Tasks.SynTree.Config (dSynTreeConfig, SynTreeInst(..))
+import Tasks.SynTree.Config (defaultSynTreeConfig, SynTreeInst(..))
 import Tasks.SynTree.Quiz (genSynTreeInst, feedback)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
@@ -12,9 +12,9 @@ main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
   putStrLn "\nThe following is the default config:\n"
-  pPrint dSynTreeConfig
+  pPrint defaultSynTreeConfig
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SynTreeInst{ correct } <- genSynTreeInst dSynTreeConfig
+  inst@SynTreeInst{ correct } <- genSynTreeInst defaultSynTreeConfig
   pPrint inst
   let
     feedbackLoop = do

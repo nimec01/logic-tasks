@@ -5,7 +5,7 @@ module Tasks.SynTree.Config (
   SynTreeInst(..),
 
   checkSynTreeConfig,
-  dSynTreeConfig,
+  defaultSynTreeConfig,
   ) where
 
 import Types (SynTree)
@@ -41,8 +41,8 @@ checkSynTreeConfig SynTreeConfig {..}
       = Just "A tree cannot be deeper than its size."
     | otherwise = Nothing
 
-dSynTreeConfig :: SynTreeConfig
-dSynTreeConfig =
+defaultSynTreeConfig :: SynTreeConfig
+defaultSynTreeConfig =
     SynTreeConfig
     { maxNodes = 10
     , minNodes = 6

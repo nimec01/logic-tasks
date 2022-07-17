@@ -6,7 +6,7 @@ import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, sublistOf, forAll, elements, suchThat)
 import Data.Set (size, toList)
 
-import Tasks.SubTree.Config (SubtreeConfig(..), checkSubTreeConfig, dSubtreeConfig)
+import Tasks.SubTree.Config (SubtreeConfig(..), checkSubTreeConfig, defaultSubtreeConfig)
 import Types (allSubtree)
 import Generate (maxLeavesForNodes, noSameSubTree, genSynTreeSubtreeExc, maxNodesForDepth, minDepthForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
@@ -107,7 +107,7 @@ spec = do
         it "should reject invalid bounde in checkSubTreeConfig" $
             forAll invalidBoundsSubtree (isJust . checkSubTreeConfig)
         it "should accept the default config" $
-            isNothing (checkSubTreeConfig dSubtreeConfig)
+            isNothing (checkSubTreeConfig defaultSubtreeConfig)
         it "should accept valid bounds" $
             forAll validBoundsSubtree (isNothing . checkSubTreeConfig)
     describe "genSynTreeSubtreeExc" $ do

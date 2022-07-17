@@ -7,7 +7,7 @@ import Data.Maybe (isJust, isNothing)
 import Generate (genSynTree, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Parsing (formulaParse)
 import Print (display)
-import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, dSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
 import Types (SynTree (..), collectLeaves, treeNodeNum)
@@ -81,7 +81,7 @@ spec = do
     it "should reject a corner case configuration" $
       isJust (checkSynTreeConfig (SynTreeConfig 1 1 2 "A" 1 True))
     it "should accept the default config" $
-      isNothing (checkSynTreeConfig dSynTreeConfig)
+      isNothing (checkSynTreeConfig defaultSynTreeConfig)
     it "should accept valid bounds" $
       forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
     it "should accept valid bounds" $

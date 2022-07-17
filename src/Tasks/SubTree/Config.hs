@@ -3,7 +3,7 @@
 module Tasks.SubTree.Config (
     SubtreeInst(..),
     SubtreeConfig(..),
-    dSubtreeConfig,
+    defaultSubtreeConfig,
     checkSubTreeConfig
   ) where
 
@@ -11,7 +11,7 @@ import Data.Set (Set)
 import Control.Applicative              (Alternative ((<|>)))
 
 import Types (SynTree)
-import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, dSynTreeConfig)
+import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Generate (maxNodesForDepth)
 
 data SubtreeConfig =
@@ -22,10 +22,10 @@ data SubtreeConfig =
     , minSubtreeNum :: Integer
     } deriving Show
 
-dSubtreeConfig :: SubtreeConfig
-dSubtreeConfig =
+defaultSubtreeConfig :: SubtreeConfig
+defaultSubtreeConfig =
     SubtreeConfig
-    { syntaxTreeConfig = dSynTreeConfig
+    { syntaxTreeConfig = defaultSynTreeConfig
     , useDupelTree = True
     , minSubtreeNum = 5
     }
