@@ -16,15 +16,15 @@ validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
   booer <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNode <- choose (1, 60)
-  maxNode <- choose (minNode, 60)
-  maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
-  useChars <- choose (1, maxLeavesForNodes (min maxNode (maxNodesForDepth maxDepth)))
+  minNodes <- choose (1, 60)
+  maxNodes <- choose (minNodes, 60)
+  maxDepth <- choose (fst (rangeDepthForNodes minNodes), maxNodes)
+  useChars <- choose (1, maxLeavesForNodes (min maxNodes (maxNodesForDepth maxDepth)))
   let minUse = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
-      { maxNode = min maxNode (maxNodesForDepth maxDepth),
-        minNode = max minNode (minUse * 2 - 1),
+      { maxNodes = min maxNodes (maxNodesForDepth maxDepth),
+        minNodes = max minNodes (minUse * 2 - 1),
         maxDepth = maxDepth,
         usedLiterals = usedLiterals,
         atLeastOccurring = minUse,
@@ -67,5 +67,5 @@ spec = do
     describe "illegalDisplay" $
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree ->
                     forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)

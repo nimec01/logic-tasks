@@ -19,7 +19,7 @@ import Text.Parsec (ParseError)
 
 genSubtreeInst :: SubtreeConfig -> IO SubtreeInst
 genSubtreeInst SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- generate (genSynTreeSubtreeExc (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum)
+    tree <- generate (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum)
     return $ SubtreeInst
       { insSynTree = tree
       , minInputTreeNum = minSubtreeNum

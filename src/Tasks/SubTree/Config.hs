@@ -37,7 +37,7 @@ checkSubTreeConfig subConfig@SubtreeConfig {..} =
 
 checkAdditionalConfig :: SubtreeConfig -> Maybe String
 checkAdditionalConfig SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-    | maxNode < minSubtreeNum
+    | maxNodes < minSubtreeNum
       = Just "The subtree's number can not larger than maxnode"
     | maxNodesForDepth maxDepth < minSubtreeNum
       = Just "The subtree's number can not larger than maxDepth can not contain"

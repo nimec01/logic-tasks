@@ -22,7 +22,7 @@ genLegalPropositionInst lPConfig = generate (generateLegalPropositionInst lPConf
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
 generateLegalPropositionInst LegalPropositionConfig  {formulaConfig = SynTreeConfig {..}, ..} = do
-    treeList <- vectorOf (fromIntegral formulaNum) (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui)
+    treeList <- vectorOf (fromIntegral formulaNum) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui)
     serialNumOfWrong <- vectorOf (fromIntegral illegalNum) (choose (1, fromIntegral formulaNum) )`suchThat` (\list -> nubOrd list ==list)
     pseudoFormulas <- genPseudoList 1 serialNumOfWrong treeList
     return $ LegalPropositionInst

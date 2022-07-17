@@ -23,13 +23,13 @@ treedepth (Equi a b) = 1 + maximum [treedepth a, treedepth b]
 invalidBoundsSyntr :: Gen SynTreeConfig
 invalidBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z']
-  minNode <- choose (2, 100)
-  maxNode <- choose (1, minNode - 1)
-  maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
+  minNodes <- choose (2, 100)
+  maxNodes <- choose (1, minNodes - 1)
+  maxDepth <- choose (fst (rangeDepthForNodes minNodes), maxNodes)
   return $
     SynTreeConfig
-      { maxNode = maxNode,
-        minNode = minNode,
+      { maxNodes = maxNodes,
+        minNodes = minNodes,
         maxDepth = maxDepth,
         usedLiterals = usedLiterals,
         atLeastOccurring = fromIntegral (length usedLiterals),
@@ -40,15 +40,15 @@ validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
   useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNode <- choose (1, 60)
-  maxNode <- choose (minNode, 60)
-  maxDepth <- choose (fst (rangeDepthForNodes minNode), maxNode)
-  useChars <- choose (1, maxLeavesForNodes (min maxNode (maxNodesForDepth maxDepth)))
+  minNodes <- choose (1, 60)
+  maxNodes <- choose (minNodes, 60)
+  maxDepth <- choose (fst (rangeDepthForNodes minNodes), maxNodes)
+  useChars <- choose (1, maxLeavesForNodes (min maxNodes (maxNodesForDepth maxDepth)))
   let minUse = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
-      { maxNode = min maxNode (maxNodesForDepth maxDepth),
-        minNode = max minNode (minUse * 2 - 1),
+      { maxNodes = min maxNodes (maxNodesForDepth maxDepth),
+        minNodes = max minNodes (minUse * 2 - 1),
         maxDepth = maxDepth,
         usedLiterals = usedLiterals,
         atLeastOccurring = minUse,
@@ -59,15 +59,15 @@ validBoundsSyntr2 :: Gen SynTreeConfig
 validBoundsSyntr2 = do
   useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNode <- choose (1, 60)
-  maxNode <- choose (minNode, 60)
-  useChars <- choose (1, maxLeavesForNodes maxNode)
+  minNodes <- choose (1, 60)
+  maxNodes <- choose (minNodes, 60)
+  useChars <- choose (1, maxLeavesForNodes maxNodes)
   let minUse = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
-      { maxNode = maxNode,
-        minNode = max minNode (minUse * 2 - 1),
-        maxDepth = maxNode,
+      { maxNodes = maxNodes,
+        minNodes = max minNodes (minUse * 2 - 1),
+        maxDepth = maxNodes,
         usedLiterals = usedLiterals,
         atLeastOccurring = min useChars (fromIntegral (length usedLiterals)),
         useImplEqui = useImplEqui
@@ -89,13 +89,13 @@ spec = do
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> formulaParse (display synTree) == Right synTree
+        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> formulaParse (display synTree) == Right synTree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> treeNodeNum synTree >= fromIntegral minNode && treeNodeNum synTree <= fromIntegral maxNode
+        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> treeNodeNum synTree >= fromIntegral minNodes && treeNodeNum synTree <= fromIntegral maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> treedepth synTree <= maxDepth
+        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> treedepth synTree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
       forAll validBoundsSyntr2 $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNode, maxNode) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= atLeastOccurring
+        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= atLeastOccurring

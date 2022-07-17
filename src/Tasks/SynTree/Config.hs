@@ -13,8 +13,8 @@ import Generate (maxNodesForDepth)
 
 data SynTreeConfig =
   SynTreeConfig
-  { maxNode :: Integer
-  , minNode :: Integer
+  { maxNodes :: Integer
+  , minNodes :: Integer
   , maxDepth :: Integer
   , usedLiterals :: String
   , atLeastOccurring :: Integer
@@ -23,9 +23,9 @@ data SynTreeConfig =
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
 checkSynTreeConfig SynTreeConfig {..}
-    | minNode < 1
+    | minNodes < 1
       = Just "Minimal number of nodes must be positive."
-    | maxNode < minNode
+    | maxNodes < minNodes
       = Just "Maximal number of nodes must not be smaller than minimal number."
     | maxDepth < 1
       = Just "Non-positive depth makes no sense."
@@ -33,19 +33,19 @@ checkSynTreeConfig SynTreeConfig {..}
       = Just "At least one literal occurs in each formula."
     | fromIntegral (length usedLiterals) < atLeastOccurring
       = Just "You have provided too few literals."
-    | minNode < atLeastOccurring * 2 - 1
+    | minNodes < atLeastOccurring * 2 - 1
       = Just "Your minimum number of nodes does not permit enough leaves for all desired literals."
-    | maxNode > maxNodesForDepth maxDepth
+    | maxNodes > maxNodesForDepth maxDepth
       = Just "Your minimum number of nodes is larger than what your maximum depth enables."
-    | maxDepth > maxNode
+    | maxDepth > maxNodes
       = Just "A tree cannot be deeper than its size."
     | otherwise = Nothing
 
 dSynTreeConfig :: SynTreeConfig
 dSynTreeConfig =
     SynTreeConfig
-    { maxNode = 10
-    , minNode = 6
+    { maxNodes = 10
+    , minNodes = 6
     , maxDepth = 6
     , usedLiterals = "ABCDE"
     , atLeastOccurring = 3
