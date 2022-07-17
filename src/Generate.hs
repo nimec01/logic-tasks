@@ -15,7 +15,7 @@ import Test.QuickCheck.Gen (vectorOf)
 import Types (SynTree(..), collectLeaves, relabelShape, allSubtree)
 
 minDepthForNodes :: Integer -> Integer
-minDepthForNodes nodes = head [ depth | depth <- [1..], maxNodesForDepth depth >= nodes ]
+minDepthForNodes nodes = ceiling (logBase 2 (fromIntegral (nodes + 1) :: Float))
 
 maxNodesForDepth :: Integer -> Integer
 maxNodesForDepth depth = 2 ^ depth - 1
