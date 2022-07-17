@@ -10,7 +10,7 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Data.Maybe (isJust, isNothing)
 import Parsing(formulaParse)
 import Data.Either (isLeft)
-import Generate (rangeDepthForNodes, maxLeavesForNodes, maxNodesForDepth, genSynTree)
+import Generate (minDepthForNodes, maxLeavesForNodes, maxNodesForDepth, genSynTree)
 
 validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
@@ -18,7 +18,7 @@ validBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNodes <- choose (1, 60)
   maxNodes <- choose (minNodes, 60)
-  maxDepth <- choose (fst (rangeDepthForNodes minNodes), maxNodes)
+  maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
   useChars <- choose (1, maxLeavesForNodes (min maxNodes (maxNodesForDepth maxDepth)))
   let minUse = min useChars (fromIntegral (length usedLiterals))
   return $

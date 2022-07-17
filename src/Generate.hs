@@ -1,5 +1,5 @@
 module Generate(
- rangeDepthForNodes,
+ minDepthForNodes,
  genSynTree,
  maxLeavesForNodes,
  maxNodesForDepth,
@@ -14,11 +14,8 @@ import Test.QuickCheck.Gen (vectorOf)
 
 import Types (SynTree(..), collectLeaves, relabelShape, allSubtree)
 
-rangeDepthForNodes :: Integer -> (Integer, Integer)
-rangeDepthForNodes nodes = (minDepth, maxDepth)
-  where
-    minDepth = head [ depth | depth <- [1..], maxNodesForDepth depth >= nodes ]
-    maxDepth = nodes
+minDepthForNodes :: Integer -> Integer
+minDepthForNodes nodes = head [ depth | depth <- [1..], maxNodesForDepth depth >= nodes ]
 
 maxNodesForDepth :: Integer -> Integer
 maxNodesForDepth depth = 2 ^ depth - 1

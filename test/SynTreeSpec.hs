@@ -4,7 +4,7 @@ module SynTreeSpec where
 
 import Data.List.Extra (nubOrd)
 import Data.Maybe (isJust, isNothing)
-import Generate (genSynTree, maxLeavesForNodes, maxNodesForDepth, rangeDepthForNodes)
+import Generate (genSynTree, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Parsing (formulaParse)
 import Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, dSynTreeConfig)
@@ -25,7 +25,7 @@ invalidBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z']
   minNodes <- choose (2, 100)
   maxNodes <- choose (1, minNodes - 1)
-  maxDepth <- choose (fst (rangeDepthForNodes minNodes), maxNodes)
+  maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
   return $
     SynTreeConfig
       { maxNodes = maxNodes,
@@ -42,7 +42,7 @@ validBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNodes <- choose (1, 60)
   maxNodes <- choose (minNodes, 60)
-  maxDepth <- choose (fst (rangeDepthForNodes minNodes), maxNodes)
+  maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
   useChars <- choose (1, maxLeavesForNodes (min maxNodes (maxNodesForDepth maxDepth)))
   let minUse = min useChars (fromIntegral (length usedLiterals))
   return $
