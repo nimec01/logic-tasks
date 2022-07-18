@@ -44,10 +44,10 @@ illegalShow notFirstLayer a b usedStr usedOperator =
     if notFirstLayer
     then  do
         letter <- elements usedStr
-        oneof [return ("(" ++ normalShow a ++ "~" ++ normalShow b ++ ")"), return ("(" ++ normalShow a ++ [letter] ++ normalShow b ++ ")"), oneof (illegalParentheses notFirstLayer a b usedOperator)]
+        oneof [return ("(" ++ normalShow a ++ normalShow b ++ ")"), oneof [return ("(" ++ normalShow a ++ "~" ++ normalShow b ++ ")"), return ("(" ++ normalShow a ++ [letter] ++ normalShow b ++ ")")], oneof (illegalParentheses a b usedOperator)]
     else  do
         letter <- elements usedStr
-        oneof [return (normalShow a ++ "~" ++ normalShow b), return (normalShow a ++ [letter] ++ normalShow b), oneof (illegalParentheses notFirstLayer a b usedOperator)]
+        oneof [return (normalShow a ++ normalShow b), oneof [return (normalShow a ++ "~" ++ normalShow b), return (normalShow a ++ [letter] ++ normalShow b)]]
 
 implementIllegal :: SynTree Char -> Bool -> String -> Gen String
 implementIllegal (And a b) notFirstLayer usedStr = illegalShow notFirstLayer a b usedStr "/\\"
@@ -57,10 +57,10 @@ implementIllegal (Impl a b) notFirstLayer usedStr = illegalShow notFirstLayer a 
 implementIllegal (Not a) _ usedStr = do
     letter <- elements usedStr
     oneof $ map (return . (++ normalShow a)) ["/\\", "\\/", "=>", "<=>", [letter]]
-implementIllegal (Leaf _) _ _ = oneof $ map return ["/\\", "\\/", "=>", "<=>", "~"]
+implementIllegal (Leaf _) _ _ = do
+    oper <- elements ["/\\", "\\/", "=>", "<=>", "~"]
+    oneof [return oper, return ""]
 
-illegalParentheses :: Bool -> SynTree Char -> SynTree Char -> String -> [Gen String]
-illegalParentheses notFirstLayer a b usedOperator
-    | notFirstLayer = [return (formulaStr ++ ")"), return ("(" ++ formulaStr), return (")" ++ formulaStr ++ "("), return formulaStr]
-    | otherwise = [return (formulaStr ++ ")"), return ("(" ++ formulaStr), return (")" ++ formulaStr ++ "(")]
+illegalParentheses :: SynTree Char -> SynTree Char -> String -> [Gen String]
+illegalParentheses  a b usedOperator = [return (formulaStr ++ ")"), return ("(" ++ formulaStr), return (")" ++ formulaStr ++ "(")]
   where formulaStr = normalShow a ++ usedOperator ++ normalShow b
