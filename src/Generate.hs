@@ -36,8 +36,8 @@ randomList availableLetters atLeastOccurring len = let
         shuffle (atLeastOccurring ++ randomRest)
 
 genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Gen (SynTree Char)
-genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui = do
-    nodeNum <- choose (minNode, maxNode)
+genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui = do
+    nodeNum <- choose (minNodes, maxNodes)
     sample <- syntaxShape nodeNum maxDepth useImplEqui `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
     usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList )
@@ -84,10 +84,10 @@ noSameSubTree synTree = let treeList = collectLeaves synTree
         treeList == nubOrd treeList
 -- generate subtree exercise
 genSynTreeSubtreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Gen (SynTree Char)
-genSynTreeSubtreeExc (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui useDupelTree minSubtreeNum =
+genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui useDupelTree minSubtreeNum =
     let
-        syntaxTree = if not useDupelTree && minSubtreeNum > minNode
-            then  genSynTree (minSubtreeNum, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui
-            else  genSynTree (minNode, maxNode) maxDepth availableLetters atLeastOccurring useImplEqui
+        syntaxTree = if not useDupelTree && minSubtreeNum > minNodes
+            then  genSynTree (minSubtreeNum, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui
+            else  genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui
     in
         syntaxTree `suchThat` \synTree -> (noSameSubTree synTree || useDupelTree) && size (allSubtree synTree) >= fromIntegral minSubtreeNum
