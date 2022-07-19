@@ -37,35 +37,35 @@ randomList availableLetters atLeastOccurring len = let
 
 genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Gen (SynTree Char)
 genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui = do
-    nodeNum <- choose (minNodes, maxNodes)
-    sample <- syntaxShape nodeNum maxDepth useImplEqui `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
+    nodesNum <- choose (minNodes, maxNodes)
+    sample <- syntaxShape nodesNum maxDepth useImplEqui `suchThat` \synTree -> fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring
     usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList )
 
 syntaxShape :: Integer -> Integer -> Bool -> Gen (SynTree ())
-syntaxShape nodeNum maxDepth useImplEqui
-    | nodeNum == 1 = positiveLiteral
-    | nodeNum == 2 = negativeLiteral
-    | maxNodesForDepth (maxDepth - 1) < nodeNum - 1 = oneof binaryOper
+syntaxShape nodesNum maxDepth useImplEqui
+    | nodesNum == 1 = positiveLiteral
+    | nodesNum == 2 = negativeLiteral
+    | maxNodesForDepth (maxDepth - 1) < nodesNum - 1 = oneof binaryOper
     | otherwise = oneof $ negativeForm : binaryOper
     where
-        binaryOper = map (binaryOperator nodeNum maxDepth useImplEqui) $ chooseList useImplEqui
-        negativeForm = negativeFormula nodeNum maxDepth useImplEqui
+        binaryOper = map (binaryOperator nodesNum maxDepth useImplEqui) $ chooseList useImplEqui
+        negativeForm = negativeFormula nodesNum maxDepth useImplEqui
 
 binaryOperator :: Integer -> Integer -> Bool -> (SynTree () -> SynTree () -> SynTree ()) -> Gen (SynTree ())
-binaryOperator nodeNum maxDepth useImplEqui operator =
+binaryOperator nodesNum maxDepth useImplEqui operator =
     let minNodesPerSide = max 1 (restNodes - maxNodesForDepth newMaxDepth)
-        restNodes = nodeNum - 1
+        restNodes = nodesNum - 1
         newMaxDepth = maxDepth - 1
     in  do
-        leftNodeNum <- choose (minNodesPerSide , restNodes - minNodesPerSide)
-        leftTree <- syntaxShape leftNodeNum newMaxDepth useImplEqui
-        rightTree <- syntaxShape (restNodes - leftNodeNum ) newMaxDepth useImplEqui
+        leftNodesNum <- choose (minNodesPerSide , restNodes - minNodesPerSide)
+        leftTree <- syntaxShape leftNodesNum newMaxDepth useImplEqui
+        rightTree <- syntaxShape (restNodes - leftNodesNum ) newMaxDepth useImplEqui
         return (operator leftTree rightTree)
 
 negativeFormula :: Integer -> Integer -> Bool -> Gen (SynTree ())
-negativeFormula nodeNum maxDepth useImplEqui =
-    let restNodes = nodeNum - 1
+negativeFormula nodesNum maxDepth useImplEqui =
+    let restNodes = nodesNum - 1
         newMaxDepth = maxDepth - 1
     in  do
         e <- syntaxShape restNodes newMaxDepth useImplEqui

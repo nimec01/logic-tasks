@@ -34,24 +34,24 @@ validBoundsSyntr = do
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
     synTreeConfig <- validBoundsSyntr
-    formulaNum <- choose (1, 20)
-    illegalNum <- choose (1, formulaNum)
+    formulasNum <- choose (1, 20)
+    illegalNum <- choose (1, formulasNum)
     return $ LegalPropositionConfig
         {
             formulaConfig = synTreeConfig
-            , formulaNum = formulaNum
+            , formulasNum = formulasNum
             , illegalNum = illegalNum
         }
 
 invalidBoundsLegalProposition :: Gen LegalPropositionConfig
 invalidBoundsLegalProposition = do
     synTreeConfig <- validBoundsSyntr
-    formulaNum <- choose (1, 19)
-    illegalNum <- choose (formulaNum + 1, 20)
+    formulasNum <- choose (1, 19)
+    illegalNum <- choose (formulasNum + 1, 20)
     return $ LegalPropositionConfig
         {
             formulaConfig = synTreeConfig
-            , formulaNum = formulaNum
+            , formulasNum = formulasNum
             , illegalNum = illegalNum
         }
 

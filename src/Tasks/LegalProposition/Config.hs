@@ -15,14 +15,14 @@ data LegalPropositionConfig =
     LegalPropositionConfig
     {
       formulaConfig :: SynTreeConfig
-    , formulaNum :: Integer
+    , formulasNum :: Integer
     , illegalNum :: Integer
     } deriving Show
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
 checkAdditionalConfig LegalPropositionConfig {..}
-    | formulaNum < illegalNum
-      = Just "the number of formula can not less than illegal number"
+    | formulasNum < illegalNum
+      = Just "the number of formulas can not less than illegal number"
     | otherwise
       = Nothing
 
@@ -36,7 +36,7 @@ defaultLegalPropositionConfig =
     LegalPropositionConfig
     {
       formulaConfig = defaultSynTreeConfig
-    , formulaNum = 5
+    , formulasNum = 5
     , illegalNum = 2
     }
 
