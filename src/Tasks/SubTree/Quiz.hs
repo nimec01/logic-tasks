@@ -12,7 +12,7 @@ import Data.Set (Set, isSubsetOf, size)
 import Parsing (subtreeStringParse)
 import Tasks.SubTree.Config (SubtreeConfig(..), SubtreeInst(..), SubtreeInst)
 import Print (display)
-import Types (allSubtree, SynTree)
+import Types (allSubtrees, SynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
 
@@ -24,7 +24,7 @@ genSubtreeInst SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
       { insSynTree = tree
       , minInputTreeNum = minSubtreeNum
       , formula = display tree
-      , correct = allSubtree tree
+      , correct = allSubtrees tree
       }
 
 feedback :: SubtreeInst -> String -> Bool

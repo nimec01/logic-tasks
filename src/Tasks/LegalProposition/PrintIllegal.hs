@@ -4,7 +4,7 @@ module Tasks.LegalProposition.PrintIllegal (
 
 import Test.QuickCheck (Gen, frequency, elements, oneof)
 
-import Types (SynTree(..), treeNodeNum, collectLeaves)
+import Types (SynTree(..), treeNodes, collectLeaves)
 import Print (normalShow)
 
 -- collectleaves
@@ -15,7 +15,7 @@ illegalDisplay synTree =
 
 ifUseIllegal :: Bool -> Bool -> SynTree Char -> String -> Gen String
 ifUseIllegal useBug notFirstLayer synTree usedStr =
-    let nodeNum = treeNodeNum synTree
+    let nodeNum = treeNodes synTree
     in if not useBug
        then return (normalShow synTree)
        else frequency [(1, implementIllegal synTree notFirstLayer usedStr),(nodeNum - 1, subTreeIllegal notFirstLayer synTree usedStr)] --  加层数判定

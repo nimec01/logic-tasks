@@ -7,8 +7,8 @@ module Types
 
     collectLeaves,
     relabelShape,
-    allSubtree,
-    treeNodeNum,
+    allSubtrees,
+    treeNodes,
     ) where
 
 import Data.List (sort)
@@ -37,21 +37,21 @@ relabelShape shape contents =
       adorn _ =
         do {current <- get; put (tail current); return (head current)}
 
-getSubTree :: SynTree c -> [SynTree c]
-getSubTree (And a b) = getSubTree a ++ (And a b : getSubTree b)
-getSubTree (Leaf a) =  [Leaf a]
-getSubTree (Or a b) = getSubTree a ++ (Or a b : getSubTree b)
-getSubTree (Not a) = Not a : getSubTree a
-getSubTree (Impl a b) = getSubTree a ++ (Impl a b : getSubTree b)
-getSubTree (Equi a b) = getSubTree a ++ (Equi a b : getSubTree b)
+getSubTrees :: SynTree c -> [SynTree c]
+getSubTrees (And a b) = getSubTrees a ++ (And a b : getSubTrees b)
+getSubTrees (Leaf a) =  [Leaf a]
+getSubTrees (Or a b) = getSubTrees a ++ (Or a b : getSubTrees b)
+getSubTrees (Not a) = Not a : getSubTrees a
+getSubTrees (Impl a b) = getSubTrees a ++ (Impl a b : getSubTrees b)
+getSubTrees (Equi a b) = getSubTrees a ++ (Equi a b : getSubTrees b)
 
-allSubtree :: Ord c => SynTree c -> Set (SynTree c)
-allSubtree a = fromList (sort $ getSubTree a)
+allSubtrees :: Ord c => SynTree c -> Set (SynTree c)
+allSubtrees a = fromList (sort $ getSubTrees a)
 
-treeNodeNum :: SynTree c -> Int
-treeNodeNum (And a b) = 1 + treeNodeNum a + treeNodeNum b
-treeNodeNum (Leaf _) =  1
-treeNodeNum (Or a b) = 1 + treeNodeNum a + treeNodeNum b
-treeNodeNum (Not a) = 1 + treeNodeNum a
-treeNodeNum (Impl a b) = 1 + treeNodeNum a + treeNodeNum b
-treeNodeNum (Equi a b) = 1 + treeNodeNum a + treeNodeNum b
+treeNodes :: SynTree c -> Int
+treeNodes (And a b) = 1 + treeNodes a + treeNodes b
+treeNodes (Leaf _) =  1
+treeNodes (Or a b) = 1 + treeNodes a + treeNodes b
+treeNodes (Not a) = 1 + treeNodes a
+treeNodes (Impl a b) = 1 + treeNodes a + treeNodes b
+treeNodes (Equi a b) = 1 + treeNodes a + treeNodes b

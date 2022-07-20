@@ -2,7 +2,7 @@ module Print(
     transferToPicture,
     display,
     normalShow,
-    displaySubtree
+    displaySubtrees
     ) where
 
 import Types (SynTree(..),)
@@ -32,8 +32,8 @@ normalShow (Not a) = "~" ++ normalShow a ++ ""
 normalShow (Impl a b) = "(" ++ normalShow a ++ "=>" ++ normalShow b ++ ")"
 normalShow (Equi a b) = "(" ++ normalShow a ++ "<=>" ++ normalShow b ++ ")"
 
-displaySubtree :: [SynTree Char] -> String
-displaySubtree trees = "{" ++ showTrees trees ++ "}"
+displaySubtrees :: [SynTree Char] -> String
+displaySubtrees trees = "{" ++ showTrees trees ++ "}"
 
 showTrees :: [SynTree Char] -> String
 showTrees synTreeList = intercalate ", " (map display synTreeList)

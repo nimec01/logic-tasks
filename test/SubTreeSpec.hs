@@ -7,11 +7,11 @@ import Test.QuickCheck (Gen, choose, sublistOf, forAll, elements, suchThat)
 import Data.Set (size, toList)
 
 import Tasks.SubTree.Config (SubtreeConfig(..), checkSubTreeConfig, defaultSubtreeConfig)
-import Types (allSubtree)
+import Types (allSubtrees)
 import Generate (maxLeavesForNodes, noSameSubTree, genSynTreeSubtreeExc, maxNodesForDepth, minDepthForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
-import Print (displaySubtree)
+import Print (displaySubtrees)
 import Parsing (subtreeStringParse)
 
 validBoundsSyntr :: Gen SynTreeConfig
@@ -114,11 +114,11 @@ spec = do
         it "parse should works well" $
             forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $
-                \synTree ->subtreeStringParse (displaySubtree (toList (allSubtree synTree))) == Right (allSubtree synTree)
+                \synTree ->subtreeStringParse (displaySubtrees (toList (allSubtrees synTree))) == Right (allSubtrees synTree)
         it "it should generate the same Syntax Sub tree number as excepted when don't allow Duple tree" $
             forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $
-                \synTree -> size ( allSubtree synTree) >= fromIntegral minSubtreeNum
+                \synTree -> size ( allSubtrees synTree) >= fromIntegral minSubtreeNum
         it "it should generate the Syntax tree without Duple tree when don't allow Duple Tree" $
             forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $
