@@ -12,7 +12,6 @@ module Types
     treeDepth,
     ) where
 
-import Data.List (sort)
 import Control.Monad.State (get, put, runState)
 import Data.Set(fromList, Set)
 
@@ -39,15 +38,15 @@ relabelShape shape contents =
         do {current <- get; put (tail current); return (head current)}
 
 getSubTrees :: SynTree c -> [SynTree c]
-getSubTrees (And a b) = getSubTrees a ++ (And a b : getSubTrees b)
-getSubTrees (Leaf a) =  [Leaf a]
-getSubTrees (Or a b) = getSubTrees a ++ (Or a b : getSubTrees b)
-getSubTrees (Not a) = Not a : getSubTrees a
-getSubTrees (Impl a b) = getSubTrees a ++ (Impl a b : getSubTrees b)
-getSubTrees (Equi a b) = getSubTrees a ++ (Equi a b : getSubTrees b)
+getSubTrees t@(And a b) = getSubTrees a ++ (t : getSubTrees b)
+getSubTrees t@(Leaf _) =  [t]
+getSubTrees t@(Or a b) = getSubTrees a ++ (t : getSubTrees b)
+getSubTrees t@(Not a) = t : getSubTrees a
+getSubTrees t@(Impl a b) = getSubTrees a ++ (t : getSubTrees b)
+getSubTrees t@(Equi a b) = getSubTrees a ++ (t : getSubTrees b)
 
 allSubtrees :: Ord c => SynTree c -> Set (SynTree c)
-allSubtrees a = fromList (sort $ getSubTrees a)
+allSubtrees a = fromList (getSubTrees a)
 
 treeNodes :: SynTree c -> Integer
 treeNodes (And a b) = 1 + treeNodes a + treeNodes b
