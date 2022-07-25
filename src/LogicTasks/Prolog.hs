@@ -23,48 +23,46 @@ import Control.Monad.Output (
   translate
   )
 
-import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: PrologInst -> [ProxyDoc]
-description PrologInst{..} =
-              [ PMult ("Betrachten Sie die zwei folgenden Klauseln:"
-                     ,"Consider the two following clauses:"
-                     )
-              , PDoc line
-              , PDoc $ nest 4 $ pretty literals1
-              , PDoc line
-              , PDoc $ nest 4 $ pretty literals2
-              , PDoc line
-              , PMult ("Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
-                      ,"Resolve the clauses and give the resulting resolvent."
-                      )
-              , PMult ("Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: "
-                        ++ "(Literal, Resolvente)."
-                      ,"Provide the literal used for the step and the resolvent in the following tuple form: "
-                        ++ "(literal, resolvent)."
-                      )
-              , PDoc line
-              , PMult ("Die leere Klausel kann durch geschweifte Klammern '{}' dargestellt werden."
-                      ,"The empty clause can be denoted by curly braces '{}'."
-                      )
-              , PDoc line
-              , PDoc $ myText (fromMaybe "" addText)
-              ]
+description :: OutputMonad m => PrologInst -> LangM m
+description PrologInst{..} = do
+  paragraph $ translate $ do
+    german "Betrachten Sie die zwei folgenden Klauseln:"
+    english "Consider the two following clauses:"
+
+    -- PDoc $ nest 4 $ pretty literals1
+
+    -- PDoc $ nest 4 $ pretty literals2
+
+  paragraph $ translate $ do
+    german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."
+    english "Resolve the clauses and give the resulting resolvent."
+
+  paragraph $ translate $ do
+    german $ "Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
+    english "Provide the literal used for the step and the resolvent in the following tuple form: (literal, resolvent)."
+
+  paragraph $ translate $ do
+    german "Die leere Klausel kann durch geschweifte Klammern '{}' dargestellt werden."
+    english "The empty clause can be denoted by curly braces '{}'."
+
+  paragraph $ text (fromMaybe "" addText)
 
 
 
-verifyStatic :: PrologInst -> Maybe ProxyDoc
+verifyStatic :: OutputMonad m => PrologInst -> Maybe (LangM m)
 verifyStatic PrologInst{..}
     | any isEmptyClause [clause1, clause2] =
-        Just $ PMult ("Mindestens eine der Klauseln ist leer."
-                     ,"At least one of the clauses is empty."
-                     )
+        Just $ translate $ do
+          german "Mindestens eine der Klauseln ist leer."
+          english "At least one of the clauses is empty."
+
     | not $ resolvable clause1 clause2 =
-        Just $ PMult ("Die Klauseln sind nicht resolvierbar."
-                     ,"The clauses are not resolvable."
-                     )
+        Just $ translate $ do
+          german "Die Klauseln sind nicht resolvierbar."
+          english "The clauses are not resolvable."
 
     | otherwise = Nothing
   where
@@ -104,19 +102,19 @@ start = (PrologLiteral True " " [], mkPrologClause [])
 
 
 
-partialGrade :: PrologInst -> (PrologLiteral, PrologClause) -> Maybe ProxyDoc
+partialGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> Maybe (LangM m)
 partialGrade PrologInst{..} sol
     | not (fst sol `Set.member` availLits) =
-        Just $ PMult ("Das gewählte Literal kommt in den Klauseln nicht vor."
-                     ,"The chosen literal is not contained in any of the clauses."
-                     )
+        Just $ translate $ do
+          german "Das gewählte Literal kommt in den Klauseln nicht vor."
+          english "The chosen literal is not contained in any of the clauses."
 
     | not (null extra) =
-        Just $ Composite [ PMult ("In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
-                                 ,"The resolvent contains unknown literals. These are incorrect:"
-                                 )
-                         , PDoc $ pretty extra
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
+            english "The resolvent contains unknown literals. These are incorrect:"
+          itemizeM $ map (text . show) extra
 
     | otherwise = Nothing
 
@@ -127,17 +125,18 @@ partialGrade PrologInst{..} sol
 
 
 
-completeGrade :: PrologInst -> (PrologLiteral, PrologClause) -> Maybe ProxyDoc
+completeGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> Maybe (LangM m)
 completeGrade PrologInst{..} sol =
     case resolve clause1 clause2 (transSol1) of
-        Nothing -> Just $ PMult ("Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                                ,"This literal can not be used for a resolution step!"
-                                )
+        Nothing -> Just $ translate $ do
+                     german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
+                     english "This literal can not be used for a resolution step!"
+
         Just solClause -> if (solClause == transSol2)
                             then Nothing
-                            else Just $ PMult ("Resolvente ist nicht korrekt."
-                                              ,"Resolvent is not correct."
-                                              )
+                            else Just $ translate $ do
+                                   german "Resolvente ist nicht korrekt."
+                                   english "Resolvent is not correct."
   where
     (clause1, clause2, mapping) = transform (literals1, literals2)
     transSol1 = fromJust $ lookup (fst sol) mapping
