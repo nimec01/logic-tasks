@@ -9,6 +9,7 @@ module Types
     relabelShape,
     allSubtrees,
     treeNodes,
+    treeDepth,
     ) where
 
 import Data.List (sort)
@@ -55,3 +56,11 @@ treeNodes (Or a b) = 1 + treeNodes a + treeNodes b
 treeNodes (Not a) = 1 + treeNodes a
 treeNodes (Impl a b) = 1 + treeNodes a + treeNodes b
 treeNodes (Equi a b) = 1 + treeNodes a + treeNodes b
+
+treeDepth :: SynTree c -> Integer
+treeDepth (Not a) = 1 + treeDepth a
+treeDepth (Leaf _) = 1
+treeDepth (And a b) = 1 + max (treeDepth a) (treeDepth b)
+treeDepth (Or a b) = 1 + max (treeDepth a) (treeDepth b)
+treeDepth (Impl a b) = 1 + max (treeDepth a) (treeDepth b)
+treeDepth (Equi a b) = 1 + max (treeDepth a) (treeDepth b)
