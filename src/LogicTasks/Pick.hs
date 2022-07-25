@@ -22,49 +22,50 @@ import Control.Monad.Output (
   translate
   )
 
-import Text.PrettyPrint.Leijen.Text
 
 
 
-description :: PickInst -> [ProxyDoc]
-description PickInst{..} =
-              [ PMult ("Betrachten Sie die folgende Formel:"
-                     ,"Consider the following formula:"
-                     )
-              , PDoc line
-              , PDoc $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
-              , PDoc line
-              , PMult ("Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
-                      ,"Which of these truth tables represents the formula? Specify the correct table by giving its number."
-                      )
-              , PDoc line
-              , PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
-              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
-                                  , "A valid solution could look like this: ")
-                          , PDoc $ myText "1"
-                          ]
-              , PDoc line
-              , PDoc $ myText (fromMaybe "" addText)
-              ]
+description :: OutputMonad m => PickInst -> LangM m
+description PickInst{..} = do
+  paragraph $ translate $ do
+    german "Betrachten Sie die folgende Formel:"
+    english "Consider the following formula:"
+
+    -- PDoc $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
+
+  paragraph $ translate $ do
+    german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
+    english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
+
+    -- PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
+
+  paragraph $ do
+    translate $ do
+      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "A valid solution could look like this: "
+    text "1"
+
+  paragraph $ text (fromMaybe "" addText)
 
 
 
-verifyStatic :: PickInst -> Maybe ProxyDoc
+
+verifyStatic :: OutputMonad m => PickInst -> Maybe (LangM m)
 verifyStatic PickInst{..}
     | null cnfs =
-        Just $ PMult ("Die Liste der Formeln ist leer."
-                     ,"The list of formulae is empty."
-                     )
+        Just $ translate $ do
+          german "Die Liste der Formeln ist leer."
+          english "The list of formulae is empty."
 
     | mkCnf [] `elem` cnfs =
-        Just $ PMult ("Für mindestens eine Formel kann keine Wahrheitstafel erstellt werden."
-                     ,"For at least one given formula there is no corresponding truth table."
-                     )
+        Just $ translate $ do
+          german "Für mindestens eine Formel kann keine Wahrheitstafel erstellt werden."
+          english "For at least one given formula there is no corresponding truth table."
 
     | length cnfs < correct || correct <= 0 =
-        Just $ PMult ("Der angegebene Index existiert nicht."
-                     ,"The given index does not exist."
-                     )
+        Just $ translate $ do
+          german "Der angegebene Index existiert nicht."
+          english "The given index does not exist."
 
     | otherwise = Nothing
 
@@ -96,18 +97,19 @@ start = Number Nothing
 
 
 
-partialGrade :: PickInst -> Number -> Maybe ProxyDoc
+partialGrade :: OutputMonad m => PickInst -> Number -> Maybe (LangM m)
 partialGrade _ _ = Nothing
 
 
 
-completeGrade :: PickInst -> Number -> Maybe ProxyDoc
+completeGrade :: OutputMonad m => PickInst -> Number -> Maybe (LangM m)
 completeGrade PickInst{..} sol =
-    case sol of Number Nothing -> Just $ PMult ("Es wurde kein Index angegeben."
-                                               ,"You did not give an index."
-                                               )
+    case sol of Number Nothing -> Just $ translate $ do
+                                    german "Es wurde kein Index angegeben."
+                                    english "You did not give an index."
                 Number (Just index) ->
                   if index == correct then Nothing
-                                      else Just $ PMult ("Der gewählte Index ist falsch."
-                                                        ,"You submitted the wrong index."
-                                                        )
+                                      else Just $ translate $ do
+                                             german "Der gewählte Index ist falsch."
+                                             english "You submitted the wrong index."
+
