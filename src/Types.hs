@@ -48,7 +48,7 @@ getSubTrees (Equi a b) = getSubTrees a ++ (Equi a b : getSubTrees b)
 allSubtrees :: Ord c => SynTree c -> Set (SynTree c)
 allSubtrees a = fromList (sort $ getSubTrees a)
 
-treeNodes :: SynTree c -> Int
+treeNodes :: SynTree c -> Integer
 treeNodes (And a b) = 1 + treeNodes a + treeNodes b
 treeNodes (Leaf _) =  1
 treeNodes (Or a b) = 1 + treeNodes a + treeNodes b
