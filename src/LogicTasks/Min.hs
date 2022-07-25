@@ -24,62 +24,64 @@ import Control.Monad.Output (
   translate
   )
 
-import Text.PrettyPrint.Leijen.Text
 
 
 
 
-description :: MinInst -> [ProxyDoc]
-description MinInst{..} =
-              [ PMult ("Betrachten Sie die folgende Wahrheitstafel:"
-                      ,"Consider the following truth table:"
-                      )
-              , PDoc line
-              , PDoc $ nest 4 $ pretty (getTable dnf)
-              , PMult ("Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
-                      ,"Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
-                      )
-              , PMult ("Reichen Sie ihre Lösung als ascii-basierte Formel ein."
-                      ,"Provide the solution as an ascii based formula."
-                      )
-              , PDoc line
-              , PMult ("Beachten Sie dabei die folgende Legende:"
-                      ,"Use the following key:"
-                      )
-              , PDoc line
-              , Composite [ PMult ("Negation"
-                                  ,"negation"
-                                  )
-                          , PDoc $ myText ": ~"
-                          ]
-              , Composite [ PMult ("oder"
-                                  ,"or"
-                                  )
-                          , PDoc $ myText ": \\/"
-                          ]
-              , Composite [ PMult ("und"
-                                  ,"and"
-                                  )
-                          , PDoc $ myText ": /\\"
-                          ]
-              , PDoc line
-              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
-                                  ,"A valid solution could look like this: ")
-                          , PDoc $ pretty $ mkDnf $ [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
-                          ]
-              , PDoc line
-              , PDoc $ myText (fromMaybe "" addText)
-              ]
+description :: OutputMonad m => MinInst -> LangM m
+description MinInst{..} = do
+  paragraph $ translate $ do
+    german "Betrachten Sie die folgende Wahrheitstafel:"
+    english "Consider the following truth table:"
+    --PDoc $ nest 4 $ pretty (getTable dnf)
+
+  paragraph $ translate $ do
+    german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
+    english "Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
+
+  paragraph $ translate $ do
+    german "Reichen Sie ihre Lösung als ascii-basierte Formel ein."
+    english "Provide the solution as an ascii based formula."
+
+  paragraph $ translate $ do
+    german "Beachten Sie dabei die folgende Legende:"
+    english "Use the following key:"
+
+  paragraph $ do
+    translate $ do
+      german "Negation"
+      english "negation"
+    text ": ~"
+
+  paragraph $ do
+    translate $ do
+      german "oder"
+      english "or"
+    text ": \\/"
+
+  paragraph $ do
+    translate $ do
+      german "und"
+      english "and"
+    text ": /\\"
+
+  paragraph $ do
+    translate $ do
+      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "A valid solution could look like this: "
+      -- PDoc $ pretty $ mkDnf $ [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+
+  paragraph $ text (fromMaybe "" addText)
 
 
 
 
-verifyStatic :: MinInst -> Maybe ProxyDoc
+verifyStatic :: OutputMonad m => MinInst -> Maybe (LangM m)
 verifyStatic MinInst{..}
     | isEmptyDnf dnf || hasEmptyCon dnf =
-        Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
-                     ,"Please give a non empty formula."
-                     )
+        Just $ translate $ do
+          german "Geben Sie bitte eine nicht-leere Formel an."
+          english "Please give a non empty formula."
 
     | otherwise = Nothing
 
@@ -112,42 +114,43 @@ start = mkDnf []
 
 
 
-partialGrade :: MinInst -> Dnf -> Maybe ProxyDoc
+partialGrade :: OutputMonad m => MinInst -> Dnf -> Maybe (LangM m)
 partialGrade MinInst{..} sol
     | not (null extra) =
-        Just $ Composite [ PMult ("Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
-                                 ,"Your submission contains unknown literals. These do not appear in a correct solution: "
-                                 )
-                         , PDoc $ pretty extra
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
+            english "Your submission contains unknown literals. These do not appear in a correct solution: "
+          itemizeM $ map (text . show) extra
 
     | not (null missing) =
-        Just $ Composite [ PMult ("Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
-                                 ,"Some literals are missing. Add these literals to your submission: "
-                                 )
-                         , PDoc $ pretty missing
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
+            english "Some literals are missing. Add these literals to your submission: "
+          itemizeM $ map (text . show) missing
 
     | not  (all (\c -> amount c == length corLits) (getConjunctions sol)) =
-        Just $ PMult ("Nicht alle Conjunktionen sind Minterme!"
-                     ,"Not all conjunctions are minterms!"
-                     )
+        Just $ translate $ do
+          german "Nicht alle Conjunktionen sind Minterme!"
+          english "Not all conjunctions are minterms!"
 
     | solLen < corrLen =
-        Just $ Composite [ PMult ("Die angegebene Formel enthält zu wenige Minterme. Fügen sie "
-                                 ,"The formula does not contain enough minterms. Add "
-                                 )
-                         , PDoc $ pretty diff
-                         , PMult (" hinzu!"
-                                 ,"!")
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Die angegebene Formel enthält zu wenige Minterme. Fügen sie "
+            english "The formula does not contain enough minterms. Add "
+          text diff
+          translate $ do
+            german " hinzu!"
+            english "!"
 
     | solLen > corrLen =
-        Just $ Composite [ PMult ("Die angegebene Formel enthält zu viele Minterme. Entfernen sie "
-                                 ,"The formula contains too many minterms. Remove "
-                                 )
-                         , PDoc $ pretty diff <+> myText "!"
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Die angegebene Formel enthält zu viele Minterme. Entfernen sie "
+            english "The formula contains too many minterms. Remove "
+          text $ diff ++ "!"
 
     | otherwise = Nothing
 
@@ -165,15 +168,15 @@ partialGrade MinInst{..} sol
 
 
 
-completeGrade :: MinInst -> Dnf -> Maybe ProxyDoc
+completeGrade :: OutputMonad m => MinInst -> Dnf -> Maybe (LangM m)
 completeGrade MinInst{..} sol
 
     | not (null diff) =
-        Just $ Composite [ PMult ("Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-                                 ,"The following rows are not correct: "
-                                 )
-                         , PDoc $ pretty diff
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
+            english "The following rows are not correct: "
+          itemizeM $ map (text . show) diff
 
     | otherwise = Nothing
   where
