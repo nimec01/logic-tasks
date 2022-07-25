@@ -24,62 +24,65 @@ import Control.Monad.Output (
   translate
   )
 
-import Text.PrettyPrint.Leijen.Text
 
 
 
 
-description :: MaxInst -> [ProxyDoc]
-description MaxInst{..} =
-              [ PMult ("Betrachten Sie die folgende Wahrheitstafel:"
-                      ,"Consider the following truth table:"
-                      )
-              , PDoc line
-              , PDoc $ nest 4 $ pretty (getTable cnf)
-              , PMult ("Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
-                      ,"Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
-                      )
-              , PMult ("Reichen Sie ihre Lösung als ascii-basierte Formel ein."
-                      ,"Provide the solution as an ascii based formula."
-                      )
-              , PDoc line
-              , PMult ("Beachten Sie dabei die folgende Legende:"
-                      ,"Use the following key:"
-                      )
-              , PDoc line
-              , Composite [ PMult ("Negation"
-                                  ,"negation"
-                                  )
-                          , PDoc $ myText ": ~"
-                          ]
-              , Composite [ PMult ("oder"
-                                  ,"or"
-                                  )
-                          , PDoc $ myText ": \\/"
-                          ]
-              , Composite [ PMult ("und"
-                                  ,"and"
-                                  )
-                          , PDoc $ myText ": /\\"
-                          ]
-              , PDoc line
-              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
-                                  ,"A valid solution could look like this: ")
-                          , PDoc $ pretty $ mkCnf $ [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
-                          ]
-              , PDoc line
-              , PDoc $ myText (fromMaybe "" addText)
-              ]
+description :: OutputMonad m => MaxInst -> LangM m
+description MaxInst{..} = do
+  paragraph $ translate $ do
+    german "Betrachten Sie die folgende Wahrheitstafel:"
+    english "Consider the following truth table:"
+    -- PDoc $ nest 4 $ pretty (getTable cnf)
+
+  paragraph $ translate $ do
+    german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
+    english "Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
+
+  paragraph $ translate $ do
+    german "Reichen Sie ihre Lösung als ascii-basierte Formel ein."
+    english "Provide the solution as an ascii based formula."
+
+  paragraph $ translate $ do
+    german "Beachten Sie dabei die folgende Legende:"
+    english "Use the following key:"
+
+  paragraph $ do
+    translate $ do
+      german "Negation"
+      english "negation"
+    text ": ~"
+
+  paragraph $ do
+    translate $ do
+      german "oder"
+      english "or"
+    text ": \\/"
+
+  paragraph $ do
+    translate $ do
+      german "und"
+      english "and"
+    text ": /\\"
+
+  paragraph $ do
+    translate $ do
+      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "A valid solution could look like this: "
+    -- PDoc $ pretty $ mkCnf $ [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+
+  paragraph $ text (fromMaybe "" addText)
 
 
 
 
-verifyStatic :: MaxInst -> Maybe ProxyDoc
+
+verifyStatic :: OutputMonad m => MaxInst -> Maybe (LangM m)
 verifyStatic MaxInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
-        Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
-                     ,"Please give a non empty formula."
-                     )
+        Just $ translate $ do
+          german "Geben Sie bitte eine nicht-leere Formel an."
+          english "Please give a non empty formula."
 
     | otherwise = Nothing
 
@@ -112,42 +115,43 @@ start = mkCnf []
 
 
 
-partialGrade :: MaxInst -> Cnf -> Maybe ProxyDoc
+partialGrade :: OutputMonad m => MaxInst -> Cnf -> Maybe (LangM m)
 partialGrade MaxInst{..} sol
     | not (null extra) =
-        Just $ Composite [ PMult ("Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
-                                 ,"Your submission contains unknown literals. These do not appear in a correct solution: "
-                                 )
-                         , PDoc $ pretty extra
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
+            english "Your submission contains unknown literals. These do not appear in a correct solution: "
+          itemizeM $ map (text . show) extra
 
     | not (null missing) =
-        Just $ Composite [ PMult ("Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
-                                 ,"Some literals are missing. Add these literals to your submission: "
-                                 )
-                         , PDoc $ pretty missing
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
+            english "Some literals are missing. Add these literals to your submission: "
+          itemizeM $ map (text . show) missing
 
     | not  (all (\c -> amount c == length corLits) (getClauses sol)) =
-        Just $ PMult ("Nicht alle Klauseln sind Maxterme!"
-                     ,"Not all clauses are maxterms!"
-                     )
+        Just $ translate $ do
+          german "Nicht alle Klauseln sind Maxterme!"
+          english "Not all clauses are maxterms!"
 
     | solLen < corrLen =
-        Just $ Composite [ PMult ("Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
-                                 ,"The formula does not contain enough maxterms. Add "
-                                 )
-                         , PDoc $ pretty diff
-                         , PMult (" hinzu!"
-                                 ,"!")
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
+            english "The formula does not contain enough maxterms. Add "
+          text diff
+          translate $ do
+            german " hinzu!"
+            english "!"
 
     | solLen > corrLen =
-        Just $ Composite [ PMult ("Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
-                                 ,"The formula contains too many maxterms. Remove "
-                                 )
-                         , PDoc $ pretty diff <+> myText "!"
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german " Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
+            english "The formula contains too many maxterms. Remove "
+          text $ diff ++ "!"
 
     | otherwise = Nothing
 
@@ -165,15 +169,15 @@ partialGrade MaxInst{..} sol
 
 
 
-completeGrade :: MaxInst -> Cnf -> Maybe ProxyDoc
+completeGrade :: OutputMonad m => MaxInst -> Cnf -> Maybe (LangM m)
 completeGrade MaxInst{..} sol
 
     | not (null diff) =
-        Just $ Composite [ PMult ("Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-                                 ,"The following rows are not correct: "
-                                 )
-                         , PDoc $ pretty diff
-                         ]
+        Just $ paragraph $ do
+          translate $ do
+            german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
+            english "The following rows are not correct: "
+          itemizeM $ map (text . show) diff
 
     | otherwise = Nothing
   where
