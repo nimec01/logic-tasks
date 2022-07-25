@@ -24,10 +24,6 @@ import Control.Monad.Output (
   translate
   )
 
-import Text.PrettyPrint.Leijen.Text hiding (text)
-
-
-
 
 
 description :: OutputMonad m => DecideInst -> LangM m
@@ -107,17 +103,17 @@ start = []
 
 
 
-partialGrade :: DecideInst -> [Int] -> Maybe ProxyDoc
+partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> Maybe (LangM m)
 partialGrade DecideInst{..} sol
     | solLen > acLen =
-        Just $ PMult ("Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
-                     ,"Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
-                     )
+        Just $ translate $ do
+          german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
+          english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
 
     | acLen > solLen =
-        Just $ PMult ("Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
-                     ,"Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
-                     )
+        Just $ translate $ do
+          german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
+          english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
 
     | otherwise = Nothing
 
@@ -134,13 +130,14 @@ partialGrade DecideInst{..} sol
 
 
 
-completeGrade :: DecideInst -> [Int] -> Maybe ProxyDoc
+completeGrade :: OutputMonad m => DecideInst -> [Int] -> Maybe (LangM m)
 completeGrade DecideInst{..} sol
 
     | diff /= 0 =
-        Just $ PMult ("Die Lösung beinhaltet " ++ display ++ " Fehler."
-                     ,"Your solution contains " ++ display ++ " mistakes."
-                     )
+        Just $ translate $ do
+          german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
+          english $ "Your solution contains " ++ display ++ " mistakes."
+
     | otherwise = Nothing
 
   where
