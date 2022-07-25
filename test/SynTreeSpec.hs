@@ -40,18 +40,19 @@ validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
   useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNodes <- choose (1, 60)
-  maxNodes <- choose (minNodes, 60)
-  maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
-  useChars <- choose (1, maxLeavesForNodes (min maxNodes (maxNodesForDepth maxDepth)))
-  let minUse = min useChars (fromIntegral (length usedLiterals))
+  minNodes' <- choose (1, 20)
+  maxNodes' <- choose (minNodes', 25)
+  maxDepth <- choose (minDepthForNodes minNodes', maxNodes')
+  let maxNodes = min maxNodes' (maxNodesForDepth maxDepth)
+  useChars <- choose (1, maxLeavesForNodes maxNodes)
+  let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
-      { maxNodes = min maxNodes (maxNodesForDepth maxDepth),
-        minNodes = max minNodes (minUse * 2 - 1),
+      { maxNodes = maxNodes,
+        minNodes = max minNodes' (atLeastOccurring * 2 - 1),
         maxDepth = maxDepth,
         usedLiterals = usedLiterals,
-        atLeastOccurring = minUse,
+        atLeastOccurring = atLeastOccurring,
         useImplEqui = useImplEqui
       }
 
@@ -59,17 +60,17 @@ validBoundsSyntr2 :: Gen SynTreeConfig
 validBoundsSyntr2 = do
   useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNodes <- choose (1, 60)
-  maxNodes <- choose (minNodes, 60)
+  minNodes' <- choose (1, 20)
+  maxNodes <- choose (minNodes', 25)
   useChars <- choose (1, maxLeavesForNodes maxNodes)
-  let minUse = min useChars (fromIntegral (length usedLiterals))
+  let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
       { maxNodes = maxNodes,
-        minNodes = max minNodes (minUse * 2 - 1),
+        minNodes = max minNodes' (atLeastOccurring * 2 - 1),
         maxDepth = maxNodes,
         usedLiterals = usedLiterals,
-        atLeastOccurring = min useChars (fromIntegral (length usedLiterals)),
+        atLeastOccurring = atLeastOccurring,
         useImplEqui = useImplEqui
       }
 
