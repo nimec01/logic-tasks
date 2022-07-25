@@ -9,7 +9,7 @@ module Parsing (
 import Text.Parsec.Char (char, oneOf, satisfy, string, digit)
 import Control.Applicative ((<|>), many)
 import Data.Char (isLetter)
-import Text.Parsec (eof, ParseError, parse, sepBy)
+import Text.Parsec (eof, ParseError, parse, sepBy, many1)
 import Data.Set (fromList, Set)
 import Data.List (sort)
 
@@ -71,7 +71,7 @@ subtreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
 illegalPropositionParse :: Parser [Int]
 illegalPropositionParse = do
     lexeme $ char '{'
-    illegalList <- many digit `sepBy` lexeme (char ',')
+    illegalList <- many1 digit `sepBy` lexeme (char ',')
     lexeme $ char '}'
     return $ sort (map read illegalList)
 
