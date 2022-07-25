@@ -28,8 +28,8 @@ genSubtreeInst SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
       }
 
 feedback :: SubtreeInst -> String -> Bool
-feedback SubtreeInst {correct, minInputTreeNum} input = judgeInput (subtreeStringParse input) (fromIntegral minInputTreeNum) correct
+feedback SubtreeInst {correct, minInputTreeNum} input = judgeInput (subtreeStringParse input) minInputTreeNum correct
 
-judgeInput :: Either ParseError (Set (SynTree Char)) -> Int -> Set (SynTree Char) -> Bool
-judgeInput (Right inputTreeSet) minInputTreeNum correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && size inputTreeSet >= minInputTreeNum
+judgeInput :: Either ParseError (Set (SynTree Char)) -> Integer -> Set (SynTree Char) -> Bool
+judgeInput (Right inputTreeSet) minInputTreeNum correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && size inputTreeSet >= fromIntegral minInputTreeNum
 judgeInput (Left _) _ _ =False
