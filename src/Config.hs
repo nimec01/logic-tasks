@@ -16,9 +16,9 @@ newtype Number = Number {value :: Maybe Int} deriving (Typeable, Generic)
 
 
 data PickInst = PickInst {
-                 cnfs    :: ! [Cnf]
-               , correct :: ! Int
-               , addText :: ! (Maybe String)
+                 cnfs    :: ![Cnf]
+               , correct :: !Int
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -32,8 +32,8 @@ dPickInst =  PickInst
 
 
 data MaxInst = MaxInst {
-                 cnf     :: ! Cnf
-               , addText :: ! (Maybe String)
+                 cnf     :: !Cnf
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -47,8 +47,8 @@ dMaxInst =  MaxInst
 
 
 data MinInst = MinInst {
-                 dnf     :: ! Dnf
-               , addText :: ! (Maybe String)
+                 dnf     :: !Dnf
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -61,9 +61,9 @@ dMinInst =  MinInst
 
 
 data FillInst = FillInst {
-                 cnf     :: ! Cnf
-               , missing :: ! [Int]
-               , addText :: ! (Maybe String)
+                 cnf     :: !Cnf
+               , missing :: ![Int]
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -77,9 +77,9 @@ dFillInst =  FillInst
 
 
 data DecideInst = DecideInst {
-                 cnf     :: ! Cnf
-               , changed :: ! [Int]
-               , addText :: ! (Maybe String)
+                 cnf     :: !Cnf
+               , changed :: ![Int]
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -93,9 +93,9 @@ dDecideInst =  DecideInst
 
 
 data StepInst = StepInst {
-                 clause1 :: ! Clause
-               , clause2 :: ! Clause
-               , addText :: ! (Maybe String)
+                 clause1 :: !Clause
+               , clause2 :: !Clause
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -109,8 +109,8 @@ dStepInst =  StepInst
 
 
 data ResolutionInst = ResolutionInst {
-                 clauses :: ! [Clause]
-               , addText    :: ! (Maybe String)
+                 clauses :: ![Clause]
+               , addText    :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
@@ -124,9 +124,9 @@ dResInst =  ResolutionInst
 
 
 data PrologInst = PrologInst {
-                 literals1 :: ! PrologClause
-               , literals2 :: ! PrologClause
-               , addText :: ! (Maybe String)
+                 literals1 :: !PrologClause
+               , literals2 :: !PrologClause
+               , addText :: !(Maybe String)
                }
                deriving (Typeable, Generic)
 
