@@ -16,6 +16,15 @@ import qualified Data.Set as Set
 import Data.List (sort)
 import Data.Maybe (fromMaybe, fromJust, isJust)
 
+
+import Control.Monad.Output (
+  LangM,
+  OutputMonad (..),
+  english,
+  german,
+  translate
+  )
+
 import Text.PrettyPrint.Leijen.Text
 
 
@@ -104,22 +113,22 @@ verifyStatic ResolutionInst{..}
 
 
 
-verifyQuiz :: ResolutionConfig -> Maybe ProxyDoc
+verifyQuiz :: OutputMonad m => ResolutionConfig -> Maybe (LangM m)
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
-        Just $ PMult ("Die Mindestschritte müssen größer als 0 sein."
-                     ,"The minimal amount of steps must be greater than 0."
-                     )
+        Just $ translate $ do
+          german "Die Mindestschritte müssen größer als 0 sein."
+          english "The minimal amount of steps must be greater than 0."
 
     | maxClauseLength baseConf == 1 && minSteps > 1 =
-        Just $ PMult ("Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
-                     ,"More than one step using only length 1 clauses is not possible."
-                     )
+        Just $ translate $ do
+          german "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
+          english "More than one step using only length 1 clauses is not possible."
 
     | minSteps > 2 * length (usedLiterals baseConf) =
-        Just $ PMult ("Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
-                     ,"This amount of steps is impossible with the given amount of literals."
-                     )
+        Just $ translate $ do
+          german "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
+          english "This amount of steps is impossible with the given amount of literals."
 
     | otherwise = checkBaseConf baseConf
 

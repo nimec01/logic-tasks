@@ -44,6 +44,7 @@ library
     , containers
     , hspec
     , minisat-solver
+    , output-monad
     , parsec
     , random
     , text
@@ -67,6 +68,7 @@ test-suite src-test
     , hspec
     , logic-tasks
     , minisat-solver
+    , output-monad
     , parsec
     , random
     , text

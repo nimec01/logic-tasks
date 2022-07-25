@@ -15,6 +15,15 @@ import Util
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 
+
+import Control.Monad.Output (
+  LangM,
+  OutputMonad (..),
+  english,
+  german,
+  translate
+  )
+
 import Text.PrettyPrint.Leijen.Text
 
 
@@ -77,19 +86,19 @@ verifyStatic MaxInst{..}
 
 
 
-verifyQuiz :: MinMaxConfig -> Maybe ProxyDoc
+verifyQuiz :: OutputMonad m => MinMaxConfig -> Maybe (LangM m)
 verifyQuiz MinMaxConfig{..}
 
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        Just $ PMult ("Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-                     ,"The given restriction on true entries are not in the range of 0 to 100 percent."
-                     )
+        Just $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
+          english "The given restriction on true entries are not in the range of 0 to 100 percent."
 
     | low > high =
-        Just $ PMult ("Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-                     ,"The given restriction on true entries are not a valid range."
-                     )
+        Just $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
+          english "The given restriction on true entries are not a valid range."
 
     | otherwise = checkCnfConf cnfConf
 

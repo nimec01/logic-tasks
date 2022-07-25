@@ -12,6 +12,15 @@ import Util
 
 import Data.Maybe (fromMaybe, fromJust)
 
+
+import Control.Monad.Output (
+  LangM,
+  OutputMonad (..),
+  english,
+  german,
+  translate
+  )
+
 import Text.PrettyPrint.Leijen.Text
 
 
@@ -78,24 +87,25 @@ verifyStatic FillInst{..}
 
 
 
-verifyQuiz :: FillConfig -> Maybe ProxyDoc
+verifyQuiz :: OutputMonad m => FillConfig -> Maybe (LangM m)
 verifyQuiz FillConfig{..}
 
 
     | isOutside 1 100 percentageOfGaps =
-        Just $ PMult ("Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
-                     , "The percentile of gaps has to be set between 1 and 100."
-                     )
+        Just $ translate$ do
+          german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
+          english "The percentile of gaps has to be set between 1 and 100."
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        Just $ PMult ("Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-                     , "The given restriction on true entries are not in the range of 0 to 100 percent."
-                     )
+        Just $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
+          english "The given restriction on true entries are not in the range of 0 to 100 percent."
+
 
     | low > high =
-        Just $ PMult ("Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-                     , "The given restriction on true entries are not a valid range."
-                     )
+        Just $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
+          english "The given restriction on true entries are not a valid range."
 
     | otherwise = checkCnfConf cnfConf
 

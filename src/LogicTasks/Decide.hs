@@ -15,74 +15,86 @@ import Util
 import Data.List (nub)
 import Data.Maybe (fromMaybe)
 
-import Text.PrettyPrint.Leijen.Text
+
+import Control.Monad.Output (
+  LangM,
+  OutputMonad (..),
+  english,
+  german,
+  translate
+  )
+
+import Text.PrettyPrint.Leijen.Text hiding (text)
 
 
 
 
-description :: DecideInst -> [ProxyDoc]
-description DecideInst{..} =
-              [ PMult ("Betrachten Sie die folgende Formel:"
-                      ,"Consider the following formula:"
-                      )
-              , PDoc line
-              , PDoc $ nest 4 $ myText "F = " <+> pretty cnf
-              , PDoc line
-              , PMult ("Finden Sie alle fehlerhaften Wahrheitswerte in der letzen Spalte der folgenden Wahrheitstafel."
-                      ,"Find all faulty entries in the last column of the following truth table."
-                      )
-              , PDoc line
-              , PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)
-              , PMult ("Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Die Indizes beginnen dabei mit der 1."
-                      ,"Provide the solution as a list of indices of the faulty rows. The indices start with 1."
-                      )
-              , PDoc line
-              , Composite [ PMult ("Ein Lösungsversuch könnte beispielsweise so aussehen: "
-                                  , "A valid solution could look like this: ")
-                          , PDoc $ myText "[1,4,5]"
-                          ]
-              , PDoc line
-              , PDoc $ myText (fromMaybe "" addText)
-              ]
+
+description :: OutputMonad m => DecideInst -> LangM m
+description DecideInst{..} = do
+  paragraph $ translate $ do
+    english "Consider the following formula:"
+    german "Betrachten Sie die folgende Formel:"
+  --PDoc $ nest 4 $ myText "F = " <+> pretty cnf
+  paragraph $ translate $ do
+    english "Find all faulty entries in the last column of the following truth table."
+    german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzen Spalte der folgenden Wahrheitstafel."
+  --PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)
+  paragraph $ translate $ do
+    english "Provide the solution as a list of indices of the faulty rows. The indices start with 1."
+    german "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Die Indizes beginnen dabei mit der 1."
+
+  paragraph $ do
+    translate $ do
+      english "A valid solution could look like this: "
+      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
+    text "[1,4,5]"
+
+  paragraph $ text (fromMaybe "" addText)
 
 
 
 
-verifyStatic :: DecideInst -> Maybe ProxyDoc
+
+verifyStatic :: OutputMonad m => DecideInst -> Maybe (LangM m)
 verifyStatic DecideInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
-        Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
-                     ,"Please give a non empty formula."
-                     )
+        Just $ translate $ do
+          english "Please give a non empty formula."
+          german "Geben Sie bitte eine nicht-leere Formel an."
+
+
 
     | any (> 2^length (atomics cnf)) changed =
-        Just $ PMult ("Mindestens ein gegebener Index ist zu hoch."
-                     ,"At least one given index is too high."
-                     )
+        Just $ translate $ do
+          english "At least one given index is too high."
+          german "Mindestens ein gegebener Index ist zu hoch."
+
 
     | any (<= 0) changed =
-        Just $ PMult ("Mindestens ein gegebener Index ist null oder negativ."
-                     ,"At least one given index is zero or negative."
-                     )
+        Just $ translate $ do
+          english "At least one given index is zero or negative."
+          german "Mindestens ein gegebener Index ist null oder negativ."
+
 
     | null changed =
-        Just $ PMult ("Es muss mindestens eine Änderung geben."
-                     ,"At least one mistake has to be specified."
-                     )
+        Just $ translate $ do
+          english "At least one mistake has to be specified."
+          german "Es muss mindestens eine Änderung geben."
 
     | otherwise = Nothing
 
 
 
 
-verifyQuiz :: DecideConfig -> Maybe ProxyDoc
+verifyQuiz :: OutputMonad m => DecideConfig -> Maybe (LangM m)
 verifyQuiz DecideConfig{..}
 
 
     | isOutside 1 100 percentageOfChanged =
-        Just $ PMult ("Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
-                     ,"The percentile of mistakes has to be set between 1 and 100."
-                     )
+        Just $ translate $ do
+          english "The percentile of mistakes has to be set between 1 and 100."
+          german "Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
 
     | otherwise = checkCnfConf cnfConf
 

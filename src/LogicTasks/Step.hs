@@ -14,6 +14,14 @@ import Resolution
 import qualified Data.Set as Set
 import Data.Maybe (fromMaybe)
 
+import Control.Monad.Output (
+  LangM,
+  OutputMonad (..),
+  english,
+  german,
+  translate
+  )
+
 import Text.PrettyPrint.Leijen.Text
 
 
@@ -77,7 +85,7 @@ verifyStatic StepInst{..}
 
 
 
-verifyQuiz :: StepConfig -> Maybe ProxyDoc
+verifyQuiz :: OutputMonad m => StepConfig -> Maybe (LangM m)
 verifyQuiz StepConfig{..} = checkBaseConf baseConf
 
 

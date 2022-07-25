@@ -11,6 +11,7 @@ dependencies:
 - wl-pprint-text
 - parsec
 - text
+- output-monad
 
 library:
   source-dirs: src

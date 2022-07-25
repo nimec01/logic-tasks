@@ -14,6 +14,15 @@ import qualified Data.Set as Set
 import Data.Maybe (fromMaybe, fromJust)
 import Data.Tuple(swap)
 
+
+import Control.Monad.Output (
+  LangM,
+  OutputMonad (..),
+  english,
+  german,
+  translate
+  )
+
 import Text.PrettyPrint.Leijen.Text
 
 
@@ -64,27 +73,27 @@ verifyStatic PrologInst{..}
 
 
 
-verifyQuiz :: PrologConfig -> Maybe ProxyDoc
+verifyQuiz :: OutputMonad m => PrologConfig -> Maybe (LangM m)
 verifyQuiz PrologConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
-        Just $ PMult ("Mindestens eines der 'length'-Parameter ist negativ."
-                     ,"At least one length parameter is negative."
-                     )
+        Just $ translate $ do
+          german "Mindestens eines der 'length'-Parameter ist negativ."
+          english "At least one length parameter is negative."
 
     | minClauseLength > maxClauseLength =
-        Just $ PMult ("Die untere Grenze der Klausellänge ist höher als die obere."
-                     ,"The minimum clause length is greater than the maximum clause length."
-                     )
+        Just $ translate $ do
+          german "Die untere Grenze der Klausellänge ist höher als die obere."
+          english "The minimum clause length is greater than the maximum clause length."
 
     | length usedPredicates < minClauseLength =
-        Just $ PMult ("Zu wenige Literale für diese Klausellänge."
-                     ,"There are not enough literals available for this clause length."
-                     )
+        Just $ translate $ do
+          german "Zu wenige Literale für diese Klausellänge."
+          english "There are not enough literals available for this clause length."
 
     | null usedPredicates =
-        Just $ PMult ("Es wurden keine Literale angegeben."
-                     ,"You did not specify which literals should be used."
-                     )
+        Just $ translate $ do
+          german "Es wurden keine Literale angegeben."
+          english "You did not specify which literals should be used."
 
     | otherwise = Nothing
 
