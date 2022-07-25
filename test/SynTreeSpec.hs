@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module SynTreeSpec where
 
@@ -28,10 +28,10 @@ invalidBoundsSyntr = do
   maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
   return $
     SynTreeConfig
-      { maxNodes = maxNodes,
-        minNodes = minNodes,
-        maxDepth = maxDepth,
-        usedLiterals = usedLiterals,
+      { maxNodes,
+        minNodes,
+        maxDepth,
+        usedLiterals,
         atLeastOccurring = fromIntegral (length usedLiterals),
         useImplEqui = True
       }
@@ -48,12 +48,12 @@ validBoundsSyntr = do
   let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
-      { maxNodes = maxNodes,
+      { maxNodes,
         minNodes = max minNodes' (atLeastOccurring * 2 - 1),
-        maxDepth = maxDepth,
-        usedLiterals = usedLiterals,
-        atLeastOccurring = atLeastOccurring,
-        useImplEqui = useImplEqui
+        maxDepth,
+        usedLiterals,
+        atLeastOccurring,
+        useImplEqui
       }
 
 validBoundsSyntr2 :: Gen SynTreeConfig
@@ -66,12 +66,12 @@ validBoundsSyntr2 = do
   let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
   return $
     SynTreeConfig
-      { maxNodes = maxNodes,
+      { maxNodes,
         minNodes = max minNodes' (atLeastOccurring * 2 - 1),
         maxDepth = maxNodes,
-        usedLiterals = usedLiterals,
-        atLeastOccurring = atLeastOccurring,
-        useImplEqui = useImplEqui
+        usedLiterals,
+        atLeastOccurring,
+        useImplEqui
       }
 
 spec :: Spec
