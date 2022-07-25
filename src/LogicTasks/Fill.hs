@@ -21,66 +21,60 @@ import Control.Monad.Output (
   translate
   )
 
-import Text.PrettyPrint.Leijen.Text
 
 
 
 
-description :: FillInst -> [ProxyDoc]
-description FillInst{..} =
-              [ PMult ("Betrachten Sie die folgende Formel:"
-                     ,"Consider the following formula:"
-                     )
-              , PDoc line
-              , PDoc $ nest 4 $ myText "F = " <+> pretty cnf
-              , PDoc line
-              , PDoc line
-              , PMult ("Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
-                     ,"Fill all blanks in the corresponding truth table with truth values (True or False)."
-                     )
-              , PDoc line
-              , PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
-              , PMult ("Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an,"
-                     ,"Provide the solution as a list of truth values."
-                     )
-              , PMult ("wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
-                     ,"The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
-                     )
-              , PMult ("Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (wahr, falsch) oder als Kurzform (f, w) erfolgen."
-                      ,"Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (true, false) or by giving a shorthand (f or t)."
-                      )
-              , PDoc line
-              , PMult ( "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen: [f,w,w,w]."
-                      , "A valid solution for four blanks could look like this: [f,t,t,t]."
-                      )
-              , PDoc line
-              , PDoc $ myText (fromMaybe "" addText)
-              ]
+description :: OutputMonad m => FillInst -> LangM m
+description FillInst{..} = do
+  paragraph $ translate $ do
+    german "Betrachten Sie die folgende Formel:"
+    english "Consider the following formula:"
+    -- PDoc $ nest 4 $ myText "F = " <+> pretty cnf
+
+  paragraph $ translate $ do
+    german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
+    english "Fill all blanks in the corresponding truth table with truth values (True or False)."
+    -- PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
+
+  paragraph $ translate $ do
+    german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
+    english "Provide the solution as a list of truth values. The first element of the list fills the first blank from the top, the second element fills the second blank, etc."
+
+  paragraph $ translate $ do
+    german "Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (wahr, falsch) oder als Kurzform (f, w) erfolgen."
+    english "Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (true, false) or by giving a shorthand (f or t)."
+
+  paragraph $ translate $ do
+    german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen: [f,w,w,w]."
+    english "A valid solution for four blanks could look like this: [f,t,t,t]."
+
+  paragraph $ text (fromMaybe "" addText)
 
 
 
 
-verifyStatic :: FillInst -> Maybe ProxyDoc
+verifyStatic :: OutputMonad m => FillInst -> Maybe (LangM m)
 verifyStatic FillInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
-        Just $ PMult ("Geben Sie bitte eine nicht-leere Formel an."
-                     , "Please give a non empty formula."
-                     )
+        Just $ translate $ do
+          german "Geben Sie bitte eine nicht-leere Formel an."
+          english "Please give a non empty formula."
 
     | any (> 2^length (atomics cnf)) missing =
-        Just $ PMult ("Mindestens ein gegebener Index ist zu hoch."
-                     , "At least one given index is too high."
-                     )
+        Just $ translate $ do
+          german "Mindestens ein gegebener Index ist zu hoch."
+          english "At least one given index is too high."
 
     | any (<= 0) missing =
-        Just $ PMult ("Mindestens ein gegebener Index ist null oder negativ."
-                     , "At least one given index is zero or negative."
-                     )
+        Just $ translate $ do
+          german "Mindestens ein gegebener Index ist null oder negativ."
+          english "At least one given index is zero or negative."
 
     | null missing =
-        Just $ PMult ("Es muss mindestens eine Lücke geben."
-                     , "At least one blank has to be specified."
-                     )
+        Just $ translate $ do
+          german "Es muss mindestens eine Lücke geben."
+          english "At least one blank has to be specified."
 
     | otherwise = Nothing
 
@@ -118,17 +112,17 @@ start :: [TruthValue]
 start = []
 
 
-partialGrade :: FillInst -> [TruthValue] -> Maybe ProxyDoc
+partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> Maybe (LangM m)
 partialGrade FillInst{..} sol
     | solLen > acLen =
-        Just $ PMult ("Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
-                     ,"Solution contains too many values. Please remove " ++ eng ++ " to proceed."
-                     )
+        Just $ translate $ do
+          german  $ "Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
+          english $ "Solution contains too many values. Please remove " ++ eng ++ " to proceed."
 
     | acLen > solLen =
-        Just $ PMult ("Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
-                     , "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
-                     )
+        Just $ translate $ do
+          german $ "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
+          english $ "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
 
     | otherwise = Nothing
 
@@ -139,18 +133,19 @@ partialGrade FillInst{..} sol
     distance = abs (solLen - acLen)
     display = show distance
     (ger, eng) = if distance == 1
-      then ( "muss " ++ display ++ " Wert", display ++ " value")
+      then ("muss " ++ display ++ " Wert", display ++ " value")
       else ("müssen " ++ display ++ " Werte", display ++ " values")
 
 
 
-completeGrade :: FillInst -> [TruthValue] -> Maybe ProxyDoc
+completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> Maybe (LangM m)
 completeGrade FillInst{..} sol
 
     | not (null diff) =
-        Just $ PMult ("Die Lösung beinhaltet " ++ display ++ " Fehler."
-                     ,"Your solution contains " ++ display ++ " mistakes."
-                     )
+        Just $ translate $ do
+          german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
+          english $ "Your solution contains " ++ display ++ " mistakes."
+
     | otherwise = Nothing
 
   where
