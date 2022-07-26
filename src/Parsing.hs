@@ -7,9 +7,8 @@ module Parsing (
   ) where
 
 import Text.Parsec.Char (char, oneOf, satisfy, string, digit)
-import Control.Applicative ((<|>), many)
 import Data.Char (isLetter)
-import Text.Parsec (eof, ParseError, parse, sepBy, many1)
+import Text.Parsec (eof, ParseError, parse, sepBy, many, many1, (<|>))
 import Data.Set (fromList, Set)
 import Data.List (sort)
 
