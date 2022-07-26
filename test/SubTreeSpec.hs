@@ -118,7 +118,7 @@ spec = do
         it "it should generate the same Syntax Sub tree number as excepted when don't allow Duple tree" $
             forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $
-                \synTree -> size ( allSubtrees synTree) >= fromIntegral minSubtreeNum
+                \synTree -> fromIntegral (size (allSubtrees synTree)) >= minSubtreeNum
         it "it should generate the Syntax tree without Duple tree when don't allow Duple Tree" $
             forAll validBoundsSubtree $ \SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum) $

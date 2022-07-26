@@ -90,4 +90,4 @@ genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccur
             then  genSynTree (minSubtreeNum, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui
             else  genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui
     in
-        syntaxTree `suchThat` \synTree -> (noSameSubTree synTree || useDupelTree) && size (allSubtrees synTree) >= fromIntegral minSubtreeNum
+        syntaxTree `suchThat` \synTree -> (noSameSubTree synTree || useDupelTree) && fromIntegral (size (allSubtrees synTree)) >= minSubtreeNum

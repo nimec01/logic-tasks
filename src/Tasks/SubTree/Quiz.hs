@@ -31,5 +31,5 @@ feedback :: SubtreeInst -> String -> Bool
 feedback SubtreeInst {correct, minInputTreeNum} input = judgeInput (subtreeStringParse input) minInputTreeNum correct
 
 judgeInput :: Either ParseError (Set (SynTree Char)) -> Integer -> Set (SynTree Char) -> Bool
-judgeInput (Right inputTreeSet) minInputTreeNum correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && size inputTreeSet >= fromIntegral minInputTreeNum
+judgeInput (Right inputTreeSet) minInputTreeNum correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && fromIntegral (size inputTreeSet) >= minInputTreeNum
 judgeInput (Left _) _ _ =False
