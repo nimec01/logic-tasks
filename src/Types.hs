@@ -7,9 +7,9 @@ module Types
 
     collectLeaves,
     relabelShape,
-    allSubtrees,
     treeNodes,
     treeDepth,
+    allNotLeafSubTrees,
     ) where
 
 import Control.Monad.State (get, put, runState)
@@ -37,16 +37,17 @@ relabelShape shape contents =
       adorn _ =
         do {current <- get; put (tail current); return (head current)}
 
-getSubTrees :: SynTree c -> [SynTree c]
-getSubTrees t@(And a b) = getSubTrees a ++ (t : getSubTrees b)
-getSubTrees t@(Leaf _) =  [t]
-getSubTrees t@(Or a b) = getSubTrees a ++ (t : getSubTrees b)
-getSubTrees t@(Not a) = t : getSubTrees a
-getSubTrees t@(Impl a b) = getSubTrees a ++ (t : getSubTrees b)
-getSubTrees t@(Equi a b) = getSubTrees a ++ (t : getSubTrees b)
+getNotLeafSubTrees :: SynTree c -> [SynTree c]
+getNotLeafSubTrees t@(And a b) = getNotLeafSubTrees a ++ (t : getNotLeafSubTrees b)
+getNotLeafSubTrees (Leaf _) =  []
+getNotLeafSubTrees t@(Or a b) = getNotLeafSubTrees a ++ (t : getNotLeafSubTrees b)
+getNotLeafSubTrees t@(Not a) = t : getNotLeafSubTrees a
+getNotLeafSubTrees t@(Impl a b) = getNotLeafSubTrees a ++ (t : getNotLeafSubTrees b)
+getNotLeafSubTrees t@(Equi a b) = getNotLeafSubTrees a ++ (t : getNotLeafSubTrees b)
 
-allSubtrees :: Ord c => SynTree c -> Set (SynTree c)
-allSubtrees a = fromList (getSubTrees a)
+allNotLeafSubTrees :: Ord c => SynTree c -> Set (SynTree c)
+allNotLeafSubTrees a = fromList (getNotLeafSubTrees a)
+
 
 treeNodes :: SynTree c -> Integer
 treeNodes (And a b) = 1 + treeNodes a + treeNodes b

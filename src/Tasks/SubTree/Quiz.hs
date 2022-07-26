@@ -2,34 +2,33 @@
 
 module Tasks.SubTree.Quiz(
     feedback,
-    genSubtreeInst,
+    genSubTreeInst,
 ) where
 
 import Test.QuickCheck (generate)
-import Generate (genSynTreeSubtreeExc)
+import Generate (genSynTreeSubTreeExc)
 import Data.Set (Set, isSubsetOf, size)
 
-import Parsing (subtreeStringParse)
-import Tasks.SubTree.Config (SubtreeConfig(..), SubtreeInst(..), SubtreeInst)
+import Parsing (subTreeStringParse)
+import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), SubTreeInst)
 import Print (display)
-import Types (allSubtrees, SynTree)
+import Types (allNotLeafSubTrees, SynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
 
 
-genSubtreeInst :: SubtreeConfig -> IO SubtreeInst
-genSubtreeInst SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- generate (genSynTreeSubtreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui useDupelTree minSubtreeNum)
-    return $ SubtreeInst
-      { insSynTree = tree
-      , minInputTreeNum = minSubtreeNum
+genSubTreeInst :: SubTreeConfig -> IO SubTreeInst
+genSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
+    tree <- generate (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees)
+    return $ SubTreeInst
+      { minInputTrees = minSubTrees
       , formula = display tree
-      , correct = allSubtrees tree
+      , correct = allNotLeafSubTrees tree
       }
 
-feedback :: SubtreeInst -> String -> Bool
-feedback SubtreeInst {correct, minInputTreeNum} input = judgeInput (subtreeStringParse input) minInputTreeNum correct
+feedback :: SubTreeInst -> String -> Bool
+feedback SubTreeInst {correct, minInputTrees} input = judgeInput (subTreeStringParse input) minInputTrees correct
 
 judgeInput :: Either ParseError (Set (SynTree Char)) -> Integer -> Set (SynTree Char) -> Bool
-judgeInput (Right inputTreeSet) minInputTreeNum correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && fromIntegral (size inputTreeSet) >= minInputTreeNum
-judgeInput (Left _) _ _ =False
+judgeInput (Right inputTreeSet) minInputTrees correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && fromIntegral (size inputTreeSet) >= minInputTrees
+judgeInput (Left _) _ _ = False

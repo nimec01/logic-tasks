@@ -2,7 +2,7 @@
 
 module Parsing (
   formulaParse,
-  subtreeStringParse,
+  subTreeStringParse,
   illegalPropositionStringParse,
   ) where
 
@@ -64,16 +64,16 @@ subTreeParse = do
     lexeme $ char '}'
     return $ fromList subTreelist
 
-subtreeStringParse :: String -> Either ParseError (Set(SynTree Char))
-subtreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
+subTreeStringParse :: String -> Either ParseError (Set(SynTree Char))
+subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
 -----------------------------------------------------------------------------------
-illegalPropositionParse :: Parser [Int]
+illegalPropositionParse :: Parser (Set Int)
 illegalPropositionParse = do
     lexeme $ char '{'
     illegalList <- many1 digit `sepBy` lexeme (char ',')
     lexeme $ char '}'
-    return $ sort (map read illegalList)
+    return $ fromList (sort (map read illegalList))
 
 
-illegalPropositionStringParse :: String -> Either ParseError [Int]
+illegalPropositionStringParse :: String -> Either ParseError (Set Int)
 illegalPropositionStringParse = parse  (whitespace >> illegalPropositionParse <* eof) ""

@@ -10,18 +10,19 @@ module Tasks.LegalProposition.Config (
 
 import Control.Applicative              (Alternative ((<|>)))
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+import Data.Set (Set)
 
 data LegalPropositionConfig =
     LegalPropositionConfig
     {
       formulaConfig :: SynTreeConfig
-    , formulasNum :: Integer
-    , illegalNum :: Integer
+    , formulas :: Integer
+    , illegals :: Integer
     } deriving Show
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
 checkAdditionalConfig LegalPropositionConfig {..}
-    | formulasNum < illegalNum
+    | formulas < illegals
       = Just "the number of formulas can not less than illegal number"
     | otherwise
       = Nothing
@@ -36,13 +37,13 @@ defaultLegalPropositionConfig =
     LegalPropositionConfig
     {
       formulaConfig = defaultSynTreeConfig
-    , formulasNum = 5
-    , illegalNum = 2
+    , formulas = 5
+    , illegals = 2
     }
 
 data LegalPropositionInst =
     LegalPropositionInst
     {
-      serialNumOfWrong :: [Int]
+      serialsOfWrong :: (Set Int)
     , pseudoFormulas :: [String]
     } deriving Show

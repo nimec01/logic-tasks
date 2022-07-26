@@ -1,58 +1,40 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module LegalPropositionSpec where
 
 import Test.Hspec (Spec, describe, it)
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
-import Test.QuickCheck (Gen, choose, forAll, elements, sublistOf, suchThat)
+import Test.QuickCheck (Gen, choose, forAll)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Data.Maybe (isJust, isNothing)
 import Parsing(formulaParse)
 import Data.Either (isLeft)
-import Generate (minDepthForNodes, maxLeavesForNodes, maxNodesForDepth, genSynTree)
-
-validBoundsSyntr :: Gen SynTreeConfig
-validBoundsSyntr = do
-  booer <- elements [True, False]
-  usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNodes <- choose (1, 60)
-  maxNodes <- choose (minNodes, 60)
-  maxDepth <- choose (minDepthForNodes minNodes, maxNodes)
-  useChars <- choose (1, maxLeavesForNodes (min maxNodes (maxNodesForDepth maxDepth)))
-  let minUse = min useChars (fromIntegral (length usedLiterals))
-  return $
-    SynTreeConfig
-      { maxNodes = min maxNodes (maxNodesForDepth maxDepth),
-        minNodes = max minNodes (minUse * 2 - 1),
-        maxDepth = maxDepth,
-        usedLiterals = usedLiterals,
-        atLeastOccurring = minUse,
-        useImplEqui = booer
-      }
+import Generate (genSynTree)
+import SynTreeSpec (validBoundsSyntr)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
     synTreeConfig <- validBoundsSyntr
-    formulasNum <- choose (1, 20)
-    illegalNum <- choose (1, formulasNum)
+    formulas <- choose (1, 20)
+    illegals <- choose (1, formulas)
     return $ LegalPropositionConfig
         {
             formulaConfig = synTreeConfig
-            , formulasNum = formulasNum
-            , illegalNum = illegalNum
+            , formulas
+            , illegals
         }
 
 invalidBoundsLegalProposition :: Gen LegalPropositionConfig
 invalidBoundsLegalProposition = do
     synTreeConfig <- validBoundsSyntr
-    formulasNum <- choose (1, 19)
-    illegalNum <- choose (formulasNum + 1, 20)
+    formulas <- choose (1, 19)
+    illegals <- choose (formulas + 1, 20)
     return $ LegalPropositionConfig
         {
             formulaConfig = synTreeConfig
-            , formulasNum = formulasNum
-            , illegalNum = illegalNum
+            , formulas
+            , illegals
         }
 
 spec :: Spec

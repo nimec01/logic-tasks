@@ -1,9 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Tasks.SubTree.Config (
-    SubtreeInst(..),
-    SubtreeConfig(..),
-    defaultSubtreeConfig,
+    SubTreeInst(..),
+    SubTreeConfig(..),
+    defaultSubTreeConfig,
     checkSubTreeConfig
   ) where
 
@@ -12,41 +12,38 @@ import Control.Applicative              (Alternative ((<|>)))
 
 import Types (SynTree)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
-import Generate (maxNodesForDepth)
+import Generate (maxLeavesForNodes)
 
-data SubtreeConfig =
-  SubtreeConfig
+data SubTreeConfig =
+  SubTreeConfig
     {
       syntaxTreeConfig :: SynTreeConfig
-    , useDupelTree :: Bool
-    , minSubtreeNum :: Integer
+    , allowDupelTree :: Bool
+    , minSubTrees :: Integer
     } deriving Show
 
-defaultSubtreeConfig :: SubtreeConfig
-defaultSubtreeConfig =
-    SubtreeConfig
+defaultSubTreeConfig :: SubTreeConfig
+defaultSubTreeConfig =
+    SubTreeConfig
     { syntaxTreeConfig = defaultSynTreeConfig
-    , useDupelTree = True
-    , minSubtreeNum = 5
+    , allowDupelTree = True
+    , minSubTrees = 3
     }
 
-checkSubTreeConfig :: SubtreeConfig -> Maybe String
-checkSubTreeConfig subConfig@SubtreeConfig {..} =
+checkSubTreeConfig :: SubTreeConfig -> Maybe String
+checkSubTreeConfig subConfig@SubTreeConfig {..} =
     checkSynTreeConfig syntaxTreeConfig
     <|> checkAdditionalConfig subConfig
 
-checkAdditionalConfig :: SubtreeConfig -> Maybe String
-checkAdditionalConfig SubtreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-    | maxNodes < minSubtreeNum
-      = Just "The subtree's number can not larger than maxnode"
-    | maxNodesForDepth maxDepth < minSubtreeNum
-      = Just "The subtree's number can not larger than maxDepth can not contain"
+checkAdditionalConfig :: SubTreeConfig -> Maybe String
+checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+    | minNodes - maxLeavesForNodes minNodes < minSubTrees
+      = Just "any trees have x min. nodes at least have x - (x+1) \\ 2 internal nodes, min. non-atomic SubTrees should not larger than it"
     | otherwise = Nothing
 
-data SubtreeInst =
-    SubtreeInst
-    { insSynTree :: SynTree Char
-    , formula :: String
+data SubTreeInst =
+    SubTreeInst
+    { formula :: String
     , correct :: Set (SynTree Char)
-    , minInputTreeNum :: Integer
+    , minInputTrees :: Integer
     } deriving Show

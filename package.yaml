@@ -44,8 +44,8 @@ executables:
       - -Wmissing-signatures
       - -Wunused-matches
       - -Werror
-  allSubformulasFromFormula:
-    main: allSubformulasFromFormula.hs
+  partNonAtomicSubTreeSet:
+    main: partNonAtomicSubTreeSet.hs
     source-dirs: app
     dependencies:
       - ba-tongxi-xu
