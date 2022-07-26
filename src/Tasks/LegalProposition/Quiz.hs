@@ -27,7 +27,7 @@ generateLegalPropositionInst LegalPropositionConfig  {formulaConfig = SynTreeCon
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd list ==list)
     pseudoFormulas <- genPseudoList 1 serialsOfWrong treeList
     return $ LegalPropositionInst
-        { serialsOfWrong = fromList $ sort serialsOfWrong
+        { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
         }
 
