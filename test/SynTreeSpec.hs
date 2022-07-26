@@ -59,8 +59,6 @@ spec = do
       isNothing (checkSynTreeConfig defaultSynTreeConfig)
     it "should accept valid bounds" $
       forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
-    it "should accept valid bounds" $
-      forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
