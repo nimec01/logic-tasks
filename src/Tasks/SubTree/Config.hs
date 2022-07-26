@@ -37,6 +37,8 @@ checkSubTreeConfig subConfig@SubTreeConfig {..} =
 
 checkAdditionalConfig :: SubTreeConfig -> Maybe String
 checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+    | minSubTrees < 1
+      = Just "The task makes no sense if not at least one subtree should be given."
     | minNodes - maxLeavesForNodes minNodes < minSubTrees
       = Just "any trees have x min. nodes at least have x - (x+1) \\ 2 internal nodes, min. non-atomic SubTrees should not larger than it"
     | otherwise = Nothing
