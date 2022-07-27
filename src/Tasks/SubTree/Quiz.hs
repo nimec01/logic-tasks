@@ -20,11 +20,12 @@ import Text.Parsec (ParseError)
 genSubTreeInst :: SubTreeConfig -> IO SubTreeInst
 genSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- generate (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees)
+    let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { minInputTrees = minSubTrees
       , formula = display tree
-      , correctTrees = allNotLeafSubTrees tree
-      , correctFormulas = Data.Set.map display (allNotLeafSubTrees tree)
+      , correctTrees
+      , correctFormulas = Data.Set.map display correctTrees
       }
 
 feedback :: SubTreeInst -> String -> Bool
