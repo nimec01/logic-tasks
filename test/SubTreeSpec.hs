@@ -2,23 +2,23 @@
 module SubTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
-import Test.QuickCheck (Gen, choose, forAll, elements)
-import Data.Set (size, toList)
+import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
+import Data.Set (size, toList, map)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), checkSubTreeConfig, defaultSubTreeConfig)
 import Types (allNotLeafSubTrees)
 import Generate (maxLeavesForNodes, noSameSubTree, genSynTreeSubTreeExc)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
-import Print (displaySubTrees)
-import Parsing (subTreeStringParse)
+import Print (displaySubTrees, display)
+import Parsing (subFormulasStringParse)
 import SynTreeSpec (invalidBoundsSyntr, validBoundsSyntr)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
     allowDupelTree <- elements [True,False]
-    SynTreeConfig {..} <- validBoundsSyntr
-    minSubTrees <- choose (0, minNodes - maxLeavesForNodes minNodes)
+    SynTreeConfig {..} <- validBoundsSyntr `suchThat` \SynTreeConfig {..} -> minNodes > 1
+    minSubTrees <- choose (1, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
         syntaxTreeConfig = SynTreeConfig {..}
@@ -51,7 +51,7 @@ spec = do
         it "parse should works well" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
-                \synTree ->subTreeStringParse (displaySubTrees (toList (allNotLeafSubTrees synTree))) == Right (allNotLeafSubTrees synTree)
+                \synTree -> subFormulasStringParse (filter (/= ' ') (displaySubTrees (toList (allNotLeafSubTrees synTree)))) == Right (Data.Set.map display (allNotLeafSubTrees synTree))
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $

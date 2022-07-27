@@ -44,6 +44,6 @@ defaultLegalPropositionConfig =
 data LegalPropositionInst =
     LegalPropositionInst
     {
-      serialsOfWrong :: (Set Int)
+      serialsOfWrong :: Set Int
     , pseudoFormulas :: [String]
     } deriving Show

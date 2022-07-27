@@ -10,6 +10,7 @@ module Types
     treeNodes,
     treeDepth,
     allNotLeafSubTrees,
+    getNotLeafSubTrees,
     ) where
 
 import Control.Monad.State (get, put, runState)

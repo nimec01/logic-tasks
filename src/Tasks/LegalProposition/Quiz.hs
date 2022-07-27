@@ -6,7 +6,6 @@ module Tasks.LegalProposition.Quiz (
 ) where
 
 import Test.QuickCheck (Gen, choose, vectorOf, suchThat, generate)
-import Data.List (sort)
 import Data.List.Extra (nubOrd)
 import Data.Set (fromList)
 

@@ -12,7 +12,7 @@ import Data.List.Extra (nubOrd)
 import Data.Set (size)
 import Test.QuickCheck.Gen (vectorOf)
 
-import Types (SynTree(..), collectLeaves, relabelShape, allNotLeafSubTrees)
+import Types (SynTree(..), collectLeaves, relabelShape, allNotLeafSubTrees, getNotLeafSubTrees)
 
 minDepthForNodes :: Integer -> Integer
 minDepthForNodes nodes = ceiling (logBase 2 (fromIntegral (nodes + 1) :: Float))
@@ -79,7 +79,7 @@ positiveLiteral = return (Leaf ())
 
 --------------------------------------------------------------------------------------------------------------
 noSameSubTree :: Ord c => SynTree c -> Bool
-noSameSubTree synTree = let treeList = collectLeaves synTree
+noSameSubTree synTree = let treeList = getNotLeafSubTrees synTree
     in
         treeList == nubOrd treeList
 -- generate subTree exercise
@@ -88,4 +88,4 @@ genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccur
     let
         syntaxTree = genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui
     in
-        syntaxTree `suchThat` \synTree -> (noSameSubTree synTree || allowDupelTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
+        syntaxTree `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees

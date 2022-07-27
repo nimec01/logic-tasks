@@ -2,18 +2,20 @@
 
 module Parsing (
   formulaParse,
-  subTreeStringParse,
   illegalPropositionStringParse,
+  subFormulasStringParse
   ) where
 
 import Text.Parsec.Char (char, oneOf, satisfy, string, digit)
 import Data.Char (isLetter)
 import Text.Parsec (eof, ParseError, parse, sepBy, many, many1, (<|>))
 import Data.Set (fromList, Set)
-import Data.List (sort)
 
 import Types (SynTree(..))
 import Text.Parsec.String (Parser)
+
+formulaSymbol :: Parser Char
+formulaSymbol = oneOf (['A'..'Z'] ++ "()/<=>~\\")
 
 whitespace :: Parser ()
 whitespace = do
@@ -57,22 +59,22 @@ parserS = do
 formulaParse :: String -> Either ParseError (SynTree Char)
 formulaParse = parse (whitespace >> parserS <* eof) ""
 -----------------------------------------------------------------------------------
-subTreeParse :: Parser (Set (SynTree Char))
-subTreeParse = do
-    lexeme $ char '{'
-    subTreelist <- parserS `sepBy` lexeme (char ',')
-    lexeme $ char '}'
-    return $ fromList subTreelist
+subFormulasParse :: Parser (Set String)
+subFormulasParse = do
+    char '{'
+    subFormulasList <- many1 formulaSymbol `sepBy` char ','
+    char '}'
+    return $ fromList subFormulasList
 
-subTreeStringParse :: String -> Either ParseError (Set(SynTree Char))
-subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
+subFormulasStringParse :: String -> Either ParseError (Set String)
+subFormulasStringParse = parse (whitespace >> subFormulasParse <* eof) ""
 -----------------------------------------------------------------------------------
 illegalPropositionParse :: Parser (Set Int)
 illegalPropositionParse = do
     lexeme $ char '{'
     illegalList <- many1 digit `sepBy` lexeme (char ',')
     lexeme $ char '}'
-    return $ fromList (sort (map read illegalList))
+    return $ fromList (map read illegalList)
 
 
 illegalPropositionStringParse :: String -> Either ParseError (Set Int)

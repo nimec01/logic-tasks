@@ -7,12 +7,12 @@ module Tasks.SubTree.Quiz(
 
 import Test.QuickCheck (generate)
 import Generate (genSynTreeSubTreeExc)
-import Data.Set (Set, isSubsetOf, size)
+import Data.Set (Set, isSubsetOf, size, map)
 
-import Parsing (subTreeStringParse)
+import Parsing (subFormulasStringParse)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), SubTreeInst)
 import Print (display)
-import Types (allNotLeafSubTrees, SynTree)
+import Types (allNotLeafSubTrees)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
 
@@ -23,12 +23,12 @@ genSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     return $ SubTreeInst
       { minInputTrees = minSubTrees
       , formula = display tree
-      , correct = allNotLeafSubTrees tree
+      , correctFormulas = Data.Set.map display (allNotLeafSubTrees tree)
       }
 
 feedback :: SubTreeInst -> String -> Bool
-feedback SubTreeInst {correct, minInputTrees} input = judgeInput (subTreeStringParse input) minInputTrees correct
+feedback SubTreeInst {correctFormulas, minInputTrees} input = judgeInput (subFormulasStringParse (filter (/= ' ') input)) minInputTrees correctFormulas
 
-judgeInput :: Either ParseError (Set (SynTree Char)) -> Integer -> Set (SynTree Char) -> Bool
-judgeInput (Right inputTreeSet) minInputTrees correctTreeSet = inputTreeSet `isSubsetOf` correctTreeSet && fromIntegral (size inputTreeSet) >= minInputTrees
-judgeInput (Left _) _ _ = False
+judgeInput :: Either ParseError (Set String) -> Integer -> Set String -> Bool
+judgeInput (Right inputFormulaSet) minInputTrees correctFormulas = inputFormulaSet `isSubsetOf` correctFormulas && fromIntegral (size inputFormulaSet) >= minInputTrees
+judgeInput _ _ _ = False

@@ -14,7 +14,9 @@ main = do
   putStrLn "\nThe following is the default config:\n"
   pPrint defaultSubTreeConfig
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SubTreeInst{ correct } <- genSubTreeInst defaultSubTreeConfig
+  inst@SubTreeInst{ correctFormulas, minInputTrees} <- genSubTreeInst defaultSubTreeConfig
+  putStrLn ("\nThe task will give a formula and you should input at least " ++ show minInputTrees ++ " non-atomic Formulas")
+  putStrLn "\nInput in the form \"{subformula1,subformula2..}\" and do not keep unnecessary parentheses outside subformulas"
   pPrint inst
   let
     feedbackLoop = do
@@ -22,7 +24,7 @@ main = do
       input <- getLine
       if null input
         then
-          putStrLn $ "The sample solution is " ++ show correct
+          putStrLn $ "The sample solution is " ++ show correctFormulas
         else do
           putStrLn $ "Your submission is " ++ show (feedback inst input)
           feedbackLoop

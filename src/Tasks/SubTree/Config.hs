@@ -10,7 +10,6 @@ module Tasks.SubTree.Config (
 import Data.Set (Set)
 import Control.Applicative              (Alternative ((<|>)))
 
-import Types (SynTree)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Generate (maxLeavesForNodes)
 
@@ -40,12 +39,12 @@ checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
     | minSubTrees < 1
       = Just "The task makes no sense if not at least one subtree should be given."
     | minNodes - maxLeavesForNodes minNodes < minSubTrees
-      = Just "any trees have x min. nodes at least have x - (x+1) \\ 2 internal nodes, min. non-atomic SubTrees should not larger than it"
+      = Just "In this case, it is possible to have too much leaves nodes and lead to not enough non-atomic SubTrees"
     | otherwise = Nothing
 
 data SubTreeInst =
     SubTreeInst
     { formula :: String
-    , correct :: Set (SynTree Char)
+    , correctFormulas :: Set String
     , minInputTrees :: Integer
     } deriving Show
