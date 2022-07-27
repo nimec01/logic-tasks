@@ -17,11 +17,11 @@ import SynTreeSpec (invalidBoundsSyntr, validBoundsSyntr)
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
     allowDupelTree <- elements [True,False]
-    SynTreeConfig {..} <- validBoundsSyntr `suchThat` \SynTreeConfig {..} -> minNodes > 1
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr `suchThat` ((1<) . minNodes)
     minSubTrees <- choose (1, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
-        syntaxTreeConfig = SynTreeConfig {..}
+        syntaxTreeConfig
       , allowDupelTree
       , minSubTrees
       }
@@ -29,11 +29,11 @@ validBoundsSubTree = do
 invalidBoundsSubTree :: Gen SubTreeConfig
 invalidBoundsSubTree = do
     allowDupelTree <- elements [True,False]
-    SynTreeConfig {..} <- invalidBoundsSyntr
+    syntaxTreeConfig@SynTreeConfig {..} <- invalidBoundsSyntr
     minSubTrees <- choose (minNodes - maxLeavesForNodes minNodes + 1, 100)
     return $ SubTreeConfig
       {
-        syntaxTreeConfig = SynTreeConfig {..}
+        syntaxTreeConfig
       , allowDupelTree
       , minSubTrees
       }
