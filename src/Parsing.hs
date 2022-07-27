@@ -3,7 +3,8 @@
 module Parsing (
   formulaParse,
   illegalPropositionStringParse,
-  subFormulasStringParse
+  subFormulasStringParse,
+  subTreeStringParse
   ) where
 
 import Text.Parsec.Char (char, oneOf, satisfy, string, digit)
@@ -15,7 +16,7 @@ import Types (SynTree(..))
 import Text.Parsec.String (Parser)
 
 formulaSymbol :: Parser Char
-formulaSymbol = oneOf (['A'..'Z'] ++ "()/<=>~\\")
+formulaSymbol = satisfy isLetter <|> oneOf " ()\\/<=>~"
 
 whitespace :: Parser ()
 whitespace = do
@@ -59,6 +60,16 @@ parserS = do
 formulaParse :: String -> Either ParseError (SynTree Char)
 formulaParse = parse (whitespace >> parserS <* eof) ""
 -----------------------------------------------------------------------------------
+subTreeParse :: Parser (Set (SynTree Char))
+subTreeParse = do
+    lexeme $ char '{'
+    subTreelist <- parserS `sepBy` lexeme (char ',')
+    lexeme $ char '}'
+    return $ fromList subTreelist
+
+subTreeStringParse :: String -> Either ParseError (Set(SynTree Char))
+subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
+
 subFormulasParse :: Parser (Set String)
 subFormulasParse = do
     char '{'

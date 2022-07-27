@@ -11,7 +11,7 @@ import Generate (maxLeavesForNodes, noSameSubTree, genSynTreeSubTreeExc)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
 import Print (displaySubTrees, display)
-import Parsing (subFormulasStringParse)
+import Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (invalidBoundsSyntr, validBoundsSyntr)
 
 validBoundsSubTree :: Gen SubTreeConfig
@@ -48,6 +48,10 @@ spec = do
         it "should accept valid bounds" $
             forAll validBoundsSubTree (isNothing . checkSubTreeConfig)
     describe "genSynTreeSubTreeExc" $ do
+        it "parse should works well" $
+            forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
+                \synTree ->subTreeStringParse (displaySubTrees (toList (allNotLeafSubTrees synTree))) == Right (allNotLeafSubTrees synTree)
         it "parse should works well" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $

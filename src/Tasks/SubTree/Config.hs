@@ -12,6 +12,7 @@ import Control.Applicative              (Alternative ((<|>)))
 
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Generate (maxLeavesForNodes)
+import Types (SynTree)
 
 data SubTreeConfig =
   SubTreeConfig
@@ -45,6 +46,7 @@ checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
 data SubTreeInst =
     SubTreeInst
     { formula :: String
+    , correctTrees :: Set (SynTree Char)
     , correctFormulas :: Set String
     , minInputTrees :: Integer
     } deriving Show
