@@ -16,8 +16,8 @@ validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
   useImplEqui <- elements [True, False]
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-  minNodes' <- choose (1, 5)
-  maxNodes' <- choose (minNodes', 10)
+  minNodes' <- choose (1, 20)
+  maxNodes' <- choose (minNodes', 25)
   maxDepth <- choose (minDepthForNodes minNodes', maxNodes')
   let maxNodes = min maxNodes' (maxNodesForDepth maxDepth)
   useChars <- choose (1, maxLeavesForNodes maxNodes)
