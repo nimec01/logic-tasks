@@ -10,6 +10,7 @@ module Tasks.SynTree.Config (
 
 import Types (SynTree)
 import Generate (maxNodesForDepth)
+import Data.Char (isLetter)
 
 data SynTreeConfig =
   SynTreeConfig
@@ -23,6 +24,8 @@ data SynTreeConfig =
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
 checkSynTreeConfig SynTreeConfig {..}
+    | any (not . isLetter) usedLiterals
+      = Just "Only letters are allowed as literals."
     | minNodes < 1
       = Just "Minimal number of nodes must be positive."
     | maxNodes < minNodes
