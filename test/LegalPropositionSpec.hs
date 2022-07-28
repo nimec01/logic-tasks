@@ -10,13 +10,14 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Data.Maybe (isJust, isNothing)
 import Parsing(formulaParse)
 import Data.Either (isLeft)
-import Generate (genSynTree)
+import Generate (genSynTree, maxLeavesForNodes)
 import SynTreeSpec (validBoundsSyntr)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
-    synTreeConfig <- validBoundsSyntr
-    formulas <- choose (1, 20)
+    synTreeConfig@SynTreeConfig {..}  <- validBoundsSyntr
+    let leaves = maxLeavesForNodes maxNodes
+    formulas <- choose (1, max 1 ((maxNodes - leaves) ^ if useImplEqui then (4 :: Integer) else (2 :: Integer)) * (leaves * fromIntegral (length usedLiterals)))
     illegals <- choose (1, formulas)
     return $ LegalPropositionConfig
         {

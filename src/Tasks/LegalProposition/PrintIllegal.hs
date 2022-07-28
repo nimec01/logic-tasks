@@ -7,7 +7,6 @@ import Test.QuickCheck (Gen, frequency, elements, oneof)
 import Types (SynTree(..), treeNodes, collectLeaves)
 import Print (normalShow)
 
--- collectleaves
 illegalDisplay :: SynTree Char -> Gen String
 illegalDisplay synTree =
     let usedStr = collectLeaves synTree
@@ -18,7 +17,7 @@ ifUseIllegal useBug notFirstLayer synTree usedStr =
     let nodeNum = treeNodes synTree
     in if not useBug
        then return (normalShow synTree)
-       else frequency [(1, implementIllegal synTree notFirstLayer usedStr), (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedStr)] --  加层数判定
+       else frequency [(1, implementIllegal synTree notFirstLayer usedStr), (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedStr)]
 
 subTreeIllegal ::Bool -> SynTree Char -> String -> Gen String
 subTreeIllegal notFirstLayer (And a b) usedStr = allocateBugToSubtree notFirstLayer "/\\" a b usedStr

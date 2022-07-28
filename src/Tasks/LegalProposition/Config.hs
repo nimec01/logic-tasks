@@ -11,6 +11,7 @@ module Tasks.LegalProposition.Config (
 import Control.Applicative              (Alternative ((<|>)))
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Data.Set (Set)
+import Generate(maxLeavesForNodes)
 
 data LegalPropositionConfig =
     LegalPropositionConfig
@@ -21,9 +22,13 @@ data LegalPropositionConfig =
     } deriving Show
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
-checkAdditionalConfig LegalPropositionConfig {..}
+checkAdditionalConfig LegalPropositionConfig {formulaConfig = SynTreeConfig {..}, ..}
+    | illegals < 1
+      = Just "the number of illegals can not less than 1"
     | formulas < illegals
       = Just "the number of formulas can not less than illegal number"
+    | let leaves = maxLeavesForNodes maxNodes , max 1 ((maxNodes - leaves) ^ if useImplEqui then (4 :: Integer) else (2 :: Integer)) * (leaves * fromIntegral (length usedLiterals)) < formulas
+      = Just "It have risks that formulas are larger than is actually reasonable given the possible size of the original formula"
     | otherwise
       = Nothing
 

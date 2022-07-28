@@ -1,4 +1,4 @@
-{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Main (main) where
 
@@ -14,7 +14,7 @@ main = do
   putStrLn "\nThe following is the default config:\n"
   pPrint defaultSubTreeConfig
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SubTreeInst{ correctFormulas, minInputTrees} <- genSubTreeInst defaultSubTreeConfig
+  inst@SubTreeInst{..} <- genSubTreeInst defaultSubTreeConfig
   putStrLn ("\nThe task will give a formula and you should input at least " ++ show minInputTrees ++ " non-atomic Formulas")
   putStrLn "\nInput in the form \"{subformula1,subformula2..}\" and do not keep unnecessary parentheses outside subformulas"
   pPrint inst
