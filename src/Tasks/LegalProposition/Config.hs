@@ -23,12 +23,14 @@ data LegalPropositionConfig =
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
 checkAdditionalConfig LegalPropositionConfig {formulaConfig = SynTreeConfig {..}, ..}
-    | illegals < 1
-      = Just "the number of illegals can not less than 1"
+    | formulas < 1
+      = Just "The number of formulas cannot be less than 1."
+    | illegals < 0
+      = Just "The number of illegals cannot be less than 0."
     | formulas < illegals
-      = Just "the number of formulas can not less than illegal number"
+      = Just "The number of formulas cannot be less than the illegal ones."
     | let leaves = maxLeavesForNodes maxNodes , max 1 ((maxNodes - leaves) ^ if useImplEqui then (4 :: Integer) else (2 :: Integer)) * (leaves * fromIntegral (length usedLiterals)) < formulas
-      = Just "It have risks that formulas are larger than is actually reasonable given the possible size of the original formula"
+      = Just "It has risks that formulas are larger than is actually reasonable given the possible size of the original formula."
     | otherwise
       = Nothing
 

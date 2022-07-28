@@ -14,8 +14,8 @@ import Data.Char (isLetter)
 
 data SynTreeConfig =
   SynTreeConfig
-  { maxNodes :: Integer
-  , minNodes :: Integer
+  { minNodes :: Integer
+  , maxNodes :: Integer
   , maxDepth :: Integer
   , usedLiterals :: String
   , atLeastOccurring :: Integer
