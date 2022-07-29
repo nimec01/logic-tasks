@@ -1,9 +1,10 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
 
 module Main (main) where
 
-import Tasks.SubTree.Config (defaultSubTreeConfig, SubTreeInst(..))
+import Tasks.SubTree.Config (SubTreeInst(..),)
 import Tasks.SubTree.Quiz (genSubTreeInst, feedback)
+import AppHelp (determineSubTreeConfig)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -11,10 +12,11 @@ import Text.Pretty.Simple (pPrint)
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
-  putStrLn "\nThe following is the default config:\n"
-  pPrint defaultSubTreeConfig
+  theConfigToUse <- determineSubTreeConfig
+  putStrLn "\nThe following is the config now used:\n"
+  pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SubTreeInst{..} <- genSubTreeInst defaultSubTreeConfig
+  inst@SubTreeInst{..} <- genSubTreeInst theConfigToUse
   putStrLn ("\nThe task will give a formula and you should input at least " ++ show minInputTrees ++ " non-atomic Formulas")
   putStrLn "\nInput in the form \"{subformula1,subformula2..}\" and do not keep unnecessary parentheses outside subformulas"
   pPrint inst

@@ -7,6 +7,7 @@ dependencies:
   - containers
   - mtl
   - QuickCheck >= 2.14
+  - pretty-simple
 default-extensions:
   - TupleSections
   - DuplicateRecordFields
@@ -29,6 +30,7 @@ library:
     - Tasks.SubTree.Quiz
     - Tasks.LegalProposition.Quiz
     - Tasks.LegalProposition.PrintIllegal
+    - AppHelp
   ghc-options:
     - -Wall
     - -Werror

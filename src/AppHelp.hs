@@ -1,0 +1,78 @@
+{-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
+
+module AppHelp (
+    determineSynTreeConfig,
+    determineLegalPropositionConfig,
+    determineSubTreeConfig
+)where
+
+import Tasks.SynTree.Config(SynTreeConfig(..), defaultSynTreeConfig,checkSynTreeConfig)
+import Tasks.LegalProposition.Config (defaultLegalPropositionConfig, LegalPropositionConfig(..), checkLegalPropositionConfig)
+import Tasks.SubTree.Config (defaultSubTreeConfig, SubTreeConfig(..), checkSubTreeConfig)
+
+import Text.Pretty.Simple (pPrint)
+
+offerChange :: Read a => String -> a -> IO a
+offerChange name value = do
+  putStrLn $ "\nDo you want to change " ++ name ++ "? If so, enter new value here (otherwise just hit return):"
+  input <- getLine
+  if null input
+    then return value
+    else return (read input)
+
+determineConfig :: IO SynTreeConfig
+determineConfig = do
+  let SynTreeConfig{..} = defaultSynTreeConfig
+  minNodes' <- offerChange "minNodes" minNodes
+  maxNodes' <- offerChange "maxNodes" maxNodes
+  maxDepth' <- offerChange "maxDepth" maxDepth
+  atLeastOccurring' <- offerChange "atLeastOccurring" atLeastOccurring
+  let newConfig = defaultSynTreeConfig { minNodes = minNodes', maxNodes = maxNodes', maxDepth = maxDepth', atLeastOccurring = atLeastOccurring' }
+  return newConfig
+
+determineSynTreeConfig :: IO SynTreeConfig
+determineSynTreeConfig = do
+  putStrLn "\nThe following is the default config:\n"
+  pPrint defaultSynTreeConfig
+  syntaxTreeConfig <- determineConfig
+  case checkSynTreeConfig syntaxTreeConfig of
+    Nothing ->
+      return syntaxTreeConfig
+    Just problem -> do
+      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
+      putStrLn "You should try again."
+      determineSynTreeConfig
+
+determineLegalPropositionConfig :: IO LegalPropositionConfig
+determineLegalPropositionConfig = do
+  putStrLn "\nThe following is the default config:\n"
+  pPrint defaultLegalPropositionConfig
+  let LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig{..}, ..} = defaultLegalPropositionConfig
+  syntaxTreeConfig' <- determineConfig
+  formulas' <- offerChange "formulas" formulas
+  illegals' <- offerChange "illegal formulas" illegals
+  let newConfig = defaultLegalPropositionConfig {syntaxTreeConfig = syntaxTreeConfig', formulas = formulas', illegals = illegals'}
+  case checkLegalPropositionConfig newConfig of
+    Nothing ->
+      return newConfig
+    Just problem -> do
+      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
+      putStrLn "You should try again."
+      determineLegalPropositionConfig
+
+determineSubTreeConfig :: IO SubTreeConfig
+determineSubTreeConfig = do
+  putStrLn "\nThe following is the default config:\n"
+  pPrint defaultSubTreeConfig
+  let SubTreeConfig{syntaxTreeConfig = SynTreeConfig{..}, ..} = defaultSubTreeConfig
+  syntaxTreeConfig' <- determineConfig
+  minSubTrees' <- offerChange "minSubTrees" minSubTrees
+  allowDupelTree' <- offerChange "allowDupelTree" allowDupelTree
+  let newConfig = defaultSubTreeConfig {syntaxTreeConfig = syntaxTreeConfig', minSubTrees = minSubTrees', allowDupelTree = allowDupelTree'}
+  case checkSubTreeConfig newConfig of
+    Nothing ->
+      return newConfig
+    Just problem -> do
+      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
+      putStrLn "You should try again."
+      determineSubTreeConfig
