@@ -28,7 +28,7 @@ normalShow :: SynTree Char -> String
 normalShow (And a b) = "(" ++ normalShow a ++ "/\\" ++ normalShow b ++ ")"
 normalShow (Leaf a)=  a : ""
 normalShow (Or a b) = "(" ++ normalShow a ++ "\\/" ++ normalShow b ++ ")"
-normalShow (Not a) = "~" ++ normalShow a ++ ""
+normalShow (Not a) = "~" ++ normalShow a
 normalShow (Impl a b) = "(" ++ normalShow a ++ "=>" ++ normalShow b ++ ")"
 normalShow (Equi a b) = "(" ++ normalShow a ++ "<=>" ++ normalShow b ++ ")"
 
