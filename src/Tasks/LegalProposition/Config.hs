@@ -16,13 +16,13 @@ import Generate(maxLeavesForNodes)
 data LegalPropositionConfig =
     LegalPropositionConfig
     {
-      formulaConfig :: SynTreeConfig
+      syntaxTreeConfig :: SynTreeConfig
     , formulas :: Integer
     , illegals :: Integer
     } deriving Show
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
-checkAdditionalConfig LegalPropositionConfig {formulaConfig = SynTreeConfig {..}, ..}
+checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
     | formulas < 1
       = Just "The number of formulas cannot be less than 1."
     | illegals < 0
@@ -36,14 +36,14 @@ checkAdditionalConfig LegalPropositionConfig {formulaConfig = SynTreeConfig {..}
 
 checkLegalPropositionConfig :: LegalPropositionConfig -> Maybe String
 checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
-    checkSynTreeConfig formulaConfig
+    checkSynTreeConfig syntaxTreeConfig
     <|> checkAdditionalConfig lPConfig
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
 defaultLegalPropositionConfig =
     LegalPropositionConfig
     {
-      formulaConfig = defaultSynTreeConfig
+      syntaxTreeConfig = defaultSynTreeConfig
     , formulas = 5
     , illegals = 2
     }

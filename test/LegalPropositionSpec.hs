@@ -15,25 +15,25 @@ import SynTreeSpec (validBoundsSyntr)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
-    synTreeConfig@SynTreeConfig {..}  <- validBoundsSyntr
+    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSyntr
     let leaves = maxLeavesForNodes maxNodes
     formulas <- choose (1, max 1 ((maxNodes - leaves) ^ if useImplEqui then (4 :: Integer) else (2 :: Integer)) * (leaves * fromIntegral (length usedLiterals)))
     illegals <- choose (0, formulas)
     return $ LegalPropositionConfig
         {
-            formulaConfig = synTreeConfig
+            syntaxTreeConfig
             , formulas
             , illegals
         }
 
 invalidBoundsLegalProposition :: Gen LegalPropositionConfig
 invalidBoundsLegalProposition = do
-    synTreeConfig <- validBoundsSyntr
+    syntaxTreeConfig <- validBoundsSyntr
     formulas <- choose (1, 19)
     illegals <- choose (formulas + 1, 20)
     return $ LegalPropositionConfig
         {
-            formulaConfig = synTreeConfig
+            syntaxTreeConfig
             , formulas
             , illegals
         }
