@@ -18,6 +18,8 @@ main = do
   putStrLn "\nThe following is a random instance generated from it:\n"
   inst@SynTreeInst{ correct } <- genSynTreeInst theConfigToUse
   pPrint inst
+  putStrLn "\nYour task is to input the propositional logic formula represented by the above (LaTeX rendered) syntax tree."
+  putStrLn "You may use as many brackets as you want for your own clarity."
   let
     feedbackLoop = do
       putStrLn "\nTry what feedback you will get for some input (blank for the sample solution and exit):"

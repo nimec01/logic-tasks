@@ -12,9 +12,9 @@ import Tasks.SubTree.Config (defaultSubTreeConfig, SubTreeConfig(..), checkSubTr
 
 import Text.Pretty.Simple (pPrint)
 
-offerChange :: Read a => String -> a -> IO a
+offerChange :: (Show a, Read a) => String -> a -> IO a
 offerChange name value = do
-  putStrLn $ "\nDo you want to change " ++ name ++ "? If so, enter new value here (otherwise just hit return):"
+  putStrLn $ "\nIf you want to change the setting " ++ name ++ " = " ++ show value ++ ", enter a new value here (otherwise just hit return):"
   input <- getLine
   if null input
     then return value
@@ -50,7 +50,7 @@ determineLegalPropositionConfig = do
   let LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig{..}, ..} = defaultLegalPropositionConfig
   syntaxTreeConfig' <- determineConfig
   formulas' <- offerChange "formulas" formulas
-  illegals' <- offerChange "illegal formulas" illegals
+  illegals' <- offerChange "illegals" illegals
   let newConfig = defaultLegalPropositionConfig {syntaxTreeConfig = syntaxTreeConfig', formulas = formulas', illegals = illegals'}
   case checkLegalPropositionConfig newConfig of
     Nothing ->
