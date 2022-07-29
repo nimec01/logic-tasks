@@ -66,8 +66,8 @@ determineSubTreeConfig = do
   pPrint defaultSubTreeConfig
   let SubTreeConfig{syntaxTreeConfig = SynTreeConfig{..}, ..} = defaultSubTreeConfig
   syntaxTreeConfig' <- determineConfig
-  minSubTrees' <- offerChange "minSubTrees" minSubTrees
   allowDupelTree' <- offerChange "allowDupelTree" allowDupelTree
+  minSubTrees' <- offerChange "minSubTrees" minSubTrees
   let newConfig = defaultSubTreeConfig {syntaxTreeConfig = syntaxTreeConfig', minSubTrees = minSubTrees', allowDupelTree = allowDupelTree'}
   case checkSubTreeConfig newConfig of
     Nothing ->
