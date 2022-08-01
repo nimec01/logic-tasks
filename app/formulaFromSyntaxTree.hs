@@ -2,9 +2,9 @@
 
 module Main (main) where
 
-import Tasks.SynTree.Config (SynTreeInst(..))
+import Tasks.SynTree.Config (SynTreeInst(..), SynTreeConfig, defaultSynTreeConfig, checkSynTreeConfig)
 import Tasks.SynTree.Quiz (genSynTreeInst, feedback)
-import AppHelp (determineSynTreeConfig)
+import AppHelp (determineBaseConfig)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -31,3 +31,16 @@ main = do
           putStrLn $ "Your submission is " ++ show (feedback inst input)
           feedbackLoop
   feedbackLoop
+
+determineSynTreeConfig :: IO SynTreeConfig
+determineSynTreeConfig = do
+  putStrLn "\nThe following is the default config:\n"
+  pPrint defaultSynTreeConfig
+  syntaxTreeConfig <- determineBaseConfig defaultSynTreeConfig
+  case checkSynTreeConfig syntaxTreeConfig of
+    Nothing ->
+      return syntaxTreeConfig
+    Just problem -> do
+      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
+      putStrLn "You should try again."
+      determineSynTreeConfig

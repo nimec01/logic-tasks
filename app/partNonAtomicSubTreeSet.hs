@@ -2,9 +2,9 @@
 
 module Main (main) where
 
-import Tasks.SubTree.Config (SubTreeInst(..),)
+import Tasks.SubTree.Config (SubTreeInst(..), SubTreeConfig(..), defaultSubTreeConfig, checkSubTreeConfig)
 import Tasks.SubTree.Quiz (genSubTreeInst, feedback)
-import AppHelp (determineSubTreeConfig)
+import AppHelp (offerChange, determineBaseConfig)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -32,3 +32,20 @@ main = do
           putStrLn $ "Your submission is " ++ show (feedback inst input)
           feedbackLoop
   feedbackLoop
+
+determineSubTreeConfig :: IO SubTreeConfig
+determineSubTreeConfig = do
+  putStrLn "\nThe following is the default config:\n"
+  pPrint defaultSubTreeConfig
+  let SubTreeConfig{..} = defaultSubTreeConfig
+  syntaxTreeConfig' <- determineBaseConfig syntaxTreeConfig
+  allowDupelTree' <- offerChange "allowDupelTree" allowDupelTree
+  minSubTrees' <- offerChange "minSubTrees" minSubTrees
+  let newConfig = defaultSubTreeConfig {syntaxTreeConfig = syntaxTreeConfig', minSubTrees = minSubTrees', allowDupelTree = allowDupelTree'}
+  case checkSubTreeConfig newConfig of
+    Nothing ->
+      return newConfig
+    Just problem -> do
+      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
+      putStrLn "You should try again."
+      determineSubTreeConfig

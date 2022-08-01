@@ -2,9 +2,9 @@
 
 module Main (main) where
 
-import Tasks.LegalProposition.Config (LegalPropositionInst(..))
+import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), defaultLegalPropositionConfig, checkLegalPropositionConfig)
 import Tasks.LegalProposition.Quiz (genLegalPropositionInst, feedback)
-import AppHelp (determineLegalPropositionConfig)
+import AppHelp (offerChange, determineBaseConfig)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -31,3 +31,21 @@ main = do
           putStrLn $ "Your submission is " ++ show (feedback inst input)
           feedbackLoop
   feedbackLoop
+
+determineLegalPropositionConfig :: IO LegalPropositionConfig
+determineLegalPropositionConfig = do
+  putStrLn "\nThe following is the default config:\n"
+  pPrint defaultLegalPropositionConfig
+  let LegalPropositionConfig {..} = defaultLegalPropositionConfig
+  syntaxTreeConfig' <- determineBaseConfig syntaxTreeConfig
+  formulas' <- offerChange "formulas" formulas
+  illegals' <- offerChange "illegals" illegals
+  bracketFormulas' <- offerChange "bracketFormulas" bracketFormulas
+  let newConfig = defaultLegalPropositionConfig {syntaxTreeConfig = syntaxTreeConfig', formulas = formulas', illegals = illegals', bracketFormulas = bracketFormulas'}
+  case checkLegalPropositionConfig newConfig of
+    Nothing ->
+      return newConfig
+    Just problem -> do
+      putStrLn $ "This didn't go well. Here is the problem: " ++ problem
+      putStrLn "You should try again."
+      determineLegalPropositionConfig
