@@ -49,7 +49,6 @@ getNotLeafSubTrees t@(Equi a b) = getNotLeafSubTrees a ++ (t : getNotLeafSubTree
 allNotLeafSubTrees :: Ord c => SynTree c -> Set (SynTree c)
 allNotLeafSubTrees a = fromList (getNotLeafSubTrees a)
 
-
 treeNodes :: SynTree c -> Integer
 treeNodes (And a b) = 1 + treeNodes a + treeNodes b
 treeNodes (Leaf _) =  1

@@ -2,7 +2,7 @@ module Tasks.LegalProposition.PrintBracket (
     bracketDisplay,
 ) where
 
-import Test.QuickCheck (Gen, elements, oneof)
+import Test.QuickCheck (Gen, elements, frequency)
 
 import Types (SynTree(..),)
 import Print (normalShow)
@@ -19,10 +19,10 @@ bracketDisplay (Impl a b) = allocateBracketToSubtree False a b "=>"
 
 ifUsebracket :: Bool -> SynTree Char -> Gen String
 ifUsebracket usebracket (Leaf a) = if not usebracket then return [a] else return ['(', a, ')']
-ifUsebracket usebracket tree@(Not a) =
+ifUsebracket usebracket synTree@(Not a) = let addPositions = notAndLeaves a in
     if not usebracket
-    then return (normalShow tree)
-    else oneof [return("(~"++ normalShow a ++ ")"), subTreebracket tree]
+    then return (normalShow synTree)
+    else frequency [(1, return("(~"++ normalShow a ++ ")")), (addPositions, subTreebracket synTree)]
 ifUsebracket usebracket synTree =
     if not usebracket
     then return (normalShow synTree)
@@ -46,3 +46,12 @@ allocateBracketToSubtree notFirstLayer a b usedOperator = do
     if notFirstLayer
     then return ("(" ++ left ++ usedOperator ++ right ++ ")")
     else return (left ++ usedOperator ++ right)
+
+
+notAndLeaves :: SynTree c -> Int
+notAndLeaves (And a b) = notAndLeaves a + notAndLeaves b
+notAndLeaves (Leaf _) =  1
+notAndLeaves (Or a b) =  notAndLeaves a + notAndLeaves b
+notAndLeaves (Not a) = 1 + notAndLeaves a
+notAndLeaves (Impl a b) = notAndLeaves a + notAndLeaves b
+notAndLeaves (Equi a b) = notAndLeaves a + notAndLeaves b
