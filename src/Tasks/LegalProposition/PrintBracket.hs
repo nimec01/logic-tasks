@@ -22,7 +22,7 @@ ifUsebracket usebracket synTree =
     let nodeNum = treeNodes synTree
     in if not usebracket
        then return (normalShow synTree)
-       else frequency [(1, implementBracket True synTree), (fromIntegral nodeNum - 1, subTreebracket synTree)]
+       else frequency [(1, implementBracket synTree), (fromIntegral nodeNum - 1, subTreebracket synTree)]
 
 subTreebracket :: SynTree Char -> Gen String
 subTreebracket (And a b) = allocateBracketToSubtree True a b "/\\"
@@ -43,17 +43,13 @@ allocateBracketToSubtree notFirstLayer a b usedOperator = do
     then return ("(" ++ left ++ usedOperator ++ right ++ ")")
     else return (left ++ usedOperator ++ right)
 
-bracketShow :: Bool -> SynTree Char -> SynTree Char -> String -> Gen String
-bracketShow notFirstLayer a b usedOperator =
-    if notFirstLayer
-    then  return ("((" ++ normalShow a ++ usedOperator ++ normalShow b ++ "))")
-    else  return ("(" ++ normalShow a ++ usedOperator ++ normalShow b ++ ")")
-        
+bracketShow :: SynTree Char -> SynTree Char -> String -> Gen String
+bracketShow a b usedOperator = return ("((" ++ normalShow a ++ usedOperator ++ normalShow b ++ "))")
 
-implementBracket :: Bool -> SynTree Char -> Gen String
-implementBracket notFirstLayer (And a b) = bracketShow notFirstLayer a b "/\\"
-implementBracket notFirstLayer (Or a b) = bracketShow notFirstLayer a b "\\/"
-implementBracket notFirstLayer (Equi a b) = bracketShow notFirstLayer a b "<=>"
-implementBracket notFirstLayer (Impl a b) = bracketShow notFirstLayer a b "=>"
-implementBracket _ (Not a) = return ("~(" ++ normalShow a ++ ")")
-implementBracket _ (Leaf a) = return ("(" ++ [a] ++ ")")
+implementBracket :: SynTree Char -> Gen String
+implementBracket (And a b) = bracketShow a b "/\\"
+implementBracket (Or a b) = bracketShow a b "\\/"
+implementBracket (Equi a b) = bracketShow a b "<=>"
+implementBracket (Impl a b) = bracketShow a b "=>"
+implementBracket (Not a) = return ("(~" ++ normalShow a ++ ")")
+implementBracket (Leaf a) = return ("(" ++ [a] ++ ")")

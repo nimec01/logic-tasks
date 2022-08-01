@@ -18,6 +18,7 @@ import Generate (genSynTree, similarExist)
 import Types ( SynTree )
 import Print ( display, )
 import Parsing (illegalPropositionStringParse)
+import Data.Char (isLetter)
 
 genLegalPropositionInst :: LegalPropositionConfig -> IO LegalPropositionInst
 genLegalPropositionInst lPConfig = generate (generateLegalPropositionInst lPConfig)
@@ -27,7 +28,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
     treeList <- vectorOf (fromIntegral formulas) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) `suchThat` (not . similarExist)
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd list ==list)
     serialsOfBracket <- vectorOf (fromIntegral bracketFormulas) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd (list ++ serialsOfWrong) ==list ++ serialsOfWrong)
-    pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList
+    pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` noSimilarFormulas
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
@@ -48,3 +49,12 @@ legalDisplay syntaxTree = return (display syntaxTree)
 
 feedback :: LegalPropositionInst -> String -> Bool
 feedback  LegalPropositionInst {serialsOfWrong}  input = illegalPropositionStringParse input == Right serialsOfWrong
+
+noSimilarFormulas :: [String] -> Bool
+noSimilarFormulas pseudoFormulas = let pseudoFormulas' = map replace pseudoFormulas in  nubOrd pseudoFormulas' == pseudoFormulas'
+
+replace :: String -> String
+replace = map judgeAndChange
+
+judgeAndChange :: Char -> Char
+judgeAndChange symbol = if isLetter symbol then '_' else symbol

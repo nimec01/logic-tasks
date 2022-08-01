@@ -9,7 +9,7 @@ module Generate(
 ) where
 
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
-import Data.List.Extra (nubOrd)
+import Data.List.Extra (nubOrd, nubBy)
 import Data.Set (size)
 import Test.QuickCheck.Gen (vectorOf)
 
@@ -101,9 +101,4 @@ similarTree (Leaf _) (Leaf _) = True
 similarTree _ _ = False
 
 similarExist :: [SynTree Char] -> Bool
-similarExist (x:xs) = similarElem x xs || similarExist xs
-similarExist [] = False
-
-similarElem :: SynTree Char -> [SynTree Char] -> Bool
-similarElem tree (x:xs) = similarTree tree x || similarElem tree xs
-similarElem _ [] = False
+similarExist trees = length (nubBy similarTree trees) /= length trees
