@@ -65,7 +65,7 @@ spec = do
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
                 \synTree -> allowDupelTree || noSameSubTree synTree
-    describe "generateSubTreeInst" $ do
+    describe "generateSubTreeInst" $
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
