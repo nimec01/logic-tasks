@@ -17,9 +17,9 @@ main = do
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
   inst@LegalPropositionInst{..} <- genLegalPropositionInst theConfigToUse
-  putStrLn "In this task there are some Pseudo Formulas, Please select the set of ordinal numbers that do not conform to the syntax definition of propositional logic formulas"
-  putStrLn "The input form is {serial number1, serial number2,..}"
   pPrint inst
+  putStrLn "In this task there are some Pseudo Formulas, your task is to give the set of ordinal numbers of the illegal formulas in Pseudo Formulas"
+  putStrLn "The input form is {serial number1, serial number2,..}"
   let
     feedbackLoop = do
       putStrLn "\nTry what feedback you will get for some input (blank for the sample solution):"

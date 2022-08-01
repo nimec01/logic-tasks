@@ -1,11 +1,11 @@
 module Print(
     transferToPicture,
     display,
+    displaySubTrees,
     normalShow,
-    displaySubTrees
     ) where
 
-import Types (SynTree(..),)
+import Types (SynTree(..))
 import Data.List (intercalate)
 
 transferToPicture :: SynTree Char -> String

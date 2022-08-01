@@ -2,6 +2,7 @@
 
 module Tasks.LegalProposition.Quiz (
     genLegalPropositionInst,
+    generateLegalPropositionInst,
     feedback,
 ) where
 
@@ -12,7 +13,8 @@ import Data.Set (fromList)
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay )
-import Generate (genSynTree)
+import Tasks.LegalProposition.PrintBracket (bracketDisplay)
+import Generate (genSynTree, similarExist)
 import Types ( SynTree )
 import Print ( display, )
 import Parsing (illegalPropositionStringParse)
@@ -22,19 +24,24 @@ genLegalPropositionInst lPConfig = generate (generateLegalPropositionInst lPConf
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
 generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    treeList <- vectorOf (fromIntegral formulas) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui)
+    treeList <- vectorOf (fromIntegral formulas) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) `suchThat` (not . similarExist)
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd list ==list)
-    pseudoFormulas <- genPseudoList serialsOfWrong treeList
+    serialsOfBracket <- vectorOf (fromIntegral bracketFormulas) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd (list ++ serialsOfWrong) ==list ++ serialsOfWrong)
+    pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
         , pseudoFormulas = pseudoFormulas
         }
 
-genPseudoList :: [Int] -> [SynTree Char] -> Gen [String]
-genPseudoList serialsOfWrong trees =
+genPseudoList :: [Int] -> [Int] -> [SynTree Char] -> Gen [String]
+genPseudoList serialsOfWrong serialsOfBracket trees =
     let pointedTrees = zip [1..] trees
     in
-        mapM (\(point, tree) -> if point `elem` serialsOfWrong then illegalDisplay tree else legalDisplay tree) pointedTrees
+        mapM (\(point, tree) -> if point `elem` serialsOfWrong
+            then illegalDisplay tree
+            else if point `elem` serialsOfBracket
+                then bracketDisplay tree
+                else legalDisplay tree) pointedTrees
 
 legalDisplay :: SynTree Char -> Gen String
 legalDisplay syntaxTree = return (display syntaxTree)

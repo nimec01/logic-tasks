@@ -20,21 +20,21 @@ offerChange name value = do
     then return value
     else return (read input)
 
-determineConfig :: IO SynTreeConfig
-determineConfig = do
-  let SynTreeConfig{..} = defaultSynTreeConfig
+determineConfig :: SynTreeConfig -> IO SynTreeConfig
+determineConfig initSynTreeConfig = do
+  let SynTreeConfig{..} = initSynTreeConfig
   minNodes' <- offerChange "minNodes" minNodes
   maxNodes' <- offerChange "maxNodes" maxNodes
   maxDepth' <- offerChange "maxDepth" maxDepth
   atLeastOccurring' <- offerChange "atLeastOccurring" atLeastOccurring
-  let newConfig = defaultSynTreeConfig { minNodes = minNodes', maxNodes = maxNodes', maxDepth = maxDepth', atLeastOccurring = atLeastOccurring' }
+  let newConfig = initSynTreeConfig { minNodes = minNodes', maxNodes = maxNodes', maxDepth = maxDepth', atLeastOccurring = atLeastOccurring' }
   return newConfig
 
 determineSynTreeConfig :: IO SynTreeConfig
 determineSynTreeConfig = do
   putStrLn "\nThe following is the default config:\n"
   pPrint defaultSynTreeConfig
-  syntaxTreeConfig <- determineConfig
+  syntaxTreeConfig <- determineConfig defaultSynTreeConfig
   case checkSynTreeConfig syntaxTreeConfig of
     Nothing ->
       return syntaxTreeConfig
@@ -47,8 +47,8 @@ determineLegalPropositionConfig :: IO LegalPropositionConfig
 determineLegalPropositionConfig = do
   putStrLn "\nThe following is the default config:\n"
   pPrint defaultLegalPropositionConfig
-  let LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig{..}, ..} = defaultLegalPropositionConfig
-  syntaxTreeConfig' <- determineConfig
+  let LegalPropositionConfig {..} = defaultLegalPropositionConfig
+  syntaxTreeConfig' <- determineConfig syntaxTreeConfig
   formulas' <- offerChange "formulas" formulas
   illegals' <- offerChange "illegals" illegals
   let newConfig = defaultLegalPropositionConfig {syntaxTreeConfig = syntaxTreeConfig', formulas = formulas', illegals = illegals'}
@@ -64,8 +64,8 @@ determineSubTreeConfig :: IO SubTreeConfig
 determineSubTreeConfig = do
   putStrLn "\nThe following is the default config:\n"
   pPrint defaultSubTreeConfig
-  let SubTreeConfig{syntaxTreeConfig = SynTreeConfig{..}, ..} = defaultSubTreeConfig
-  syntaxTreeConfig' <- determineConfig
+  let SubTreeConfig{..} = defaultSubTreeConfig
+  syntaxTreeConfig' <- determineConfig syntaxTreeConfig
   allowDupelTree' <- offerChange "allowDupelTree" allowDupelTree
   minSubTrees' <- offerChange "minSubTrees" minSubTrees
   let newConfig = defaultSubTreeConfig {syntaxTreeConfig = syntaxTreeConfig', minSubTrees = minSubTrees', allowDupelTree = allowDupelTree'}

@@ -29,6 +29,7 @@ library:
     - Tasks.SubTree.Quiz
     - Tasks.LegalProposition.Quiz
     - Tasks.LegalProposition.PrintIllegal
+    - Tasks.LegalProposition.PrintBracket
   ghc-options:
     - -Wall
     - -Werror

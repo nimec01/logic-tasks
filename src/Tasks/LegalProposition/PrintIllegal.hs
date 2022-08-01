@@ -9,57 +9,53 @@ import Print (normalShow)
 
 illegalDisplay :: SynTree Char -> Gen String
 illegalDisplay synTree =
-    let usedStr = collectLeaves synTree
-    in ifUseIllegal True False synTree usedStr
+    let usedLiterals = collectLeaves synTree
+    in ifUseIllegal True False synTree usedLiterals
 
 ifUseIllegal :: Bool -> Bool -> SynTree Char -> String -> Gen String
-ifUseIllegal useBug notFirstLayer synTree usedStr =
+ifUseIllegal useBug notFirstLayer synTree usedLiterals =
     let nodeNum = treeNodes synTree
     in if not useBug
        then return (normalShow synTree)
-       else frequency [(1, implementIllegal synTree notFirstLayer usedStr), (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedStr)]
+       else frequency [(1, implementIllegal notFirstLayer synTree usedLiterals), (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedLiterals)]
 
 subTreeIllegal ::Bool -> SynTree Char -> String -> Gen String
-subTreeIllegal notFirstLayer (And a b) usedStr = allocateBugToSubtree notFirstLayer "/\\" a b usedStr
-subTreeIllegal notFirstLayer (Or a b) usedStr = allocateBugToSubtree notFirstLayer "\\/" a b usedStr
-subTreeIllegal notFirstLayer (Equi a b) usedStr = allocateBugToSubtree notFirstLayer "<=>" a b usedStr
-subTreeIllegal notFirstLayer (Impl a b) usedStr = allocateBugToSubtree notFirstLayer "=>" a b usedStr
-subTreeIllegal _ (Not a) usedStr = do
-    left <- ifUseIllegal True True a usedStr
+subTreeIllegal notFirstLayer (And a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "/\\"
+subTreeIllegal notFirstLayer (Or a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "\\/"
+subTreeIllegal notFirstLayer (Equi a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "<=>"
+subTreeIllegal notFirstLayer (Impl a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "=>"
+subTreeIllegal _ (Not a) usedLiterals = do
+    left <- ifUseIllegal True True a usedLiterals
     return ("~" ++ left)
-subTreeIllegal _ (Leaf _) _ = return ""
+subTreeIllegal _ (Leaf _) _ = error "This will not happen but must be write"
 
-allocateBugToSubtree :: Bool -> String -> SynTree Char -> SynTree Char -> String -> Gen String
-allocateBugToSubtree notFirstLayer op a b usedStr = do
+allocateBugToSubtree :: Bool -> SynTree Char -> SynTree Char -> String -> String -> Gen String
+allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
     ifUseBug <- elements [True, False]
-    left <- ifUseIllegal ifUseBug True a usedStr
-    right <- ifUseIllegal (not ifUseBug) True b usedStr
+    left <- ifUseIllegal ifUseBug True a usedLiterals
+    right <- ifUseIllegal (not ifUseBug) True b usedLiterals
     if notFirstLayer
-    then return ("(" ++ left ++ op ++ right ++ ")")
-    else return (left ++ op ++ right)
+    then return ("(" ++ left ++ usedOperator ++ right ++ ")")
+    else return (left ++ usedOperator ++ right)
 
-illegalShow :: Bool -> SynTree Char -> SynTree Char -> String -> String -> Gen String
-illegalShow notFirstLayer a b usedStr usedOperator =
+illegalShow :: Bool -> SynTree Char -> SynTree Char -> String -> Gen String
+illegalShow notFirstLayer a b usedLiterals =
     if notFirstLayer
     then  do
-        letter <- elements usedStr
-        oneof [return ("(" ++ normalShow a ++ normalShow b ++ ")"), oneof [return ("(" ++ normalShow a ++ "~" ++ normalShow b ++ ")"), return ("(" ++ normalShow a ++ [letter] ++ normalShow b ++ ")")], oneof (illegalParentheses a b usedOperator)]
+        letter <- elements usedLiterals
+        frequency [(2, return ("(" ++ normalShow a ++ normalShow b ++ ")")), (1, return ("(" ++ normalShow a ++ "~" ++ normalShow b ++ ")")), (1, return ("(" ++ normalShow a ++ [letter] ++ normalShow b ++ ")"))]
     else  do
-        letter <- elements usedStr
-        oneof [return (normalShow a ++ normalShow b), oneof [return (normalShow a ++ "~" ++ normalShow b), return (normalShow a ++ [letter] ++ normalShow b)]]
+        letter <- elements usedLiterals
+        frequency [(2, return (normalShow a ++ normalShow b)), (1,return (normalShow a ++ "~" ++ normalShow b)), (1, return (normalShow a ++ [letter] ++ normalShow b))]
 
-implementIllegal :: SynTree Char -> Bool -> String -> Gen String
-implementIllegal (And a b) notFirstLayer usedStr = illegalShow notFirstLayer a b usedStr "/\\"
-implementIllegal (Or a b) notFirstLayer usedStr = illegalShow notFirstLayer a b usedStr "\\/"
-implementIllegal (Equi a b) notFirstLayer usedStr = illegalShow notFirstLayer a b usedStr "<=>"
-implementIllegal (Impl a b) notFirstLayer usedStr = illegalShow notFirstLayer a b usedStr "=>"
-implementIllegal (Not a) _ usedStr = do
-    letter <- elements usedStr
+implementIllegal :: Bool -> SynTree Char -> String -> Gen String
+implementIllegal notFirstLayer (And a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals
+implementIllegal notFirstLayer (Or a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals
+implementIllegal notFirstLayer (Equi a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals
+implementIllegal notFirstLayer (Impl a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals
+implementIllegal _ (Not a) usedLiterals = do
+    letter <- elements usedLiterals
     oneof $ map (return . (++ normalShow a)) ["/\\", "\\/", "=>", "<=>", [letter]]
-implementIllegal (Leaf _) _ _ = do
+implementIllegal _ (Leaf _) _ = do
     oper <- elements ["/\\", "\\/", "=>", "<=>", "~"]
-    oneof [return oper, return ""]
-
-illegalParentheses :: SynTree Char -> SynTree Char -> String -> [Gen String]
-illegalParentheses  a b usedOperator = [return (formulaStr ++ ")"), return ("(" ++ formulaStr), return (")" ++ formulaStr ++ "(")]
-  where formulaStr = normalShow a ++ usedOperator ++ normalShow b
+    elements [oper,""]

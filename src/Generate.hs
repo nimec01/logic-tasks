@@ -5,6 +5,7 @@ module Generate(
  maxNodesForDepth,
  genSynTreeSubTreeExc,
  noSameSubTree,
+ similarExist
 ) where
 
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
@@ -89,3 +90,20 @@ genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccur
         syntaxTree = genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui
     in
         syntaxTree `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
+-------------------------------------------------------------------------------------------------------------------
+similarTree :: SynTree Char -> SynTree Char -> Bool
+similarTree (And a b) (And c d) = similarTree a c && similarTree b d
+similarTree (Or a b) (Or c d) = similarTree a c && similarTree b d
+similarTree (Impl a b) (Impl c d) = similarTree a c && similarTree b d
+similarTree (Equi a b) (Equi c d) = similarTree a c && similarTree b d
+similarTree (Not a) (Not c) = similarTree a c
+similarTree (Leaf _) (Leaf _) = True
+similarTree _ _ = False
+
+similarExist :: [SynTree Char] -> Bool
+similarExist (x:xs) = similarElem x xs || similarExist xs
+similarExist [] = False
+
+similarElem :: SynTree Char -> [SynTree Char] -> Bool
+similarElem tree (x:xs) = similarTree tree x || similarElem tree xs
+similarElem _ [] = False

@@ -17,16 +17,17 @@ main = do
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
   inst@SubTreeInst{..} <- genSubTreeInst theConfigToUse
-  putStrLn ("\nThe task will give a formula and you should input at least " ++ show minInputTrees ++ " non-atomic Formulas")
-  putStrLn "\nInput in the form \"{subformula1,subformula2..}\" and do not keep unnecessary parentheses outside subformulas"
   pPrint inst
+  putStrLn ("\nThe task will give a formula and your task is to input a set which at least have " ++ show minInputTrees ++ " non-atomic Formulas")
+  putStrLn "\nInput form is {subformula1,subformula2..}"
+  putStrLn "\nDo not keep unnecessary parentheses outside subformulas and do not add any addtional parentheses"
   let
     feedbackLoop = do
       putStrLn "\nTry what feedback you will get for some input (blank for the sample solution):"
       input <- getLine
       if null input
         then
-          putStrLn $ "The sample solution is " ++ show correctFormulas
+          putStrLn $ "One of the sample solution is " ++ show correctFormulas
         else do
           putStrLn $ "Your submission is " ++ show (feedback inst input)
           feedbackLoop

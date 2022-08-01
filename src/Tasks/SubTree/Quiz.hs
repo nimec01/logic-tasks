@@ -2,10 +2,11 @@
 
 module Tasks.SubTree.Quiz(
     feedback,
-    genSubTreeInst,
+    generateSubTreeInst,
+    genSubTreeInst
 ) where
 
-import Test.QuickCheck (generate)
+import Test.QuickCheck (generate, Gen)
 import Generate (genSynTreeSubTreeExc)
 import Data.Set (Set, isSubsetOf, size, map)
 
@@ -16,10 +17,12 @@ import Types (allNotLeafSubTrees, SynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
 
-
 genSubTreeInst :: SubTreeConfig -> IO SubTreeInst
-genSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- generate (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees)
+genSubTreeInst subTreeConfig = generate (generateSubTreeInst subTreeConfig)
+
+generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
+generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
+    tree <- genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { minInputTrees = minSubTrees
