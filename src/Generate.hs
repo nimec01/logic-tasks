@@ -6,7 +6,6 @@ module Generate(
  genSynTreeSubTreeExc,
  noSameSubTree,
  similarExist,
- consecutiveNegations
 ) where
 
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
@@ -37,20 +36,24 @@ randomList availableLetters atLeastOccurring len = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-consecutiveNegations :: SynTree a -> Int -> Int -> Int
-consecutiveNegations (And a b) _ continueNegations = max (consecutiveNegations a continueNegations 0) (consecutiveNegations b continueNegations 0)
-consecutiveNegations (Or a b) _ continueNegations = max (consecutiveNegations a continueNegations 0) (consecutiveNegations b continueNegations 0)
-consecutiveNegations (Impl a b) _ continueNegations = max (consecutiveNegations a continueNegations 0) (consecutiveNegations b continueNegations 0)
-consecutiveNegations (Equi a b) _ continueNegations = max (consecutiveNegations a continueNegations 0) (consecutiveNegations b continueNegations 0)
-consecutiveNegations (Not a) maxNegations continueNegations = let continueNegations' = (1 + continueNegations) in consecutiveNegations a (max continueNegations' maxNegations) (1 + continueNegations)
-consecutiveNegations (Leaf _) maxNegations _  = maxNegations
+consecutiveNegations :: SynTree a -> Int
+consecutiveNegations (And a b) = max (consecutiveNegations a) (consecutiveNegations b)
+consecutiveNegations (Or a b) = max (consecutiveNegations a) (consecutiveNegations b)
+consecutiveNegations (Impl a b) = max (consecutiveNegations a) (consecutiveNegations b)
+consecutiveNegations (Equi a b) = max (consecutiveNegations a) (consecutiveNegations b)
+consecutiveNegations (Not a) = max (consecutiveNegations a) (1 + continueNot a)
+consecutiveNegations (Leaf _)  = 0
+
+continueNot :: SynTree a -> Int
+continueNot (Not a) = 1+ continueNot a
+continueNot _ = 0
 
 genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Int -> Gen (SynTree Char)
 genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations =
     if maxConsecutiveNegations /= 0
         then do
         nodes <- choose (minNodes, maxNodes)
-        sample <- syntaxShape nodes maxDepth useImplEqui True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree 0 0 <= maxConsecutiveNegations
+        sample <- syntaxShape nodes maxDepth useImplEqui True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree <= maxConsecutiveNegations
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
         else do
@@ -62,7 +65,6 @@ genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useIm
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree ())
 syntaxShape nodes maxDepth useImplEqui allowNegation
     | not allowNegation && nodes >= 3 = oneof binaryOper
-    | not allowNegation && nodes == 1 = positiveLiteral
     | nodes == 1 = positiveLiteral
     | nodes == 2 = negativeLiteral
     | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof binaryOper

@@ -5,13 +5,14 @@ module SynTreeSpec where
 
 import Data.List.Extra (nubOrd)
 import Data.Maybe (isJust, isNothing)
-import Generate (genSynTree, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes, consecutiveNegations)
+import Generate (genSynTree, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Parsing (formulaParse)
 import Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
 import Types (collectLeaves, treeDepth, treeNodes)
+import Data.List (group)
 
 validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
@@ -19,8 +20,8 @@ validBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNodes' <- choose (1, 20)
   maxNodes' <- choose (minNodes', 25)
-  maxDepth <- choose (minDepthForNodes minNodes', maxNodes')
   maxConsecutiveNegations <- choose(1, 3)
+  maxDepth <- choose (minDepthForNodes minNodes', (maxNodes' `div` (maxConsecutiveNegations + 1)) * maxConsecutiveNegations + (maxNodes' `mod` (maxConsecutiveNegations + 1)))
   let maxNodes = min maxNodes' (maxNodesForDepth maxDepth)
   useChars <- choose (1, maxLeavesForNodes maxNodes)
   let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
@@ -32,7 +33,7 @@ validBoundsSyntr = do
         usedLiterals,
         atLeastOccurring,
         useImplEqui,
-        maxConsecutiveNegations
+        maxConsecutiveNegations = fromIntegral maxConsecutiveNegations
       }
 
 invalidBoundsSyntr :: Gen SynTreeConfig
@@ -79,4 +80,4 @@ spec = do
         forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> consecutiveNegations synTree 0 0 <= maxConsecutiveNegations
+        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> notElem (take (maxConsecutiveNegations + 1) (cycle "~"))  (group (display synTree))
