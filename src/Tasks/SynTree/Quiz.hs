@@ -14,7 +14,7 @@ import Generate (genSynTree)
 
 genSynTreeInst :: SynTreeConfig -> IO SynTreeInst
 genSynTreeInst SynTreeConfig {..} = do
-    tree <- generate (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui)
+    tree <- generate (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations)
     return $ SynTreeInst
       { instSyntree = tree
       , latexImage = transferToPicture tree

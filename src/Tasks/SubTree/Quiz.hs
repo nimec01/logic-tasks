@@ -22,7 +22,7 @@ genSubTreeInst subTreeConfig = generate (generateSubTreeInst subTreeConfig)
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees
+    tree <- genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { minInputTrees = minSubTrees

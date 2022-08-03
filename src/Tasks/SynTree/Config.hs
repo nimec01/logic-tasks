@@ -20,12 +20,15 @@ data SynTreeConfig =
   , usedLiterals :: String
   , atLeastOccurring :: Integer
   , useImplEqui :: Bool
+  , maxConsecutiveNegations :: Int
   } deriving Show
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
 checkSynTreeConfig SynTreeConfig {..}
     | any (not . isLetter) usedLiterals
       = Just "Only letters are allowed as literals."
+    | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes)
+      = Just "Syntax tree with no negation can not have even nodes"
     | minNodes < 1
       = Just "Minimal number of nodes must be positive."
     | maxNodes < minNodes
@@ -53,6 +56,7 @@ defaultSynTreeConfig =
     , usedLiterals = "ABCDE"
     , atLeastOccurring = 3
     , useImplEqui = False
+    , maxConsecutiveNegations = 2
     }
 
 data SynTreeInst =

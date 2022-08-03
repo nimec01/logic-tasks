@@ -51,19 +51,19 @@ spec = do
     describe "genSynTreeSubTreeExc" $ do
         it "parse should works well" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
+            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
                 \synTree ->subTreeStringParse (displaySubTrees (toList (allNotLeafSubTrees synTree))) == Right (allNotLeafSubTrees synTree)
         it "parse should works well" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
+            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
                 \synTree -> subFormulasStringParse (filter (/= ' ') (displaySubTrees (toList (allNotLeafSubTrees synTree)))) == Right (Data.Set.map display (allNotLeafSubTrees synTree))
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
+            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
                 \synTree -> fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
         it "it should generate the Syntax tree without Duple tree when don't allow Duple Tree" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree minSubTrees) $
+            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
                 \synTree -> allowDupelTree || noSameSubTree synTree
     describe "generateSubTreeInst" $
         it "the correct store in Inst should be accept by feedback" $

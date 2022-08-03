@@ -25,7 +25,7 @@ genLegalPropositionInst lPConfig = generate (generateLegalPropositionInst lPConf
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
 generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    treeList <- vectorOf (fromIntegral formulas) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) `suchThat` (not . similarExist)
+    treeList <- vectorOf (fromIntegral formulas) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) `suchThat` (not . similarExist)
     serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd list ==list)
     serialsOfBracket <- vectorOf (fromIntegral bracketFormulas) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd (list ++ serialsOfWrong) ==list ++ serialsOfWrong)
     pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` noSimilarFormulas

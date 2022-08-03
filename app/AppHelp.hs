@@ -22,5 +22,6 @@ determineBaseConfig initSynTreeConfig = do
   maxNodes' <- offerChange "maxNodes" maxNodes
   maxDepth' <- offerChange "maxDepth" maxDepth
   atLeastOccurring' <- offerChange "atLeastOccurring" atLeastOccurring
-  let newConfig = initSynTreeConfig { minNodes = minNodes', maxNodes = maxNodes', maxDepth = maxDepth', atLeastOccurring = atLeastOccurring' }
+  maxConsecutiveNegations' <- offerChange "maxConsecutiveNegations" maxConsecutiveNegations
+  let newConfig = initSynTreeConfig { minNodes = minNodes', maxNodes = maxNodes', maxDepth = maxDepth', atLeastOccurring = atLeastOccurring', maxConsecutiveNegations = maxConsecutiveNegations'}
   return newConfig

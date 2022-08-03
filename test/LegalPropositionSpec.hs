@@ -68,12 +68,12 @@ spec = do
     describe "illegalDisplay" $
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
                     forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $
         it "the String after bracketDisplay just add a bracket " $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui) $ \synTree ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
                     forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
