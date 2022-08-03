@@ -20,7 +20,7 @@ data SynTreeConfig =
   , usedLiterals :: String
   , atLeastOccurring :: Integer
   , useImplEqui :: Bool
-  , maxConsecutiveNegations :: Int
+  , maxConsecutiveNegations :: Integer
   } deriving Show
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
@@ -28,7 +28,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | any (not . isLetter) usedLiterals
       = Just "Only letters are allowed as literals."
     | maxConsecutiveNegations < 0
-      = Just "maximal consecutive negations can not less than 0"
+      = Just "Minimal number of consecutive negations must not be negative"
     | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes)
       = Just "Syntax tree with no negation can not have even nodes"
     | minNodes < 1
@@ -45,7 +45,7 @@ checkSynTreeConfig SynTreeConfig {..}
       = Just "Your minimum number of nodes does not permit enough leaves for all desired literals."
     | maxNodes > maxNodesForDepth maxDepth
       = Just "Your minimum number of nodes is larger than what your maximum depth enables."
-    | fromIntegral maxDepth > (fromIntegral maxNodes `div` (maxConsecutiveNegations + 1)) * maxConsecutiveNegations + (fromIntegral maxNodes `mod` (maxConsecutiveNegations + 1))
+    | maxDepth > 1 + (maxNodes - 1) `div` (maxConsecutiveNegations + 2) * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations ((maxNodes - 1) `mod` (maxConsecutiveNegations + 2))
       = Just "A tree cannot be deeper than the maximum depth you set."
     | otherwise = Nothing
 

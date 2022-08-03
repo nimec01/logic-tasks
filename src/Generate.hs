@@ -48,12 +48,12 @@ continueNot :: SynTree a -> Int
 continueNot (Not a) = 1+ continueNot a
 continueNot _ = 0
 
-genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Int -> Gen (SynTree Char)
+genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Integer -> Gen (SynTree Char)
 genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations =
     if maxConsecutiveNegations /= 0
         then do
         nodes <- choose (minNodes, maxNodes)
-        sample <- syntaxShape nodes maxDepth useImplEqui True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree <= maxConsecutiveNegations
+        sample <- syntaxShape nodes maxDepth useImplEqui True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree <= fromIntegral maxConsecutiveNegations
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
         else do
@@ -64,9 +64,9 @@ genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useIm
 
 syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree ())
 syntaxShape nodes maxDepth useImplEqui allowNegation
-    | not allowNegation && nodes >= 3 = oneof binaryOper
     | nodes == 1 = positiveLiteral
     | nodes == 2 = negativeLiteral
+    | not allowNegation = oneof binaryOper
     | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof binaryOper
     | otherwise = oneof $ negativeForm : binaryOper
     where
@@ -104,7 +104,7 @@ noSameSubTree synTree = let treeList = getNotLeafSubTrees synTree
     in
         treeList == nubOrd treeList
 -- generate subTree exercise
-genSynTreeSubTreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Int -> Integer -> Gen (SynTree Char)
+genSynTreeSubTreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Integer -> Gen (SynTree Char)
 genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees =
     let
         syntaxTree = genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations
