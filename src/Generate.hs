@@ -36,7 +36,7 @@ randomList availableLetters atLeastOccurring len = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-consecutiveNegations :: SynTree a -> Int
+consecutiveNegations :: SynTree a -> Integer
 consecutiveNegations (And a b) = max (consecutiveNegations a) (consecutiveNegations b)
 consecutiveNegations (Or a b) = max (consecutiveNegations a) (consecutiveNegations b)
 consecutiveNegations (Impl a b) = max (consecutiveNegations a) (consecutiveNegations b)
@@ -44,7 +44,7 @@ consecutiveNegations (Equi a b) = max (consecutiveNegations a) (consecutiveNegat
 consecutiveNegations (Not a) = max (consecutiveNegations a) (1 + continueNot a)
 consecutiveNegations (Leaf _)  = 0
 
-continueNot :: SynTree a -> Int
+continueNot :: SynTree a -> Integer
 continueNot (Not a) = 1+ continueNot a
 continueNot _ = 0
 
@@ -53,7 +53,7 @@ genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useIm
     if maxConsecutiveNegations /= 0
         then do
         nodes <- choose (minNodes, maxNodes)
-        sample <- syntaxShape nodes maxDepth useImplEqui True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree <= fromIntegral maxConsecutiveNegations
+        sample <- syntaxShape nodes maxDepth useImplEqui True `suchThat` \synTree -> (fromIntegral (length (collectLeaves synTree)) >= atLeastOccurring) && consecutiveNegations synTree <= maxConsecutiveNegations
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
         else do

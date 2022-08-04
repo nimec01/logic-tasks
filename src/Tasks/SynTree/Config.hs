@@ -45,7 +45,9 @@ checkSynTreeConfig SynTreeConfig {..}
       = Just "Your minimum number of nodes does not permit enough leaves for all desired literals."
     | maxNodes > maxNodesForDepth maxDepth
       = Just "Your minimum number of nodes is larger than what your maximum depth enables."
-    | maxDepth > 1 + (maxNodes - 1) `div` (maxConsecutiveNegations + 2) * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations ((maxNodes - 1) `mod` (maxConsecutiveNegations + 2))
+    | let maxNodes' = maxNodes - 1
+          maxConsecutiveNegations' = maxConsecutiveNegations + 2
+          (result, rest) = maxNodes' `divMod` maxConsecutiveNegations', maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
       = Just "A tree cannot be deeper than the maximum depth you set."
     | otherwise = Nothing
 

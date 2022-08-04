@@ -20,7 +20,10 @@ validBoundsSyntr = do
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNodes' <- choose (1, 20) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
   maxNodes' <- choose (minNodes', 25) `suchThat` \maxNodes' -> maxConsecutiveNegations /= 0 || odd maxNodes'
-  maxDepth <- choose (minDepthForNodes minNodes', 1 + (maxNodes' - 1) `div` (maxConsecutiveNegations + 2) * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations ((maxNodes' - 1) `mod` (maxConsecutiveNegations + 2)))
+  let maxNodes'' = maxNodes' - 1
+      maxConsecutiveNegations' = maxConsecutiveNegations + 2
+      (result, rest) = maxNodes'' `divMod` maxConsecutiveNegations'
+  maxDepth <- choose (minDepthForNodes minNodes', 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest)
   let maxNodes = min maxNodes' (maxNodesForDepth maxDepth)
   useChars <- choose (1, maxLeavesForNodes maxNodes)
   let atLeastOccurring = min useChars (fromIntegral (length usedLiterals))
@@ -32,7 +35,7 @@ validBoundsSyntr = do
         usedLiterals,
         atLeastOccurring,
         useImplEqui,
-        maxConsecutiveNegations = fromIntegral maxConsecutiveNegations
+        maxConsecutiveNegations
       }
 
 invalidBoundsSyntr :: Gen SynTreeConfig
@@ -79,4 +82,4 @@ spec = do
         forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> not (isInfixOf (take (fromIntegral maxConsecutiveNegations + 1) (cycle "~")) (display synTree))
+        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` display synTree)
