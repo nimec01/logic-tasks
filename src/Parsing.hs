@@ -29,7 +29,7 @@ lexeme p = do
     whitespace
     return x
 
-leafE :: Parser (SynTree Op Char)
+leafE :: Parser (SynTree o Char)
 leafE =
     Leaf <$> lexeme (satisfy isLetter)
 

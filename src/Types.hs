@@ -35,10 +35,10 @@ numberAllNodes = flip evalState 1 . go
       go (Binary o t1 t2) = do { l <- next; t1' <- go t1; t2' <- go t2; return (Binary (o,l) t1' t2') }
       next = do {current <- get; put (current + 1); return current}
 
-collectLeaves :: SynTree Op c -> [c]
+collectLeaves :: SynTree o c -> [c]
 collectLeaves = foldMap ( : [])
 
-relabelShape :: SynTree Op () -> [c] -> SynTree Op c
+relabelShape :: SynTree o () -> [c] -> SynTree o c
 relabelShape shape contents =
     let (tree,[])
           = runState (traverse adorn shape) contents
@@ -48,7 +48,7 @@ relabelShape shape contents =
       adorn _ =
         do {current <- get; put (tail current); return (head current)}
 
-getNotLeafSubTrees :: SynTree Op c -> [SynTree Op c]
+getNotLeafSubTrees :: SynTree o c -> [SynTree o c]
 getNotLeafSubTrees t@(Binary _ a b) = getNotLeafSubTrees a ++ (t : getNotLeafSubTrees b)
 getNotLeafSubTrees (Leaf _) =  []
 getNotLeafSubTrees t@(Unary _ a) = t : getNotLeafSubTrees a
@@ -56,12 +56,12 @@ getNotLeafSubTrees t@(Unary _ a) = t : getNotLeafSubTrees a
 allNotLeafSubTrees :: Ord c => SynTree Op c -> Set (SynTree Op c)
 allNotLeafSubTrees a = fromList (getNotLeafSubTrees a)
 
-treeNodes :: SynTree Op c -> Integer
+treeNodes :: SynTree o c -> Integer
 treeNodes (Binary _ a b) = 1 + treeNodes a + treeNodes b
 treeNodes (Leaf _) =  1
 treeNodes (Unary _ a) = 1 + treeNodes a
 
-treeDepth :: SynTree Op c -> Integer
+treeDepth :: SynTree o c -> Integer
 treeDepth (Unary _ a) = 1 + treeDepth a
 treeDepth (Leaf _) = 1
 treeDepth (Binary _ a b) = 1 + max (treeDepth a) (treeDepth b)

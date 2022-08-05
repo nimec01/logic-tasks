@@ -24,10 +24,10 @@ maxNodesForDepth depth = 2 ^ depth - 1
 maxLeavesForNodes :: Integer -> Integer
 maxLeavesForNodes nodes = (nodes + 1) `div` 2
 
-chooseList :: Bool -> [SynTree Op c -> SynTree Op c -> SynTree Op c]
+chooseList :: Bool -> [Op]
 chooseList useImplEqui = if useImplEqui
-        then [Binary And, Binary Or, Binary Impl, Binary Equi]
-        else [Binary And, Binary Or]
+        then [And, Or, Impl, Equi]
+        else [And, Or]
 
 randomList :: [c] -> [c] -> Integer -> Gen [c]
 randomList availableLetters atLeastOccurring len = let
@@ -37,10 +37,7 @@ randomList availableLetters atLeastOccurring len = let
         shuffle (atLeastOccurring ++ randomRest)
 
 consecutiveNegations :: SynTree Op a -> Integer
-consecutiveNegations (Binary And a b) = max (consecutiveNegations a) (consecutiveNegations b)
-consecutiveNegations (Binary Or a b) = max (consecutiveNegations a) (consecutiveNegations b)
-consecutiveNegations (Binary Impl a b) = max (consecutiveNegations a) (consecutiveNegations b)
-consecutiveNegations (Binary Equi a b) = max (consecutiveNegations a) (consecutiveNegations b)
+consecutiveNegations (Binary _ a b) = max (consecutiveNegations a) (consecutiveNegations b)
 consecutiveNegations (Unary Not a) = max (consecutiveNegations a) (1 + continueNot a)
 consecutiveNegations (Leaf _)  = 0
 consecutiveNegations _ = error "All cases handled!"
@@ -71,7 +68,7 @@ syntaxShape nodes maxDepth useImplEqui allowNegation
     | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof binaryOper
     | otherwise = oneof $ negativeForm : binaryOper
     where
-        binaryOper = map (binaryOperator nodes maxDepth useImplEqui allowNegation) $ chooseList useImplEqui
+        binaryOper = map (binaryOperator nodes maxDepth useImplEqui allowNegation . Binary) $ chooseList useImplEqui
         negativeForm = negativeFormula nodes maxDepth useImplEqui
 
 binaryOperator :: Integer -> Integer -> Bool -> Bool -> (SynTree Op () -> SynTree Op () -> SynTree Op ()) -> Gen (SynTree Op ())
@@ -96,11 +93,11 @@ negativeFormula nodes maxDepth useImplEqui =
 negativeLiteral ::  Gen (SynTree Op ())
 negativeLiteral = Unary Not <$> positiveLiteral
 
-positiveLiteral :: Gen (SynTree Op ())
+positiveLiteral :: Gen (SynTree o ())
 positiveLiteral = return (Leaf ())
 
 --------------------------------------------------------------------------------------------------------------
-noSameSubTree :: Ord c => SynTree Op c -> Bool
+noSameSubTree :: (Eq o, Ord o, Ord c) => SynTree o c -> Bool
 noSameSubTree synTree = let treeList = getNotLeafSubTrees synTree
     in
         treeList == nubOrd treeList
@@ -112,11 +109,11 @@ genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccur
     in
         syntaxTree `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
 -------------------------------------------------------------------------------------------------------------------
-similarTree :: SynTree Op Char -> SynTree Op Char -> Bool
+similarTree :: Eq o => SynTree o c -> SynTree o c -> Bool
 similarTree (Binary o1 a b) (Binary o2 c d) | o1 == o2 = similarTree a c && similarTree b d
 similarTree (Unary o1 a) (Unary o2 c) | o1 == o2 = similarTree a c
 similarTree (Leaf _) (Leaf _) = True
 similarTree _ _ = False
 
-similarExist :: [SynTree Op Char] -> Bool
+similarExist :: Eq o => [SynTree o c] -> Bool
 similarExist trees = length (nubBy similarTree trees) /= length trees

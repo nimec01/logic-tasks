@@ -52,10 +52,7 @@ allocateBracketToSubtree notFirstLayer a b usedOperator = do
 
 
 notAndLeaves :: SynTree Op c -> Int
-notAndLeaves (Binary And a b) = notAndLeaves a + notAndLeaves b
+notAndLeaves (Binary _ a b) = notAndLeaves a + notAndLeaves b
 notAndLeaves (Leaf _) =  1
-notAndLeaves (Binary Or a b) =  notAndLeaves a + notAndLeaves b
 notAndLeaves (Unary Not a) = 1 + notAndLeaves a
-notAndLeaves (Binary Impl a b) = notAndLeaves a + notAndLeaves b
-notAndLeaves (Binary Equi a b) = notAndLeaves a + notAndLeaves b
 notAndLeaves _ = error "All cases handled!"
