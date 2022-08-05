@@ -3,6 +3,7 @@ module Print(
     display,
     displaySubTrees,
     normalShow,
+    showOperator
     ) where
 
 import Types (SynTree(..), Op(..))
@@ -18,21 +19,15 @@ transferToPicture (Binary Equi a b) = "[ $\\Leftrightarrow  $ " ++ transferToPic
 transferToPicture _ = error "All cases handled!"
 
 display :: SynTree Op Char -> String
-display (Binary And a b) = normalShow a ++ "/\\" ++ normalShow b
+display (Binary oper a b) = normalShow a ++ showOperator oper ++ normalShow b
 display (Leaf a)=  a : ""
-display (Binary Or a b) = normalShow a ++ "\\/" ++ normalShow b
 display (Unary Not a) = "~" ++ normalShow a ++ ""
-display (Binary Impl a b) = normalShow a ++ "=>" ++ normalShow b
-display (Binary Equi a b) = normalShow a ++ "<=>" ++ normalShow b
 display _ = error "All cases handled!"
 
 normalShow :: SynTree Op Char -> String
-normalShow (Binary And a b) = "(" ++ normalShow a ++ "/\\" ++ normalShow b ++ ")"
+normalShow (Binary oper a b) = "(" ++ normalShow a ++ showOperator oper ++ normalShow b ++ ")"
 normalShow (Leaf a)=  a : ""
-normalShow (Binary Or a b) = "(" ++ normalShow a ++ "\\/" ++ normalShow b ++ ")"
 normalShow (Unary Not a) = "~" ++ normalShow a
-normalShow (Binary Impl a b) = "(" ++ normalShow a ++ "=>" ++ normalShow b ++ ")"
-normalShow (Binary Equi a b) = "(" ++ normalShow a ++ "<=>" ++ normalShow b ++ ")"
 normalShow _ = error "All cases handled!"
 
 displaySubTrees :: [SynTree Op Char] -> String
@@ -40,3 +35,10 @@ displaySubTrees trees = "{" ++ showTrees trees ++ "}"
 
 showTrees :: [SynTree Op Char] -> String
 showTrees synTreeList = intercalate ", " (map display synTreeList)
+
+showOperator :: Op -> String
+showOperator And = "/\\"
+showOperator Or = "\\/"
+showOperator Impl = "=>"
+showOperator Equi = "<=>"
+showOperator Not = "~"

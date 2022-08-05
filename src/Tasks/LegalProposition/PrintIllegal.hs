@@ -5,7 +5,7 @@ module Tasks.LegalProposition.PrintIllegal (
 import Test.QuickCheck (Gen, frequency, elements)
 
 import Types (SynTree(..), Op(..), treeNodes, collectLeaves)
-import Print (normalShow)
+import Print (normalShow, showOperator)
 
 illegalDisplay :: SynTree Op Char -> Gen String
 illegalDisplay synTree =
@@ -20,10 +20,7 @@ ifUseIllegal useBug notFirstLayer synTree usedLiterals =
        else frequency [(1, implementIllegal notFirstLayer synTree usedLiterals), (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedLiterals)]
 
 subTreeIllegal ::Bool -> SynTree Op Char -> String -> Gen String
-subTreeIllegal notFirstLayer (Binary And a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "/\\"
-subTreeIllegal notFirstLayer (Binary Or a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "\\/"
-subTreeIllegal notFirstLayer (Binary Equi a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "<=>"
-subTreeIllegal notFirstLayer (Binary Impl a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals "=>"
+subTreeIllegal notFirstLayer (Binary oper a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator oper)
 subTreeIllegal _ (Unary Not a) usedLiterals = do
     left <- ifUseIllegal True True a usedLiterals
     return ("~" ++ left)
@@ -55,10 +52,7 @@ combineNormalShow a b replacedOperator True = return ("(" ++ normalShow a ++ rep
 
 
 implementIllegal :: Bool -> SynTree Op Char -> String -> Gen String
-implementIllegal notFirstLayer (Binary And a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals "/\\"
-implementIllegal notFirstLayer (Binary Or a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals "\\/"
-implementIllegal notFirstLayer (Binary Equi a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals "<=>"
-implementIllegal notFirstLayer (Binary Impl a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals "=>"
+implementIllegal notFirstLayer (Binary oper a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals (showOperator oper)
 implementIllegal _ (Unary Not a) usedLiterals = do
     letter <- elements usedLiterals
     elements  $ map (++ normalShow a) ["/\\", "\\/", "=>", "<=>", [letter]]

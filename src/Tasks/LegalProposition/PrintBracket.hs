@@ -5,17 +5,14 @@ module Tasks.LegalProposition.PrintBracket (
 import Test.QuickCheck (Gen, elements, frequency)
 
 import Types (SynTree(..), Op(..))
-import Print (normalShow)
+import Print (normalShow,showOperator)
 
 bracketDisplay :: SynTree Op Char -> Gen String
-bracketDisplay (Binary And a b) = allocateBracketToSubtree False a b "/\\"
+bracketDisplay (Binary oper a b) = allocateBracketToSubtree False a b (showOperator oper)
 bracketDisplay (Leaf a)=  return ("("++ (a : ")"))
-bracketDisplay (Binary Or a b) = allocateBracketToSubtree False a b "\\/"
 bracketDisplay (Unary Not a) = do
     aFormula <- ifUsebracket True a
     return ('~' : aFormula)
-bracketDisplay (Binary Equi a b) = allocateBracketToSubtree False a b "<=>"
-bracketDisplay (Binary Impl a b) = allocateBracketToSubtree False a b "=>"
 bracketDisplay _ = error "All cases handled!"
 
 ifUsebracket :: Bool -> SynTree Op Char -> Gen String
@@ -31,10 +28,7 @@ ifUsebracket usebracket synTree@(Binary _ _ _) =
 ifUsebracket _ _ = error "All cases handled!"
 
 subTreebracket :: SynTree Op Char -> Gen String
-subTreebracket (Binary And a b) = allocateBracketToSubtree True a b "/\\"
-subTreebracket (Binary Or a b) = allocateBracketToSubtree True a b "\\/"
-subTreebracket (Binary Equi a b) = allocateBracketToSubtree True a b "<=>"
-subTreebracket (Binary Impl a b) = allocateBracketToSubtree True a b "=>"
+subTreebracket (Binary oper a b) = allocateBracketToSubtree True a b (showOperator oper)
 subTreebracket (Unary Not a) = do
     left <- ifUsebracket True a
     return ("~" ++ left)
