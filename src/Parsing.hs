@@ -12,7 +12,7 @@ import Data.Char (isLetter)
 import Text.Parsec (eof, ParseError, parse, sepBy, many, many1, (<|>))
 import Data.Set (fromList, Set)
 
-import Types (SynTree(..))
+import Types (SynTree(..), Op(..))
 import Text.Parsec.String (Parser)
 
 formulaSymbol :: Parser Char
@@ -29,45 +29,45 @@ lexeme p = do
     whitespace
     return x
 
-leafE :: Parser (SynTree Char)
+leafE :: Parser (SynTree Op Char)
 leafE =
     Leaf <$> lexeme (satisfy isLetter)
 
-notE :: Parser (SynTree Char)
+notE :: Parser (SynTree Op Char)
 notE = do
     lexeme $ char '~'
-    Not <$> parserT
+    Unary Not <$> parserT
 
-parserTtoS :: Parser (SynTree Char)
+parserTtoS :: Parser (SynTree Op Char)
 parserTtoS = do
    lexeme $ char '('
    e <- parserS
    lexeme $ char ')'
    return e
 
-parserT :: Parser (SynTree Char)
+parserT :: Parser (SynTree Op Char)
 parserT = leafE <|> parserTtoS <|> notE
 
-parserS :: Parser (SynTree Char)
+parserS :: Parser (SynTree Op Char)
 parserS = do
     firstT <- parserT
-    (lexeme (string "/\\") >> And firstT <$> parserT) <|>
-      (lexeme (string "\\/") >> Or firstT <$> parserT) <|>
-      (lexeme (string "=>") >> Impl firstT <$> parserT) <|>
-      (lexeme (string "<=>") >> Equi firstT <$> parserT) <|>
+    (lexeme (string "/\\") >> Binary And firstT <$> parserT) <|>
+      (lexeme (string "\\/") >> Binary Or firstT <$> parserT) <|>
+      (lexeme (string "=>") >> Binary Impl firstT <$> parserT) <|>
+      (lexeme (string "<=>") >> Binary Equi firstT <$> parserT) <|>
       return firstT
 
-formulaParse :: String -> Either ParseError (SynTree Char)
+formulaParse :: String -> Either ParseError (SynTree Op Char)
 formulaParse = parse (whitespace >> parserS <* eof) ""
 -----------------------------------------------------------------------------------
-subTreeParse :: Parser (Set (SynTree Char))
+subTreeParse :: Parser (Set (SynTree Op Char))
 subTreeParse = do
     lexeme $ char '{'
     subTreelist <- parserS `sepBy` lexeme (char ',')
     lexeme $ char '}'
     return $ fromList subTreelist
 
-subTreeStringParse :: String -> Either ParseError (Set(SynTree Char))
+subTreeStringParse :: String -> Either ParseError (Set(SynTree Op Char))
 subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
 
 subFormulasParse :: Parser (Set String)

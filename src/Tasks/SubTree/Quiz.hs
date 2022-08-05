@@ -13,7 +13,7 @@ import Data.Set (Set, isSubsetOf, size, map)
 import Parsing (subFormulasStringParse, subTreeStringParse)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), SubTreeInst)
 import Print (display)
-import Types (allNotLeafSubTrees, SynTree)
+import Types (allNotLeafSubTrees, SynTree, Op)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
 
@@ -34,6 +34,6 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
 feedback :: SubTreeInst -> String -> Bool
 feedback SubTreeInst {correctFormulas, correctTrees, minInputTrees} input = judgeInput (subTreeStringParse input) (subFormulasStringParse (filter (/= ' ') input)) minInputTrees correctFormulas correctTrees
 
-judgeInput :: Either ParseError (Set (SynTree Char)) -> Either ParseError (Set String) -> Integer -> Set String -> Set (SynTree Char) -> Bool
+judgeInput :: Either ParseError (Set (SynTree Op Char)) -> Either ParseError (Set String) -> Integer -> Set String -> Set (SynTree Op Char) -> Bool
 judgeInput (Right inputTreesSet) (Right inputFormulasSet) minInputTrees correctFormulas correctTrees = inputTreesSet `isSubsetOf` correctTrees && inputFormulasSet `isSubsetOf` correctFormulas && fromIntegral (size inputFormulasSet) >= minInputTrees
 judgeInput _ _ _ _ _ = False
