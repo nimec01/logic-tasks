@@ -24,10 +24,11 @@ ifUsebracket usebracket synTree@(Unary Not a) = let addPositions = notAndLeaves 
     if not usebracket
     then return (normalShow synTree)
     else frequency [(1, return("(~"++ normalShow a ++ ")")), (addPositions, subTreebracket synTree)]
-ifUsebracket usebracket synTree =
+ifUsebracket usebracket synTree@(Binary _ _ _) =
     if not usebracket
     then return (normalShow synTree)
     else subTreebracket synTree
+ifUsebracket _ _ = error "All cases handled!"
 
 subTreebracket :: SynTree Op Char -> Gen String
 subTreebracket (Binary And a b) = allocateBracketToSubtree True a b "/\\"

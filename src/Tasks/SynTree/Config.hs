@@ -48,7 +48,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | let maxNodes' = maxNodes - 1
           maxConsecutiveNegations' = maxConsecutiveNegations + 2
           (result, rest) = maxNodes' `divMod` maxConsecutiveNegations', maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
-      = Just "A tree cannot be deeper than the maximum depth you set."
+      = Just "Your maximum depth value is unreasonably large, given your other settings."
     | otherwise = Nothing
 
 defaultSynTreeConfig :: SynTreeConfig

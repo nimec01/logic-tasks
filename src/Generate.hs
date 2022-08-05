@@ -113,11 +113,8 @@ genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccur
         syntaxTree `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
 -------------------------------------------------------------------------------------------------------------------
 similarTree :: SynTree Op Char -> SynTree Op Char -> Bool
-similarTree (Binary And a b) (Binary And c d) = similarTree a c && similarTree b d
-similarTree (Binary Or a b) (Binary Or c d) = similarTree a c && similarTree b d
-similarTree (Binary Impl a b) (Binary Impl c d) = similarTree a c && similarTree b d
-similarTree (Binary Equi a b) (Binary Equi c d) = similarTree a c && similarTree b d
-similarTree (Unary Not a) (Unary Not c) = similarTree a c
+similarTree (Binary o1 a b) (Binary o2 c d) | o1 == o2 = similarTree a c && similarTree b d
+similarTree (Unary o1 a) (Unary o2 c) | o1 == o2 = similarTree a c
 similarTree (Leaf _) (Leaf _) = True
 similarTree _ _ = False
 
