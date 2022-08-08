@@ -96,21 +96,24 @@ start = (Literal ' ', mkClause [])
 
 
 
-partialGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> Maybe (LangM m)
-partialGrade StepInst{..} sol
-    | not (fst sol `Set.member` availLits) =
-        Just $ translate $ do
-          german "Das gewählte Literal kommt in den Klauseln nicht vor."
-          english "The chosen literal is not contained in any of the clauses."
+partialGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> LangM m
+partialGrade StepInst{..} sol = do
+  prevent (not (fst sol `Set.member` availLits)) $
+    translate $ do
+      german "Das gewählte Literal kommt in einer der Klauseln vor?"
+      english "The chosen literal is contained in any of the clauses?"
 
-    | not (null extra) =
-        Just $ paragraph $ do
-          translate $ do
-            german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
-            english "The resolvent contains unknown literals. These literals are incorrect:"
-          itemizeM $ map (text . show) extra
-
-    | otherwise = Nothing
+  preventWithHint (not $ null extra)
+    (translate $ do
+      german "Resolvente besteht aus bekannten Literalen?"
+      english "Resolvent contains only known literals?"
+    )
+    (paragraph $ do
+      translate $ do
+        german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
+        english "The resolvent contains unknown literals. These literals are incorrect:"
+      itemizeM $ map (text . show) extra
+    )
 
   where
      availLits = Set.fromList (literals clause1) `Set.union` Set.fromList (literals clause2)
@@ -119,15 +122,15 @@ partialGrade StepInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> Maybe (LangM m)
+completeGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> LangM m
 completeGrade StepInst{..} sol =
     case resolve clause1 clause2 (fst sol) of
-        Nothing -> Just $ translate $ do
+        Nothing -> refuse $ indent $ translate $ do
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
                      english "This literal can not be used for a resolution step!"
 
         Just solClause -> if (solClause == snd sol)
-                            then Nothing
-                            else Just $ translate $ do
+                            then pure()
+                            else refuse $ indent $ translate $ do
                                    german "Resolvente ist nicht korrekt."
                                    english "Resolvent is not correct."
