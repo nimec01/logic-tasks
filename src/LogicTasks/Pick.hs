@@ -75,7 +75,6 @@ verifyStatic PickInst{..}
 verifyQuiz :: OutputMonad m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
-
     | amountOfOptions < 2 =
         refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."
@@ -98,19 +97,19 @@ start = Number Nothing
 
 
 
-partialGrade :: OutputMonad m => PickInst -> Number -> Maybe (LangM m)
-partialGrade _ _ = Nothing
+partialGrade :: OutputMonad m => PickInst -> Number -> LangM m
+partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => PickInst -> Number -> Maybe (LangM m)
+completeGrade :: OutputMonad m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} sol =
-    case sol of Number Nothing -> Just $ translate $ do
+    case sol of Number Nothing -> refuse $ indent $ translate $ do
                                     german "Es wurde kein Index angegeben."
                                     english "You did not give an index."
                 Number (Just index) ->
-                  if index == correct then Nothing
-                                      else Just $ translate $ do
+                  if index == correct then pure()
+                                      else refuse $ indent $ translate $ do
                                              german "Der gewählte Index ist falsch."
                                              english "You submitted the wrong index."
 
