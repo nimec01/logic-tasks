@@ -22,7 +22,8 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate
+  translate,
+  refuse
   )
 
 
@@ -116,20 +117,20 @@ verifyStatic ResolutionInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => ResolutionConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => ResolutionConfig -> LangM m
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die Mindestschritte müssen größer als 0 sein."
           english "The minimal amount of steps must be greater than 0."
 
     | maxClauseLength baseConf == 1 && minSteps > 1 =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
           english "More than one step using only length 1 clauses is not possible."
 
     | minSteps > 2 * length (usedLiterals baseConf) =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of literals."
 

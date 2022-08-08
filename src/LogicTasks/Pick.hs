@@ -19,7 +19,8 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate
+  translate,
+  refuse
   )
 
 
@@ -71,17 +72,17 @@ verifyStatic PickInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => PickConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => PickConfig -> LangM m
 verifyQuiz PickConfig{..}
 
 
     | amountOfOptions < 2 =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Es muss mindestens zwei Optionen geben."
           english "At least two options need to be given."
 
     | amountOfOptions > 4*2^ length (usedLiterals base) =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
           english "The amount of options is higher than the amount of possible, distinct formulae."
 

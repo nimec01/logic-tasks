@@ -19,7 +19,8 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate
+  translate,
+  refuse
   )
 
 
@@ -85,7 +86,7 @@ verifyStatic StepInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => StepConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => StepConfig -> LangM m
 verifyQuiz StepConfig{..} = checkBaseConf baseConf
 
 

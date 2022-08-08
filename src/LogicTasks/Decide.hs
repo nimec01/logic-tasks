@@ -83,12 +83,10 @@ verifyStatic DecideInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => DecideConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => DecideConfig -> LangM m
 verifyQuiz DecideConfig{..}
-
-
     | isOutside 1 100 percentageOfChanged =
-        Just $ indent $ translate $ do
+        refuse $ indent $ translate $ do
           english "The percentile of mistakes has to be set between 1 and 100."
           german "Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
 

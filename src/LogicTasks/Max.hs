@@ -21,7 +21,8 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate
+  translate,
+  refuse
   )
 
 
@@ -89,17 +90,17 @@ verifyStatic MaxInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => MinMaxConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..}
 
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
           english "The given restriction on true entries are not in the range of 0 to 100 percent."
 
     | low > high =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
           english "The given restriction on true entries are not a valid range."
 

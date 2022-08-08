@@ -20,7 +20,8 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate
+  translate,
+  refuse
   )
 
 
@@ -71,29 +72,29 @@ verifyStatic PrologInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => PrologConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => PrologConfig -> LangM m
 verifyQuiz PrologConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Mindestens eines der 'length'-Parameter ist negativ."
           english "At least one length parameter is negative."
 
     | minClauseLength > maxClauseLength =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die untere Grenze der Klausellänge ist höher als die obere."
           english "The minimum clause length is greater than the maximum clause length."
 
     | length usedPredicates < minClauseLength =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Zu wenige Literale für diese Klausellänge."
           english "There are not enough literals available for this clause length."
 
     | null usedPredicates =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
 
-    | otherwise = Nothing
+    | otherwise = pure()
 
 
 

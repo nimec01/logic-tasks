@@ -18,7 +18,8 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate
+  translate,
+  refuse
   )
 
 
@@ -81,23 +82,23 @@ verifyStatic FillInst{..}
 
 
 
-verifyQuiz :: OutputMonad m => FillConfig -> Maybe (LangM m)
+verifyQuiz :: OutputMonad m => FillConfig -> LangM m
 verifyQuiz FillConfig{..}
 
 
     | isOutside 1 100 percentageOfGaps =
-        Just $ translate$ do
+        refuse $ translate$ do
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentile of gaps has to be set between 1 and 100."
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
           english "The given restriction on true entries are not in the range of 0 to 100 percent."
 
 
     | low > high =
-        Just $ translate $ do
+        refuse $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
           english "The given restriction on true entries are not a valid range."
 
