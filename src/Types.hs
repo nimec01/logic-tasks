@@ -147,9 +147,9 @@ instance Show Clause where
    show (Clause set) = listShow (Set.toList set)
      where
        listShow :: [Literal] -> String
-       listShow [] = "False"
+       listShow [] = "{ }"
        listShow [x] = show x
-       listShow (x:xs) = show x ++ " OR " ++ listShow xs
+       listShow (x:xs) = show x ++ " \\/ " ++ listShow xs
 
 
 
@@ -276,9 +276,9 @@ instance Show Cnf where
     show (Cnf set) = listShow (Set.toList set)
       where
         listShow :: [Clause] -> String
-        listShow [] = "True"
+        listShow [] = " "
         listShow [x] = show x
-        listShow (x:xs) = "(" ++ show x ++ ") AND (" ++ listShow xs ++ ")"
+        listShow (x:xs) = "(" ++ show x ++ ") /\\ (" ++ listShow xs ++ ")"
 
 
 instance Formula Cnf where
@@ -369,9 +369,9 @@ instance Show Con where
    show (Con set) = listShow (Set.toList set)
      where
        listShow :: [Literal] -> String
-       listShow [] = "True"
+       listShow [] = " "
        listShow [x] = show x
-       listShow (x:xs) = show x ++ " AND " ++ listShow xs
+       listShow (x:xs) = show x ++ " /\\ " ++ listShow xs
 
 
 
@@ -495,9 +495,9 @@ instance Show Dnf where
     show (Dnf set) = listShow (Set.toList set)
       where
         listShow :: [Con] -> String
-        listShow [] = "False"
+        listShow [] = " "
         listShow [x] = show x
-        listShow (x:xs) = "(" ++ show x ++ ") OR (" ++ listShow xs ++ ")"
+        listShow (x:xs) = "(" ++ show x ++ ") \\/ (" ++ listShow xs ++ ")"
 
 
 instance Formula Dnf where
