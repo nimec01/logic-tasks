@@ -28,17 +28,16 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => PickInst -> LangM m
 description PickInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die folgende Formel:"
-    english "Consider the following formula:"
-
-    -- PDoc $ nest 4 $ myText "F = " <+> pretty (cnfs !! (correct - 1))
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die folgende Formel:"
+      english "Consider the following formula:"
+    indent $ code $ "F = " ++ show (cnfs !! (correct - 1))
 
   paragraph $ translate $ do
     german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
     english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
-
-    -- PDoc $ nest 4 $ showIndexedList 120 5 $ map getTable cnfs
+  --indent $ code $ showIndexedList 120 5 $ map getTable cnfs
 
   paragraph $ do
     translate $ do

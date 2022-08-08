@@ -43,11 +43,11 @@ thrd3 (_,_,c) = c
 
 description :: OutputMonad m => ResolutionInst -> LangM m
 description ResolutionInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die folgende Formel in KNF:"
-    english "Consider the following formula in cnf:"
-
-  -- PDoc $ nest 4 $ pretty $ mkCnf clauses
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die folgende Formel in KNF:"
+      english "Consider the following formula in cnf:"
+    indent $ code $ show $ mkCnf clauses
 
   paragraph $ translate $ do
     german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."

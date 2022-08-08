@@ -666,7 +666,7 @@ instance Show PrologLiteral where
     where separated = concat $ intersperse "," $ constants p
           (begin,end) = if polarity p then ("","") else ("not(",")")
 
-newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
+newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic,Show)
 
 
 terms :: PrologClause -> [PrologLiteral]

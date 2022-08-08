@@ -30,13 +30,12 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => PrologInst -> LangM m
 description PrologInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die zwei folgenden Klauseln:"
-    english "Consider the two following clauses:"
-
-    -- PDoc $ nest 4 $ pretty literals1
-
-    -- PDoc $ nest 4 $ pretty literals2
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die zwei folgenden Klauseln:"
+      english "Consider the two following clauses:"
+    indent $ code $ show literals1
+    indent $ code $ show literals2
 
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."

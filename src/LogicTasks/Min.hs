@@ -31,10 +31,11 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => MinInst -> LangM m
 description MinInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die folgende Wahrheitstafel:"
-    english "Consider the following truth table:"
-    --PDoc $ nest 4 $ pretty (getTable dnf)
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die folgende Wahrheitstafel:"
+      english "Consider the following truth table:"
+    indent $ code $ show $ getTable dnf
 
   paragraph $ translate $ do
     german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
@@ -70,7 +71,7 @@ description MinInst{..} = do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-      -- PDoc $ pretty $ mkDnf $ [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+    code $ show $ mkDnf $ [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
 
   paragraph $ text (fromMaybe "" addText)
 

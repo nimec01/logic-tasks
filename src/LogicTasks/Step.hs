@@ -28,13 +28,12 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => StepInst -> LangM m
 description StepInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die zwei folgenden Klauseln:"
-    english "Consider the two following clauses:"
-
-    -- PDoc $ nest 4 $ pretty clause1
-
-    -- PDoc $ nest 4 $ pretty clause2
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die zwei folgenden Klauseln:"
+      english "Consider the two following clauses:"
+    indent $ code $ show clause1
+    indent $ code $ show clause2
 
   paragraph $ translate $ do
     german "Resolvieren Sie die Klauseln und geben Sie die Resolvente an."

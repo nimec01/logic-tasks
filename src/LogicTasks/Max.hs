@@ -31,10 +31,11 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => MaxInst -> LangM m
 description MaxInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die folgende Wahrheitstafel:"
-    english "Consider the following truth table:"
-    -- PDoc $ nest 4 $ pretty (getTable cnf)
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die folgende Wahrheitstafel:"
+      english "Consider the following truth table:"
+    indent $ code $ show $ getTable cnf
 
   paragraph $ translate $ do
     german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
@@ -70,7 +71,7 @@ description MaxInst{..} = do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    -- PDoc $ pretty $ mkCnf $ [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+    code $ show $ mkCnf $ [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
 
   paragraph $ text (fromMaybe "" addText)
 

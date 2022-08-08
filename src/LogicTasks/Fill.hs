@@ -28,15 +28,17 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => FillInst -> LangM m
 description FillInst{..} = do
-  paragraph $ translate $ do
-    german "Betrachten Sie die folgende Formel:"
-    english "Consider the following formula:"
-    -- PDoc $ nest 4 $ myText "F = " <+> pretty cnf
+  paragraph $ do
+    translate $ do
+      german "Betrachten Sie die folgende Formel:"
+      english "Consider the following formula:"
+    indent $ code $ "F = " ++ show cnf
 
-  paragraph $ translate $ do
-    german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
-    english "Fill all blanks in the corresponding truth table with truth values (True or False)."
-    -- PDoc $ nest 4 $ pretty (gapsAt (getTable cnf) missing)
+  paragraph $ do
+    translate $ do
+      german "Füllen Sie in der zugehörigen Wahrheitstafel alle Lücken mit einem passenden Wahrheitswert (Wahr oder Falsch)."
+      english "Fill all blanks in the corresponding truth table with truth values (True or False)."
+    indent $ code $ show $ gapsAt (getTable cnf) missing
 
   paragraph $ translate $ do
     german "Geben Sie als Lösung eine Liste der fehlenden Wahrheitswerte an, wobei das erste Element der Liste der ersten Lücke von oben entspricht, das zweite Element der zweiten Lücke, etc."
