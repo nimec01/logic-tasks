@@ -14,7 +14,7 @@ import Resolution
 
 import qualified Data.Set as Set
 import Data.List (sort)
-import Data.Maybe (fromMaybe, fromJust, isJust)
+import Data.Maybe (fromMaybe, fromJust)
 
 
 import Control.Monad.Output (
@@ -143,30 +143,38 @@ start = []
 
 
 
-partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> Maybe (LangM m)
-partialGrade ResolutionInst{..} sol
-    | isJust checkMapping  = checkMapping
+partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
+partialGrade ResolutionInst{..} sol = do
+  checkMapping
 
-    | not (null wrongLitsSteps) =
-        Just $ paragraph $ do
-          translate $ do
-            german "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
-            english "At least one step contains literals not found in the original formula. "
-          itemizeM $ map (text . show) wrongLitsSteps
+  preventWithHint (not $ null wrongLitsSteps)
+    (translate $ do
+      german "Genutzte Literale kommen in FOrmel vor?"
+      english "Used literals are present in formula?"
+    )
+    (paragraph $ do
+      translate $ do
+        german "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
+        english "At least one step contains literals not found in the original formula. "
+      itemizeM $ map (text . show) wrongLitsSteps
+    )
 
-    | not (null noResolveSteps) =
-        Just $ paragraph $ do
-          translate $ do
-            german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-            english "At least one step is not a valid resolution step. "
-          itemizeM $ map (text . show) noResolveSteps
+  preventWithHint (not $ null noResolveSteps)
+    (translate $ do
+      german "Alle Schritte sind gültig?"
+      english "All steps are valid?"
+    )
+    (paragraph $ do
+      translate $ do
+        german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
+        english "At least one step is not a valid resolution step. "
+      itemizeM $ map (text . show) noResolveSteps
+    )
 
-    | checkEmptyClause =
-        Just $ translate $ do
-          german "Im letzten Schritt muss die leere Klausel abgeleitet werden."
-          english "The last step must derive the empty clause."
-
-    | otherwise = Nothing
+  prevent checkEmptyClause $
+    translate $ do
+      german "Letzter Schritt leitet die leere Klausel ab?"
+      english "The last step derives the empty clause?"
 
   where
     checkMapping = correctMapping sol $ baseMapping clauses
@@ -179,16 +187,16 @@ partialGrade ResolutionInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> Maybe (LangM m)
+completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol =
     case applySteps clauses steps of
-        Nothing -> Just $ translate $ do
+        Nothing -> refuse $ indent $ translate $ do
                      german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
                      english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
 
         Just solClauses -> if (any isEmptyClause solClauses)
-                            then Nothing
-                            else Just $ translate $ do
+                            then pure()
+                            else refuse $ indent $ translate $ do
                                    german "Die Leere Klausel wurde nicht korrekt abgeleitet."
                                    english "The Empty clause was not derived correctly."
 
@@ -201,18 +209,20 @@ baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
 
 
-correctMapping :: OutputMonad m => [ResStep] -> [(Int,Clause)] -> Maybe (LangM m)
-correctMapping [] _ = Nothing
-correctMapping (Res (c1,c2,(c3,i)): rest) mapping
-    | checkIndices = Just $ translate $ do
-                       german "Mindestens ein Schritt verwendet einen nicht vergebenen Index. "
-                       english "At least one step is using an unknown index."
+correctMapping :: OutputMonad m => [ResStep] -> [(Int,Clause)] -> LangM m
+correctMapping [] _ = pure()
+correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
+  prevent (checkIndices) $
+    translate $ do
+      german "Alle Schritte verwenden existierende Indices?"
+      english "All steps use valid indices?"
 
-    | alreadyUsed i = Just $ translate $ do
-                        german "Mindestens ein Schritt vergibt einen Index, welcher bereits verwendet wird. "
-                        english "At least one step assigns an index, which is already in use. "
+  prevent (alreadyUsed i) $
+    translate $ do
+      german "Kein Index wird mehrfach vergeben?"
+      english "No index is in duplicate use?"
 
-    | otherwise = correctMapping rest newMapping
+  correctMapping rest newMapping
 
 
   where
