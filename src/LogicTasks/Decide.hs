@@ -103,20 +103,15 @@ start = []
 
 
 
-partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> Maybe (LangM m)
-partialGrade DecideInst{..} sol
-    | solLen > acLen =
-        Just $ translate $ do
-          german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
-          english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
+partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
+partialGrade DecideInst{..} sol = do
+  prevent (solLen > acLen) $ translate $ do
+    german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
+    english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
 
-    | acLen > solLen =
-        Just $ translate $ do
-          german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
-          english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
-
-    | otherwise = Nothing
-
+  prevent (acLen > solLen) $ translate $ do
+    german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
+    english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
 
   where
     acLen = length $ nub changed
@@ -130,15 +125,11 @@ partialGrade DecideInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => DecideInst -> [Int] -> Maybe (LangM m)
-completeGrade DecideInst{..} sol
-
-    | diff /= 0 =
-        Just $ translate $ do
+completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
+completeGrade DecideInst{..} sol = do
+  prevent (diff /= 0) $ translate $ do
           german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
           english $ "Your solution contains " ++ display ++ " mistakes."
-
-    | otherwise = Nothing
 
   where
     nubSol = nub sol

@@ -11,6 +11,10 @@ import Control.Monad.Output
 
 
 
+prevent :: OutputMonad m => Bool -> LangM m -> LangM m
+prevent b = assertion $ not b
+
+
 pairwiseCheck :: Eq a => [(a,a,Int)] -> ([Int],[Int])
 pairwiseCheck [] = ([],[])
 pairwiseCheck ((x,y,index):xs)
