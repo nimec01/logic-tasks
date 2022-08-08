@@ -115,45 +115,68 @@ start = mkDnf []
 
 
 
-partialGrade :: OutputMonad m => MinInst -> Dnf -> Maybe (LangM m)
-partialGrade MinInst{..} sol
-    | not (null extra) =
-        Just $ paragraph $ do
-          translate $ do
-            german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
-            english "Your submission contains unknown literals. These do not appear in a correct solution: "
-          itemizeM $ map (text . show) extra
+partialGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
+partialGrade MinInst{..} sol = do
+  preventWithHint (not $ null extra)
+    (translate $ do
+      german "Angegebene Literale kommen in Aufgabe vor?"
+      english "Given literals are used in task?"
+    )
 
-    | not (null missing) =
-        Just $ paragraph $ do
-          translate $ do
-            german "Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
-            english "Some literals are missing. Add these literals to your submission: "
-          itemizeM $ map (text . show) missing
+    (paragraph $ do
+      translate $ do
+        german "Es sind unbekannte Literale enthalten. Diese Literale kommen in der korrekten Lösung nicht vor: "
+        english "Your submission contains unknown literals. These do not appear in a correct solution: "
+      itemizeM $ map (text . show) extra
+    )
 
-    | not  (all (\c -> amount c == length corLits) (getConjunctions sol)) =
-        Just $ translate $ do
-          german "Nicht alle Conjunktionen sind Minterme!"
-          english "Not all conjunctions are minterms!"
+  preventWithHint (not $ null missing)
+    (translate $ do
+      german "Alle Literale kommen vor?"
+      english "All literals are contained in solution?"
+    )
 
-    | solLen < corrLen =
-        Just $ paragraph $ do
-          translate $ do
-            german "Die angegebene Formel enthält zu wenige Minterme. Fügen sie "
-            english "The formula does not contain enough minterms. Add "
-          text diff
-          translate $ do
-            german " hinzu!"
-            english "!"
+    (paragraph $ do
+      translate $ do
+        german "Es fehlen Literale. Fügen Sie Diese Literale der Abgabe hinzu: "
+        english "Some literals are missing. Add these literals to your submission: "
+      itemizeM $ map (text . show) missing
+    )
 
-    | solLen > corrLen =
-        Just $ paragraph $ do
-          translate $ do
-            german "Die angegebene Formel enthält zu viele Minterme. Entfernen sie "
-            english "The formula contains too many minterms. Remove "
-          text $ diff ++ "!"
+  prevent (all (\c -> amount c == length corLits) $ getConjunctions sol) $
+    translate $ do
+      german "Alle Konjunktionen sind Minterme?"
+      english "All conjunctions are minterms?"
 
-    | otherwise = Nothing
+  preventWithHint (solLen < corrLen)
+    (translate $ do
+      german "Genügend Maxterme in Lösung?"
+      english "Solution contains enough maxterms?"
+    )
+
+    (paragraph $ do
+      translate $ do
+        german "Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
+        english "The formula does not contain enough maxterms. Add "
+      text diff
+      translate $ do
+        german " hinzu!"
+        english "!"
+    )
+
+  preventWithHint (solLen > corrLen)
+    (translate $ do
+      german "Nicht zu viele Maxterme in Lösung?"
+      english "Not too many maxterms in solution?"
+    )
+
+    (paragraph $ do
+      translate $ do
+        german " Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
+        english "The formula contains too many maxterms. Remove "
+      text $ diff ++ "!"
+    )
+
 
   where
     solLits = atomics sol
@@ -169,17 +192,24 @@ partialGrade MinInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => MinInst -> Dnf -> Maybe (LangM m)
-completeGrade MinInst{..} sol
 
-    | not (null diff) =
-        Just $ paragraph $ do
-          translate $ do
-            german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-            english "The following rows are not correct: "
-          itemizeM $ map (text . show) diff
 
-    | otherwise = Nothing
+
+
+completeGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
+completeGrade MinInst{..} sol = do
+  preventWithHint (not $ null diff)
+    (translate $ do
+      german "Lösung liefert korrekte Wahrheitstabelle?"
+      english "Solution gives correct truth table?"
+    )
+    (paragraph $ do
+      translate $ do
+        german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
+        english "The following rows are not correct: "
+      itemizeM $ map (text . show) diff
+    )
+
   where
     solTable = getTable sol
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable dnf) [1..])
