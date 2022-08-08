@@ -10,9 +10,12 @@ import Control.Monad.Output
 
 
 
-
 prevent :: OutputMonad m => Bool -> LangM m -> LangM m
-prevent b = assertion $ not b
+prevent b = yesNo $ not b
+
+
+preventCont :: OutputMonad m => Bool -> LangM m -> LangM m
+preventCont b = yesNo $ not b
 
 
 pairwiseCheck :: Eq a => [(a,a,Int)] -> ([Int],[Int])

@@ -105,17 +105,15 @@ start = []
 
 partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
-  prevent (solLen > acLen) $ translate $ do
+  preventCont (solLen > acLen) $ translate $ do
     german $ "Lösung enthält nicht zu viele Indices?"
     english $ "Solution does not contains too many indices?"
 
-  paragraph $ if solLen > acLen
-    then
-      translate $ do
-        german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
-        english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
-    else
-      text " "
+  if solLen > acLen
+    then paragraph $ translate $ do
+      german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
+      english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
+    else pure()
 
   prevent (acLen > solLen) $ translate $ do
     german $ "Lösung enthält genügend Indices?"
