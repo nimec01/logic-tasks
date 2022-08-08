@@ -14,13 +14,11 @@ prevent :: OutputMonad m => Bool -> LangM m -> LangM m
 prevent b = assertion $ not b
 
 
-preventCont :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
-preventCont b m hint = do
-  yesNo (not b) m
+preventWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
+preventWithHint b desc hint = do
+  yesNo (not b) desc
   if b
-    then do
-      indent hint
-      refuse $ text " "
+    then indent hint
     else pure()
 
 
