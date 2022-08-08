@@ -28,14 +28,18 @@ import Control.Monad.Output (
 
 description :: OutputMonad m => DecideInst -> LangM m
 description DecideInst{..} = do
-  paragraph $ translate $ do
-    english "Consider the following formula:"
-    german "Betrachten Sie die folgende Formel:"
-  --PDoc $ nest 4 $ myText "F = " <+> pretty cnf
-  paragraph $ translate $ do
-    english "Find all faulty entries in the last column of the following truth table."
-    german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzen Spalte der folgenden Wahrheitstafel."
-  --PDoc $ nest 4 $ pretty (flipAt (getTable cnf) changed)
+  paragraph $ do
+    translate $ do
+      english "Consider the following formula:"
+      german "Betrachten Sie die folgende Formel:"
+    indent $ code $ "F = " ++ show cnf
+
+  paragraph $ do
+    translate $ do
+      english "Find all faulty entries in the last column of the following truth table."
+      german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzen Spalte der folgenden Wahrheitstafel."
+    indent $ code $ show (flipAt (getTable cnf) changed)
+
   paragraph $ translate $ do
     english "Provide the solution as a list of indices of the faulty rows. The indices start with 1."
     german "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Die Indizes beginnen dabei mit der 1."
