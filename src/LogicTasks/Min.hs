@@ -77,14 +77,14 @@ description MinInst{..} = do
 
 
 
-verifyStatic :: OutputMonad m => MinInst -> Maybe (LangM m)
+verifyStatic :: OutputMonad m => MinInst -> LangM m
 verifyStatic MinInst{..}
     | isEmptyDnf dnf || hasEmptyCon dnf =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Geben Sie bitte eine nicht-leere Formel an."
           english "Please give a non empty formula."
 
-    | otherwise = Nothing
+    | otherwise = pure ()
 
 
 
@@ -94,12 +94,12 @@ verifyQuiz MinMaxConfig{..}
 
 
     | isOutside 0 100 low || isOutside 0 100 high =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
           english "The given restriction on true entries are not in the range of 0 to 100 percent."
 
     | low > high =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
           english "The given restriction on true entries are not a valid range."
 

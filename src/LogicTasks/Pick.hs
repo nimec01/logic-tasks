@@ -51,24 +51,24 @@ description PickInst{..} = do
 
 
 
-verifyStatic :: OutputMonad m => PickInst -> Maybe (LangM m)
+verifyStatic :: OutputMonad m => PickInst -> LangM m
 verifyStatic PickInst{..}
     | null cnfs =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Liste der Formeln ist leer."
           english "The list of formulae is empty."
 
     | mkCnf [] `elem` cnfs =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Für mindestens eine Formel kann keine Wahrheitstafel erstellt werden."
           english "For at least one given formula there is no corresponding truth table."
 
     | length cnfs < correct || correct <= 0 =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Der angegebene Index existiert nicht."
           english "The given index does not exist."
 
-    | otherwise = Nothing
+    | otherwise = pure()
 
 
 
@@ -77,12 +77,12 @@ verifyQuiz PickConfig{..}
 
 
     | amountOfOptions < 2 =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Es muss mindestens zwei Optionen geben."
           english "At least two options need to be given."
 
     | amountOfOptions > 4*2^ length (usedLiterals base) =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Anzahl Optionen übersteigt die Anzahl möglicher, unterschiedlicher Formeln."
           english "The amount of options is higher than the amount of possible, distinct formulae."
 

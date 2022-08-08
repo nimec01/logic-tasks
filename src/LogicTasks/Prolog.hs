@@ -53,19 +53,19 @@ description PrologInst{..} = do
 
 
 
-verifyStatic :: OutputMonad m => PrologInst -> Maybe (LangM m)
+verifyStatic :: OutputMonad m => PrologInst -> LangM m
 verifyStatic PrologInst{..}
     | any isEmptyClause [clause1, clause2] =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Mindestens eine der Klauseln ist leer."
           english "At least one of the clauses is empty."
 
     | not $ resolvable clause1 clause2 =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Klauseln sind nicht resolvierbar."
           english "The clauses are not resolvable."
 
-    | otherwise = Nothing
+    | otherwise = pure()
   where
     (clause1, clause2, _) = transform (literals1, literals2)
 
@@ -75,22 +75,22 @@ verifyStatic PrologInst{..}
 verifyQuiz :: OutputMonad m => PrologConfig -> LangM m
 verifyQuiz PrologConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Mindestens eines der 'length'-Parameter ist negativ."
           english "At least one length parameter is negative."
 
     | minClauseLength > maxClauseLength =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die untere Grenze der Klausellänge ist höher als die obere."
           english "The minimum clause length is greater than the maximum clause length."
 
     | length usedPredicates < minClauseLength =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Zu wenige Literale für diese Klausellänge."
           english "There are not enough literals available for this clause length."
 
     | null usedPredicates =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
 

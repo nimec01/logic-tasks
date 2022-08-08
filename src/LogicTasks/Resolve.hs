@@ -101,36 +101,36 @@ description ResolutionInst{..} = do
 
 
 
-verifyStatic :: OutputMonad m => ResolutionInst -> Maybe (LangM m)
+verifyStatic :: OutputMonad m => ResolutionInst -> LangM m
 verifyStatic ResolutionInst{..}
     | any isEmptyClause clauses =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Mindestens eine der Klauseln ist leer."
           english "At least one of the clauses is empty."
 
     | sat $ mkCnf clauses =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Formel ist erfüllbar."
           english "This formula is satisfiable."
 
-    | otherwise = Nothing
+    | otherwise = pure()
 
 
 
 verifyQuiz :: OutputMonad m => ResolutionConfig -> LangM m
 verifyQuiz ResolutionConfig{..}
     | minSteps < 1 =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Mindestschritte müssen größer als 0 sein."
           english "The minimal amount of steps must be greater than 0."
 
     | maxClauseLength baseConf == 1 && minSteps > 1 =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Mit Klauseln der Länge 1 kann nicht mehr als ein Schritt durchgeführt werden."
           english "More than one step using only length 1 clauses is not possible."
 
     | minSteps > 2 * length (usedLiterals baseConf) =
-        refuse $ translate $ do
+        refuse $ indent $ translate $ do
           german "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of literals."
 

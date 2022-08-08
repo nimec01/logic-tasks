@@ -70,19 +70,19 @@ description StepInst{..} = do
 
 
 
-verifyStatic :: OutputMonad m => StepInst -> Maybe (LangM m)
+verifyStatic :: OutputMonad m => StepInst -> LangM m
 verifyStatic StepInst{..}
     | any isEmptyClause [clause1, clause2] =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Mindestens eine der Klauseln ist leer."
           english "At least one of the clauses is empty."
 
     | not $ resolvable clause1 clause2 =
-        Just $ translate $ do
+        refuse $ indent $ translate $ do
           german "Die Klauseln sind nicht resolvierbar."
           english "The clauses are not resolvable."
 
-    | otherwise = Nothing
+    | otherwise = pure()
 
 
 
