@@ -18,7 +18,7 @@ preventWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
 preventWithHint b desc hint = do
   yesNo (not b) desc
   if b
-    then indent hint
+    then refuse $ indent hint
     else pure()
 
 

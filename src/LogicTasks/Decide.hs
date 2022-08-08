@@ -52,33 +52,33 @@ description DecideInst{..} = do
 
 
 
-verifyStatic :: OutputMonad m => DecideInst -> Maybe (LangM m)
+verifyStatic :: OutputMonad m => DecideInst -> LangM m
 verifyStatic DecideInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
-        Just $ indent $ translate $ do
+        refuse $ indent $ translate $ do
           english "Please give a non empty formula."
           german "Geben Sie bitte eine nicht-leere Formel an."
 
 
 
     | any (> 2^length (atomics cnf)) changed =
-        Just $ indent $ translate $ do
+        refuse $ indent $ translate $ do
           english "At least one given index is too high."
           german "Mindestens ein gegebener Index ist zu hoch."
 
 
     | any (<= 0) changed =
-        Just $ indent $ translate $ do
+        refuse $ indent $ translate $ do
           english "At least one given index is zero or negative."
           german "Mindestens ein gegebener Index ist null oder negativ."
 
 
     | null changed =
-        Just $ indent $ translate $ do
+        refuse $ indent $ translate $ do
           english "At least one mistake has to be specified."
           german "Es muss mindestens eine Änderung geben."
 
-    | otherwise = Nothing
+    | otherwise = pure()
 
 
 
