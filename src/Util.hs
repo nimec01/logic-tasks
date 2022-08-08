@@ -11,11 +11,17 @@ import Control.Monad.Output
 
 
 prevent :: OutputMonad m => Bool -> LangM m -> LangM m
-prevent b = yesNo $ not b
+prevent b = assertion $ not b
 
 
-preventCont :: OutputMonad m => Bool -> LangM m -> LangM m
-preventCont b = yesNo $ not b
+preventCont :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
+preventCont b m hint = do
+  yesNo (not b) m
+  if b
+    then do
+      hint
+      refuse $ paragraph $ text " "
+    else pure()
 
 
 pairwiseCheck :: Eq a => [(a,a,Int)] -> ([Int],[Int])
