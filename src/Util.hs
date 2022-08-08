@@ -19,8 +19,8 @@ preventCont b m hint = do
   yesNo (not b) m
   if b
     then do
-      hint
-      refuse $ paragraph $ text " "
+      indent hint
+      refuse $ text " "
     else pure()
 
 
