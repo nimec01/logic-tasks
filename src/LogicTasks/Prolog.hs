@@ -9,6 +9,7 @@ import Printing
 import Types
 import Formula
 import Resolution
+import Util(prevent, preventWithHint)
 
 import qualified Data.Set as Set
 import Data.Maybe (fromMaybe, fromJust)
@@ -103,21 +104,24 @@ start = (PrologLiteral True " " [], mkPrologClause [])
 
 
 
-partialGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> Maybe (LangM m)
-partialGrade PrologInst{..} sol
-    | not (fst sol `Set.member` availLits) =
-        Just $ translate $ do
-          german "Das gewählte Literal kommt in den Klauseln nicht vor."
-          english "The chosen literal is not contained in any of the clauses."
+partialGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
+partialGrade PrologInst{..} sol = do
+  prevent (not (fst sol `Set.member` availLits)) $
+    translate $ do
+      german "Gewähltes Literal kommt in den Klauseln vor?"
+      english "Chosen literal is contained in any of the clauses?"
 
-    | not (null extra) =
-        Just $ paragraph $ do
-          translate $ do
-            german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
-            english "The resolvent contains unknown literals. These are incorrect:"
-          itemizeM $ map (text . show) extra
-
-    | otherwise = Nothing
+  preventWithHint (not $ null extra)
+    (translate $ do
+       german "Resolvente besteht aus bekannten Literalen?"
+       english "Resolvent contains only known literals?"
+    )
+    (paragraph $ do
+      translate $ do
+        german "In der Resolvente sind unbekannte Literale enthalten. Diese Literale sind falsch: "
+        english "The resolvent contains unknown literals. These are incorrect:"
+      itemizeM $ map (text . show) extra
+    )
 
   where
      availLits = pliterals literals1 `Set.union` pliterals literals2
@@ -126,16 +130,16 @@ partialGrade PrologInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> Maybe (LangM m)
+completeGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade PrologInst{..} sol =
     case resolve clause1 clause2 (transSol1) of
-        Nothing -> Just $ translate $ do
+        Nothing -> refuse $ indent $ translate $ do
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
                      english "This literal can not be used for a resolution step!"
 
         Just solClause -> if (solClause == transSol2)
-                            then Nothing
-                            else Just $ translate $ do
+                            then pure()
+                            else refuse $ indent $ translate $ do
                                    german "Resolvente ist nicht korrekt."
                                    english "Resolvent is not correct."
   where
