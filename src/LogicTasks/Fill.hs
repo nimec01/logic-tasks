@@ -113,20 +113,27 @@ start :: [TruthValue]
 start = []
 
 
-partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> Maybe (LangM m)
-partialGrade FillInst{..} sol
-    | solLen > acLen =
-        Just $ translate $ do
-          german  $ "Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
-          english $ "Solution contains too many values. Please remove " ++ eng ++ " to proceed."
+partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+partialGrade FillInst{..} sol = do
+  preventWithHint (solLen > acLen)
+    (translate $ do
+      german $ "Lösung überschreitet nicht maximale Anzahl Werte?"
+      english $ "Solution does not exceed maximum possible number of values?"
+    )
+    (translate $ do
+      german $ "Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
+      english $ "Solution contains too many values. Please remove " ++ eng ++ " to proceed."
+    )
 
-    | acLen > solLen =
-        Just $ translate $ do
-          german $ "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
-          english $ "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
-
-    | otherwise = Nothing
-
+  preventWithHint (acLen > solLen)
+    (translate $ do
+      german $ "Lösung hat genügend Werte?."
+      english $ "Solution contains enough values?."
+    )
+    (translate $ do
+      german $ "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
+      english $ "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
+    )
 
   where
     acLen = length missing
@@ -139,15 +146,17 @@ partialGrade FillInst{..} sol
 
 
 
-completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> Maybe (LangM m)
-completeGrade FillInst{..} sol
-
-    | not (null diff) =
-        Just $ translate $ do
-          german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
-          english $ "Your solution contains " ++ display ++ " mistakes."
-
-    | otherwise = Nothing
+completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
+completeGrade FillInst{..} sol = do
+  preventWithHint (not $ null diff)
+    (translate $ do
+      german $ "Lösung ist korrekt?"
+      english $ "Solution is korrekt?"
+    )
+    (translate $ do
+      german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
+      english $ "Your solution contains " ++ display ++ " mistakes."
+    )
 
   where
     table = getTable cnf
