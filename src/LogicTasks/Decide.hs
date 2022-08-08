@@ -106,16 +106,24 @@ start = []
 partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
   prevent (solLen > acLen) $ translate $ do
-    german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
-    english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
+    german $ "Lösung enthält nicht zu viele Indices?"
+    english $ "Solution does not contains too many indices?"
+
+  paragraph $ text ""
+
   paragraph $ translate $ do
     german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
     english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
 
-
   prevent (acLen > solLen) $ translate $ do
+    german $ "Lösung enthält genügend Indices?"
+    english $ "Solution contains enough indices?"
+
+  paragraph $ translate $ do
     german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."
     english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
+
+
 
   where
     acLen = length $ nub changed
