@@ -109,11 +109,13 @@ partialGrade DecideInst{..} sol = do
     german $ "Lösung enthält nicht zu viele Indices?"
     english $ "Solution does not contains too many indices?"
 
-  paragraph $ translate $ do
-    german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
-    english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
-
-  paragraph $ text " "
+  paragraph $ if solLen > acLen
+    then
+      translate $ do
+        german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
+        english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
+    else
+      text " "
 
   prevent (acLen > solLen) $ translate $ do
     german $ "Lösung enthält genügend Indices?"
