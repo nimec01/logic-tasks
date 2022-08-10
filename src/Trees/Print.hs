@@ -1,14 +1,11 @@
-module Print(
-    transferToPicture,
-    display,
-    displaySubTrees,
-    normalShow,
-    simplestDisplay,
-    showOperator
-    ) where
+module Trees.Print (
+  transferToPicture,
+  display,
+  normalShow,
+  simplestDisplay,
+  ) where
 
-import Types (SynTree(..), Op(..))
-import Data.List (intercalate)
+import Trees.Types (SynTree(..), Op(..), showOperator)
 
 transferToPicture :: SynTree Op Char -> String
 transferToPicture (Binary And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
@@ -31,12 +28,6 @@ normalShow (Leaf a)=  a : ""
 normalShow (Unary Not a) = showOperator Not ++ normalShow a
 normalShow _ = error "All cases handled!"
 
-displaySubTrees :: [SynTree Op Char] -> String
-displaySubTrees trees = "{" ++ showTrees trees ++ "}"
-
-showTrees :: [SynTree Op Char] -> String
-showTrees synTreeList = intercalate ", " (map display synTreeList)
-
 simplestDisplay :: SynTree Op Char -> String
 simplestDisplay (Leaf a)=  a : ""
 simplestDisplay (Unary Not a) = showOperator Not ++ simplestShow a (Just Not)
@@ -50,10 +41,3 @@ simplestShow (Binary And a b) (Just And) = simplestShow a (Just And) ++ "/\\" ++
 simplestShow (Binary Or a b) (Just Or) = simplestShow a (Just Or) ++ "\\/" ++ simplestShow b (Just Or)
 simplestShow (Binary oper a b) _ = "(" ++ simplestShow a (Just oper) ++ showOperator oper ++ simplestShow b (Just oper) ++ ")"
 simplestShow _ _ = error "All cases handled!"
-
-showOperator :: Op -> String
-showOperator And = "/\\"
-showOperator Or = "\\/"
-showOperator Impl = "=>"
-showOperator Equi = "<=>"
-showOperator Not = "~"

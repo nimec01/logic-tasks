@@ -3,6 +3,7 @@
 module AppHelp (
     offerChange,
     determineBaseConfig,
+    feedbackLoop,
 ) where
 
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -25,3 +26,16 @@ determineBaseConfig initSynTreeConfig = do
   maxConsecutiveNegations' <- offerChange "maxConsecutiveNegations" maxConsecutiveNegations
   let newConfig = initSynTreeConfig { minNodes = minNodes', maxNodes = maxNodes', maxDepth = maxDepth', atLeastOccurring = atLeastOccurring', maxConsecutiveNegations = maxConsecutiveNegations'}
   return newConfig
+
+feedbackLoop :: (String -> Bool) -> String -> IO ()
+feedbackLoop feedbackFunction correctMessage = repeat
+  where
+    repeat = do
+      putStrLn "\nTry what feedback you will get for some input (blank for the sample solution and exit):"
+      input <- getLine
+      if null input
+        then
+          putStrLn correctMessage
+        else do
+          putStrLn $ "Your submission is " ++ show (feedbackFunction input)
+          repeat

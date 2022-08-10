@@ -4,7 +4,7 @@ module Main (main) where
 
 import Tasks.SubTree.Config (SubTreeInst(..), SubTreeConfig(..), defaultSubTreeConfig, checkSubTreeConfig)
 import Tasks.SubTree.Quiz (genSubTreeInst, feedback)
-import AppHelp (offerChange, determineBaseConfig)
+import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -21,17 +21,7 @@ main = do
   putStrLn ("\nThe task will give a formula and your task is to input a set which at least have " ++ show minInputTrees ++ " non-atomic Formulas")
   putStrLn "\nInput form is {subformula1,subformula2..}"
   putStrLn "\nDo not keep unnecessary parentheses outside subformulas and do not add any addtional parentheses"
-  let
-    feedbackLoop = do
-      putStrLn "\nTry what feedback you will get for some input (blank for the sample solution):"
-      input <- getLine
-      if null input
-        then
-          putStrLn $ "One of the sample solution is " ++ show correctFormulas
-        else do
-          putStrLn $ "Your submission is " ++ show (feedback inst input)
-          feedbackLoop
-  feedbackLoop
+  feedbackLoop (feedback inst) ("One of the sample solution is " ++ show correctFormulas)
 
 determineSubTreeConfig :: IO SubTreeConfig
 determineSubTreeConfig = do

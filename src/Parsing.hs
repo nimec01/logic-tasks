@@ -1,20 +1,14 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module Parsing (
-  formulaParse,
-  illegalPropositionStringParse,
-  operatorAndLeavesParse,
-  subFormulasStringParse,
-  subTreeStringParse,
-  superfluousBracketsExcParser
+  formulaSymbol,
+  whitespace,
+  lexeme,
   ) where
 
-import Text.Parsec.Char (char, oneOf, satisfy, string, digit)
+import Text.Parsec.Char (oneOf, satisfy)
 import Data.Char (isLetter)
-import Text.Parsec (eof, ParseError, parse, sepBy, many, many1, (<|>))
-import Data.Set (fromList, Set)
-
-import Types (SynTree(..), Op(..))
+import Text.Parsec (many, (<|>))
 import Text.Parsec.String (Parser)
 
 formulaSymbol :: Parser Char
@@ -30,78 +24,3 @@ lexeme p = do
     x <- p
     whitespace
     return x
-
-leafE :: Parser (SynTree o Char)
-leafE =
-    Leaf <$> lexeme (satisfy isLetter)
-
-notE :: Parser (SynTree Op Char)
-notE = do
-    lexeme $ char '~'
-    Unary Not <$> parserT
-
-parserTtoS :: Parser (SynTree Op Char)
-parserTtoS = do
-   lexeme $ char '('
-   e <- parserS
-   lexeme $ char ')'
-   return e
-
-parserT :: Parser (SynTree Op Char)
-parserT = leafE <|> parserTtoS <|> notE
-
-parserS :: Parser (SynTree Op Char)
-parserS = do
-    firstT <- parserT
-    (lexeme (string "/\\") >> Binary And firstT <$> parserT) <|>
-      (lexeme (string "\\/") >> Binary Or firstT <$> parserT) <|>
-      (lexeme (string "=>") >> Binary Impl firstT <$> parserT) <|>
-      (lexeme (string "<=>") >> Binary Equi firstT <$> parserT) <|>
-      return firstT
-
-formulaParse :: String -> Either ParseError (SynTree Op Char)
-formulaParse = parse (whitespace >> parserS <* eof) ""
------------------------------------------------------------------------------------
-subTreeParse :: Parser (Set (SynTree Op Char))
-subTreeParse = do
-    lexeme $ char '{'
-    subTreelist <- parserS `sepBy` lexeme (char ',')
-    lexeme $ char '}'
-    return $ fromList subTreelist
-
-subTreeStringParse :: String -> Either ParseError (Set(SynTree Op Char))
-subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
-
-subFormulasParse :: Parser (Set String)
-subFormulasParse = do
-    char '{'
-    subFormulasList <- many1 formulaSymbol `sepBy` char ','
-    char '}'
-    return $ fromList subFormulasList
-
-subFormulasStringParse :: String -> Either ParseError (Set String)
-subFormulasStringParse = parse (whitespace >> subFormulasParse <* eof) ""
------------------------------------------------------------------------------------
-illegalPropositionParse :: Parser (Set Int)
-illegalPropositionParse = do
-    lexeme $ char '{'
-    illegalList <- many1 digit `sepBy` lexeme (char ',')
-    lexeme $ char '}'
-    return $ fromList (map read illegalList)
-
-
-illegalPropositionStringParse :: String -> Either ParseError (Set Int)
-illegalPropositionStringParse = parse  (whitespace >> illegalPropositionParse <* eof) ""
-----------------------------------------------------------------------------------------
-parseLettertoStr :: Parser String
-parseLettertoStr = do
-    letter <- lexeme $ satisfy isLetter
-    return [letter]
-
-operatorAndLeavesParse :: Parser String
-operatorAndLeavesParse = do
-    listOfString <- many1 (parseLettertoStr <|> lexeme (string "/\\") <|> lexeme (string "\\/") <|> lexeme (string "=>") <|> lexeme (string "<=>") <|> lexeme (string "(") <|> lexeme (string ")") <|> lexeme (string "~"))
-    return (concat listOfString)
-
-superfluousBracketsExcParser :: String -> Either ParseError String
-superfluousBracketsExcParser = parse  (whitespace >> operatorAndLeavesParse <* eof) ""

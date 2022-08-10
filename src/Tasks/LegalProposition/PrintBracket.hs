@@ -4,8 +4,8 @@ module Tasks.LegalProposition.PrintBracket (
 
 import Test.QuickCheck (Gen, elements, frequency)
 
-import Types (SynTree(..), Op(..))
-import Print (normalShow,showOperator)
+import Trees.Types (SynTree(..), Op(..), showOperator)
+import Trees.Print (normalShow)
 
 bracketDisplay :: SynTree Op Char -> Gen String
 bracketDisplay (Binary oper a b) = allocateBracketToSubtree False a b (showOperator oper)

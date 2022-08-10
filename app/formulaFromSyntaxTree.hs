@@ -4,7 +4,7 @@ module Main (main) where
 
 import Tasks.SynTree.Config (SynTreeInst(..), SynTreeConfig, defaultSynTreeConfig, checkSynTreeConfig)
 import Tasks.SynTree.Quiz (genSynTreeInst, feedback)
-import AppHelp (determineBaseConfig)
+import AppHelp (determineBaseConfig, feedbackLoop)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -20,17 +20,7 @@ main = do
   pPrint inst
   putStrLn "\nYour task is to input the propositional logic formula represented by the above (LaTeX rendered) syntax tree."
   putStrLn "You may use as many brackets as you want for your own clarity."
-  let
-    feedbackLoop = do
-      putStrLn "\nTry what feedback you will get for some input (blank for the sample solution and exit):"
-      input <- getLine
-      if null input
-        then
-          putStrLn $ "The sample solution is: " ++ correct
-        else do
-          putStrLn $ "Your submission is " ++ show (feedback inst input)
-          feedbackLoop
-  feedbackLoop
+  feedbackLoop (feedback inst) ("The sample solution is: " ++ correct)
 
 determineSynTreeConfig :: IO SynTreeConfig
 determineSynTreeConfig = do

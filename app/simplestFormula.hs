@@ -4,7 +4,8 @@ module Main (main) where
 
 import Tasks.SuperfluousBrackets.Config (defaultSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig)
 import Tasks.SuperfluousBrackets.Quiz (genSuperfluousBracketsInst, feedback)
-import AppHelp (offerChange, determineBaseConfig)
+import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
 
@@ -19,21 +20,11 @@ main = do
   pPrint inst
   putStrLn "\n The task will give a formula with redundant brackets, and your mission is to give the simplest form of the formula"
   putStrLn "\n That means delete all unnecessary brackets"
-  let
-    feedbackLoop = do
-      putStrLn "\nTry what feedback you will get for some input (blank for the sample solution):"
-      input <- getLine
-      if null input
-        then
-          putStrLn $ "The sample solution is " ++ show (feedback inst simplestString)
-        else do
-          putStrLn $ "Your submission is " ++ show (feedback inst input)
-          feedbackLoop
-  feedbackLoop
+  feedbackLoop (feedback inst) ("The sample solution is " ++ show (feedback inst simplestString))
 
 determineSuperfluousBracketsConfig :: IO SuperfluousBracketsConfig
 determineSuperfluousBracketsConfig = do
-  putStrLn "\nThe following is the default config :\n"
+  putStrLn "\nThe following is the default config:\n"
   pPrint defaultSuperfluousBracketsConfig
   let SuperfluousBracketsConfig{..} = defaultSuperfluousBracketsConfig
   syntaxTreeConfig' <- determineBaseConfig syntaxTreeConfig

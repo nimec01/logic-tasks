@@ -2,18 +2,18 @@
 
 module SuperfluousBracketsSpec where
 
-import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
+import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback, genSynTreeSuperfluousBracketsExc)
 import Test.QuickCheck (Gen, forAll, choose, suchThat)
-import Generate (sameOperatorAdjacent, genSynTreeSuperfluousBracketsExc)
 import Test.Hspec (Spec, describe, it)
 import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig, defaultSuperfluousBracketsConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSyntr)
 import Data.Maybe (isJust, isNothing)
-import Types (SynTree(..), Op(..), numberAllNodes)
+import Trees.Types (SynTree(..), Op(..))
+import Trees.Helpers (numberAllNodes, sameOperatorAdjacent)
 import Data.Either (isRight)
-import Parsing (superfluousBracketsExcParser)
-import Print (simplestDisplay, display)
+import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
+import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay, sameOperatorAdjacentSerial)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig

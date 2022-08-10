@@ -19,6 +19,19 @@ data SuperfluousBracketsConfig =
     , superfluousBrackets :: Integer
     } deriving Show
 
+defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
+defaultSuperfluousBracketsConfig =
+    SuperfluousBracketsConfig
+    {
+      syntaxTreeConfig = defaultSynTreeConfig
+    , superfluousBrackets = 2
+    }
+
+checkSuperfluousBracketsConfig :: SuperfluousBracketsConfig -> Maybe String
+checkSuperfluousBracketsConfig sBConfig@SuperfluousBracketsConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig
+    <|> checkAdditionalConfig sBConfig
+
 checkAdditionalConfig :: SuperfluousBracketsConfig -> Maybe String
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}
     | minNodes < 5
@@ -29,19 +42,6 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
       = Just "Add at least one extra Brackets"
     | otherwise
       = Nothing
-
-checkSuperfluousBracketsConfig :: SuperfluousBracketsConfig -> Maybe String
-checkSuperfluousBracketsConfig sBConfig@SuperfluousBracketsConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
-    <|> checkAdditionalConfig sBConfig
-
-defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
-defaultSuperfluousBracketsConfig =
-    SuperfluousBracketsConfig
-    {
-      syntaxTreeConfig = defaultSynTreeConfig
-    , superfluousBrackets = 2
-    }
 
 data SuperfluousBracketsInst =
     SuperfluousBracketsInst

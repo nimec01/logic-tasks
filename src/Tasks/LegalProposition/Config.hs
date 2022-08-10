@@ -11,7 +11,7 @@ module Tasks.LegalProposition.Config (
 import Control.Applicative              (Alternative ((<|>)))
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Data.Set (Set)
-import Generate(maxLeavesForNodes)
+import Trees.Helpers (maxLeavesForNodes)
 
 data LegalPropositionConfig =
     LegalPropositionConfig
@@ -21,6 +21,21 @@ data LegalPropositionConfig =
     , illegals :: Integer
     , bracketFormulas :: Integer
     } deriving Show
+
+defaultLegalPropositionConfig :: LegalPropositionConfig
+defaultLegalPropositionConfig =
+    LegalPropositionConfig
+    {
+      syntaxTreeConfig = defaultSynTreeConfig
+    , formulas = 5
+    , illegals = 2
+    , bracketFormulas = 1
+    }
+
+checkLegalPropositionConfig :: LegalPropositionConfig -> Maybe String
+checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig
+    <|> checkAdditionalConfig lPConfig
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
 checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
@@ -36,21 +51,6 @@ checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {
       = Just "It has risks that formulas are larger than is actually reasonable given the possible size of the original formula."
     | otherwise
       = Nothing
-
-checkLegalPropositionConfig :: LegalPropositionConfig -> Maybe String
-checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
-    <|> checkAdditionalConfig lPConfig
-
-defaultLegalPropositionConfig :: LegalPropositionConfig
-defaultLegalPropositionConfig =
-    LegalPropositionConfig
-    {
-      syntaxTreeConfig = defaultSynTreeConfig
-    , formulas = 5
-    , illegals = 2
-    , bracketFormulas = 1
-    }
 
 data LegalPropositionInst =
     LegalPropositionInst

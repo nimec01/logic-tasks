@@ -4,8 +4,9 @@ module Tasks.LegalProposition.PrintIllegal (
 
 import Test.QuickCheck (Gen, frequency, elements)
 
-import Types (SynTree(..), Op(..), treeNodes, collectLeaves)
-import Print (normalShow, showOperator)
+import Trees.Types (SynTree(..), Op(..), showOperator)
+import Trees.Helpers (treeNodes, collectLeaves)
+import Trees.Print (normalShow)
 
 illegalDisplay :: SynTree Op Char -> Gen String
 illegalDisplay synTree =

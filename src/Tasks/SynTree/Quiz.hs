@@ -8,9 +8,9 @@ module Tasks.SynTree.Quiz (
 import Test.QuickCheck (generate)
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
 
-import Print (display, transferToPicture)
-import Parsing (formulaParse)
-import Generate (genSynTree)
+import Trees.Print (display, transferToPicture)
+import Trees.Parsing (formulaParse)
+import Trees.Generate (genSynTree)
 
 genSynTreeInst :: SynTreeConfig -> IO SynTreeInst
 genSynTreeInst SynTreeConfig {..} = do

@@ -14,10 +14,11 @@ import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalProposit
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay )
 import Tasks.LegalProposition.PrintBracket (bracketDisplay)
-import Generate (genSynTree, similarExist)
-import Types (SynTree, Op)
-import Print ( display, )
-import Parsing (illegalPropositionStringParse)
+import Trees.Generate (genSynTree)
+import Trees.Types (SynTree, Op)
+import Trees.Helpers (similarExist)
+import Trees.Print (display)
+import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Data.Char (isLetter)
 
 genLegalPropositionInst :: LegalPropositionConfig -> IO LegalPropositionInst

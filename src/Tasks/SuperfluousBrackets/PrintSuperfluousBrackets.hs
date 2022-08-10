@@ -5,8 +5,8 @@ module Tasks.SuperfluousBrackets.PrintSuperfluousBrackets(
 
 import Test.QuickCheck (Gen, frequency, elements, choose)
 
-import Print (showOperator)
-import Types (SynTree (..), treeNodes, numberAllNodes, Op(..))
+import Trees.Types (SynTree (..), Op(..), showOperator)
+import Trees.Helpers (treeNodes, numberAllNodes)
 
 superfluousBracketsDisplay :: SynTree Op Char -> Integer -> Gen String
 superfluousBracketsDisplay synTree brackets =

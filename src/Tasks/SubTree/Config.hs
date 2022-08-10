@@ -11,8 +11,8 @@ import Data.Set (Set)
 import Control.Applicative              (Alternative ((<|>)))
 
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
-import Generate (maxLeavesForNodes)
-import Types (SynTree, Op)
+import Trees.Types (SynTree, Op)
+import Trees.Helpers (maxLeavesForNodes)
 
 data SubTreeConfig =
   SubTreeConfig

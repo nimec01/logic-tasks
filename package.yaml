@@ -18,21 +18,26 @@ default-extensions:
 library:
   source-dirs: src
   exposed-modules:
+    - Trees.Types
+    - Trees.Helpers
+    - Trees.Parsing
+    - Trees.Generate
+    - Trees.Print
     - Tasks.SynTree.Config
-    - Tasks.SubTree.Config
-    - Tasks.LegalProposition.Config
-    - Tasks.SuperfluousBrackets.Config
-    - Types
-    - Parsing
-    - Generate
-    - Print
     - Tasks.SynTree.Quiz
+    - Tasks.SubTree.Config
+    - Tasks.SubTree.Parsing
     - Tasks.SubTree.Quiz
-    - Tasks.LegalProposition.Quiz
-    - Tasks.SuperfluousBrackets.Quiz
-    - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
+    - Tasks.LegalProposition.Config
+    - Tasks.LegalProposition.Parsing
     - Tasks.LegalProposition.PrintIllegal
     - Tasks.LegalProposition.PrintBracket
+    - Tasks.LegalProposition.Quiz
+    - Tasks.SuperfluousBrackets.Config
+    - Tasks.SuperfluousBrackets.Parsing
+    - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
+    - Tasks.SuperfluousBrackets.Quiz
+    - Parsing
   ghc-options:
     - -Wall
     - -Werror

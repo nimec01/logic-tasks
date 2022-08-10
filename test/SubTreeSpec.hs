@@ -6,13 +6,14 @@ import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Data.Set (size, toList, map)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
-import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
-import Types (allNotLeafSubTrees)
-import Generate (maxLeavesForNodes, noSameSubTree, genSynTreeSubTreeExc)
+import Tasks.SubTree.Quiz (generateSubTreeInst, genSynTreeSubTreeExc, feedback)
+import Trees.Types (SynTree, Op)
+import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes, noSameSubTree)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
-import Print (displaySubTrees, display)
-import Parsing (subFormulasStringParse, subTreeStringParse)
+import Data.List (intercalate)
+import Trees.Print (display)
+import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (invalidBoundsSyntr, validBoundsSyntr)
 
 validBoundsSubTree :: Gen SubTreeConfig
@@ -69,3 +70,9 @@ spec = do
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
+
+displaySubTrees :: [SynTree Op Char] -> String
+displaySubTrees trees = "{" ++ showTrees trees ++ "}"
+
+showTrees :: [SynTree Op Char] -> String
+showTrees synTreeList = intercalate ", " (Prelude.map display synTreeList)

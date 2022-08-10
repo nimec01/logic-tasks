@@ -1,6 +1,7 @@
 module ParsingSpec where
 
-import Parsing (formulaParse, illegalPropositionStringParse)
+import Trees.Parsing (formulaParse)
+import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Data.Either (isRight)
 
 import Test.Hspec ( describe, it, Spec)

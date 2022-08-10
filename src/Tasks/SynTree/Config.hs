@@ -8,8 +8,8 @@ module Tasks.SynTree.Config (
   defaultSynTreeConfig,
   ) where
 
-import Types (SynTree, Op)
-import Generate (maxNodesForDepth)
+import Trees.Types (SynTree, Op)
+import Trees.Helpers (maxNodesForDepth)
 import Data.Char (isLetter)
 
 data SynTreeConfig =
@@ -22,6 +22,18 @@ data SynTreeConfig =
   , useImplEqui :: Bool
   , maxConsecutiveNegations :: Integer
   } deriving Show
+
+defaultSynTreeConfig :: SynTreeConfig
+defaultSynTreeConfig =
+    SynTreeConfig
+    { maxNodes = 10
+    , minNodes = 6
+    , maxDepth = 6
+    , usedLiterals = "ABCDE"
+    , atLeastOccurring = 3
+    , useImplEqui = False
+    , maxConsecutiveNegations = 2
+    }
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
 checkSynTreeConfig SynTreeConfig {..}
@@ -50,18 +62,6 @@ checkSynTreeConfig SynTreeConfig {..}
           (result, rest) = maxNodes' `divMod` maxConsecutiveNegations', maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
       = Just "Your maximum depth value is unreasonably large, given your other settings."
     | otherwise = Nothing
-
-defaultSynTreeConfig :: SynTreeConfig
-defaultSynTreeConfig =
-    SynTreeConfig
-    { maxNodes = 10
-    , minNodes = 6
-    , maxDepth = 6
-    , usedLiterals = "ABCDE"
-    , atLeastOccurring = 3
-    , useImplEqui = False
-    , maxConsecutiveNegations = 2
-    }
 
 data SynTreeInst =
     SynTreeInst
