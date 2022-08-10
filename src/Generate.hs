@@ -5,7 +5,10 @@ module Generate(
  maxNodesForDepth,
  genSynTreeSubTreeExc,
  noSameSubTree,
+ genSynTreeSuperfluousBracketsExc,
  similarExist,
+ sameOperatorAdjacent,
+ checkNextOperator
 ) where
 
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
@@ -117,3 +120,19 @@ similarTree _ _ = False
 
 similarExist :: Eq o => [SynTree o c] -> Bool
 similarExist trees = length (nubBy similarTree trees) /= length trees
+-----------------------------------------------------------------------------------------------------------------
+sameOperatorAdjacent :: SynTree Op Char -> Bool
+sameOperatorAdjacent (Leaf _) = False
+sameOperatorAdjacent (Unary Not a) = sameOperatorAdjacent a
+sameOperatorAdjacent (Binary oper a b) = checkNextOperator a oper || checkNextOperator b oper || sameOperatorAdjacent a || sameOperatorAdjacent b
+sameOperatorAdjacent _ = error "All cases handled!"
+
+checkNextOperator :: SynTree Op Char -> Op -> Bool
+checkNextOperator (Binary And _ _) fatherOperator = fatherOperator == And
+checkNextOperator (Binary Or _ _) fatherOperator = fatherOperator == Or
+checkNextOperator _ _ = False
+
+
+genSynTreeSuperfluousBracketsExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Integer -> Gen (SynTree Op Char)  --minNodes must >= 5
+genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations =
+    genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations `suchThat` sameOperatorAdjacent

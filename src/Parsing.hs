@@ -3,8 +3,10 @@
 module Parsing (
   formulaParse,
   illegalPropositionStringParse,
+  operatorAndLeavesParse,
   subFormulasStringParse,
-  subTreeStringParse
+  subTreeStringParse,
+  superfluousBracketsExcParser
   ) where
 
 import Text.Parsec.Char (char, oneOf, satisfy, string, digit)
@@ -90,3 +92,16 @@ illegalPropositionParse = do
 
 illegalPropositionStringParse :: String -> Either ParseError (Set Int)
 illegalPropositionStringParse = parse  (whitespace >> illegalPropositionParse <* eof) ""
+----------------------------------------------------------------------------------------
+parseLettertoStr :: Parser String
+parseLettertoStr = do
+    letter <- lexeme $ satisfy isLetter
+    return [letter]
+
+operatorAndLeavesParse :: Parser String
+operatorAndLeavesParse = do
+    listOfString <- many1 (parseLettertoStr <|> lexeme (string "/\\") <|> lexeme (string "\\/") <|> lexeme (string "=>") <|> lexeme (string "<=>") <|> lexeme (string "(") <|> lexeme (string ")") <|> lexeme (string "~"))
+    return (concat listOfString)
+
+superfluousBracketsExcParser :: String -> Either ParseError String
+superfluousBracketsExcParser = parse  (whitespace >> operatorAndLeavesParse <* eof) ""

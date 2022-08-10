@@ -12,7 +12,7 @@ bracketDisplay (Binary oper a b) = allocateBracketToSubtree False a b (showOpera
 bracketDisplay (Leaf a)=  return ("("++ (a : ")"))
 bracketDisplay (Unary Not a) = do
     aFormula <- ifUsebracket True a
-    return ('~' : aFormula)
+    return (showOperator Not ++ aFormula)
 bracketDisplay _ = error "All cases handled!"
 
 ifUsebracket :: Bool -> SynTree Op Char -> Gen String
@@ -20,7 +20,7 @@ ifUsebracket usebracket (Leaf a) = if not usebracket then return [a] else return
 ifUsebracket usebracket synTree@(Unary Not a) = let addPositions = notAndLeaves a in
     if not usebracket
     then return (normalShow synTree)
-    else frequency [(1, return("(~"++ normalShow a ++ ")")), (addPositions, subTreebracket synTree)]
+    else frequency [(1, return("(" ++ showOperator Not ++ normalShow a ++ ")")), (addPositions, subTreebracket synTree)]
 ifUsebracket usebracket synTree@(Binary _ _ _) =
     if not usebracket
     then return (normalShow synTree)
@@ -31,7 +31,7 @@ subTreebracket :: SynTree Op Char -> Gen String
 subTreebracket (Binary oper a b) = allocateBracketToSubtree True a b (showOperator oper)
 subTreebracket (Unary Not a) = do
     left <- ifUsebracket True a
-    return ("~" ++ left)
+    return (showOperator Not ++ left)
 subTreebracket (Leaf _) = error "This will not happen but must be write"
 subTreebracket _ = error "All cases handled!"
 

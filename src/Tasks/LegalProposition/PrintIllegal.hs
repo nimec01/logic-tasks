@@ -23,7 +23,7 @@ subTreeIllegal ::Bool -> SynTree Op Char -> String -> Gen String
 subTreeIllegal notFirstLayer (Binary oper a b) usedLiterals = allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator oper)
 subTreeIllegal _ (Unary Not a) usedLiterals = do
     left <- ifUseIllegal True True a usedLiterals
-    return ("~" ++ left)
+    return (showOperator Not ++ left)
 subTreeIllegal _ (Leaf _) _ = error "This will not happen but must be write"
 subTreeIllegal _ _ _ = error "All cases handled!"
 
@@ -41,10 +41,10 @@ illegalShow notFirstLayer a b usedLiterals usedOperator =
     if notFirstLayer
     then  do
         letter <- elements usedLiterals
-        frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator True)) [(2, ""), (2, "~"), (2, [letter])] ++ illegalParentheses a b usedOperator)
+        frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator True)) [(2, ""), (2, showOperator Not), (2, [letter])] ++ illegalParentheses a b usedOperator)
     else  do
         letter <- elements usedLiterals
-        frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, "~"), (1, [letter])])
+        frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, showOperator Not), (1, [letter])])
 
 combineNormalShow :: SynTree Op Char -> SynTree Op Char -> String -> Bool -> Gen String
 combineNormalShow a b replacedOperator False = return (normalShow a ++ replacedOperator ++ normalShow b)
