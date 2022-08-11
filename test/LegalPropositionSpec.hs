@@ -23,7 +23,7 @@ validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
     syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSyntr
     let leaves = maxLeavesForNodes maxNodes
-    formulas <- choose (1, min 15 ( max 1 ((maxNodes - leaves) ^ if useImplEqui then (4 :: Integer) else (2 :: Integer))))
+    formulas <- choose (1, min 15 ( max 1 (if useImplEqui then (4 :: Integer) else (2 :: Integer)) ^ (maxNodes - leaves)))
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
     return $ LegalPropositionConfig

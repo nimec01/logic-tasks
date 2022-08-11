@@ -37,7 +37,7 @@ simplestDisplay _ = error "All cases handled!"
 simplestShow :: SynTree Op Char -> Maybe Op -> String
 simplestShow (Leaf a) _ =  a : ""
 simplestShow (Unary Not a) _ = showOperator Not ++ simplestShow a (Just Not)
-simplestShow (Binary And a b) (Just And) = simplestShow a (Just And) ++ "/\\" ++ simplestShow b (Just And)
-simplestShow (Binary Or a b) (Just Or) = simplestShow a (Just Or) ++ "\\/" ++ simplestShow b (Just Or)
+simplestShow (Binary And a b) (Just And) = simplestShow a (Just And) ++ showOperator And ++ simplestShow b (Just And)
+simplestShow (Binary Or a b) (Just Or) = simplestShow a (Just Or) ++ showOperator Or ++ simplestShow b (Just Or)
 simplestShow (Binary oper a b) _ = "(" ++ simplestShow a (Just oper) ++ showOperator oper ++ simplestShow b (Just oper) ++ ")"
 simplestShow _ _ = error "All cases handled!"

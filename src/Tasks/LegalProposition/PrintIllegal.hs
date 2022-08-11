@@ -56,9 +56,9 @@ implementIllegal :: Bool -> SynTree Op Char -> String -> Gen String
 implementIllegal notFirstLayer (Binary oper a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals (showOperator oper)
 implementIllegal _ (Unary Not a) usedLiterals = do
     letter <- elements usedLiterals
-    elements  $ map (++ normalShow a) ["/\\", "\\/", "=>", "<=>", [letter]]
+    elements  $ map (++ normalShow a) ([letter] : map showOperator [And, Or, Equi, Impl])
 implementIllegal _ (Leaf _) _ = do
-    oper <- elements ["/\\", "\\/", "=>", "<=>", "~"]
+    oper <- elements (map showOperator [And, Or, Equi, Impl, Not])
     elements [oper,""]
 implementIllegal _ _ _ = error "All cases handled!"
 
