@@ -12,7 +12,7 @@ module Trees.Helpers
     maxLeavesForNodes,
     maxNodesForDepth,
     noSameSubTree,
-    sameOperatorAdjacent,
+    sameAssociativeOperatorAdjacent,
     similarExist,
     consecutiveNegations,
     ) where
@@ -76,11 +76,11 @@ maxNodesForDepth depth = 2 ^ depth - 1
 maxLeavesForNodes :: Integer -> Integer
 maxLeavesForNodes nodes = (nodes + 1) `div` 2
 
-sameOperatorAdjacent :: SynTree Op Char -> Bool
-sameOperatorAdjacent (Leaf _) = False
-sameOperatorAdjacent (Unary Not a) = sameOperatorAdjacent a
-sameOperatorAdjacent (Binary oper a b) = checkNextOperator a oper || checkNextOperator b oper || sameOperatorAdjacent a || sameOperatorAdjacent b
-sameOperatorAdjacent _ = error "All cases handled!"
+sameAssociativeOperatorAdjacent :: SynTree Op c -> Bool
+sameAssociativeOperatorAdjacent (Leaf _) = False
+sameAssociativeOperatorAdjacent (Unary Not a) = sameAssociativeOperatorAdjacent a
+sameAssociativeOperatorAdjacent (Binary oper a b) = checkNextOperator a oper || checkNextOperator b oper || sameAssociativeOperatorAdjacent a || sameAssociativeOperatorAdjacent b
+sameAssociativeOperatorAdjacent _ = error "All cases handled!"
 
 checkNextOperator :: SynTree Op Char -> Op -> Bool
 checkNextOperator (Binary And _ _) fatherOperator = fatherOperator == And

@@ -1,6 +1,6 @@
 module Tasks.SuperfluousBrackets.PrintSuperfluousBrackets(
     superfluousBracketsDisplay,
-    sameOperatorAdjacentSerial,
+    sameAssociativeOperatorAdjacentSerial,
 )where
 
 import Test.QuickCheck (Gen, frequency, elements, choose)
@@ -12,7 +12,7 @@ import Data.Maybe (isNothing)
 superfluousBracketsDisplay :: SynTree Op Char -> Integer -> Gen String
 superfluousBracketsDisplay synTree brackets =
     let synTreeWithSerial = numberAllNodes synTree
-        serialsOfsameOperator = sameOperatorAdjacentSerial synTreeWithSerial Nothing
+        serialsOfsameOperator = sameAssociativeOperatorAdjacentSerial synTreeWithSerial Nothing
     in  do
         serial <- elements serialsOfsameOperator
         rootDisplay synTreeWithSerial (brackets -1) serial
@@ -61,10 +61,12 @@ nonRootDisplay synTree@(Unary (Not,_) a) brackets _ serial = do
 nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial = allocateBracketToSubtree a b operWithSerial brackets (Just fatherOperator) serial
 nonRootDisplay _ _ _ _ = error "All cases handled!"
 
-sameOperatorAdjacentSerial :: SynTree (Op, Integer) (Char, Integer) -> Maybe Op -> [Integer]
-sameOperatorAdjacentSerial (Leaf _) _ = []
-sameOperatorAdjacentSerial (Unary (Not, _) a) _ = sameOperatorAdjacentSerial a (Just Not)
-sameOperatorAdjacentSerial (Binary (oper, serial) a b) fatherOper
-    | Just oper == fatherOper && (oper == And || oper == Or) = serial : sameOperatorAdjacentSerial a (Just oper) ++ sameOperatorAdjacentSerial b (Just oper)
-    | otherwise = sameOperatorAdjacentSerial a (Just oper) ++ sameOperatorAdjacentSerial b (Just oper)
-sameOperatorAdjacentSerial  _ _ = error "All cases handled!"
+sameAssociativeOperatorAdjacentSerial :: SynTree (Op, Integer) (c, Integer) -> Maybe Op -> [Integer]
+sameAssociativeOperatorAdjacentSerial (Leaf _) _ = []
+sameAssociativeOperatorAdjacentSerial (Unary (Not, _) a) _ = sameAssociativeOperatorAdjacentSerial a (Just Not)
+sameAssociativeOperatorAdjacentSerial (Binary (oper, serial) a b) fatherOper
+    | Just oper == fatherOper && (oper == And || oper == Or) =
+        serial : sameAssociativeOperatorAdjacentSerial a (Just oper) ++ sameAssociativeOperatorAdjacentSerial b (Just oper)
+    | otherwise =
+        sameAssociativeOperatorAdjacentSerial a (Just oper) ++ sameAssociativeOperatorAdjacentSerial b (Just oper)
+sameAssociativeOperatorAdjacentSerial  _ _ = error "All cases handled!"
