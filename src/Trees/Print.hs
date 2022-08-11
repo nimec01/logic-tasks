@@ -30,14 +30,14 @@ normalShow _ = error "All cases handled!"
 
 simplestDisplay :: SynTree Op Char -> String
 simplestDisplay (Leaf a)=  a : ""
-simplestDisplay (Unary Not a) = showOperator Not ++ simplestShow a (Just Not)
-simplestDisplay (Binary oper a b) = simplestShow a (Just oper) ++ showOperator oper ++ simplestShow b (Just oper)
+simplestDisplay (Unary Not a) = showOperator Not ++ simplestShow a Not
+simplestDisplay (Binary oper a b) = simplestShow a oper ++ showOperator oper ++ simplestShow b oper
 simplestDisplay _ = error "All cases handled!"
 
-simplestShow :: SynTree Op Char -> Maybe Op -> String
+simplestShow :: SynTree Op Char -> Op -> String
 simplestShow (Leaf a) _ =  a : ""
-simplestShow (Unary Not a) _ = showOperator Not ++ simplestShow a (Just Not)
-simplestShow (Binary And a b) (Just And) = simplestShow a (Just And) ++ showOperator And ++ simplestShow b (Just And)
-simplestShow (Binary Or a b) (Just Or) = simplestShow a (Just Or) ++ showOperator Or ++ simplestShow b (Just Or)
-simplestShow (Binary oper a b) _ = "(" ++ simplestShow a (Just oper) ++ showOperator oper ++ simplestShow b (Just oper) ++ ")"
+simplestShow (Unary Not a) _ = showOperator Not ++ simplestShow a Not
+simplestShow (Binary And a b) And = simplestShow a And ++ showOperator And ++ simplestShow b And
+simplestShow (Binary Or a b) Or = simplestShow a Or ++ showOperator Or ++ simplestShow b Or
+simplestShow (Binary oper a b) _ = "(" ++ simplestShow a oper ++ showOperator oper ++ simplestShow b oper ++ ")"
 simplestShow _ _ = error "All cases handled!"
