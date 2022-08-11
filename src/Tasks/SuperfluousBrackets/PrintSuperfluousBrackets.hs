@@ -7,6 +7,7 @@ import Test.QuickCheck (Gen, frequency, elements, choose)
 
 import Trees.Types (SynTree (..), Op(..), showOperator)
 import Trees.Helpers (treeNodes, numberAllNodes)
+import Data.Maybe (isNothing)
 
 superfluousBracketsDisplay :: SynTree Op Char -> Integer -> Gen String
 superfluousBracketsDisplay synTree brackets =
@@ -40,7 +41,7 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
                 in  do
                 ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (rightNodes + leftNodes + 1 - brackets), return False)]
                 let brackets' = if ifUsebrackets then brackets - 1 else brackets
-                    addBracket = (if ifUsebrackets then 1 else 0) + (if nowSerial == 1 || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
+                    addBracket = (if ifUsebrackets then 1 else 0) + (if isNothing fatherOperator || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
                 leftBrackets <- choose (max 0 (brackets' - rightNodes) , min leftNodes brackets')
                 leftFormula <- nonRootDisplay a leftBrackets oper serial
                 rightFormula <- nonRootDisplay b (brackets' - leftBrackets) oper serial
