@@ -49,7 +49,7 @@ getNotLeafSubTrees t@(Binary _ a b) = getNotLeafSubTrees a ++ (t : getNotLeafSub
 getNotLeafSubTrees (Leaf _) =  []
 getNotLeafSubTrees t@(Unary _ a) = t : getNotLeafSubTrees a
 
-allNotLeafSubTrees :: Ord c => SynTree Op c -> Set (SynTree Op c)
+allNotLeafSubTrees :: (Ord o, Ord c) => SynTree o c -> Set (SynTree o c)
 allNotLeafSubTrees a = fromList (getNotLeafSubTrees a)
 
 noSameSubTree :: (Eq o, Ord o, Ord c) => SynTree o c -> Bool
@@ -82,9 +82,9 @@ sameAssociativeOperatorAdjacent (Unary Not a) = sameAssociativeOperatorAdjacent 
 sameAssociativeOperatorAdjacent (Binary oper a b) = checkNextOperator a oper || checkNextOperator b oper || sameAssociativeOperatorAdjacent a || sameAssociativeOperatorAdjacent b
 sameAssociativeOperatorAdjacent _ = error "All cases handled!"
 
-checkNextOperator :: SynTree Op Char -> Op -> Bool
-checkNextOperator (Binary And _ _) fatherOperator = fatherOperator == And
-checkNextOperator (Binary Or _ _) fatherOperator = fatherOperator == Or
+checkNextOperator :: SynTree Op c -> Op -> Bool
+checkNextOperator (Binary And _ _) And = True
+checkNextOperator (Binary Or _ _) Or = True
 checkNextOperator _ _ = False
 
 similarTree :: Eq o => SynTree o c -> SynTree o c -> Bool
