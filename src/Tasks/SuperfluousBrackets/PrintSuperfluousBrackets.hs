@@ -18,15 +18,15 @@ superfluousBracketsDisplay synTree brackets =
 
 rootDisplay :: SynTree (Op, Integer) (Char, Integer) -> Integer -> Integer -> Gen String
 rootDisplay (Leaf _) _ _ =  error "can not have only one node"
-rootDisplay synTree@(Unary _ a) brackets serial = do
+rootDisplay synTree@(Unary (neg,_) a) brackets serial = do
     ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
     if ifUsebrackets
     then do
-        formula <- nonRootDisplay a  (brackets - 1) Not (Just serial)
-        return ("(" ++ showOperator Not  ++ formula ++ ")")
+        formula <- nonRootDisplay a (brackets - 1) neg (Just serial)
+        return ("(" ++ showOperator neg ++ formula ++ ")")
     else do
-        formula <- nonRootDisplay a brackets Not (Just serial)
-        return (showOperator Not ++ formula)
+        formula <- nonRootDisplay a brackets neg (Just serial)
+        return (showOperator neg ++ formula)
 rootDisplay (Binary operWithSerial a b) brackets serial = allocateBracketToSubtree a b operWithSerial brackets Nothing (Just serial)
 
 allocateBracketToSubtree :: SynTree (Op, Integer) (Char, Integer) -> SynTree (Op, Integer) (Char, Integer) -> (Op, Integer) -> Integer -> Maybe Op -> Maybe Integer -> Gen String
@@ -47,15 +47,15 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
 
 nonRootDisplay :: SynTree (Op, Integer) (Char, Integer) -> Integer -> Op -> Maybe Integer -> Gen String  -- string is fatheroper
 nonRootDisplay (Leaf (a, _)) brackets _ _ = if brackets == 0 then return [a] else return ("("++ (a : ")"))
-nonRootDisplay synTree@(Unary _ a) brackets _ serial = do
+nonRootDisplay synTree@(Unary (neg,_) a) brackets _ serial = do
     ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
     if ifUsebrackets
     then do
-        formula <- nonRootDisplay a  (brackets - 1) Not serial
-        return ("(" ++ showOperator Not ++ formula ++ ")")
+        formula <- nonRootDisplay a (brackets - 1) neg serial
+        return ("(" ++ showOperator neg ++ formula ++ ")")
     else do
-        formula <-nonRootDisplay a brackets Not serial
-        return (showOperator Not ++ formula)
+        formula <- nonRootDisplay a brackets neg serial
+        return (showOperator neg ++ formula)
 nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial = allocateBracketToSubtree a b operWithSerial brackets (Just fatherOperator) serial
 
 sameOperatorAdjacentSerial :: SynTree (Op, Integer) (Char, Integer) -> Maybe Op -> [Integer]

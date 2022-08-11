@@ -4,7 +4,7 @@ module Tasks.LegalProposition.PrintIllegal (
 
 import Test.QuickCheck (Gen, frequency, elements)
 
-import Trees.Types (SynTree(..), Op(..), showOperator)
+import Trees.Types (SynTree(..), Op(..), showOperator, allOperators, allBinaryOperators)
 import Trees.Helpers (treeNodes, collectLeaves)
 import Trees.Print (normalShow)
 
@@ -56,9 +56,9 @@ implementIllegal :: Bool -> SynTree Op Char -> String -> Gen String
 implementIllegal notFirstLayer (Binary oper a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals (showOperator oper)
 implementIllegal _ (Unary Not a) usedLiterals = do
     letter <- elements usedLiterals
-    elements  $ map (++ normalShow a) ([letter] : map showOperator [And, Or, Equi, Impl])
+    elements  $ map (++ normalShow a) ([letter] : map showOperator allBinaryOperators)
 implementIllegal _ (Leaf _) _ = do
-    oper <- elements (map showOperator [And, Or, Equi, Impl, Not])
+    oper <- elements (map showOperator allOperators)
     elements [oper,""]
 implementIllegal _ _ _ = error "All cases handled!"
 

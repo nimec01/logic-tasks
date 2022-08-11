@@ -5,12 +5,12 @@ module Trees.Generate (
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
 
-import Trees.Types (SynTree(..), Op(..))
+import Trees.Types (SynTree(..), Op(..), allBinaryOperators)
 import Trees.Helpers (collectLeaves, relabelShape, maxNodesForDepth, consecutiveNegations)
 
 chooseList :: Bool -> [Op]
 chooseList useImplEqui = if useImplEqui
-        then [And, Or, Impl, Equi]
+        then allBinaryOperators
         else [And, Or]
 
 randomList :: [c] -> [c] -> Integer -> Gen [c]
