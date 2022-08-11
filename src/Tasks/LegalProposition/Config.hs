@@ -39,15 +39,17 @@ checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
 
 checkAdditionalConfig :: LegalPropositionConfig -> Maybe String
 checkAdditionalConfig LegalPropositionConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
+    | minNodes < 3
+      = Just "form A and ~A is meaningless in this kind of issue"
     | formulas < 1
-      = Just "The number of formulas cannot be less than 1."
+      = Just "The number of formulas must be positive."
     | illegals < 0
-      = Just "The number of illegals cannot be less than 0."
+      = Just "The number of illegals can not be negative."
     | bracketFormulas < 0
       = Just "The number of bracketFormulas cannot be less than 0."
     | formulas < illegals + bracketFormulas
       = Just "The number of formulas cannot be less than the sum of bracket Formulas and illegal ones."
-    | let leaves = maxLeavesForNodes maxNodes , max 1 (if useImplEqui then (4 :: Integer) else (2 :: Integer)) ^ (maxNodes - leaves) < formulas
+    | let leaves = maxLeavesForNodes maxNodes , (if useImplEqui then (4 :: Integer) else (2 :: Integer)) ^ (maxNodes - leaves) < formulas
       = Just "It has risks that formulas are larger than is actually reasonable given the possible size of the original formula."
     | otherwise
       = Nothing

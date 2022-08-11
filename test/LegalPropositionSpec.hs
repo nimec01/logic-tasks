@@ -4,7 +4,7 @@ module LegalPropositionSpec where
 
 import Test.Hspec (Spec, describe, it)
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
-import Test.QuickCheck (Gen, choose, forAll)
+import Test.QuickCheck (Gen, choose, forAll, suchThat)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
@@ -21,9 +21,9 @@ import Data.List (delete, intercalate)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
-    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSyntr
+    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSyntr `suchThat` ((3 <=) . minNodes)
     let leaves = maxLeavesForNodes maxNodes
-    formulas <- choose (1, min 15 ( max 1 (if useImplEqui then (4 :: Integer) else (2 :: Integer)) ^ (maxNodes - leaves)))
+    formulas <- choose (1, min 15 ( if useImplEqui then (4 :: Integer) else (2 :: Integer) ^ (maxNodes - leaves)))
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
     return $ LegalPropositionConfig
