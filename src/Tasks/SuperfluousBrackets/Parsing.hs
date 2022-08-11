@@ -12,12 +12,12 @@ import Trees.Types (showOperator, allOperators)
 
 parseLettertoStr :: Parser String
 parseLettertoStr = do
-    letter <- lexeme $ satisfy isLetter
+    letter <- satisfy isLetter
     return [letter]
 
 operatorAndLeavesParse :: Parser String
 operatorAndLeavesParse = do
-    listOfString <- many1 (parseLettertoStr <|> foldr (<|>) (lexeme (string "(") <|> lexeme (string ")")) (map (lexeme . string . showOperator) allOperators))
+    listOfString <- many1 . lexeme $ parseLettertoStr <|> foldr (<|>) (string "(" <|> string ")") (map (string . showOperator) allOperators)
     return (concat listOfString)
 
 superfluousBracketsExcParser :: String -> Either ParseError String

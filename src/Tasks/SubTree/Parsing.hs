@@ -33,4 +33,4 @@ subFormulasParse = do
     return $ fromList subFormulasList
 
 subFormulasStringParse :: String -> Either ParseError (Set String)
-subFormulasStringParse = parse (whitespace >> subFormulasParse <* eof) ""
+subFormulasStringParse = parse (subFormulasParse <* eof) ""

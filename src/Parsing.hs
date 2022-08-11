@@ -7,18 +7,18 @@ module Parsing (
   ) where
 
 import Text.Parsec.Char (oneOf, satisfy)
-import Data.Char (isLetter)
+import Data.Char (isLetter, isSpace)
 import Text.Parsec (many, (<|>))
 import Text.Parsec.String (Parser)
 import Trees.Types (showOperator, allOperators)
 import Data.List.Extra (nubOrd)
 
 formulaSymbol :: Parser Char
-formulaSymbol = satisfy isLetter <|> oneOf (nubOrd (" ()" ++ concatMap showOperator allOperators))
+formulaSymbol = satisfy isLetter <|> oneOf (nubOrd ("()" ++ concatMap showOperator allOperators))
 
 whitespace :: Parser ()
 whitespace = do
-    many $ oneOf " \n\t"
+    many $ satisfy isSpace
     return ()
 
 lexeme :: Parser a -> Parser a

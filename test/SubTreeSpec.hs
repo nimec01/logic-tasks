@@ -12,6 +12,7 @@ import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes, noSameSubTree)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
 import Data.List (intercalate)
+import Data.Char (isSpace)
 import Trees.Print (display)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (invalidBoundsSyntr, validBoundsSyntr)
@@ -57,7 +58,7 @@ spec = do
         it "parse should works well" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
-                \synTree -> subFormulasStringParse (filter (/= ' ') (displaySubTrees (toList (allNotLeafSubTrees synTree)))) == Right (Data.Set.map display (allNotLeafSubTrees synTree))
+                \synTree -> subFormulasStringParse (filter (not . isSpace) (displaySubTrees (toList (allNotLeafSubTrees synTree)))) == Right (Data.Set.map display (allNotLeafSubTrees synTree))
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
             -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
