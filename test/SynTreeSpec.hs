@@ -4,14 +4,13 @@
 module SynTreeSpec where
 
 import Data.Maybe (isJust, isNothing)
-import Trees.Parsing (formulaParse)
 import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig, SynTreeInst (..))
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Data.List.Extra ( nubOrd, isInfixOf )
-import Tasks.SynTree.Quiz (generateSynTreeInst)
+import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
 
 validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
@@ -70,7 +69,7 @@ spec = do
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSyntr $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right instSyntree
+        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst correct
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSyntree >= minNodes && treeNodes instSyntree <= maxNodes
