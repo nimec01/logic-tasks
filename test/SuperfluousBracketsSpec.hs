@@ -56,7 +56,7 @@ spec = do
         it "superfluousBracketsDisplay should have setted addtional brackets than simplest formula" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
                 forAll (genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
-                    forAll (superfluousBracketsDisplay synTree superfluousBracketPairs) $ \bracketsFormula -> length bracketsFormula - length (simplestDisplay synTree) == fromIntegral (superfluousBracketPairs * 2)
+                    forAll (superfluousBracketsDisplay synTree superfluousBracketPairs) $ \bracketsFormula -> fromIntegral (length bracketsFormula - length (simplestDisplay synTree)) == superfluousBracketPairs * 2
     describe "Parser" $
         it "the Parser can accept all formula generate by simplestShow" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
@@ -68,4 +68,4 @@ spec = do
                 forAll (generateSuperfluousBracketsInst superfluousBracketsConfig) $ \superfluousBracketsInst@SuperfluousBracketsInst{..} -> feedback superfluousBracketsInst simplestString
         it "the stringWithSuperfluousBrackets should have right number of SuperfluousBrackets" $
             forAll validBoundsSuperfluousBrackets $ \sBConfig@SuperfluousBracketsConfig {..} ->
-                forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} -> length stringWithSuperfluousBrackets - length simplestString == fromIntegral (superfluousBracketPairs * 2)
+                forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} -> fromIntegral (length stringWithSuperfluousBrackets - length simplestString) == superfluousBracketPairs * 2
