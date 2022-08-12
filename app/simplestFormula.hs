@@ -13,7 +13,7 @@ main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
   theConfigToUse <- determineSuperfluousBracketsConfig
-  putStrLn "\nThe following is the default config:\n"
+  putStrLn "\nThe following is the config now used:\n"
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
   inst@SuperfluousBracketsInst{ simplestString } <- genSuperfluousBracketsInst theConfigToUse
@@ -22,7 +22,7 @@ main = do
   putStrLn "\n Because of /\\ and \\/ are associative, it is not necessary to use brackets when combining three atoms with same operators /\\ or \\/ for example A/\\B/\\C"
   putStrLn "\n The task will give a formula with redundant brackets, and your mission is to give the simplest form of the formula"
   putStrLn "\n That means delete all unnecessary brackets"
-  feedbackLoop (feedback inst) ("The sample solution is " ++ show (feedback inst simplestString))
+  feedbackLoop (feedback inst) ("The sample solution is: " ++ simplestString)
 
 determineSuperfluousBracketsConfig :: IO SuperfluousBracketsConfig
 determineSuperfluousBracketsConfig = do
