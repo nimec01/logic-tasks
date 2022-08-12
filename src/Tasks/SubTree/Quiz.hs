@@ -3,7 +3,6 @@
 module Tasks.SubTree.Quiz(
     feedback,
     generateSubTreeInst,
-    genSynTreeSubTreeExc,
 ) where
 
 import Test.QuickCheck (Gen, suchThat)
@@ -21,7 +20,8 @@ import Text.Parsec (ParseError)
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    tree <- genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees
+    tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations
+      `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { minInputTrees = minSubTrees
@@ -29,13 +29,6 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       , correctTrees
       , correctFormulas = Data.Set.map display correctTrees
       }
-
-genSynTreeSubTreeExc :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Bool -> Integer -> Integer -> Gen (SynTree Op Char)
-genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees =
-    let
-        syntaxTree = genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations
-    in
-        syntaxTree `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
 
 feedback :: SubTreeInst -> String -> Bool
 feedback SubTreeInst {correctFormulas, correctTrees, minInputTrees} input = judgeInput (subTreeStringParse input) (subFormulasStringParse (filter (not . isSpace) input)) minInputTrees correctFormulas correctTrees
