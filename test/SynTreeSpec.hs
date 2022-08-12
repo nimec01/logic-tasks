@@ -4,7 +4,6 @@
 module SynTreeSpec where
 
 import Data.Maybe (isJust, isNothing)
-import Trees.Generate (genSynTree)
 import Trees.Parsing (formulaParse)
 import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig, SynTreeInst (..))
@@ -73,14 +72,14 @@ spec = do
       forAll validBoundsSyntr $ \sTConfig ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right instSyntree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
-      forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> treeNodes synTree >= minNodes && treeNodes synTree <= maxNodes
+      forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSyntree >= minNodes && treeNodes instSyntree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
-      forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> treeDepth synTree <= maxDepth
+      forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeDepth instSyntree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-      forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> fromIntegral (length (nubOrd (collectLeaves synTree))) >= atLeastOccurring
+      forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> fromIntegral (length (nubOrd (collectLeaves instSyntree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
-      forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` display synTree)
+      forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->  not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` display instSyntree)

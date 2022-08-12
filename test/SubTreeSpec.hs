@@ -4,11 +4,11 @@ module SubTreeSpec where
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Data.Set (size, toList, map)
-
+import TestHelpers (deleteBrackets)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
-import Tasks.SubTree.Quiz (generateSubTreeInst, genSynTreeSubTreeExc, feedback)
+import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
 import Trees.Types (SynTree, Op)
-import Trees.Helpers (maxLeavesForNodes, noSameSubTree)
+import Trees.Helpers (maxLeavesForNodes, )
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
 import Data.List (intercalate)
@@ -16,6 +16,7 @@ import Data.Char (isSpace)
 import Trees.Print (display)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (validBoundsSyntr)
+import Data.List.Extra (isInfixOf )
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
@@ -50,11 +51,6 @@ spec = do
             isNothing (checkSubTreeConfig defaultSubTreeConfig)
         it "should accept valid bounds" $
             forAll validBoundsSubTree (isNothing . checkSubTreeConfig)
-    describe "genSynTreeSubTreeExc" $
-        it "it should generate the Syntax tree without Duple tree when don't allow Duple Tree" $
-            forAll validBoundsSubTree $ \SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-            -> forAll (genSynTreeSubTreeExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui allowDupelTree maxConsecutiveNegations minSubTrees) $
-                \synTree -> allowDupelTree || noSameSubTree synTree
     describe "generateSubTreeInst" $ do
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
@@ -65,6 +61,10 @@ spec = do
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees
+        it "all subformulas is the sublist of formula" $
+            forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
+                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let formula' = deleteBrackets formula
+                                                                                correctFormulas' = Prelude.map deleteBrackets (toList correctFormulas) in all (`isInfixOf` formula') correctFormulas'
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
