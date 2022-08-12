@@ -41,9 +41,8 @@ allocateBracketToSubtree notFirstLayer a b usedOperator = do
     left <- ifUsebracket ifUseBug a
     right <- ifUsebracket (not ifUseBug) b
     if notFirstLayer
-    then return ("(" ++ left ++ usedOperator ++ right ++ ")")
-    else return (left ++ usedOperator ++ right)
-
+    then return ("(" ++ left ++ " " ++ usedOperator ++ " " ++ right ++ ")")
+    else return (left ++ " " ++ usedOperator ++ " " ++ right)
 
 notAndLeaves :: SynTree Op c -> Int
 notAndLeaves (Binary _ a b) = notAndLeaves a + notAndLeaves b

@@ -34,8 +34,8 @@ allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
     left <- ifUseIllegal ifUseBug True a usedLiterals
     right <- ifUseIllegal (not ifUseBug) True b usedLiterals
     if notFirstLayer
-    then return ("(" ++ left ++ usedOperator ++ right ++ ")")
-    else return (left ++ usedOperator ++ right)
+    then return ("(" ++ left ++ " " ++ usedOperator ++ " " ++ right ++ ")")
+    else return (left ++ " " ++ usedOperator ++ " " ++ right)
 
 illegalShow :: Bool -> SynTree Op Char -> SynTree Op Char -> String -> String -> Gen String
 illegalShow notFirstLayer a b usedLiterals usedOperator =
@@ -48,15 +48,15 @@ illegalShow notFirstLayer a b usedLiterals usedOperator =
         frequency (map (\(probability, replacedOperator) -> (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, showOperator Not), (1, [letter])])
 
 combineNormalShow :: SynTree Op Char -> SynTree Op Char -> String -> Bool -> Gen String
-combineNormalShow a b replacedOperator False = return (normalShow a ++ replacedOperator ++ normalShow b)
-combineNormalShow a b replacedOperator True = return ("(" ++ normalShow a ++ replacedOperator ++ normalShow b ++ ")")
+combineNormalShow a b replacedOperator False = return (normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b)
+combineNormalShow a b replacedOperator True = return ("(" ++ normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b ++ ")")
 
 
 implementIllegal :: Bool -> SynTree Op Char -> String -> Gen String
 implementIllegal notFirstLayer (Binary oper a b) usedLiterals = illegalShow notFirstLayer a b usedLiterals (showOperator oper)
 implementIllegal _ (Unary Not a) usedLiterals = do
     letter <- elements usedLiterals
-    elements  $ map (++ normalShow a) ([letter] : map showOperator allBinaryOperators)
+    elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)
 implementIllegal _ (Leaf _) _ = do
     oper <- elements (map showOperator allOperators)
     elements [oper,""]
@@ -64,4 +64,4 @@ implementIllegal _ _ _ = error "All cases handled!"
 
 illegalParentheses :: SynTree Op Char -> SynTree Op Char -> String -> [(Int, Gen String)]
 illegalParentheses  a b usedOperator = [(1, return (formulaStr ++ ")")),(1, return ("(" ++ formulaStr))]
-    where formulaStr = normalShow a ++ usedOperator ++ normalShow b
+    where formulaStr = normalShow a ++ " " ++ usedOperator ++ " " ++ normalShow b

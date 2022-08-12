@@ -66,6 +66,9 @@ spec = do
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
+        it "the correct store in Inst should be accept by feedback, even without spaces" $
+            forAll validBoundsSubTree $ \subTreeConfig ->
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (filter (not . isSpace) . displaySubTrees $ toList correctTrees)
 
 displaySubTrees :: [SynTree Op Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"

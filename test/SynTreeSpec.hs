@@ -4,6 +4,7 @@
 module SynTreeSpec where
 
 import Data.Maybe (isJust, isNothing)
+import Data.Char (isSpace)
 import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig, SynTreeInst (..))
 import Test.Hspec (Spec, describe, it)
@@ -70,6 +71,9 @@ spec = do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSyntr $ \sTConfig ->
         forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst correct
+    it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, even without spaces" $
+      forAll validBoundsSyntr $ \sTConfig ->
+        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst (filter (not . isSpace) correct)
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSyntree >= minNodes && treeNodes instSyntree <= maxNodes

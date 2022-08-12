@@ -17,13 +17,13 @@ transferToPicture (Binary Equi a b) = "[ $\\Leftrightarrow  $ " ++ transferToPic
 transferToPicture _ = error "All cases handled!"
 
 display :: SynTree Op Char -> String
-display (Binary oper a b) = normalShow a ++ showOperator oper ++ normalShow b
+display (Binary oper a b) = normalShow a ++ " " ++ showOperator oper ++ " " ++ normalShow b
 display (Leaf a)=  a : ""
 display (Unary Not a) = showOperator Not ++ normalShow a ++ ""
 display _ = error "All cases handled!"
 
 normalShow :: SynTree Op Char -> String
-normalShow (Binary oper a b) = "(" ++ normalShow a ++ showOperator oper ++ normalShow b ++ ")"
+normalShow (Binary oper a b) = "(" ++ normalShow a ++ " " ++ showOperator oper ++ " " ++ normalShow b ++ ")"
 normalShow (Leaf a)=  a : ""
 normalShow (Unary Not a) = showOperator Not ++ normalShow a
 normalShow _ = error "All cases handled!"
@@ -31,13 +31,13 @@ normalShow _ = error "All cases handled!"
 simplestDisplay :: SynTree Op Char -> String
 simplestDisplay (Leaf a)=  a : ""
 simplestDisplay (Unary Not a) = showOperator Not ++ simplestShow a Not
-simplestDisplay (Binary oper a b) = simplestShow a oper ++ showOperator oper ++ simplestShow b oper
+simplestDisplay (Binary oper a b) = simplestShow a oper ++ " " ++ showOperator oper ++ " " ++ simplestShow b oper
 simplestDisplay _ = error "All cases handled!"
 
 simplestShow :: SynTree Op Char -> Op -> String
 simplestShow (Leaf a) _ =  a : ""
 simplestShow (Unary Not a) _ = showOperator Not ++ simplestShow a Not
-simplestShow (Binary And a b) And = simplestShow a And ++ showOperator And ++ simplestShow b And
-simplestShow (Binary Or a b) Or = simplestShow a Or ++ showOperator Or ++ simplestShow b Or
-simplestShow (Binary oper a b) _ = "(" ++ simplestShow a oper ++ showOperator oper ++ simplestShow b oper ++ ")"
+simplestShow (Binary And a b) And = simplestShow a And ++ " " ++ showOperator And ++ " " ++ simplestShow b And
+simplestShow (Binary Or a b) Or = simplestShow a Or ++ " " ++ showOperator Or ++ " " ++ simplestShow b Or
+simplestShow (Binary oper a b) _ = "(" ++ simplestShow a oper ++ " " ++ showOperator oper ++ " " ++ simplestShow b oper ++ ")"
 simplestShow _ _ = error "All cases handled!"

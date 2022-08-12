@@ -45,7 +45,7 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
                 leftBrackets <- choose (max 0 (brackets' - rightNodes) , min leftNodes brackets')
                 leftFormula <- nonRootDisplay a leftBrackets oper serial
                 rightFormula <- nonRootDisplay b (brackets' - leftBrackets) oper serial
-                return (replicate addBracket '(' ++ leftFormula ++ showOperator oper ++ rightFormula ++ replicate addBracket ')')
+                return (replicate addBracket '(' ++ leftFormula ++ " " ++ showOperator oper ++ " " ++ rightFormula ++ replicate addBracket ')')
 
 nonRootDisplay :: SynTree (Op, Integer) (Char, Integer) -> Integer -> Op -> Maybe Integer -> Gen String  -- string is fatheroper
 nonRootDisplay (Leaf (a, _)) 0 _ _ = return [a]
