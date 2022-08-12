@@ -20,7 +20,7 @@ import Trees.Parsing(formulaParse)
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
     syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr `suchThat` ((5<=) . minNodes)
-    superfluousBracketPairs <- choose (1, minNodes - 1)
+    superfluousBracketPairs <- choose (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
           syntaxTreeConfig

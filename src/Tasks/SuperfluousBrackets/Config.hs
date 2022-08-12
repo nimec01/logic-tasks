@@ -36,8 +36,8 @@ checkAdditionalConfig :: SuperfluousBracketsConfig -> Maybe String
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}
     | minNodes < 5
       = Just "Minimal number of nodes must larger than 4"
-    | superfluousBracketPairs >= minNodes
-      = Just "The number of Superfluous brackets is too much, it should not larger than minimal number of nodes"
+    | superfluousBracketPairs > minNodes `div` 2
+      = Just "The number of superfluous brackets is excessive, given your node numbers."
     | superfluousBracketPairs < 1
       = Just "Add at least one extra Brackets"
     | otherwise
