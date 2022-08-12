@@ -2,23 +2,19 @@
 
 module Tasks.SuperfluousBrackets.Quiz (
     feedback,
-    genSuperfluousBracketsInst,
     generateSuperfluousBracketsInst,
     genSynTreeSuperfluousBracketsExc
 )where
 
 import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), )
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets(superfluousBracketsDisplay)
-import Test.QuickCheck (generate, Gen, suchThat)
+import Test.QuickCheck (Gen, suchThat)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Print (simplestDisplay)
 import Trees.Types (SynTree, Op)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
-
-genSuperfluousBracketsInst :: SuperfluousBracketsConfig -> IO SuperfluousBracketsInst
-genSuperfluousBracketsInst sBConfig =generate (generateSuperfluousBracketsInst sBConfig)
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do

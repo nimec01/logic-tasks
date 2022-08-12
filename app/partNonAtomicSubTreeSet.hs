@@ -3,8 +3,9 @@
 module Main (main) where
 
 import Tasks.SubTree.Config (SubTreeInst(..), SubTreeConfig(..), defaultSubTreeConfig, checkSubTreeConfig)
-import Tasks.SubTree.Quiz (genSubTreeInst, feedback)
+import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
 import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -16,7 +17,7 @@ main = do
   putStrLn "\nThe following is the config now used:\n"
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SubTreeInst{..} <- genSubTreeInst theConfigToUse
+  inst@SubTreeInst{..} <- generate . generateSubTreeInst $ theConfigToUse
   pPrint inst
   putStrLn ("\nThe task will give a formula and your task is to input a set which at least have " ++ show minInputTrees ++ " non-atomic Formulas")
   putStrLn "\nInput form is {subformula1,subformula2..}"

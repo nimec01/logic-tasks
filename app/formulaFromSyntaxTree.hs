@@ -3,8 +3,9 @@
 module Main (main) where
 
 import Tasks.SynTree.Config (SynTreeInst(..), SynTreeConfig, defaultSynTreeConfig, checkSynTreeConfig)
-import Tasks.SynTree.Quiz (genSynTreeInst, feedback)
+import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
 import AppHelp (determineBaseConfig, feedbackLoop)
+import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -16,7 +17,7 @@ main = do
   putStrLn "\nThe following is the config now used:\n"
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SynTreeInst{ correct } <- genSynTreeInst theConfigToUse
+  inst@SynTreeInst{ correct } <- generate . generateSynTreeInst $ theConfigToUse
   pPrint inst
   putStrLn "\nYour task is to input the propositional logic formula represented by the above (LaTeX rendered) syntax tree."
   putStrLn "You may use as many brackets as you want for your own clarity."

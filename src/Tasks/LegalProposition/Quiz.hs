@@ -1,12 +1,11 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
 module Tasks.LegalProposition.Quiz (
-    genLegalPropositionInst,
     generateLegalPropositionInst,
     feedback,
 ) where
 
-import Test.QuickCheck (Gen, choose, vectorOf, suchThat, generate)
+import Test.QuickCheck (Gen, choose, vectorOf, suchThat)
 import Data.List.Extra (nubOrd)
 import Data.Set (fromList)
 
@@ -20,9 +19,6 @@ import Trees.Helpers (similarExist)
 import Trees.Print (display)
 import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Data.Char (isLetter)
-
-genLegalPropositionInst :: LegalPropositionConfig -> IO LegalPropositionInst
-genLegalPropositionInst lPConfig = generate (generateLegalPropositionInst lPConfig)
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
 generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do

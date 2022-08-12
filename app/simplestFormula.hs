@@ -3,8 +3,9 @@
 module Main (main) where
 
 import Tasks.SuperfluousBrackets.Config (defaultSuperfluousBracketsConfig, SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig)
-import Tasks.SuperfluousBrackets.Quiz (genSuperfluousBracketsInst, feedback)
+import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
 import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -16,7 +17,7 @@ main = do
   putStrLn "\nThe following is the config now used:\n"
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@SuperfluousBracketsInst{ simplestString } <- genSuperfluousBracketsInst theConfigToUse
+  inst@SuperfluousBracketsInst{ simplestString } <- generate . generateSuperfluousBracketsInst $ theConfigToUse
   pPrint inst
   putStrLn "\n This is a important syntax task before you deal with CNF and DNF"
   putStrLn "\n Because of /\\ and \\/ are associative, it is not necessary to use brackets when combining three atoms with same operators /\\ or \\/ for example A/\\B/\\C"

@@ -68,7 +68,7 @@ spec = do
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
                 forAll (genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
                     \synTree -> forAll (superfluousBracketsDisplay synTree (treeNodes synTree + 1)) $ \stringWithSuperfluousBrackets -> isRight (formulaParse stringWithSuperfluousBrackets)
-    describe "genSuperfluousBracketsInst" $ do
+    describe "generateSuperfluousBracketsInst" $ do
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
                 forAll (generateSuperfluousBracketsInst superfluousBracketsConfig) $ \superfluousBracketsInst@SuperfluousBracketsInst{..} -> feedback superfluousBracketsInst simplestString

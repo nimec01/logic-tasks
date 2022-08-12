@@ -4,10 +4,9 @@ module Tasks.SubTree.Quiz(
     feedback,
     generateSubTreeInst,
     genSynTreeSubTreeExc,
-    genSubTreeInst
 ) where
 
-import Test.QuickCheck (generate, Gen, suchThat)
+import Test.QuickCheck (Gen, suchThat)
 import Trees.Generate (genSynTree)
 import Data.Set (Set, isSubsetOf, size, map)
 import Data.Char (isSpace)
@@ -19,9 +18,6 @@ import Trees.Types (SynTree, Op)
 import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
-
-genSubTreeInst :: SubTreeConfig -> IO SubTreeInst
-genSubTreeInst subTreeConfig = generate (generateSubTreeInst subTreeConfig)
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do

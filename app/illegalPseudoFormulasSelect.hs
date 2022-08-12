@@ -3,8 +3,9 @@
 module Main (main) where
 
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), defaultLegalPropositionConfig, checkLegalPropositionConfig)
-import Tasks.LegalProposition.Quiz (genLegalPropositionInst, feedback)
+import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
 import AppHelp (offerChange, determineBaseConfig, feedbackLoop)
+import Test.QuickCheck (generate)
 
 import System.IO (hSetBuffering, stdout, BufferMode(NoBuffering))
 import Text.Pretty.Simple (pPrint)
@@ -16,7 +17,7 @@ main = do
   putStrLn "\nThe following is the config now used:\n"
   pPrint theConfigToUse
   putStrLn "\nThe following is a random instance generated from it:\n"
-  inst@LegalPropositionInst{..} <- genLegalPropositionInst theConfigToUse
+  inst@LegalPropositionInst{..} <- generate . generateLegalPropositionInst $ theConfigToUse
   pPrint inst
   putStrLn "In this task there are some Pseudo Formulas, your task is to give the set of ordinal numbers of the illegal formulas in Pseudo Formulas"
   putStrLn "The input form is {serial number1, serial number2,..}"

@@ -2,19 +2,19 @@
 
 module Tasks.SynTree.Quiz (
     feedback,
-    genSynTreeInst,
+    generateSynTreeInst,
     ) where
 
-import Test.QuickCheck (generate)
+import Test.QuickCheck (Gen)
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
 
 import Trees.Print (display, transferToPicture)
 import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
 
-genSynTreeInst :: SynTreeConfig -> IO SynTreeInst
-genSynTreeInst SynTreeConfig {..} = do
-    tree <- generate (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations)
+generateSynTreeInst :: SynTreeConfig -> Gen SynTreeInst
+generateSynTreeInst SynTreeConfig {..} = do
+    tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations
     return $ SynTreeInst
       { instSyntree = tree
       , latexImage = transferToPicture tree
