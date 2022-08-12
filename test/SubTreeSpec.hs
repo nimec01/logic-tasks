@@ -4,7 +4,6 @@ module SubTreeSpec where
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Data.Set (size, toList, map)
-import TestHelpers (deleteBrackets)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
 import Trees.Types (SynTree, Op)
@@ -63,8 +62,7 @@ spec = do
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees
         it "all subformulas is the sublist of formula" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let formula' = deleteBrackets formula
-                                                                                correctFormulas' = Prelude.map deleteBrackets (toList correctFormulas) in all (`isInfixOf` formula') correctFormulas'
+                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let correctFormulas' = toList correctFormulas in all (`isInfixOf` formula) correctFormulas'
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
