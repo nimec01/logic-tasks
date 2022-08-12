@@ -7,11 +7,12 @@ import Data.Maybe (isJust, isNothing)
 import Trees.Generate (genSynTree)
 import Trees.Parsing (formulaParse)
 import Trees.Print (display)
-import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig)
+import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig, SynTreeInst (..))
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Data.List.Extra ( nubOrd, isInfixOf )
+import Tasks.SynTree.Quiz (generateSynTreeInst)
 
 validBoundsSyntr :: Gen SynTreeConfig
 validBoundsSyntr = do
@@ -69,8 +70,8 @@ spec = do
       forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
-      forAll validBoundsSyntr $ \SynTreeConfig {..} ->
-        forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> formulaParse (display synTree) == Right synTree
+      forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right instSyntree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
         forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree -> treeNodes synTree >= minNodes && treeNodes synTree <= maxNodes

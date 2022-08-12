@@ -18,6 +18,7 @@ import SynTreeSpec (validBoundsSyntr)
 import Trees.Print (display)
 import Data.Set (toList, Set)
 import Data.List (delete, intercalate)
+import SuperfluousBracketsSpec(deleteBrackets)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -71,11 +72,15 @@ spec = do
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
                     forAll (illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
-    describe "bracket display" $
+    describe "bracket display" $ do
         it "the String after bracketDisplay just add a bracket " $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
                     forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
+        it "the String remove all brackets should same with display remove all brackets" $
+            forAll validBoundsSyntr $ \SynTreeConfig {..} ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
+                    forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig {..} ->
