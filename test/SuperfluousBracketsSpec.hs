@@ -16,6 +16,7 @@ import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay, sameAssociativeOperatorAdjacentSerial)
 import Trees.Parsing(formulaParse)
+import TestHelpers (deleteBrackets)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
@@ -37,9 +38,6 @@ invalidBoundsSuperfluousBrackets = do
         , superfluousBracketPairs
         }
 
-deleteBrackets :: String  -> String
-deleteBrackets = filter (\char -> char /= ')' && char /= '(')
-
 spec :: Spec
 spec = do
     describe "checkSuperfluousBracketsConfig" $ do
@@ -58,11 +56,11 @@ spec = do
                 forAll (genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
                     \synTree -> length (sameAssociativeOperatorAdjacentSerial (numberAllNodes synTree) Nothing) * 2 == length (display synTree) - length (simplestDisplay synTree)
         it "after remove all bracket two strings should be same" $
-            forAll validBoundsSuperfluousBrackets $ \sBConfig@SuperfluousBracketsConfig {..} ->
+            forAll validBoundsSuperfluousBrackets $ \sBConfig ->
                 forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} -> deleteBrackets stringWithSuperfluousBrackets == deleteBrackets simplestString
     describe "Parser" $
         it "the Parser can accept all formula generate by simplestShow" $
-            forAll validBoundsSuperfluousBrackets $ \sBConfig@SuperfluousBracketsConfig {..} ->
+            forAll validBoundsSuperfluousBrackets $ \sBConfig ->
                 forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} -> isRight (superfluousBracketsExcParser simplestString)
     describe "validformula" $
         it "the formula Parser can accept when brackets is max number" $

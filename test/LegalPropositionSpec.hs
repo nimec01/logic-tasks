@@ -18,7 +18,7 @@ import SynTreeSpec (validBoundsSyntr)
 import Trees.Print (display)
 import Data.Set (toList, Set)
 import Data.List (delete, intercalate)
-import SuperfluousBracketsSpec(deleteBrackets)
+import TestHelpers (deleteBrackets)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -86,5 +86,5 @@ spec = do
             forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig {..} ->
                 forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> judgeInst (toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
-            forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig {..} ->
+            forAll validBoundsLegalProposition $ \lPConfig ->
                 forAll (generateLegalPropositionInst lPConfig) $ \lPInst@LegalPropositionInst{..} -> feedback lPInst (transferSetIntToString serialsOfWrong)

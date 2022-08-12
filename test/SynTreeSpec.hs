@@ -70,7 +70,7 @@ spec = do
       forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
-      forAll validBoundsSyntr $ \sTConfig@SynTreeConfig {..} ->
+      forAll validBoundsSyntr $ \sTConfig ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right instSyntree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSyntr $ \SynTreeConfig {..} ->
