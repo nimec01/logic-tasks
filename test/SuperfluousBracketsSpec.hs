@@ -10,11 +10,12 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSyntr)
 import Data.Maybe (isJust, isNothing)
 import Trees.Types (SynTree(..), Op(..))
-import Trees.Helpers (numberAllNodes, sameAssociativeOperatorAdjacent)
+import Trees.Helpers (numberAllNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Data.Either (isRight)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay, sameAssociativeOperatorAdjacentSerial)
+import Trees.Parsing(formulaParse)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
@@ -57,15 +58,16 @@ spec = do
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
                 forAll (genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
                     forAll (superfluousBracketsDisplay synTree superfluousBracketPairs) $ \bracketsFormula -> fromIntegral (length bracketsFormula - length (simplestDisplay synTree)) == superfluousBracketPairs * 2
-    describe "Parser" $ do
+    describe "Parser" $
         it "the Parser can accept all formula generate by simplestShow" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
                forAll (genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
                     \synTree -> isRight (superfluousBracketsExcParser (simplestDisplay synTree ))
-        it "the Parser can accept all formula generate by superfluousBracketsDisplay" $
-            forAll validBoundsSuperfluousBrackets $ \sBConfig@SuperfluousBracketsConfig {..} ->
-               forAll (generateSuperfluousBracketsInst sBConfig) $
-                    \SuperfluousBracketsInst{..} -> isRight (superfluousBracketsExcParser stringWithSuperfluousBrackets)
+    describe "validformula" $
+        it "the formula Parser can accept when brackets is max number" $
+            forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
+                forAll (genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
+                    \synTree -> forAll (superfluousBracketsDisplay synTree (treeNodes synTree + 1)) $ \stringWithSuperfluousBrackets -> isRight (formulaParse stringWithSuperfluousBrackets)
     describe "genSuperfluousBracketsInst" $ do
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
