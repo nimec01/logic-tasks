@@ -15,7 +15,7 @@ import Data.List (intercalate)
 import Data.Char (isSpace)
 import Trees.Print (display)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
-import SynTreeSpec (invalidBoundsSyntr, validBoundsSyntr)
+import SynTreeSpec (validBoundsSyntr)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
@@ -32,7 +32,7 @@ validBoundsSubTree = do
 invalidBoundsSubTree :: Gen SubTreeConfig
 invalidBoundsSubTree = do
     allowDupelTree <- elements [True,False]
-    syntaxTreeConfig@SynTreeConfig {..} <- invalidBoundsSyntr
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr
     minSubTrees <- choose (minNodes - maxLeavesForNodes minNodes + 1, 100)
     return $ SubTreeConfig
       {

@@ -36,8 +36,8 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
     | Just nowSerial == serial = do
         formula <- allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator Nothing
         return ("(" ++ formula ++ ")")
-    | otherwise = let rightNodes = fromIntegral (treeNodes b)
-                      leftNodes = fromIntegral (treeNodes a)
+    | otherwise = let rightNodes =  treeNodes b
+                      leftNodes =  treeNodes a
                 in  do
                 ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (rightNodes + leftNodes + 1 - brackets), return False)]
                 let brackets' = if ifUsebrackets then brackets - 1 else brackets

@@ -16,7 +16,7 @@ data SuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
       syntaxTreeConfig :: SynTreeConfig
-    , superfluousBrackets :: Integer
+    , superfluousBracketPairs :: Integer
     } deriving Show
 
 defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
@@ -24,7 +24,7 @@ defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
       syntaxTreeConfig = defaultSynTreeConfig { useImplEqui = True }
-    , superfluousBrackets = 2
+    , superfluousBracketPairs = 2
     }
 
 checkSuperfluousBracketsConfig :: SuperfluousBracketsConfig -> Maybe String
@@ -36,9 +36,9 @@ checkAdditionalConfig :: SuperfluousBracketsConfig -> Maybe String
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}
     | minNodes < 5
       = Just "Minimal number of nodes must larger than 4"
-    | superfluousBrackets > fromIntegral minNodes
-      = Just  "It is possible that occured ((formula)) and these two brackets are not necessary"
-    | superfluousBrackets < 1
+    | superfluousBracketPairs >= minNodes
+      = Just "The number of Superfluous brackets is too much, it should not larger than minimal number of nodes"
+    | superfluousBracketPairs < 1
       = Just "Add at least one extra Brackets"
     | otherwise
       = Nothing
@@ -46,6 +46,6 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
 data SuperfluousBracketsInst =
     SuperfluousBracketsInst
     {
-      superfluousString :: String
+      stringWithSuperfluousBrackets :: String
     , simplestString :: String
     } deriving Show

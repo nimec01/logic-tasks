@@ -18,6 +18,8 @@ main = do
   putStrLn "\nThe following is a random instance generated from it:\n"
   inst@SuperfluousBracketsInst{ simplestString } <- genSuperfluousBracketsInst theConfigToUse
   pPrint inst
+  putStrLn "\n This is a important syntax task before you deal with CNF and DNF"
+  putStrLn "\n Because of /\\ and \\/ are associative, it is not necessary to use brackets when combining three atoms with same operators /\\ or \\/ for example A/\\B/\\C"
   putStrLn "\n The task will give a formula with redundant brackets, and your mission is to give the simplest form of the formula"
   putStrLn "\n That means delete all unnecessary brackets"
   feedbackLoop (feedback inst) ("The sample solution is " ++ show (feedback inst simplestString))
@@ -28,8 +30,8 @@ determineSuperfluousBracketsConfig = do
   pPrint defaultSuperfluousBracketsConfig
   let SuperfluousBracketsConfig{..} = defaultSuperfluousBracketsConfig
   syntaxTreeConfig' <- determineBaseConfig syntaxTreeConfig
-  superfluousBrackets' <- offerChange "superfluousBrackets" superfluousBrackets
-  let newConfig = defaultSuperfluousBracketsConfig {syntaxTreeConfig = syntaxTreeConfig', superfluousBrackets = superfluousBrackets'}
+  superfluousBracketPairs' <- offerChange "superfluousBracketPairs" superfluousBracketPairs
+  let newConfig = defaultSuperfluousBracketsConfig {syntaxTreeConfig = syntaxTreeConfig', superfluousBracketPairs = superfluousBracketPairs'}
   case checkSuperfluousBracketsConfig newConfig of
     Nothing ->
       return newConfig

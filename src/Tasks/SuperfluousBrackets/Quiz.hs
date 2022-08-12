@@ -23,9 +23,9 @@ genSuperfluousBracketsInst sBConfig =generate (generateSuperfluousBracketsInst s
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     syntaxTree <- genSynTreeSuperfluousBracketsExc (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations
-    superfluousString <- superfluousBracketsDisplay syntaxTree superfluousBrackets
+    stringWithSuperfluousBrackets <- superfluousBracketsDisplay syntaxTree superfluousBracketPairs
     return $ SuperfluousBracketsInst
-      { superfluousString
+      { stringWithSuperfluousBrackets
       , simplestString = simplestDisplay syntaxTree
       }
 
