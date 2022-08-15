@@ -17,7 +17,7 @@ superfluousBracketsDisplay synTree brackets =
         serial <- elements serialsOfsameOperator
         rootDisplay synTreeWithSerial (brackets -1) serial
 
-rootDisplay :: SynTree (Op, Integer) (Char, Integer) -> Integer -> Integer -> Gen String
+rootDisplay :: SynTree (Op, Integer) Char -> Integer -> Integer -> Gen String
 rootDisplay (Leaf _) _ _ =  error "can not have only one node"
 rootDisplay synTree@(Unary (Not,_) a) brackets serial = do
     ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
@@ -31,7 +31,7 @@ rootDisplay synTree@(Unary (Not,_) a) brackets serial = do
 rootDisplay (Binary operWithSerial a b) brackets serial = allocateBracketToSubtree a b operWithSerial brackets Nothing (Just serial)
 rootDisplay _ _ _ = error "All cases handled!"
 
-allocateBracketToSubtree :: SynTree (Op, Integer) (Char, Integer) -> SynTree (Op, Integer) (Char, Integer) -> (Op, Integer) -> Integer -> Maybe Op -> Maybe Integer -> Gen String
+allocateBracketToSubtree :: SynTree (Op, Integer) Char -> SynTree (Op, Integer) Char -> (Op, Integer) -> Integer -> Maybe Op -> Maybe Integer -> Gen String
 allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
     | Just nowSerial == serial = do
         formula <- allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator Nothing
@@ -47,9 +47,9 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
                 rightFormula <- nonRootDisplay b (brackets' - leftBrackets) oper serial
                 return (replicate addBracket '(' ++ leftFormula ++ " " ++ showOperator oper ++ " " ++ rightFormula ++ replicate addBracket ')')
 
-nonRootDisplay :: SynTree (Op, Integer) (Char, Integer) -> Integer -> Op -> Maybe Integer -> Gen String  -- string is fatheroper
-nonRootDisplay (Leaf (a, _)) 0 _ _ = return [a]
-nonRootDisplay (Leaf (a, _)) 1 _ _ = return ("("++ (a : ")"))
+nonRootDisplay :: SynTree (Op, Integer) Char -> Integer -> Op -> Maybe Integer -> Gen String  -- string is fatheroper
+nonRootDisplay (Leaf a) 0 _ _ = return [a]
+nonRootDisplay (Leaf a) 1 _ _ = return ("("++ (a : ")"))
 nonRootDisplay synTree@(Unary (Not,_) a) brackets _ serial = do
     ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
     if ifUsebrackets
@@ -62,7 +62,7 @@ nonRootDisplay synTree@(Unary (Not,_) a) brackets _ serial = do
 nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial = allocateBracketToSubtree a b operWithSerial brackets (Just fatherOperator) serial
 nonRootDisplay _ _ _ _ = error "All cases handled!"
 
-sameAssociativeOperatorAdjacentSerial :: SynTree (Op, Integer) (c, Integer) -> Maybe Op -> [Integer]
+sameAssociativeOperatorAdjacentSerial :: SynTree (Op, Integer) c -> Maybe Op -> [Integer]
 sameAssociativeOperatorAdjacentSerial (Leaf _) _ = []
 sameAssociativeOperatorAdjacentSerial (Unary (Not, _) a) _ = sameAssociativeOperatorAdjacentSerial a (Just Not)
 sameAssociativeOperatorAdjacentSerial (Binary (oper, serial) a b) fatherOper

@@ -23,10 +23,10 @@ import Data.List.Extra (nubOrd, nubBy)
 
 import Trees.Types (SynTree(..), Op(..))
 
-numberAllNodes :: SynTree o c -> SynTree (o, Integer) (c, Integer)
+numberAllNodes :: SynTree o c -> SynTree (o, Integer) c
 numberAllNodes = flip evalState 1 . go
     where
-      go (Leaf c) = do { l <- next; return (Leaf (c,l)) }
+      go (Leaf c) = return (Leaf c)
       go (Unary o t) = do { l <- next; t' <- go t; return (Unary (o,l) t') }
       go (Binary o t1 t2) = do { l <- next; t1' <- go t1; t2' <- go t2; return (Binary (o,l) t1' t2') }
       next = do {current <- get; put (current + 1); return current}
