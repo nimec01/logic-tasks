@@ -9,8 +9,8 @@ import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), Superfluo
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSyntr)
 import Data.Maybe (isJust, isNothing)
-import Trees.Types (SynTree(..), Op(..))
-import Trees.Helpers (numberAllNodes, sameAssociativeOperatorAdjacent, treeNodes)
+import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Data.Either (isRight)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 import Trees.Print (display, simplestDisplay)
@@ -50,12 +50,12 @@ spec = do
             forAll validBoundsSuperfluousBrackets (isNothing . checkSuperfluousBracketsConfig)
     describe "sameAssociativeOperatorAdjacent" $
         it "should return true if two \\/s or two /\\s are Neighboring " $
-            sameAssociativeOperatorAdjacent (Unary Not (Binary And (Binary Equi (Leaf 'a') (Leaf 'b')) (Binary And (Leaf 'a') (Leaf 'c'))))
+            sameAssociativeOperatorAdjacent (Not (Binary And (Binary Equi (Leaf 'a') (Leaf 'b')) (Binary And (Leaf 'a') (Leaf 'c'))))
     describe "simplestDisplay and superfluousBracketsDisplay" $ do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
-                    \synTree -> length (sameAssociativeOperatorAdjacentSerial (numberAllNodes synTree) Nothing) * 2 == length (display synTree) - length (simplestDisplay synTree)
+                    \synTree -> length (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing) * 2 == length (display synTree) - length (simplestDisplay synTree)
         it "the number of brackets generate by simplestDisplay should equal to display if not satisfy sameAssociativeOperatorAdjacent" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations `suchThat` (not.sameAssociativeOperatorAdjacent)) $

@@ -8,7 +8,7 @@ module Tasks.SynTree.Config (
   defaultSynTreeConfig,
   ) where
 
-import Trees.Types (SynTree, Op)
+import Trees.Types (SynTree, BinOp)
 import Trees.Helpers (maxNodesForDepth)
 import Data.Char (isLetter)
 
@@ -65,7 +65,7 @@ checkSynTreeConfig SynTreeConfig {..}
 
 data SynTreeInst =
     SynTreeInst
-    { instSyntree :: SynTree Op Char
+    { instSyntree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
     } deriving Show

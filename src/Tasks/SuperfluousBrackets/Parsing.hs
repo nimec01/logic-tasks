@@ -8,7 +8,7 @@ import Text.Parsec.Char (satisfy, string)
 import Parsing (whitespace, lexeme)
 
 import Data.Char (isLetter)
-import Trees.Types (showOperator, allOperators)
+import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
 
 parseLettertoStr :: Parser String
 parseLettertoStr = do
@@ -17,7 +17,7 @@ parseLettertoStr = do
 
 operatorAndLeavesParse :: Parser String
 operatorAndLeavesParse = do
-    listOfString <- many1 . lexeme $ parseLettertoStr <|> foldr (<|>) (string "(" <|> string ")") (map (string . showOperator) allOperators)
+    listOfString <- many1 . lexeme $ parseLettertoStr <|> foldr (<|>) (string "(" <|> string ")" <|> string showOperatorNot) (map (string . showOperator) allBinaryOperators)
     return (concat listOfString)
 
 superfluousBracketsExcParser :: String -> Either ParseError String

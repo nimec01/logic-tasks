@@ -5,10 +5,10 @@ module Trees.Generate (
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
 
-import Trees.Types (SynTree(..), Op(..), allBinaryOperators)
+import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Trees.Helpers (collectLeaves, relabelShape, maxNodesForDepth, consecutiveNegations)
 
-chooseList :: Bool -> [Op]
+chooseList :: Bool -> [BinOp]
 chooseList useImplEqui = if useImplEqui
         then allBinaryOperators
         else [And, Or]
@@ -20,7 +20,7 @@ randomList availableLetters atLeastOccurring len = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Integer -> Gen (SynTree Op Char)
+genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Integer -> Gen (SynTree BinOp Char)
 genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations =
     if maxConsecutiveNegations /= 0
         then do
@@ -34,7 +34,7 @@ genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useIm
         usedList <- randomList availableLetters (take (fromIntegral atLeastOccurring) availableLetters) $ fromIntegral $ length $ collectLeaves sample
         return (relabelShape sample usedList )
 
-syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree Op ())
+syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
 syntaxShape nodes maxDepth useImplEqui allowNegation
     | nodes == 1 = positiveLiteral
     | nodes == 2 = negativeLiteral
@@ -45,7 +45,7 @@ syntaxShape nodes maxDepth useImplEqui allowNegation
         binaryOper = map (binaryOperator nodes maxDepth useImplEqui allowNegation . Binary) $ chooseList useImplEqui
         negativeForm = negativeFormula nodes maxDepth useImplEqui
 
-binaryOperator :: Integer -> Integer -> Bool -> Bool -> (SynTree Op () -> SynTree Op () -> SynTree Op ()) -> Gen (SynTree Op ())
+binaryOperator :: Integer -> Integer -> Bool -> Bool -> (SynTree BinOp () -> SynTree BinOp () -> SynTree BinOp ()) -> Gen (SynTree BinOp ())
 binaryOperator nodes maxDepth useImplEqui allowNegation operator =
     let minNodesPerSide = max 1 (restNodes - maxNodesForDepth newMaxDepth)
         restNodes = nodes - 1
@@ -56,16 +56,16 @@ binaryOperator nodes maxDepth useImplEqui allowNegation operator =
         rightTree <- syntaxShape (restNodes - leftNodes ) newMaxDepth useImplEqui allowNegation
         return (operator leftTree rightTree)
 
-negativeFormula :: Integer -> Integer -> Bool -> Gen (SynTree Op ())
+negativeFormula :: Integer -> Integer -> Bool -> Gen (SynTree BinOp ())
 negativeFormula nodes maxDepth useImplEqui =
     let restNodes = nodes - 1
         newMaxDepth = maxDepth - 1
     in  do
         e <- syntaxShape restNodes newMaxDepth useImplEqui True
-        return (Unary Not e)
+        return (Not e)
 
-negativeLiteral ::  Gen (SynTree Op ())
-negativeLiteral = Unary Not <$> positiveLiteral
+negativeLiteral ::  Gen (SynTree o ())
+negativeLiteral = Not <$> positiveLiteral
 
 positiveLiteral :: Gen (SynTree o ())
 positiveLiteral = return (Leaf ())

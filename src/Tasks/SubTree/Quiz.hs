@@ -13,7 +13,7 @@ import Data.Char (isSpace)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), SubTreeInst)
 import Trees.Print (display)
-import Trees.Types (SynTree, Op)
+import Trees.Types (SynTree, BinOp)
 import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Text.Parsec (ParseError)
@@ -33,6 +33,6 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
 feedback :: SubTreeInst -> String -> Bool
 feedback SubTreeInst {correctFormulas, correctTrees, minInputTrees} input = judgeInput (subTreeStringParse input) (subFormulasStringParse (filter (not . isSpace) input)) minInputTrees (Data.Set.map (filter (not . isSpace)) correctFormulas) correctTrees
 
-judgeInput :: Either ParseError (Set (SynTree Op Char)) -> Either ParseError (Set String) -> Integer -> Set String -> Set (SynTree Op Char) -> Bool
+judgeInput :: Either ParseError (Set (SynTree BinOp Char)) -> Either ParseError (Set String) -> Integer -> Set String -> Set (SynTree BinOp Char) -> Bool
 judgeInput (Right inputTreesSet) (Right inputFormulasSet) minInputTrees correctFormulas correctTrees = inputTreesSet `isSubsetOf` correctTrees && inputFormulasSet `isSubsetOf` correctFormulas && fromIntegral (size inputFormulasSet) >= minInputTrees
 judgeInput _ _ _ _ _ = False

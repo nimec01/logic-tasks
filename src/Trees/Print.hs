@@ -5,39 +5,34 @@ module Trees.Print (
   simplestDisplay,
   ) where
 
-import Trees.Types (SynTree(..), Op(..), showOperator)
+import Trees.Types (SynTree(..), BinOp(..), showOperator, showOperatorNot)
 
-transferToPicture :: SynTree Op Char -> String
+transferToPicture :: SynTree BinOp Char -> String
 transferToPicture (Binary And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
 transferToPicture (Leaf a) = "[" ++ (a:"]")
 transferToPicture (Binary Or a b) = "[ $\\vee   $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
-transferToPicture (Unary Not a) = "[ $\\neg $ " ++ transferToPicture a ++ "  ]"
+transferToPicture (Not a) = "[ $\\neg $ " ++ transferToPicture a ++ "  ]"
 transferToPicture (Binary Impl a b) = "[ $\\to  $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
 transferToPicture (Binary Equi a b) = "[ $\\Leftrightarrow  $ " ++ transferToPicture a ++ transferToPicture b ++"  ]"
-transferToPicture _ = error "All cases handled!"
 
-display :: SynTree Op Char -> String
+display :: SynTree BinOp Char -> String
 display (Binary oper a b) = normalShow a ++ " " ++ showOperator oper ++ " " ++ normalShow b
-display (Leaf a)=  a : ""
-display (Unary Not a) = showOperator Not ++ normalShow a ++ ""
-display _ = error "All cases handled!"
+display (Leaf a) = a : ""
+display (Not a) = showOperatorNot ++ normalShow a
 
-normalShow :: SynTree Op Char -> String
+normalShow :: SynTree BinOp Char -> String
 normalShow (Binary oper a b) = "(" ++ normalShow a ++ " " ++ showOperator oper ++ " " ++ normalShow b ++ ")"
-normalShow (Leaf a)=  a : ""
-normalShow (Unary Not a) = showOperator Not ++ normalShow a
-normalShow _ = error "All cases handled!"
+normalShow (Leaf a) = a : ""
+normalShow (Not a) = showOperatorNot ++ normalShow a
 
-simplestDisplay :: SynTree Op Char -> String
+simplestDisplay :: SynTree BinOp Char -> String
 simplestDisplay (Leaf a)=  a : ""
-simplestDisplay (Unary Not a) = showOperator Not ++ simplestShow a Not
-simplestDisplay (Binary oper a b) = simplestShow a oper ++ " " ++ showOperator oper ++ " " ++ simplestShow b oper
-simplestDisplay _ = error "All cases handled!"
+simplestDisplay (Not a) = showOperatorNot ++ simplestShow a Nothing
+simplestDisplay (Binary oper a b) = simplestShow a (Just oper) ++ " " ++ showOperator oper ++ " " ++ simplestShow b (Just oper)
 
-simplestShow :: SynTree Op Char -> Op -> String
+simplestShow :: SynTree BinOp Char -> Maybe BinOp -> String
 simplestShow (Leaf a) _ =  a : ""
-simplestShow (Unary Not a) _ = showOperator Not ++ simplestShow a Not
-simplestShow (Binary And a b) And = simplestShow a And ++ " " ++ showOperator And ++ " " ++ simplestShow b And
-simplestShow (Binary Or a b) Or = simplestShow a Or ++ " " ++ showOperator Or ++ " " ++ simplestShow b Or
-simplestShow (Binary oper a b) _ = "(" ++ simplestShow a oper ++ " " ++ showOperator oper ++ " " ++ simplestShow b oper ++ ")"
-simplestShow _ _ = error "All cases handled!"
+simplestShow (Not a) _ = showOperatorNot ++ simplestShow a Nothing
+simplestShow (Binary And a b) j@(Just And) = simplestShow a j ++ " " ++ showOperator And ++ " " ++ simplestShow b j
+simplestShow (Binary Or a b) j@(Just Or) = simplestShow a j ++ " " ++ showOperator Or ++ " " ++ simplestShow b j
+simplestShow (Binary oper a b) _ = let j = Just oper in "(" ++ simplestShow a j ++ " " ++ showOperator oper ++ " " ++ simplestShow b j ++ ")"

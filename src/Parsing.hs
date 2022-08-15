@@ -10,11 +10,11 @@ import Text.Parsec.Char (oneOf, satisfy)
 import Data.Char (isLetter, isSpace)
 import Text.Parsec (many, (<|>))
 import Text.Parsec.String (Parser)
-import Trees.Types (showOperator, allOperators)
+import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
 import Data.List.Extra (nubOrd)
 
 formulaSymbol :: Parser Char
-formulaSymbol = satisfy isLetter <|> oneOf (nubOrd ("()" ++ concatMap showOperator allOperators))
+formulaSymbol = satisfy isLetter <|> oneOf (nubOrd ("()" ++ showOperatorNot ++ concatMap showOperator allBinaryOperators))
 
 whitespace :: Parser ()
 whitespace = do

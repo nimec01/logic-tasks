@@ -6,8 +6,8 @@ import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Data.Set (size, toList, map)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
-import Trees.Types (SynTree, Op)
-import Trees.Helpers (maxLeavesForNodes, )
+import Trees.Types (SynTree, BinOp)
+import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
 import Data.List (intercalate)
@@ -70,8 +70,8 @@ spec = do
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (filter (not . isSpace) . displaySubTrees $ toList correctTrees)
 
-displaySubTrees :: [SynTree Op Char] -> String
+displaySubTrees :: [SynTree BinOp Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"
 
-showTrees :: [SynTree Op Char] -> String
+showTrees :: [SynTree BinOp Char] -> String
 showTrees synTreeList = intercalate ", " (Prelude.map display synTreeList)

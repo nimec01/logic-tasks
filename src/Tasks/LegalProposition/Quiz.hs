@@ -14,7 +14,7 @@ import Tasks.SynTree.Config (SynTreeConfig (..))
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay )
 import Tasks.LegalProposition.PrintBracket (bracketDisplay)
 import Trees.Generate (genSynTree)
-import Trees.Types (SynTree, Op)
+import Trees.Types (SynTree, BinOp)
 import Trees.Helpers (similarExist)
 import Trees.Print (display)
 import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
@@ -31,7 +31,7 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
         , pseudoFormulas = pseudoFormulas
         }
 
-genPseudoList :: [Int] -> [Int] -> [SynTree Op Char] -> Gen [String]
+genPseudoList :: [Int] -> [Int] -> [SynTree BinOp Char] -> Gen [String]
 genPseudoList serialsOfWrong serialsOfBracket trees =
     let pointedTrees = zip [1..] trees
     in
@@ -41,7 +41,7 @@ genPseudoList serialsOfWrong serialsOfBracket trees =
                 then bracketDisplay tree
                 else legalDisplay tree) pointedTrees
 
-legalDisplay :: SynTree Op Char -> Gen String
+legalDisplay :: SynTree BinOp Char -> Gen String
 legalDisplay syntaxTree = return (display syntaxTree)
 
 feedback :: LegalPropositionInst -> String -> Bool
