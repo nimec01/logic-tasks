@@ -7,7 +7,6 @@ import Test.QuickCheck (Gen, frequency, elements, choose)
 
 import Trees.Types (SynTree (..), Op(..), showOperator)
 import Trees.Helpers (treeNodes, numberAllNodes)
-import Data.Maybe (isNothing)
 
 superfluousBracketsDisplay :: SynTree Op Char -> Integer -> Gen String
 superfluousBracketsDisplay synTree brackets =
@@ -28,26 +27,26 @@ rootDisplay synTree@(Unary (Not,_) a) brackets serial = do
     else do
         formula <- nonRootDisplay a brackets Not (Just serial)
         return (showOperator Not ++ formula)
-rootDisplay (Binary operWithSerial a b) brackets serial = allocateBracketToSubtree a b operWithSerial brackets Nothing (Just serial)
+rootDisplay (Binary operWithSerial a b) brackets serial = allocateBracketToSubtree a b operWithSerial brackets False Nothing (Just serial)
 rootDisplay _ _ _ = error "All cases handled!"
 
-allocateBracketToSubtree :: SynTree (Op, Integer) Char -> SynTree (Op, Integer) Char -> (Op, Integer) -> Integer -> Maybe Op -> Maybe Integer -> Gen String
-allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator serial
+allocateBracketToSubtree :: SynTree (Op, Integer) Char -> SynTree (Op, Integer) Char -> (Op, Integer) -> Integer -> Bool -> Maybe Op -> Maybe Integer -> Gen String
+allocateBracketToSubtree a b (oper, nowSerial) brackets hasFather fatherOperator serial
     | Just nowSerial == serial = do
-        formula <- allocateBracketToSubtree a b (oper, nowSerial) brackets fatherOperator Nothing
+        formula <- allocateBracketToSubtree a b (oper, error "never gonna need this") brackets hasFather fatherOperator Nothing
         return ("(" ++ formula ++ ")")
     | otherwise = let rightNodes =  treeNodes b
                       leftNodes =  treeNodes a
                 in  do
                 ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (rightNodes + leftNodes + 1 - brackets), return False)]
                 let brackets' = if ifUsebrackets then brackets - 1 else brackets
-                    addBracket = (if ifUsebrackets then 1 else 0) + (if isNothing fatherOperator || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
+                    addBracket = (if ifUsebrackets then 1 else 0) + (if not hasFather || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
                 leftBrackets <- choose (max 0 (brackets' - rightNodes) , min leftNodes brackets')
                 leftFormula <- nonRootDisplay a leftBrackets oper serial
                 rightFormula <- nonRootDisplay b (brackets' - leftBrackets) oper serial
                 return (replicate addBracket '(' ++ leftFormula ++ " " ++ showOperator oper ++ " " ++ rightFormula ++ replicate addBracket ')')
 
-nonRootDisplay :: SynTree (Op, Integer) Char -> Integer -> Op -> Maybe Integer -> Gen String  -- string is fatheroper
+nonRootDisplay :: SynTree (Op, Integer) Char -> Integer -> Op -> Maybe Integer -> Gen String
 nonRootDisplay (Leaf a) 0 _ _ = return [a]
 nonRootDisplay (Leaf a) 1 _ _ = return ("("++ (a : ")"))
 nonRootDisplay synTree@(Unary (Not,_) a) brackets _ serial = do
@@ -59,7 +58,7 @@ nonRootDisplay synTree@(Unary (Not,_) a) brackets _ serial = do
     else do
         formula <- nonRootDisplay a brackets Not serial
         return (showOperator Not ++ formula)
-nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial = allocateBracketToSubtree a b operWithSerial brackets (Just fatherOperator) serial
+nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial = allocateBracketToSubtree a b operWithSerial brackets True (Just fatherOperator) serial
 nonRootDisplay _ _ _ _ = error "All cases handled!"
 
 sameAssociativeOperatorAdjacentSerial :: SynTree (Op, Integer) c -> Maybe Op -> [Integer]
