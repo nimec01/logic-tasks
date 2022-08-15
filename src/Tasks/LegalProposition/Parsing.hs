@@ -14,7 +14,7 @@ import Data.Set (fromList, Set)
 illegalPropositionParse :: Parser (Set Int)
 illegalPropositionParse = do
     lexeme $ char '{'
-    illegalList <- many1 digit `sepBy` lexeme (char ',')
+    illegalList <- lexeme (many1 digit) `sepBy` lexeme (char ',')
     lexeme $ char '}'
     return $ fromList (map read illegalList)
 

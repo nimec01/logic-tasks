@@ -13,6 +13,7 @@ import Trees.Print (simplestDisplay)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
+import Data.Char (isSpace)
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
@@ -24,4 +25,4 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       }
 
 feedback :: SuperfluousBracketsInst -> String -> Bool
-feedback SuperfluousBracketsInst {simplestString} input = superfluousBracketsExcParser input == Right simplestString
+feedback SuperfluousBracketsInst {simplestString} input = superfluousBracketsExcParser input == Right (filter (not . isSpace) simplestString)

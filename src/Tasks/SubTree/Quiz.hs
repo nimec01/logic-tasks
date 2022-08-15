@@ -31,7 +31,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       }
 
 feedback :: SubTreeInst -> String -> Bool
-feedback SubTreeInst {correctFormulas, correctTrees, minInputTrees} input = judgeInput (subTreeStringParse input) (subFormulasStringParse (filter (not . isSpace) input)) minInputTrees correctFormulas correctTrees
+feedback SubTreeInst {correctFormulas, correctTrees, minInputTrees} input = judgeInput (subTreeStringParse input) (subFormulasStringParse (filter (not . isSpace) input)) minInputTrees (Data.Set.map (filter (not . isSpace)) correctFormulas) correctTrees
 
 judgeInput :: Either ParseError (Set (SynTree Op Char)) -> Either ParseError (Set String) -> Integer -> Set String -> Set (SynTree Op Char) -> Bool
 judgeInput (Right inputTreesSet) (Right inputFormulasSet) minInputTrees correctFormulas correctTrees = inputTreesSet `isSubsetOf` correctTrees && inputFormulasSet `isSubsetOf` correctFormulas && fromIntegral (size inputFormulasSet) >= minInputTrees

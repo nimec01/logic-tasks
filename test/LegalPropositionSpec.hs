@@ -77,6 +77,10 @@ spec = do
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
                     forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
+        it "the String can be parsed by formulaParse" $
+            forAll validBoundsSyntr $ \SynTreeConfig {..} ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
+                    forAll (bracketDisplay synTree) $ \str -> isRight (formulaParse str)
         it "the String remove all brackets should same with display remove all brackets" $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->

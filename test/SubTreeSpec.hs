@@ -56,7 +56,7 @@ spec = do
                 forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subTreeStringParse (displaySubTrees (toList correctTrees)) == Right correctTrees
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subFormulasStringParse (filter (not . isSpace) (displaySubTrees (toList correctTrees))) == Right (Data.Set.map display correctTrees)
+                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subFormulasStringParse (filter (not . isSpace) (displaySubTrees (toList correctTrees))) == Right (Data.Set.map (filter (not . isSpace). display) correctTrees)
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees
