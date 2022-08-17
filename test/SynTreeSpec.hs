@@ -67,6 +67,10 @@ spec = do
       isNothing (checkSynTreeConfig defaultSynTreeConfig)
     it "should accept valid bounds" $
       forAll validBoundsSyntr (isNothing . checkSynTreeConfig)
+  describe "feedback" $
+    it "rejects nonsense" $
+      forAll validBoundsSyntr $ \sTConfig ->
+        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> not $ feedback sTInst (tail correct)
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSyntr $ \sTConfig ->
