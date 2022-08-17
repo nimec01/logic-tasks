@@ -62,7 +62,7 @@ description MaxInst{..} = do
     translate $ do
       german "und"
       english "and"
-    text ": /\\"
+    text ": /\\ "
 
   paragraph $ do
     translate $ do
