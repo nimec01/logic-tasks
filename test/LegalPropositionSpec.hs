@@ -87,7 +87,7 @@ spec = do
                     forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
-            forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig {..} ->
+            forAll validBoundsLegalProposition $ \lPConfig ->
                 forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> judgeInst (toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalProposition $ \lPConfig ->
