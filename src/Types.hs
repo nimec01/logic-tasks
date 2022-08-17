@@ -273,13 +273,13 @@ partEvalCnf cnf tup
 
 
 instance Show Cnf where
-    show cnf = listShow $ getClauses cnf
+    show = listShow . getClauses
       where
         listShow :: [Clause] -> String
         listShow [] = ""
         listShow [x] = withBraces x
         listShow (x:xs) = withBraces x ++ " /\\ " ++ listShow xs
-        withBraces cl = if amount cnf == 1 then show cl else "(" ++ show cl ++ ")"
+        withBraces cl = if amount cl == 1 then show cl else "(" ++ show cl ++ ")"
 
 instance Formula Cnf where
     convert (Cnf set)
@@ -494,13 +494,13 @@ partEvalDnf dnf tup
 
 
 instance Show Dnf where
-    show dnf = listShow $ getConjunctions dnf
+    show = listShow . getConjunctions
       where
         listShow :: [Con] -> String
         listShow [] = "{ }"
         listShow [x] = withBraces x
         listShow (x:xs) = withBraces x ++ " \\/ " ++ listShow xs
-        withBraces con = if amount dnf == 1 then show con else "(" ++ show con ++ ")"
+        withBraces con = if amount con == 1 then show con else "(" ++ show con ++ ")"
 
 
 instance Formula Dnf where
