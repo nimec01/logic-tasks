@@ -3,10 +3,10 @@ module SubTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
-import Data.Set (size, toList, map)
+import Data.Set (size, toList, map, fromList)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
-import Trees.Types (SynTree, BinOp)
+import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
@@ -69,6 +69,13 @@ spec = do
         it "the correct store in Inst should be accept by feedback, even without spaces" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (deleteSpaces . displaySubTrees $ toList correctTrees)
+    describe "feedback" $ do
+      it "rejects insufficiently large answer sets" $
+        not $ feedback (SubTreeInst "~A" (fromList [Leaf 'A', Not (Leaf 'A')]) (fromList ["A","~A"]) 2) "{A,A}"
+      it "rejects wrong subtree" $
+        not $ feedback (SubTreeInst "A => B" (fromList [Leaf 'A', Leaf 'B', Binary Impl (Leaf 'A') (Leaf 'B')]) (fromList ["A","B","A => B"]) 2) "{A,C}"
+      it "rejects wrong subformula strings" $
+        not $ feedback (SubTreeInst "A => B" (fromList [Leaf 'A', Leaf 'B', Binary Impl (Leaf 'A') (Leaf 'B')]) (fromList ["A","B","A => B"]) 2) "{A,(B)}"
 
 displaySubTrees :: [SynTree BinOp Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"
