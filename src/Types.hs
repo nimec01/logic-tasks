@@ -273,13 +273,13 @@ partEvalCnf cnf tup
 
 
 instance Show Cnf where
-    show (Cnf set) = listShow (Set.toList set)
+    show cnf = listShow $ getClauses cnf
       where
         listShow :: [Clause] -> String
-        listShow [] = " "
-        listShow [x] = show x
-        listShow (x:xs) = "(" ++ show x ++ ") /\\ (" ++ listShow xs ++ ")"
-
+        listShow [] = ""
+        listShow [x] = withBraces x
+        listShow (x:xs) = withBraces x ++ " /\\ " ++ listShow xs
+        withBraces cl = if amount cnf == 1 then show cl else "(" ++ show cl ++ ")"
 
 instance Formula Cnf where
     convert (Cnf set)
@@ -295,6 +295,8 @@ instance Formula Cnf where
     evaluate alloc cnf = and <$> sequence clauses
       where
         clauses = map (evaluate alloc) (getClauses cnf)
+
+
 
 
 
@@ -492,12 +494,13 @@ partEvalDnf dnf tup
 
 
 instance Show Dnf where
-    show (Dnf set) = listShow (Set.toList set)
+    show dnf = listShow $ getConjunctions dnf
       where
         listShow :: [Con] -> String
-        listShow [] = " "
-        listShow [x] = show x
-        listShow (x:xs) = "(" ++ show x ++ ") \\/ (" ++ listShow xs ++ ")"
+        listShow [] = "{ }"
+        listShow [x] = withBraces x
+        listShow (x:xs) = withBraces x ++ " \\/ " ++ listShow xs
+        withBraces con = if amount dnf == 1 then show con else "(" ++ show con ++ ")"
 
 
 instance Formula Dnf where
