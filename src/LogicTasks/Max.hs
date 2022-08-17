@@ -6,7 +6,6 @@ module LogicTasks.Max where
 
 
 import Config
-import Printing
 import Table
 import Types
 import Formula
@@ -15,14 +14,12 @@ import Util
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 
-
 import Control.Monad.Output (
   LangM,
   OutputMonad (..),
   english,
   german,
-  translate,
-  refuse
+  translate
   )
 
 

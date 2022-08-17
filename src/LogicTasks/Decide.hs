@@ -6,7 +6,6 @@ module LogicTasks.Decide where
 
 
 import Config
-import Printing
 import Table
 import Types
 import Formula
@@ -14,7 +13,6 @@ import Util
 
 import Data.List (nub)
 import Data.Maybe (fromMaybe)
-
 
 import Control.Monad.Output (
   LangM,

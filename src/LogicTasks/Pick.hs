@@ -6,21 +6,17 @@ module LogicTasks.Pick where
 
 
 import Config (BaseConfig(..), CnfConfig(..), PickConfig(..), PickInst(..), Number(..))
-import Printing
-import Types
 import Formula
 import Util
 
 import Data.Maybe (fromMaybe)
-
 
 import Control.Monad.Output (
   LangM,
   OutputMonad (..),
   english,
   german,
-  translate,
-  refuse
+  translate
   )
 
 

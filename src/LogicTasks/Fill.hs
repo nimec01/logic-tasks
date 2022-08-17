@@ -4,7 +4,6 @@ module LogicTasks.Fill where
 
 
 import Config
-import Printing
 import Table
 import Types
 import Formula
@@ -12,14 +11,12 @@ import Util
 
 import Data.Maybe (fromMaybe, fromJust)
 
-
 import Control.Monad.Output (
   LangM,
   OutputMonad (..),
   english,
   german,
-  translate,
-  refuse
+  translate
   )
 
 

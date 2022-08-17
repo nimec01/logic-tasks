@@ -5,7 +5,6 @@ module LogicTasks.Prolog where
 
 
 import Config (PrologConfig(..), PrologInst(..))
-import Printing
 import Types
 import Formula
 import Resolution

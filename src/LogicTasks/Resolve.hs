@@ -6,7 +6,6 @@ module LogicTasks.Resolve where
 
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
-import Printing
 import Types
 import Formula
 import Util
@@ -22,8 +21,7 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate,
-  refuse
+  translate
   )
 
 

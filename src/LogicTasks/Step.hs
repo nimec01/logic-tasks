@@ -5,7 +5,6 @@ module LogicTasks.Step where
 
 
 import Config (StepConfig(..), StepInst(..))
-import Printing
 import Types
 import Formula
 import Util
@@ -19,8 +18,7 @@ import Control.Monad.Output (
   OutputMonad (..),
   english,
   german,
-  translate,
-  refuse
+  translate
   )
 
 

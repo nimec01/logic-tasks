@@ -144,7 +144,7 @@ instance Ord Clause where
 
 
 instance Show Clause where
-   show (Clause set) = listShow (Set.toList set)
+   show = listShow . literals
      where
        listShow :: [Literal] -> String
        listShow [] = "{ }"
@@ -368,7 +368,7 @@ instance Ord Con where
 
 
 instance Show Con where
-   show (Con set) = listShow (Set.toList set)
+   show = listShow . literals
      where
        listShow :: [Literal] -> String
        listShow [] = " "
@@ -665,11 +665,27 @@ instance Ord PrologLiteral where
 
 
 instance Show PrologLiteral where
-  show p = begin ++ name p ++ "(" ++ separated ++ ")" ++ end
-    where separated = concat $ intersperse "," $ constants p
-          (begin,end) = if polarity p then ("","") else ("not(",")")
+  show (PrologLiteral p n c)
+    | n == "" || nub n == " " = error "Literal does not have a name."
+    | otherwise = begin ++ n ++ "(" ++ separated ++ ")" ++ end
 
-newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic,Show)
+    where separated = concat $ intersperse "," $ c
+          (begin,end) = if p then ("","") else ("not(",")")
+
+
+---------------------------------------------------------------------------------
+
+
+newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
+
+
+
+instance Show PrologClause where
+  show pc
+    | null lits = "{ }"
+    | otherwise = concat $ intersperse (" \\/ ") $ map show $ lits
+    where lits = terms pc
+
 
 
 terms :: PrologClause -> [PrologLiteral]
