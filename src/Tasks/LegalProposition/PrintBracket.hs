@@ -41,7 +41,7 @@ allocateBracketToSubtree notFirstLayer a b usedOperator = do
     then return ("(" ++ left ++ " " ++ usedOperator ++ " " ++ right ++ ")")
     else return (left ++ " " ++ usedOperator ++ " " ++ right)
 
-notAndLeaves :: SynTree BinOp c -> Int
+notAndLeaves :: SynTree o c -> Int
 notAndLeaves (Binary _ a b) = notAndLeaves a + notAndLeaves b
 notAndLeaves (Leaf _) = 1
 notAndLeaves (Not a) = 1 + notAndLeaves a

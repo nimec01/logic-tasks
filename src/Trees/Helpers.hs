@@ -95,11 +95,11 @@ similarTree _ _ = False
 similarExist :: Eq o => [SynTree o c] -> Bool
 similarExist trees = length (nubBy similarTree trees) /= length trees
 
-consecutiveNegations :: SynTree BinOp a -> Integer
+consecutiveNegations :: SynTree o c -> Integer
 consecutiveNegations (Binary _ a b) = max (consecutiveNegations a) (consecutiveNegations b)
 consecutiveNegations (Not a) = max (consecutiveNegations a) (1 + continueNot a)
 consecutiveNegations (Leaf _)  = 0
 
-continueNot :: SynTree BinOp a -> Integer
+continueNot :: SynTree o c -> Integer
 continueNot (Not a) = 1 + continueNot a
 continueNot _ = 0

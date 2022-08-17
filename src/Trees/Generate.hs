@@ -20,7 +20,7 @@ randomList availableLetters atLeastOccurring len = let
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)
 
-genSynTree :: (Integer, Integer) -> Integer -> String -> Integer -> Bool -> Integer -> Gen (SynTree BinOp Char)
+genSynTree :: (Integer, Integer) -> Integer -> [c] -> Integer -> Bool -> Integer -> Gen (SynTree BinOp c)
 genSynTree (minNodes, maxNodes) maxDepth availableLetters atLeastOccurring useImplEqui maxConsecutiveNegations =
     if maxConsecutiveNegations /= 0
         then do
