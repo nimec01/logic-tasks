@@ -11,7 +11,7 @@ import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import Data.Maybe (isJust, isNothing)
 import Data.List (intercalate)
-import Data.Char (isSpace)
+import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (validBoundsSyntr)
@@ -56,7 +56,7 @@ spec = do
                 forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subTreeStringParse (displaySubTrees (toList correctTrees)) == Right correctTrees
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subFormulasStringParse (filter (not . isSpace) (displaySubTrees (toList correctTrees))) == Right (Data.Set.map (filter (not . isSpace). display) correctTrees)
+                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subFormulasStringParse (deleteSpaces (displaySubTrees (toList correctTrees))) == Right (Data.Set.map deleteSpaces correctFormulas)
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees
@@ -68,7 +68,7 @@ spec = do
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (displaySubTrees $ toList correctTrees)
         it "the correct store in Inst should be accept by feedback, even without spaces" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (filter (not . isSpace) . displaySubTrees $ toList correctTrees)
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig (deleteSpaces . displaySubTrees $ toList correctTrees)
 
 displaySubTrees :: [SynTree BinOp Char] -> String
 displaySubTrees trees = "{" ++ showTrees trees ++ "}"
