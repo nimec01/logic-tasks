@@ -11,6 +11,7 @@ import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Data.Maybe (isJust, isNothing)
 import Trees.Parsing (formulaParse)
+import Tasks.SubTree.Parsing (subFormulasStringParse)
 import Data.Either (isLeft, isRight)
 import Trees.Generate (genSynTree)
 import Trees.Helpers (maxLeavesForNodes)
@@ -18,7 +19,7 @@ import SynTreeSpec (validBoundsSyntr)
 import Trees.Print (display)
 import Data.Set (toList, Set)
 import Data.List (delete, intercalate)
-import TestHelpers (deleteBrackets)
+import TestHelpers (deleteBrackets, deleteSpaces)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -67,7 +68,11 @@ spec = do
             isNothing (checkLegalPropositionConfig defaultLegalPropositionConfig)
         it "should accept valid bounds" $
             forAll validBoundsLegalProposition (isNothing . checkLegalPropositionConfig)
-    describe "illegalDisplay" $
+    describe "illegalDisplay" $ do
+        it "at least creates actual formula symbols" $
+            forAll validBoundsSyntr $ \SynTreeConfig {..} ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
+                    forAll (illegalDisplay synTree) $ \str -> isRight (subFormulasStringParse $ "{" ++ deleteSpaces str ++ "}")
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
