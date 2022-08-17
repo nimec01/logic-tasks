@@ -9,6 +9,7 @@ import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), Superfluo
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSyntr)
 import Data.Maybe (isJust, isNothing)
+import Data.List.Extra (notNull)
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)
@@ -46,9 +47,16 @@ spec = do
             isNothing (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig)
         it "should accept valid bounds" $
             forAll validBoundsSuperfluousBrackets (isNothing . checkSuperfluousBracketsConfig)
-    describe "sameAssociativeOperatorAdjacent" $
+    describe "sameAssociativeOperatorAdjacent" $ do
+        it "should return false if there are no two \\/s or two /\\s as neighbors" $
+            not $ sameAssociativeOperatorAdjacent (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c'))))
         it "should return true if two \\/s or two /\\s are Neighboring " $
             sameAssociativeOperatorAdjacent (Not (Binary And (Binary Equi (Leaf 'a') (Leaf 'b')) (Binary And (Leaf 'a') (Leaf 'c'))))
+    describe "sameAssociativeOperatorAdjacent... functions" $
+        it "is a consistent pair of functions" $
+            forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
+                    \synTree -> sameAssociativeOperatorAdjacent synTree ==> notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
     describe "simplestDisplay and superfluousBracketsDisplay" $ do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
