@@ -50,19 +50,19 @@ description MaxInst{..} = do
     translate $ do
       german "Negation"
       english "negation"
-    text ": ~"
+    code ": ~"
 
   paragraph $ do
     translate $ do
       german "oder"
       english "or"
-    text ": \\/"
+    code ": \\/"
 
   paragraph $ do
     translate $ do
       german "und"
       english "and"
-    text ": /\\."
+    code ": /\\"
 
   paragraph $ do
     translate $ do
