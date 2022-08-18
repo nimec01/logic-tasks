@@ -47,21 +47,19 @@ description MaxInst{..} = do
     english "Use the following key:"
 
   paragraph $ indent $ do
-    translate $ do
-      german "Negation:"
-      english "negation:"
+    text "Negation:"
     code "~"
 
   paragraph $ indent $ do
     translate $ do
-      german "oder:"
-      english "or:"
+      german "Oder:"
+      english "Or:"
     code "\\/"
 
   paragraph $ indent $ do
     translate $ do
-      german "und:"
-      english "and:"
+      german "Und:"
+      english "And:"
     code "/\\"
 
   paragraph $ do

@@ -45,23 +45,21 @@ description StepInst{..} = do
     german "Beachten Sie dabei für die ASCII-Formel diese Legende:"
     english "Consider this key for the ASCII based formula:"
 
-  paragraph $ do
-    translate $ do
-      german "Negation"
-      english "negation"
-    text ": ~"
+  paragraph $ indent $ do
+    text "Negation:"
+    code "~"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
-      german "oder"
-      english "or"
-    text ": \\/"
+      german "Oder:"
+      english "Or:"
+    code "\\/"
 
   paragraph $ do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    text "(A, ~B \\/ C)"
+    code "(A, ~B \\/ C)"
 
   paragraph $ text (fromMaybe "" addText)
 

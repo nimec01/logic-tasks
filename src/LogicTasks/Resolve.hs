@@ -59,23 +59,21 @@ description ResolutionInst{..} = do
     german "Beachten Sie dabei für die ASCII-Formel diese Legende:"
     english "Consider this key for the ASCII based formula:"
 
-  paragraph $ do
-    translate $ do
-      german "Negation"
-      english "negation"
-    text ": ~"
+  paragraph $ indent $ do
+    text "Negation:"
+    code "~"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
-      german "oder"
-      english "or"
-    text ": \\/"
+      german "Oder:"
+      english "Or:"
+    code "\\/"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
-      german "leere Klausel"
-      english "empty clause"
-    text ": { }"
+      german "Leere Klausel:"
+      english "Empty clause:"
+    code "{ }"
 
   paragraph $ translate $ do
     german "Optional können Sie Klauseln auch durch Nummern substituieren."
@@ -93,7 +91,7 @@ description ResolutionInst{..} = do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    text "[(1, 2, {A, ~B} = 5), (4, 5, { })]"
+    code "[(1, 2, {A, ~B} = 5), (4, 5, { })]"
 
   paragraph $ text (fromMaybe "" addText)
 

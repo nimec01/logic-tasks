@@ -46,7 +46,7 @@ description DecideInst{..} = do
     translate $ do
       english "A valid solution could look like this: "
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-    text "[1,4,5]"
+    code "[1,4,5]"
 
   paragraph $ text (fromMaybe "" addText)
 

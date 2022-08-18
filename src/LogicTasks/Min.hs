@@ -46,23 +46,21 @@ description MinInst{..} = do
     german "Beachten Sie dabei die folgende Legende:"
     english "Use the following key:"
 
-  paragraph $ do
-    translate $ do
-      german "Negation"
-      english "negation"
-    text ": ~"
+  paragraph $ indent $ do
+    text "Negation:"
+    code "~"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
-      german "oder"
-      english "or"
-    text ": \\/"
+      german "Oder:"
+      english "Or:"
+    code "\\/"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
-      german "und"
-      english "and"
-    text ": /\\ "
+      german "Und:"
+      english "And:"
+    code "/\\"
 
   paragraph $ do
     translate $ do
