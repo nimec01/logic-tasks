@@ -26,7 +26,7 @@ dPickInst :: PickInst
 dPickInst =  PickInst
           { cnfs = [mkCnf [mkClause [Literal 'A', Not 'B']], mkCnf [mkClause [Not 'A', Literal 'B']]]
           , correct = 1
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -40,7 +40,7 @@ data MaxInst = MaxInst {
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -55,7 +55,7 @@ data MinInst = MinInst {
 dMinInst :: MinInst
 dMinInst =  MinInst
           { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -71,7 +71,7 @@ dFillInst :: FillInst
 dFillInst =  FillInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , missing = [1,4]
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -87,7 +87,7 @@ dDecideInst :: DecideInst
 dDecideInst =  DecideInst
           { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
           , changed = [1,4]
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -103,7 +103,7 @@ dStepInst :: StepInst
 dStepInst =  StepInst
           { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
           , clause2 = mkClause [Literal 'A', Not 'C']
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -117,7 +117,7 @@ data ResolutionInst = ResolutionInst {
 dResInst :: ResolutionInst
 dResInst =  ResolutionInst
           { clauses = [mkClause [Not 'A', Not 'C', Literal 'B'], mkClause [Literal 'A', Not 'C'], mkClause [Literal 'C'], mkClause [Not 'B']]
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
@@ -135,7 +135,7 @@ dPrologInst :: PrologInst
 dPrologInst =  PrologInst
           { literals1 = mkPrologClause [PrologLiteral True "pred" ["fact"]]
           , literals2 = mkPrologClause [PrologLiteral False "pred" ["fact"]]
-          , addText = Just "Put additional text here or delete this parameter."
+          , addText = Nothing
           }
 
 
