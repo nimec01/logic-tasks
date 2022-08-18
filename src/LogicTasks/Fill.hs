@@ -45,9 +45,11 @@ description FillInst{..} = do
     german "Die Eingabe der Werte kann binär (0 = falsch, 1 = wahr), ausgeschrieben (wahr, falsch) oder als Kurzform (f, w) erfolgen."
     english "Values can be submitted in binary form (0 = false, 1 = true), by entering the entire word (true, false) or by giving a shorthand (f or t)."
 
-  paragraph $ translate $ do
-    german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen: [f,w,w,w]."
-    english "A valid solution for four blanks could look like this: [f,t,t,t]."
+  paragraph $ indent $ do
+    translate $ do
+      german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen:"
+      english "A valid solution for four blanks could look like this:"
+    code "[f,t,t,t]"
 
   paragraph $ text (fromMaybe "" addText)
 

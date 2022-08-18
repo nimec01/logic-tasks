@@ -48,6 +48,12 @@ description PrologInst{..} = do
     german "Die leere Klausel kann durch geschweifte Klammern '{}' dargestellt werden."
     english "The empty clause can be denoted by curly braces '{}'."
 
+  paragraph $ indent $ do
+    translate $ do
+      german "Ein Lösungsversuch mit den Klauseln a(x) und not(a(x)) könnte beispielsweise so aussehen:"
+      english "A valid solution with the clauses a(x) and not(a(x)) could look like this:"
+    code "(a(x), { })"
+
   paragraph $ text (fromMaybe "" addText)
 
 
