@@ -46,23 +46,23 @@ description MaxInst{..} = do
     german "Beachten Sie dabei die folgende Legende:"
     english "Use the following key:"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       german "Negation"
       english "negation"
-    code ": ~"
+    text ": ~"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       german "oder"
       english "or"
-    code ": \\/"
+    text ": \\/"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       german "und"
       english "and"
-    code ": /\\"
+    text ": /\\"
 
   paragraph $ do
     translate $ do
