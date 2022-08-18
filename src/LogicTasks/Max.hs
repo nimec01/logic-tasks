@@ -48,21 +48,21 @@ description MaxInst{..} = do
 
   paragraph $ indent $ do
     translate $ do
-      german "Negation"
-      english "negation"
-    text ": ~"
+      german "Negation:"
+      english "negation:"
+    code "~"
 
   paragraph $ indent $ do
     translate $ do
-      german "oder"
-      english "or"
-    text ": \\/"
+      german "oder:"
+      english "or:"
+    code "\\/"
 
   paragraph $ indent $ do
     translate $ do
-      german "und"
-      english "and"
-    text ": /\\"
+      german "und:"
+      english "and:"
+    code "/\\"
 
   paragraph $ do
     translate $ do
