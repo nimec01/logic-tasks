@@ -45,8 +45,8 @@ description PrologInst{..} = do
     english "Provide the literal used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
   paragraph $ translate $ do
-    german "Die leere Klausel kann durch geschweifte Klammern '{}' dargestellt werden."
-    english "The empty clause can be denoted by curly braces '{}'."
+    german "Die leere Klausel kann durch geschweifte Klammern '{ }' dargestellt werden."
+    english "The empty clause can be denoted by curly braces '{ }'."
 
   paragraph $ indent $ do
     translate $ do
