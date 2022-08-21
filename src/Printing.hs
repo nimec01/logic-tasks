@@ -175,15 +175,15 @@ showIndexedList maxLine gapSize xs = prodLines indexed
 
     prodLines ys
         | null ys = ""
-        | perLine <= length ys = unlines [ unlines (docRow tRow)
+        | perLine <= length ys = unlines [ unlines (row tRow)
                                          , " "
                                          , prodLines rest
                                          ]
-        | otherwise = unlines (docRow ys)
+        | otherwise = unlines (row ys)
       where
         tRow = take perLine ys
         rest = drop perLine ys
-        docRow ls = foldl1 (zipWith (++)) (intersperse sperseGaps ls)
+        row ls = foldl1 (zipWith (++)) (intersperse sperseGaps ls)
 
 
 test = getTable (Cnf (Set.fromList [Clause (Set.fromList [Not 'A'])]))
