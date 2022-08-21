@@ -87,7 +87,7 @@ description ResolutionInst{..} = do
     german "neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
     english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "

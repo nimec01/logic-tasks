@@ -42,7 +42,7 @@ description DecideInst{..} = do
     english "Provide the solution as a list of indices of the faulty rows. The indices start with 1."
     german "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Die Indizes beginnen dabei mit der 1."
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       english "A valid solution could look like this: "
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "

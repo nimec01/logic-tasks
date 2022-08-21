@@ -55,7 +55,7 @@ description StepInst{..} = do
       english "Or:"
     code "\\/"
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "

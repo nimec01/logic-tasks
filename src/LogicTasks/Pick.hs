@@ -39,11 +39,11 @@ description PickInst{..} = do
       english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
     indent $ code $ showIndexedList 120 5 $ map getTable cnfs
 
-  paragraph $ do
+  paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    text "1"
+    code "1"
 
   paragraph $ text (fromMaybe "" addText)
 
