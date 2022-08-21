@@ -7,7 +7,10 @@ module LogicTasks.Pick where
 
 import Config (BaseConfig(..), CnfConfig(..), PickConfig(..), PickInst(..), Number(..))
 import Formula
+import Types (getTable)
+import Printing (showIndexedList)
 import Util
+
 
 import Data.Maybe (fromMaybe)
 
@@ -30,10 +33,11 @@ description PickInst{..} = do
       english "Consider the following formula:"
     indent $ code $ "F = " ++ show (cnfs !! (correct - 1))
 
-  paragraph $ translate $ do
-    german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
-    english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
-  --indent $ code $ showIndexedList 120 5 $ map getTable cnfs
+  paragraph $ do
+    translate $ do
+      german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
+      english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
+    indent $ code $ showIndexedList 120 5 $ map getTable cnfs
 
   paragraph $ do
     translate $ do

@@ -6,6 +6,8 @@ module Printing
        , myText
        , MText
        , ProxyDoc(..)
+       , test
+       , test1
        ) where
 
 
@@ -14,7 +16,7 @@ import Types
 
 import Data.List (intersperse,nub)
 import Data.Text.Lazy (pack)
-import qualified Data.Set as Set (null)
+import qualified Data.Set as Set (null, fromList)
 
 import Text.PrettyPrint.Leijen.Text
 
@@ -159,8 +161,8 @@ instance Pretty PickInst where
 
 
 -- show tables side by side
-showIndexedList :: Show b => Int -> Int -> [b] -> Doc
-showIndexedList _ _ []= empty
+showIndexedList :: Show b => Int -> Int -> [b] -> String
+showIndexedList _ _ []= ""
 showIndexedList maxLine gapSize xs = prodLines indexed
   where
     strings = map (lines . show) xs
@@ -172,15 +174,18 @@ showIndexedList maxLine gapSize xs = prodLines indexed
     perLine = maxLine `div` (lineLen + gapSize)
 
     prodLines ys
-        | null ys = empty
-        | perLine <= length ys = vcat [ vcat (map myText (docRow tRow))
-                                      , line
-                                      , prodLines rest
-                                      ]
-        | otherwise = vcat (map myText (docRow ys))
+        | null ys = ""
+        | perLine <= length ys = unlines [ unlines (docRow tRow)
+                                         , " "
+                                         , prodLines rest
+                                         ]
+        | otherwise = unlines (docRow ys)
       where
         tRow = take perLine ys
         rest = drop perLine ys
         docRow ls = foldl1 (zipWith (++)) (intersperse sperseGaps ls)
 
 
+test = getTable (Cnf (Set.fromList [Clause (Set.fromList [Not 'A'])]))
+
+test1 = getTable (Cnf (Set.fromList [Clause (Set.fromList [Not 'A', Literal 'B']), Clause (Set.fromList [Not 'C'])]))
