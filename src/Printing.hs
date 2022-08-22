@@ -3,11 +3,6 @@
 
 module Printing
        ( showIndexedList
-       , myText
-       , MText
-       , ProxyDoc(..)
-       , test
-       , test1
        ) where
 
 
@@ -19,10 +14,6 @@ import Data.Text.Lazy (pack)
 import qualified Data.Set as Set (null, fromList)
 
 import Text.PrettyPrint.Leijen.Text
-
-
-type MText = (String,String)
-data ProxyDoc = PDoc Doc| PMult MText | Composite [ProxyDoc]
 
 
 
@@ -44,7 +35,7 @@ instance Pretty TruthValue where
 
 
 instance Pretty ResStep where
-  pretty (Res (a,b,(c,i))) = tupled [litsOrNum a, litsOrNum b, prettyClause c]
+  pretty (Res (a,b,(c,_))) = tupled [litsOrNum a, litsOrNum b, prettyClause c]
     where
       litsOrNum = either prettyClause pretty
       curlyBracesList = encloseSep (char '{') (char '}') (char ',')
@@ -156,10 +147,6 @@ instance Pretty PickInst where
 
 
 
-
-
-
-
 -- show tables side by side
 showIndexedList :: Show b => Int -> Int -> [b] -> String
 showIndexedList _ _ []= ""
@@ -184,8 +171,3 @@ showIndexedList maxLine gapSize xs = prodLines indexed
         tRow = take perLine ys
         rest = drop perLine ys
         row ls = foldl1 (zipWith (++)) (intersperse sperseGaps ls)
-
-
-test = getTable (Cnf (Set.fromList [Clause (Set.fromList [Not 'A'])]))
-
-test1 = getTable (Cnf (Set.fromList [Clause (Set.fromList [Not 'A', Literal 'B']), Clause (Set.fromList [Not 'C'])]))
