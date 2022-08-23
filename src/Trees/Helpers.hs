@@ -18,7 +18,6 @@ module Trees.Helpers
     transferCnfToSyntree,
     transferClause,
     transferLiteral,
-    transferCnf,
     judgeCNFSynTree,
     ) where
 

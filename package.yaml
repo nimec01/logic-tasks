@@ -7,7 +7,6 @@ dependencies:
   - containers
   - mtl
   - QuickCheck >= 2.14
-  - minisat-solver
 default-extensions:
   - TupleSections
   - DuplicateRecordFields

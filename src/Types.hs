@@ -1,5 +1,4 @@
 {-# language DeriveGeneric #-}
-{-# language DuplicateRecordFields #-}
 
 -- | Some basic types for propositional logic
 module Types
@@ -7,8 +6,6 @@ module Types
          Literal(..)
        , Clause(..)
        , Cnf(..)
-       , genLiteral
-       , genClause
        , genCnf
        ) where
 
