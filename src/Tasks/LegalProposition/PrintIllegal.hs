@@ -9,6 +9,7 @@ import Trees.Helpers (treeNodes, collectLeaves)
 import Trees.Print (normalShow)
 
 illegalDisplay :: SynTree BinOp Char -> Gen String
+illegalDisplay (Leaf _) = elements (showOperatorNot : map showOperator allBinaryOperators)
 illegalDisplay synTree =
     let usedLiterals = collectLeaves synTree
     in ifUseIllegal True False synTree usedLiterals
