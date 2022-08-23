@@ -11,7 +11,7 @@ data BaseConfig = BaseConfig
     { minClauseLength :: Int
     , maxClauseLength :: Int
     , usedLiterals :: String
-    } deriving (Typeable, Generic, Show)
+    } deriving (Typeable, Generic)
 
 dBaseConf :: BaseConfig
 dBaseConf = BaseConfig {
@@ -24,7 +24,7 @@ data CnfConfig = CnfConfig
     { baseConf:: BaseConfig
     , minClauseAmount :: Int
     , maxClauseAmount :: Int
-    } deriving (Typeable, Generic, Show)
+    } deriving (Typeable, Generic)
 
 dCnfConf :: CnfConfig
 dCnfConf = CnfConfig
