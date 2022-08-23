@@ -3,14 +3,15 @@
 
 module SynTreeSpec where
 
+import Test.Hspec (Spec, describe, it)
+import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
+import Data.List.Extra ( nubOrd, isInfixOf )
 import Data.Maybe (isJust, isNothing)
+
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Tasks.SynTree.Config (SynTreeConfig (..), checkSynTreeConfig, defaultSynTreeConfig, SynTreeInst (..))
-import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
-import Data.List.Extra ( nubOrd, isInfixOf )
 import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
 
 validBoundsSyntr :: Gen SynTreeConfig

@@ -15,13 +15,19 @@ module Trees.Helpers
     sameAssociativeOperatorAdjacent,
     similarExist,
     consecutiveNegations,
+    transferCnfToSyntree,
+    transferClause,
+    transferLiteral,
+    transferCnf,
+    judgeCNFSynTree,
     ) where
 
 import Control.Monad.State (get, put, runState, evalState)
-import Data.Set(fromList, Set)
-import Data.List.Extra (nubOrd, nubBy)
-
+import Data.Set(fromList, Set, toList)
+import Data.List.Extra (nubBy)
+import qualified Types as Setform
 import Trees.Types (SynTree(..), BinOp(..))
+import Auxiliary (listNoDuplicate)
 
 numberAllBinaryNodes :: SynTree o c -> SynTree (o, Integer) c
 numberAllBinaryNodes = flip evalState 1 . go
@@ -55,7 +61,7 @@ allNotLeafSubTrees a = fromList (getNotLeafSubTrees a)
 noSameSubTree :: (Eq o, Ord o, Ord c) => SynTree o c -> Bool
 noSameSubTree synTree = let treeList = getNotLeafSubTrees synTree
     in
-        treeList == nubOrd treeList
+        listNoDuplicate treeList
 
 treeNodes :: SynTree o c -> Integer
 treeNodes (Binary _ a b) = 1 + treeNodes a + treeNodes b
@@ -103,3 +109,43 @@ consecutiveNegations (Leaf _)  = 0
 continueNot :: SynTree o c -> Integer
 continueNot (Not a) = 1 + continueNot a
 continueNot _ = 0
+
+transferCnfToSyntree :: Setform.Cnf -> SynTree BinOp Char
+transferCnfToSyntree cnf = let cnfList = map (toList . Setform.literalSet) (toList (Setform.clauseSet cnf))
+                               synTreeWithClause = transferCnf cnfList
+                               synTreeWithLiteral = transferClause synTreeWithClause
+                           in transferLiteral synTreeWithLiteral
+
+transferCnf :: [[Setform.Literal]] -> SynTree BinOp [Setform.Literal]
+transferCnf [a] = Leaf a
+transferCnf (a:cnfList) = Binary And (Leaf a) (transferCnf cnfList)
+transferCnf [] = error "size of the list should be positive"
+
+transferClause :: SynTree BinOp [Setform.Literal] -> SynTree BinOp Setform.Literal
+transferClause (Binary And a b) = Binary And (transferClause a) (transferClause b)
+transferClause (Leaf [a]) = Leaf a
+transferClause (Leaf (a:clauseList)) = Binary Or (Leaf a) (transferClause (Leaf clauseList))
+transferClause _ = error "no such cases"
+
+transferLiteral :: SynTree BinOp Setform.Literal -> SynTree BinOp Char
+transferLiteral (Binary oper a b) = Binary oper (transferLiteral a) (transferLiteral b)
+transferLiteral (Not a) = Not (transferLiteral a)
+transferLiteral (Leaf (Setform.Literal a)) = Leaf a
+transferLiteral (Leaf (Setform.Not a)) = Not (Leaf a)
+
+judgeCNFSynTree :: SynTree BinOp a -> Bool
+judgeCNFSynTree (Binary And a b) = judgeCNFSynTree a && judgeCNFSynTree b
+judgeCNFSynTree (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
+judgeCNFSynTree (Not a) = judgeLeaf a
+judgeCNFSynTree (Leaf _) = True
+judgeCNFSynTree _ = False
+
+judgeCNFOr :: SynTree BinOp a -> Bool
+judgeCNFOr (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
+judgeCNFOr (Not a) = judgeLeaf a
+judgeCNFOr (Leaf _) = True
+judgeCNFOr _ = False
+
+judgeLeaf :: SynTree o a -> Bool
+judgeLeaf (Leaf _) = True
+judgeLeaf _ = False

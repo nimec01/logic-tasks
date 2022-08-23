@@ -2,14 +2,15 @@
 
 module SuperfluousBracketsSpec where
 
-import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
 import Test.QuickCheck (Gen, forAll, choose, suchThat, (==>))
+import Data.List.Extra (notNull)
+import Data.Maybe (isJust, isNothing)
 import Test.Hspec (Spec, describe, it)
+
+import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
 import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig, defaultSuperfluousBracketsConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSyntr)
-import Data.Maybe (isJust, isNothing)
-import Data.List.Extra (notNull)
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)

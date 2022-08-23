@@ -7,6 +7,7 @@ dependencies:
   - containers
   - mtl
   - QuickCheck >= 2.14
+  - minisat-solver
 default-extensions:
   - TupleSections
   - DuplicateRecordFields
@@ -37,7 +38,12 @@ library:
     - Tasks.SuperfluousBrackets.Parsing
     - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
     - Tasks.SuperfluousBrackets.Quiz
+    - Tasks.LegalCNF.Config
+    - Tasks.LegalCNF.Quiz
+    - Tasks.LegalCNF.GenerateIllegal
+    - Tasks.LegalCNF.GenerateLegal
     - Parsing
+    - Config
   ghc-options:
     - -Wall
     - -Widentities
@@ -81,6 +87,18 @@ executables:
       - -Werror
   simplestFormula:
     main: simplestFormula.hs
+    source-dirs: app
+    dependencies:
+      - ba-tongxi-xu
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Widentities
+      - -Werror
+  illegalCNFSelect:
+    main: illegalCNFSelect.hs
     source-dirs: app
     dependencies:
       - ba-tongxi-xu

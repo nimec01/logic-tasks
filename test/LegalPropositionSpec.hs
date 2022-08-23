@@ -2,23 +2,24 @@
 
 module LegalPropositionSpec where
 
+import Data.Set (toList, Set)
+import Data.Either (isLeft, isRight)
+import Data.Maybe (isJust, isNothing)
+import Data.List (intercalate, (\\))
 import Test.Hspec (Spec, describe, it)
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
 import Test.QuickCheck (Gen, choose, forAll, suchThat)
+
+import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..), checkLegalPropositionConfig, defaultLegalPropositionConfig)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst, feedback)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Data.Maybe (isJust, isNothing)
 import Trees.Parsing (formulaParse)
 import Tasks.SubTree.Parsing (subFormulasStringParse)
-import Data.Either (isLeft, isRight)
 import Trees.Generate (genSynTree)
 import Trees.Helpers (maxLeavesForNodes)
 import SynTreeSpec (validBoundsSyntr)
 import Trees.Print (display)
-import Data.Set (toList, Set)
-import Data.List (delete, intercalate)
 import TestHelpers (deleteBrackets, deleteSpaces)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
@@ -50,11 +51,11 @@ invalidBoundsLegalProposition = do
             , bracketFormulas
         }
 
-judgeInst :: [Int] -> [String] -> Bool
-judgeInst (x:xs) formulas = isLeft (formulaParse formula) && judgeInst (map (+ (-1)) xs) (delete formula formulas)
-    where formula = formulas !! (x - 1)
-judgeInst [] (x:xs) = isRight (formulaParse x) && judgeInst [] xs
-judgeInst [] [] = True
+illegaltest :: [Int] -> [String] -> Bool
+illegaltest xs strings = and (map (\ x -> isLeft (formulaParse (strings !! (x - 1)))) xs)
+
+legaltest :: [Int] -> [String] -> Bool
+legaltest xs strings = and (map (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs)
 
 transferSetIntToString :: Set Int -> String
 transferSetIntToString setInt ="{" ++ intercalate "," (map show (toList setInt)) ++ "}"
@@ -93,7 +94,10 @@ spec = do
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             forAll validBoundsLegalProposition $ \lPConfig ->
-                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> judgeInst (toList serialsOfWrong) pseudoFormulas
+                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> illegaltest (toList serialsOfWrong) pseudoFormulas
+        it "the generateLegalPropositionInst should generate expected legal number" $
+            forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig{..} ->
+                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> legaltest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalProposition $ \lPConfig ->
                 forAll (generateLegalPropositionInst lPConfig) $ \lPInst@LegalPropositionInst{..} -> feedback lPInst (transferSetIntToString serialsOfWrong)

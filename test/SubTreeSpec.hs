@@ -3,19 +3,20 @@ module SubTreeSpec where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
+import Data.Maybe (isJust, isNothing)
+import Data.List (intercalate)
+import Data.List.Extra (isInfixOf )
 import Data.Set (size, toList, map, fromList)
+
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
-import Data.Maybe (isJust, isNothing)
-import Data.List (intercalate)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
 import SynTreeSpec (validBoundsSyntr)
-import Data.List.Extra (isInfixOf )
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do

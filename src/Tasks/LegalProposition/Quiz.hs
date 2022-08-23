@@ -6,7 +6,6 @@ module Tasks.LegalProposition.Quiz (
 ) where
 
 import Test.QuickCheck (Gen, choose, vectorOf, suchThat)
-import Data.List.Extra (nubOrd)
 import Data.Set (fromList)
 
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
@@ -15,7 +14,8 @@ import Tasks.LegalProposition.PrintIllegal (illegalDisplay )
 import Tasks.LegalProposition.PrintBracket (bracketDisplay)
 import Trees.Generate (genSynTree)
 import Trees.Types (SynTree, BinOp)
-import Trees.Helpers (similarExist)
+import Trees.Helpers (similarExist,)
+import Auxiliary (listNoDuplicate)
 import Trees.Print (display)
 import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Data.Char (isLetter)
@@ -23,8 +23,8 @@ import Data.Char (isLetter)
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
 generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     treeList <- vectorOf (fromIntegral formulas) (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) `suchThat` (not . similarExist)
-    serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd list ==list)
-    serialsOfBracket <- vectorOf (fromIntegral bracketFormulas) (choose (1, fromIntegral formulas) )`suchThat` (\list -> nubOrd (list ++ serialsOfWrong) ==list ++ serialsOfWrong)
+    serialsOfWrong <- vectorOf (fromIntegral illegals) (choose (1, fromIntegral formulas) )`suchThat` listNoDuplicate
+    serialsOfBracket <- vectorOf (fromIntegral bracketFormulas) (choose (1, fromIntegral formulas) )`suchThat` (\list -> listNoDuplicate (list ++ serialsOfWrong))
     pseudoFormulas <- genPseudoList serialsOfWrong serialsOfBracket treeList `suchThat` noSimilarFormulas
     return $ LegalPropositionInst
         { serialsOfWrong = fromList serialsOfWrong
@@ -48,7 +48,7 @@ feedback :: LegalPropositionInst -> String -> Bool
 feedback  LegalPropositionInst {serialsOfWrong}  input = illegalPropositionStringParse input == Right serialsOfWrong
 
 noSimilarFormulas :: [String] -> Bool
-noSimilarFormulas pseudoFormulas = let pseudoFormulas' = map replace pseudoFormulas in  nubOrd pseudoFormulas' == pseudoFormulas'
+noSimilarFormulas pseudoFormulas = let pseudoFormulas' = map replace pseudoFormulas in  listNoDuplicate pseudoFormulas'
 
 replace :: String -> String
 replace = map judgeAndChange

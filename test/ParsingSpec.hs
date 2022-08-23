@@ -1,11 +1,11 @@
 module ParsingSpec where
 
+import Data.Either (isLeft, isRight)
+import Test.Hspec ( describe, it, Spec)
+
 import Trees.Parsing (formulaParse)
 import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
-import Data.Either (isLeft, isRight)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
-
-import Test.Hspec ( describe, it, Spec)
 
 spec :: Spec
 spec = do
