@@ -27,7 +27,7 @@ determineLegalCNFConfig :: IO LegalCNFConfig
 determineLegalCNFConfig = do
     putStrLn "\nThe following is the default config:\n"
     pPrint defaultLegalCNFConfig
-    let LegalCNFConfig {cnfConfig = CnfConfig {baseConf = BaseConfig{..}, ..}, ..} = defaultLegalCNFConfig
+    let LegalCNFConfig {cnfConfig = cnfConfig@CnfConfig {baseConf = baseConf@BaseConfig{..}, ..}, ..} = defaultLegalCNFConfig
     minClauseLength' <- offerChange "minClauseLength" minClauseLength
     maxClauseLength' <- offerChange "maxClauseLength" maxClauseLength
     usedLiterals' <- offerChange "usedLiterals" usedLiterals
@@ -38,8 +38,8 @@ determineLegalCNFConfig = do
     externalGenFormulas' <- offerChange "externalGenFormulas" externalGenFormulas
     includeFormWithJustOneClause' <- offerChange "includeFormWithJustOneClause" includeFormWithJustOneClause
     includeFormWithJustOneLiteralPerClause' <- offerChange "includeFormWithJustOneLiteralPerClause" includeFormWithJustOneLiteralPerClause
-    let newBaseConfig = BaseConfig {minClauseLength = minClauseLength', maxClauseLength = maxClauseLength', usedLiterals = usedLiterals'}
-        newCNFConfig = CnfConfig{baseConf = newBaseConfig, minClauseAmount = minClauseAmount', maxClauseAmount = maxClauseAmount'}
+    let newBaseConfig = baseConf {minClauseLength = minClauseLength', maxClauseLength = maxClauseLength', usedLiterals = usedLiterals'}
+        newCNFConfig = cnfConfig {baseConf = newBaseConfig, minClauseAmount = minClauseAmount', maxClauseAmount = maxClauseAmount'}
         newConfig = defaultLegalCNFConfig{
             formulas = formulas'
           , illegals = illegals'
