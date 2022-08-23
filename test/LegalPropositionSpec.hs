@@ -2,7 +2,7 @@
 
 module LegalPropositionSpec where
 
-import Data.Set (toList, Set)
+import Data.Set (toList, Set, singleton)
 import Data.Either (isLeft, isRight)
 import Data.Maybe (isJust, isNothing)
 import Data.List (intercalate, (\\))
@@ -73,7 +73,7 @@ spec = do
         it "at least creates actual formula symbols" $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
-                    forAll (illegalDisplay synTree) $ \str -> isRight (subFormulasStringParse $ "{" ++ deleteSpaces str ++ "}")
+                    forAll (deleteSpaces <$> illegalDisplay synTree) $ \str -> subFormulasStringParse ("{" ++ str ++ "}") == Right (singleton str)
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSyntr $ \SynTreeConfig {..} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $ \synTree ->
