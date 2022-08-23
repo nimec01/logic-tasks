@@ -9,7 +9,10 @@ import Data.Maybe (isJust, isNothing)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf)
 import Data.List((\\))
 
-import Parsing (cnfParse)
+import ParsingHelpers (whitespace)
+import Types (Cnf)
+import Parsing (parser)
+import Text.ParserCombinators.Parsec (ParseError, eof, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Helpers(judgeCNFSynTree)
 import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig, defaultLegalCNFConfig, lengthBound)
@@ -113,3 +116,6 @@ spec = do
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalCNF $ \lCConfig ->
                 forAll (generateLegalCNFInst lCConfig) $ \lCInst@LegalCNFInst {..} -> feedback lCInst (transferSetIntToString serialsOfWrong)
+
+cnfParse :: String -> Either ParseError Cnf
+cnfParse = parse (whitespace >> parser <* eof) ""

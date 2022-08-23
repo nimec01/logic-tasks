@@ -11,7 +11,7 @@ import Text.Parsec.String (Parser)
 
 import Data.Char (isLetter)
 import Trees.Types (SynTree(..), BinOp(..), showOperator, showOperatorNot, allBinaryOperators)
-import Parsing (lexeme, whitespace)
+import ParsingHelpers (lexeme, whitespace)
 
 leafE :: Parser (SynTree o Char)
 leafE =

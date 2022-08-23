@@ -43,7 +43,9 @@ library:
     - Tasks.LegalCNF.GenerateIllegal
     - Tasks.LegalCNF.GenerateLegal
     - Parsing
+    - ParsingHelpers
     - Config
+    - Types
   ghc-options:
     - -Wall
     - -Widentities

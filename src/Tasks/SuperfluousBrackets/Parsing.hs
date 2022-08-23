@@ -5,7 +5,7 @@ module Tasks.SuperfluousBrackets.Parsing (
 import Text.Parsec.String (Parser)
 import Text.Parsec (eof, ParseError, parse, many1, (<|>))
 import Text.Parsec.Char (satisfy, string)
-import Parsing (whitespace, lexeme)
+import ParsingHelpers (whitespace, lexeme)
 
 import Data.Char (isLetter)
 import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)

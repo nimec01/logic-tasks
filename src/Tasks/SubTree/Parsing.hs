@@ -10,7 +10,7 @@ import Trees.Types (SynTree, BinOp)
 import Text.Parsec.String (Parser)
 import Text.Parsec (eof, ParseError, parse, sepBy, many1)
 import Text.Parsec.Char (char)
-import Parsing (whitespace, lexeme, formulaSymbol)
+import ParsingHelpers (whitespace, lexeme, formulaSymbol)
 import Trees.Parsing (parserS)
 
 import Data.Set (fromList, Set)

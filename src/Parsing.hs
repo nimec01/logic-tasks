@@ -1,36 +1,12 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module Parsing (
-  formulaSymbol,
-  whitespace,
-  lexeme,
-  cnfParse
+  parser
   ) where
-
--- import Text.Parsec.Char (oneOf, satisfy)
-import Data.Char (isLetter, isSpace)
--- import Text.Parsec (many, (<|>))
--- import Text.Parsec.String (Parser)
-import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
-import Data.List.Extra (nubOrd)
 import Types
 import Text.ParserCombinators.Parsec
 import Formula
 import Control.Monad (void)
-
-formulaSymbol :: Parser Char
-formulaSymbol = satisfy isLetter <|> oneOf (nubOrd ("()" ++ showOperatorNot ++ concatMap showOperator allBinaryOperators))
-
-whitespace :: Parser ()
-whitespace = do
-    many $ satisfy isSpace
-    return ()
-
-lexeme :: Parser a -> Parser a
-lexeme p = do
-    x <- p
-    whitespace
-    return x
 
 trailSpaces :: Parser a -> Parser a
 trailSpaces p = p <* spaces
@@ -90,5 +66,3 @@ instance Parse Cnf where
         clauses <- sepBy parser parseAnd
         pure $ mkCnf clauses
 
-cnfParse :: String -> Either ParseError Cnf
-cnfParse = parse (whitespace >> parser <* eof) ""

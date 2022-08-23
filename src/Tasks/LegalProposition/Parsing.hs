@@ -7,7 +7,7 @@ module Tasks.LegalProposition.Parsing (
 import Text.Parsec.String (Parser)
 import Text.Parsec (eof, ParseError, parse, sepBy, many1)
 import Text.Parsec.Char (char, digit)
-import Parsing (whitespace, lexeme)
+import ParsingHelpers (whitespace, lexeme)
 
 import Data.Set (fromList, Set)
 
