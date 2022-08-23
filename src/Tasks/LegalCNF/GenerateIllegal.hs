@@ -39,7 +39,7 @@ genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals (Binary oper a
     node <- elements [Binary oper, flip (Binary oper)]
     return (node illegalSubTree legalSubTree)
 genIllegalClauses len usedLiterals (Leaf ()) = illegalClauseTree len usedLiterals
-genIllegalClauses _ _ _ = error "can not match rest thing"
+genIllegalClauses _ _ (Not _) = error "can not match rest thing"
 
 genLegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
 genLegalClauses (minClauseLength, maxClauseLength) usedLiterals (Not a) = Not <$> genLegalClauses (minClauseLength, maxClauseLength) usedLiterals a
@@ -64,6 +64,7 @@ illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do
     return (transferLiteral (relabelShape illegalSynTreeShape leaves))
 
 illegalClauseShape :: Bool -> Int -> Gen (SynTree BinOp ())
+illegalClauseShape _ 0 = error "impossible"
 illegalClauseShape ifFirstlayer ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
@@ -81,6 +82,7 @@ legalClauseShape ors =  Binary Or (Leaf ()) <$> legalClauseShape (ors - 1)
 
 
 genIllegalCNFShape :: Int -> Gen (SynTree BinOp ())
+genIllegalCNFShape 0 = error "impossible"
 genIllegalCNFShape 1 = oneof [Not <$> genLegalCNFShape 1, genIllegalOper genLegalCNFShape (allBinaryOperators \\ [And, Or]) 1]
 genIllegalCNFShape ands = do
     ifUseError <- frequency[(1, return True), (ands - 1, return False)]
