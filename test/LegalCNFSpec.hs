@@ -51,8 +51,8 @@ validBoundsLegalCNF = do
           includeFormWithJustOneClause,
           includeFormWithJustOneLiteralPerClause,
           externalGenFormulas,
-          maxStringSize = 1000,
-          minStringSize = 1
+          maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
+          minStringSize = minClauseAmount * ((minClauseLength - 1) * 5 + 1)
         }
 
 invalidBoundsLegalCNF :: Gen LegalCNFConfig

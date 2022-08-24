@@ -79,6 +79,10 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = Just "Can not generate String with such minStringSize"
     | maxStringSize < minStringSize
       = Just "The maxmun length of formula string can not less than the minimun length of formula string"
+    | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1)
+      = Just "Can not generate String with such minimun length of formula string"
+    | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5)
+      = Just "Can not generate String with such maxmun length of formula string"
     | otherwise
       = Nothing
 
