@@ -180,12 +180,7 @@ partEvalClause (Clause set) x
               else if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
     | otherwise = Right (Clause set)
   where
-    next = fst x
-    negNext = opposite next
-    isIn = next `Set.member` set
-    negIsIn = negNext `Set.member` set
-    setWithout = Set.delete next set
-    setWithoutNeg = Set.delete negNext set
+    (next,negNext,isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
 
 
 
@@ -376,12 +371,7 @@ partEvalCon (Con set) x
               else if isIn then Left False else Right (Con setWithoutNeg)
     | otherwise = Right (Con set)
   where
-    next = fst x
-    negNext = opposite next
-    isIn = next `Set.member` set
-    negIsIn = negNext `Set.member` set
-    setWithout = Set.delete next set
-    setWithoutNeg = Set.delete negNext set
+    (next,negNext,isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
 
 
 
@@ -397,8 +387,8 @@ instance Arbitrary Con where
 --   The used atomic formulae are drawn from the list of chars.
 genCon :: (Int,Int) -> [Char] -> Gen Con
 genCon (minlen,maxlen) lits = do
-        genLits <- genForBasic (minlen,maxlen) lits
-        pure (Con genLits)
+    genLits <- genForBasic (minlen,maxlen) lits
+    pure (Con genLits)
 
 
 --------------------------------------------------------------
@@ -493,7 +483,6 @@ instance Arbitrary Dnf where
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulae are drawn from the list of chars.
-
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
 genDnf (minNum,maxNum) (minLen,maxLen) lits = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
@@ -634,6 +623,21 @@ terms :: PrologClause -> [PrologLiteral]
 terms (PrologClause set) = Set.toList set
 
 -------------------------------------------------------------
+
+
+-- Helpers to reduce duplicate code
+
+partEvalHelper :: Set Literal -> (Literal,Bool) -> (Literal,Literal,Bool,Bool,Set Literal, Set Literal)
+partEvalHelper set x = (next,negNext,isIn,negIsIn,setWithout,setWithoutNeg)
+  where
+    next = fst x
+    negNext = opposite next
+    isIn = next `Set.member` set
+    negIsIn = negNext `Set.member` set
+    setWithout = Set.delete next set
+    setWithoutNeg = Set.delete negNext set
+
+
 
 genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
 genForBasic (minlen,maxlen) lits
