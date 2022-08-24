@@ -30,16 +30,17 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
             genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals firstSyntaxShape
 
 genIllegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
-genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals (Binary oper a b) = do
+genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals (Binary And a b) = do
     let leftNodes = length (collectLeaves a)
         rightNodes = length (collectLeaves b)
     (illegalShape, legalShape) <- frequency [(leftNodes, return (a,b)), (rightNodes, return (b,a))]
     illegalSubTree <- genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals illegalShape
     legalSubTree <- genLegalClauses (minClauseLength, maxClauseLength) usedLiterals legalShape
-    node <- elements [Binary oper, flip (Binary oper)]
+    node <- elements [Binary And, flip (Binary And)]
     return (node illegalSubTree legalSubTree)
 genIllegalClauses len usedLiterals (Leaf ()) = illegalClauseTree len usedLiterals
-genIllegalClauses _ _ (Not _) = error "can not match rest thing"
+genIllegalClauses _ _ (Binary _ _ _) = error "except for And, will never happen"
+genIllegalClauses _ _ (Not _) = error "will never happen"
 
 genLegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
 genLegalClauses (minClauseLength, maxClauseLength) usedLiterals (Not a) = Not <$> genLegalClauses (minClauseLength, maxClauseLength) usedLiterals a
