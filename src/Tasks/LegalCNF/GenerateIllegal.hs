@@ -1,5 +1,6 @@
 module Tasks.LegalCNF.GenerateIllegal (
   genIllegalSynTree,
+  genCNFWithOneIllegalClause
 ) where
 
 import Test.QuickCheck (choose, Gen, suchThat, elements, frequency)
@@ -35,7 +36,7 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands 
     if ifUseError
     then do
         illegalClause <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
-        legalSubTree <- genSynTreeWithCnf (ands + 1, ands + 1) (minClauseLength, maxClauseLength) usedLiterals
+        legalSubTree <- genSynTreeWithCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
         return (Binary And illegalClause legalSubTree)
     else do
         legalClause <- legalCluaseTree (minClauseLength, maxClauseLength) usedLiterals
