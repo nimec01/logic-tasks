@@ -124,7 +124,7 @@ completeGrade StepInst{..} sol =
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
                      english "This literal can not be used for a resolution step!"
 
-        Just solClause -> if (solClause == snd sol)
+        Just solClause -> if solClause == snd sol
                             then pure()
                             else refuse $ indent $ translate $ do
                                    german "Resolvente ist nicht korrekt."

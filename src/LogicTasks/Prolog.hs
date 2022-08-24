@@ -41,7 +41,7 @@ description PrologInst{..} = do
     english "Resolve the clauses and give the resulting resolvent."
 
   paragraph $ translate $ do
-    german $ "Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
+    german "Geben Sie das in dem Resolutionsschritt genutzte Literal und das Ergebnis in der folgenden Tupelform an: (Literal, Resolvente)."
     english "Provide the literal used for the step and the resolvent in the following tuple form: (literal, resolvent)."
 
   paragraph $ translate $ do
@@ -136,12 +136,12 @@ partialGrade PrologInst{..} sol = do
 
 completeGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade PrologInst{..} sol =
-    case resolve clause1 clause2 (transSol1) of
+    case resolve clause1 clause2 transSol1 of
         Nothing -> refuse $ indent $ translate $ do
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
                      english "This literal can not be used for a resolution step!"
 
-        Just solClause -> if (solClause == transSol2)
+        Just solClause -> if solClause == transSol2
                             then pure()
                             else refuse $ indent $ translate $ do
                                    german "Resolvente ist nicht korrekt."
@@ -178,5 +178,5 @@ revertMapping :: [Literal] -> [(PrologLiteral,Literal)] -> [PrologLiteral]
 revertMapping ls mapping = map fromJust getPreds
   where
     reverseM = map swap mapping
-    getPreds = map (flip lookup reverseM) ls
+    getPreds = map (`lookup` reverseM) ls
 

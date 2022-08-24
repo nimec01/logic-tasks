@@ -1,4 +1,3 @@
-{-# language RecordWildCards #-}
 
 module Parsing where
 
@@ -18,21 +17,21 @@ instance Parse ResStep where
 
   parser = do
     withSpaces '('
-    clause1 <- parseEither resClause parseNum
+    cl1 <- parseEither resClause parseNum
     withSpaces ','
-    clause2 <- parseEither resClause parseNum
+    cl2 <- parseEither resClause parseNum
     withSpaces ','
-    clause3 <- resClause
+    cl3 <- resClause
     index <- optionMaybe indexParse
     withSpaces ')'
-    pure $ Res (clause1,clause2,(clause3,index))
+    pure $ Res (cl1,cl2,(cl3,index))
 
    where
     braces = between (withSpaces '{') (withSpaces '}')
 
     indexParse = withSpaces '=' >> trailSpaces parseNum
 
-    resClause = mkClause <$> braces (parser `sepBy` (char ','))
+    resClause = mkClause <$> braces (parser `sepBy` char ',')
 
     parseEither x y = trailSpaces ((Left <$> try x) <|> (Right <$> y))
 
@@ -52,12 +51,12 @@ withSpaces = trailSpaces . char
 
 
 parseOr :: Parser ()
-parseOr = ((trailSpaces $ void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
+parseOr = (trailSpaces (void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
 
 
 
 parseAnd :: Parser ()
-parseAnd = ((trailSpaces $ void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
+parseAnd = (trailSpaces (void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
 
 
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
@@ -92,7 +91,7 @@ instance Parse Number where
 
 
 instance Parse TruthValue where
-  parser = (trailSpaces truthParse <?> "Truth Value")
+  parser = trailSpaces truthParse <?> "Truth Value"
 
     where truthParse = do
             s <- getInput
@@ -168,8 +167,8 @@ instance Parse Cnf where
            <|> fail "Could not parse a CNF: CNFs are composed out of clauses and the 'and operator' (/\\)."
     where
       parseCnf = do
-        clauses <- sepBy parser parseAnd
-        pure $ mkCnf clauses
+        cls <- sepBy parser parseAnd
+        pure $ mkCnf cls
 
 
 
@@ -188,14 +187,14 @@ instance Parse PrologLiteral where
            <|> fail "Could not parse a literal."
     where
       litParse = do
-        polarity <- trailSpaces $ optionMaybe $ string "not("
-        name <- strParse
+        pol <- trailSpaces $ optionMaybe $ string "not("
+        ident <- strParse
         trailSpaces $ char '('
         facts <- trailSpaces $ sepBy (trailSpaces strParse) (trailSpaces $ char ',')
         trailSpaces $ char ')'
-        case polarity of Nothing -> pure (PrologLiteral True name facts)
-                         Just _  -> do char ')'
-                                       pure (PrologLiteral False name facts)
+        case pol of Nothing -> pure (PrologLiteral True ident facts)
+                    Just _  -> do char ')'
+                                  pure (PrologLiteral False ident facts)
         where
           strParse = many1 $ satisfy $ flip elem ['A'..'z']
 
@@ -208,10 +207,10 @@ instance Parse PrologClause where
    where
      clauseParse = do
        braces <- trailSpaces $ optionMaybe $ char '('
-       terms <- sepBy parser parseOr
+       ts <- sepBy parser parseOr
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
-       pure $ mkPrologClause terms
+       pure $ mkPrologClause ts
      emptyParse = do
        char '{'
        spaces
@@ -231,11 +230,11 @@ instance Parse PickInst where
         cnfs <- parser
         withSpaces ','
         index <- trailSpaces $ many1 digit
-        text <- optionMaybe $ trailSpaces extraText
+        text <- optionMaybe $ trailSpaces bonusText
         char ')'
         pure $ PickInst cnfs (read index) text
           where
-            extraText = between start (char '}') $ many1 $ satisfy ( /= '}')
+            bonusText = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
               char ','
               spaces

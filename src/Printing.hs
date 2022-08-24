@@ -9,7 +9,7 @@ module Printing
 import Config
 import Types
 
-import Data.List (intersperse,nub)
+import Data.List (intercalate, intersperse, nub)
 import Data.Text.Lazy (pack)
 import qualified Data.Set as Set (null, fromList)
 
@@ -121,7 +121,7 @@ instance Pretty PrologLiteral where
              , end
              ]
       where
-        separated = myText $ concat $ intersperse "," $ f
+        separated = myText $ intercalate "," f
         (begin,end) = if b then (empty,empty) else (text "not(", char ')')
 
 

@@ -118,8 +118,8 @@ partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
   preventWithHint (solLen > acLen)
     (translate $ do
-      german $ "Lösung überschreitet nicht maximale Anzahl Werte?"
-      english $ "Solution does not exceed maximum possible number of values?"
+      german "Lösung überschreitet nicht maximale Anzahl Werte?"
+      english "Solution does not exceed maximum possible number of values?"
     )
     (translate $ do
       german $ "Lösung enthält zu viele Werte. Es " ++ ger ++" entfernt werden."
@@ -128,8 +128,8 @@ partialGrade FillInst{..} sol = do
 
   preventWithHint (acLen > solLen)
     (translate $ do
-      german $ "Lösung hat genügend Werte?."
-      english $ "Solution contains enough values?."
+      german "Lösung hat genügend Werte?."
+      english "Solution contains enough values?."
     )
     (translate $ do
       german $ "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
@@ -151,8 +151,8 @@ completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
   preventWithHint (not $ null diff)
     (translate $ do
-      german $ "Lösung ist korrekt?"
-      english $ "Solution is korrekt?"
+      german "Lösung ist korrekt?"
+      english "Solution is korrekt?"
     )
     (translate $ do
       german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."

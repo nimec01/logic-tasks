@@ -107,8 +107,8 @@ partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
   preventWithHint (solLen > acLen)
     (translate $ do
-      german $ "Lösung enthält nicht zu viele Indices?"
-      english $ "Solution does not contains too many indices?"
+      german "Lösung enthält nicht zu viele Indices?"
+      english "Solution does not contains too many indices?"
     )
     (translate $ do
       german $ "Lösung enthält zu viele Indices. Es " ++ ger ++" entfernt werden."
@@ -117,8 +117,8 @@ partialGrade DecideInst{..} sol = do
 
   preventWithHint (acLen > solLen)
     (translate $ do
-      german $ "Lösung enthält genügend Indices?"
-      english $ "Solution contains enough indices?"
+      german "Lösung enthält genügend Indices?"
+      english "Solution contains enough indices?"
     )
     (translate $ do
       german $ "Lösung enthält zu wenige Indices. Es " ++ ger ++ " hinzugefügt werden."

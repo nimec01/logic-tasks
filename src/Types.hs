@@ -35,7 +35,7 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Either(rights)
-import Data.List(transpose, nub, delete, intersperse)
+import Data.List(intercalate, intersperse, delete, nub, transpose)
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
@@ -669,7 +669,7 @@ instance Show PrologLiteral where
     | n == "" || nub n == " " = error "Literal does not have a name."
     | otherwise = begin ++ n ++ "(" ++ separated ++ ")" ++ end
 
-    where separated = concat $ intersperse "," $ c
+    where separated = intercalate "," c
           (begin,end) = if p then ("","") else ("not(",")")
 
 
@@ -683,7 +683,7 @@ newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (E
 instance Show PrologClause where
   show pc
     | null lits = "{ }"
-    | otherwise = concat $ intersperse (" \\/ ") $ map show $ lits
+    | otherwise = concat $ intersperse (" \\/ ") $ map show lits
     where lits = terms pc
 
 

@@ -66,7 +66,7 @@ description MinInst{..} = do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    code $ show $ mkDnf $ [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+    code $ show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
 
   paragraph $ text (fromMaybe "" addText)
 

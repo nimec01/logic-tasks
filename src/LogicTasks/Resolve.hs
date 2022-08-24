@@ -208,7 +208,7 @@ baseMapping xs = zip [1..] $ sort xs
 correctMapping :: OutputMonad m => [ResStep] -> [(Int,Clause)] -> LangM m
 correctMapping [] _ = pure()
 correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
-  prevent (checkIndices) $
+  prevent checkIndices $
     translate $ do
       german "Alle Schritte verwenden existierende Indices?"
       english "All steps use valid indices?"
@@ -227,12 +227,12 @@ correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
 
 
     unknown (Left _) = False
-    unknown (Right n) = n `notElem` (map fst mapping)
+    unknown (Right n) = n `notElem` map fst mapping
 
     checkIndices = unknown c1 || unknown c2
 
     alreadyUsed Nothing = False
-    alreadyUsed (Just n) = n `elem` (map fst mapping)
+    alreadyUsed (Just n) = n `elem` map fst mapping
 
 
 
