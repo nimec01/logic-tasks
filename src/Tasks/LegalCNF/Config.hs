@@ -45,7 +45,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     | minClauseAmount < 1
       = Just "The number of Clauses must be positive"
     | minClauseLength < 1
-      = Just "The number of Literals must be positive"
+      = Just "The number of Literals per clause must be positive"
     | maxClauseAmount < minClauseAmount
       = Just "maxCluases can not less than minClauseAmount"
     | maxClauseLength < minClauseLength
