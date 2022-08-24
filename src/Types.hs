@@ -200,25 +200,10 @@ instance Arbitrary Clause where
 -- | Generates a random clause. The length of the generated clause lies in the given length bounds.
 --   The used atomic formulae are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
-genClause (minlen,maxlen) lits
-    | null lits || minlen > length nLits || invalidLen = pure (Clause empty)
-    | otherwise = do
-        len <- choose (minlen,minimum [length nLits, maxlen])
-        genLits <- generateLiterals nLits empty len
-        pure (Clause genLits)
-  where
-    nLits = nub lits
-    invalidLen = minlen > maxlen || minlen <= 0
+genClause (minlen,maxlen) lits = do
+    genLits <- genForBasic (minlen,maxlen) lits
+    pure (Clause genLits)
 
-    generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
-    generateLiterals usedLits xs len
-        | Set.size xs == len = pure xs
-        | otherwise = do
-            literal <- genLiteral usedLits
-            let
-              restLits = delete (letter literal) usedLits
-              newSet = Set.insert literal xs
-            generateLiterals restLits newSet len
 
 
 -- | A shorthand representing an allocation.
@@ -411,26 +396,9 @@ instance Arbitrary Con where
 -- | Generates a random conjunction. The length of the generated conjunction lies in the given length bounds.
 --   The used atomic formulae are drawn from the list of chars.
 genCon :: (Int,Int) -> [Char] -> Gen Con
-genCon (minlen,maxlen) lits
-    | null lits || minlen > length nLits || invalidLen = pure (Con empty)
-    | otherwise = do
-        len <- choose (minlen,minimum [length nLits, maxlen])
-        genLits <- generateLiterals nLits empty len
+genCon (minlen,maxlen) lits = do
+        genLits <- genForBasic (minlen,maxlen) lits
         pure (Con genLits)
-  where
-    nLits = nub lits
-    invalidLen = minlen > maxlen || minlen <= 0
-
-    generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
-    generateLiterals usedLits xs len
-        | Set.size xs == len = pure xs
-        | otherwise = do
-            literal <- genLiteral usedLits
-            let
-              restLits = delete (letter literal) usedLits
-              newSet = Set.insert literal xs
-            generateLiterals restLits newSet len
-
 
 
 --------------------------------------------------------------
@@ -666,6 +634,28 @@ terms :: PrologClause -> [PrologLiteral]
 terms (PrologClause set) = Set.toList set
 
 -------------------------------------------------------------
+
+genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
+genForBasic (minlen,maxlen) lits
+    | null lits || minlen > length nLits || invalidLen = pure empty
+    | otherwise = do
+        len <- choose (minlen,minimum [length nLits, maxlen])
+        generateLiterals nLits empty len
+  where
+    nLits = nub lits
+    invalidLen = minlen > maxlen || minlen <= 0
+
+    generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
+    generateLiterals usedLits xs len
+        | Set.size xs == len = pure xs
+        | otherwise = do
+            literal <- genLiteral usedLits
+            let
+              restLits = delete (letter literal) usedLits
+              newSet = Set.insert literal xs
+            generateLiterals restLits newSet len
+
+
 
 
 genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
