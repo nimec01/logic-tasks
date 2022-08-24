@@ -33,7 +33,7 @@ generateLegalCNFInst lCConfig@LegalCNFConfig {cnfConfig = CnfConfig{baseConf = B
 
 
 genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
-genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause formulasList lCConfig@LegalCNFConfig{..} = do
+genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause formulasList lCConfig@LegalCNFConfig{..} =
     mapM (\serial -> genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause lCConfig serial `suchThat` checkSize maxStringSize minStringSize) formulasList
 
 genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)

@@ -52,10 +52,10 @@ invalidBoundsLegalProposition = do
         }
 
 illegaltest :: [Int] -> [String] -> Bool
-illegaltest xs strings = and (map (\ x -> isLeft (formulaParse (strings !! (x - 1)))) xs)
+illegaltest xs strings = all (\ x -> isLeft (formulaParse (strings !! (x - 1)))) xs
 
 legaltest :: [Int] -> [String] -> Bool
-legaltest xs strings = and (map (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs)
+legaltest xs strings = all (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs
 
 transferSetIntToString :: Set Int -> String
 transferSetIntToString setInt ="{" ++ intercalate "," (map show (toList setInt)) ++ "}"

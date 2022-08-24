@@ -89,10 +89,10 @@ invalidBoundsLegalCNF = do
         }
 
 illegaltest :: [Int] -> [String] -> Bool
-illegaltest xs strings = and (map (\ x -> isLeft (cnfParse (strings !! (x - 1)))) xs)
+illegaltest xs strings = all (\ x -> isLeft (cnfParse (strings !! (x - 1)))) xs
 
 legaltest :: [Int] -> [String] -> Bool
-legaltest xs strings = and (map (\ x -> isRight (cnfParse (strings !! (x - 1)))) xs)
+legaltest xs strings = all (\ x -> isRight (cnfParse (strings !! (x - 1)))) xs
 
 spec :: Spec
 spec = do
@@ -111,7 +111,7 @@ spec = do
         it "the syntax Tree are CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll (genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) $ \synTree -> judgeCNFSynTree synTree
-    describe "generateLegalCNFInst" $ do
+    describe "generateLegalCNFInst" $
         it "all of the formulas in the woring serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig ->
                 forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> illegaltest (toList serialsOfWrong) formulaStrings
