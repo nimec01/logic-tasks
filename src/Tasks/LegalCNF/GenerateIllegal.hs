@@ -82,7 +82,7 @@ genIllegalClauseShape ifFirstlayer ors = do
     else genIllegalShapeInSubTree ors (genIllegalClauseShape False) Or
 
 legalClauseShape :: Int -> SynTree BinOp ()
-legalClauseShape ors = legalShape ors Or
+legalClauseShape = legalShape Or
 
 genIllegalCNFShape :: Int -> Gen (SynTree BinOp ())
 genIllegalCNFShape 0 = error "impossible"
@@ -94,7 +94,7 @@ genIllegalCNFShape ands = do
     else genIllegalShapeInSubTree ands genIllegalCNFShape And
 
 legalCNFShape :: Int -> SynTree BinOp ()
-legalCNFShape ands = legalShape ands And
+legalCNFShape = legalShape And
 
 genIllegalOper :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
 genIllegalOper recF opers restOpers =
@@ -103,5 +103,5 @@ genIllegalOper recF opers restOpers =
         leftOpers <- choose (0, restOpers - 1)
         return (Binary errorOper (recF leftOpers) (recF (restOpers - 1 - leftOpers)))
 
-legalShape :: Int -> BinOp -> SynTree BinOp ()
-legalShape opers oper = foldr (Binary oper . Leaf) (Leaf ()) (replicate opers ())
+legalShape :: BinOp -> Int -> SynTree BinOp ()
+legalShape oper opers = foldr (Binary oper . Leaf) (Leaf ()) (replicate opers ())
