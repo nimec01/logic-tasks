@@ -180,7 +180,7 @@ partEvalClause (Clause set) x
               else if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
     | otherwise = Right (Clause set)
   where
-    (next,negNext,isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
+    (isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
 
 
 
@@ -371,7 +371,7 @@ partEvalCon (Con set) x
               else if isIn then Left False else Right (Con setWithoutNeg)
     | otherwise = Right (Con set)
   where
-    (next,negNext,isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
+    (isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
 
 
 
@@ -627,8 +627,8 @@ terms (PrologClause set) = Set.toList set
 
 -- Helpers to reduce duplicate code
 
-partEvalHelper :: Set Literal -> (Literal,Bool) -> (Literal,Literal,Bool,Bool,Set Literal, Set Literal)
-partEvalHelper set x = (next,negNext,isIn,negIsIn,setWithout,setWithoutNeg)
+partEvalHelper :: Set Literal -> (Literal,Bool) -> (Bool,Bool,Set Literal, Set Literal)
+partEvalHelper set x = (isIn,negIsIn,setWithout,setWithoutNeg)
   where
     next = fst x
     negNext = opposite next
