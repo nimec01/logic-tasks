@@ -6,9 +6,6 @@ import qualified Control.Exception as Exc (evaluate)
 import Test.Hspec
 import Test.QuickCheck
 import LogicTasks.Formula
-import qualified Data.Set as Set
-import Data.Set (empty,Set)
-import Data.List (nub)
 
 
 

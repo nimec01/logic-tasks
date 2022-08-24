@@ -1,8 +1,5 @@
 module TableSpec where
 
-import Data.Set (Set,empty)
-import Data.Maybe (isNothing,fromJust)
-import qualified Control.Exception as Exc(evaluate)
 import Test.Hspec
 import Test.QuickCheck
 import LogicTasks.Formula

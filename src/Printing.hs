@@ -11,7 +11,7 @@ import Types
 
 import Data.List (intercalate, intersperse, nub)
 import Data.Text.Lazy (pack)
-import qualified Data.Set as Set (null, fromList)
+import qualified Data.Set as Set (null)
 
 import Text.PrettyPrint.Leijen.Text
 
