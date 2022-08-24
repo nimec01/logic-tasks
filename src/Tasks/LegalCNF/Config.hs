@@ -75,10 +75,10 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = Just "The formulas used to generate special formula is not enough"
     | externalGenFormulas > 0 && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
       = Just "The minimum Number of ClauseAmount is too big and the external generator can not generate such CNF "
-    | minStringSize < 0
+    | minStringSize <= 0
       = Just "Can not generate String with such minStringSize"
     | maxStringSize < minStringSize
-      = Just "maxStringSize must larger than minStringSize"
+      = Just "The maxmun length of formula string can not less than the minimun length of formula string"
     | otherwise
       = Nothing
 
