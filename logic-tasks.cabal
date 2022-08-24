@@ -37,7 +37,7 @@ library
       Paths_logic_tasks
   hs-source-dirs:
       src
-  ghc-options: -Wall
+  ghc-options: -Wall -fno-warn-unused-do-bind
   build-depends:
       QuickCheck >=2.14
     , base >=4.7 && <5
