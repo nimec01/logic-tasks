@@ -33,18 +33,18 @@ generateLegalCNFInst lCConfig@LegalCNFConfig {cnfConfig = CnfConfig{baseConf = B
 
 
 genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
-genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause formulasList lCConfig = do
-    mapM (genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause lCConfig) formulasList
+genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause formulasList lCConfig@LegalCNFConfig{..} = do
+    mapM (\serial -> genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause lCConfig serial `suchThat` checkSize maxStringSize minStringSize) formulasList
 
 genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)
 genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} serial
-    | serial `elem` serialsOfWrong = genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals `suchThat` checkSize maxStringSize minStringSize
+    | serial `elem` serialsOfWrong = genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     | serial `elem` serialsOfExternal = do
-        cnf <- genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals `suchThat` \cnf -> checkSize maxStringSize minStringSize (transferCnfToSyntree cnf)
+        cnf <- genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
         return (transferCnfToSyntree cnf)
-    | serial `elem` serialsOfJustOneClause = genSynTreeWithCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals `suchThat` checkSize maxStringSize minStringSize
-    | serial `elem` serialsOfJustOneLiteralPerClause = genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals `suchThat` checkSize maxStringSize minStringSize
-    | otherwise = genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals `suchThat` checkSize maxStringSize minStringSize
+    | serial `elem` serialsOfJustOneClause = genSynTreeWithCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals
+    | serial `elem` serialsOfJustOneLiteralPerClause = genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals
+    | otherwise = genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 checkSize :: Int -> Int -> SynTree BinOp Char -> Bool
 checkSize maxStringSize minStringSize synTree = let stringLength = length (simplestDisplay synTree) in stringLength <= maxStringSize && stringLength >= minStringSize
