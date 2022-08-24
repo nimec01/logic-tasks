@@ -12,7 +12,6 @@ import Text.ParserCombinators.Parsec
 
 
 
-
 instance Parse ResStep where
 
   parser = do
@@ -227,12 +226,12 @@ instance Parse PickInst where
     where
       instParse = do
         string "PickInst("
-        cnfs <- parser
+        cs <- parser
         withSpaces ','
         index <- trailSpaces $ many1 digit
         text <- optionMaybe $ trailSpaces bonusText
         char ')'
-        pure $ PickInst cnfs (read index) text
+        pure $ PickInst cs (read index) text
           where
             bonusText = between start (char '}') $ many1 $ satisfy ( /= '}')
             start = do
