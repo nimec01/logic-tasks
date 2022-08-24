@@ -1,7 +1,8 @@
 module Tasks.LegalCNF.GenerateLegal (
   genSynTreeWithCnf,
   genClause,
-  genLiteral
+  genLiteral,
+  genClauseList
 ) where
 
 import Test.QuickCheck (choose, Gen, suchThat, elements)
@@ -24,6 +25,11 @@ genClause (minClauseLength, maxClauseLength) usedLiterals = do
     literals <- choose (minClauseLength, maxClauseLength)
     clause <- vectorOf literals (genLiteral usedLiterals) `suchThat` \clause -> listNoDuplicate clause
     return (Setform.Clause (fromList clause))
+
+genClauseList :: (Int,Int) -> (Int,Int) -> [Char] -> Gen [Setform.Clause]
+genClauseList (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
+  clauses <- choose (minClauseAmount, maxClauseAmount)
+  vectorOf clauses (genClause (minClauseLength, maxClauseLength) usedLiterals) `suchThat` \cnf -> listNoDuplicate cnf
 
 genSynTreeWithCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do

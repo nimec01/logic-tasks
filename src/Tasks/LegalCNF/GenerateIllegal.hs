@@ -1,16 +1,15 @@
 module Tasks.LegalCNF.GenerateIllegal (
   genIllegalSynTree,
-  genCNFWithOneIllegalClause
 ) where
 
 import Test.QuickCheck (choose, Gen, suchThat, elements, frequency)
 import Test.QuickCheck.Gen (vectorOf, oneof)
 import qualified Types as Setform
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
-import Data.Set (toList)
-import Trees.Helpers(relabelShape, transferLiteral, transferClause)
+import Data.Set (toList, size, fromList)
+import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves, transferCnfToSyntree)
 import Data.List((\\), sort)
-import Tasks.LegalCNF.GenerateLegal (genClause, genLiteral, genSynTreeWithCnf)
+import Tasks.LegalCNF.GenerateLegal (genClause, genLiteral, genClauseList)
 import Auxiliary(listNoDuplicate)
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
@@ -30,18 +29,22 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
             genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1)
 
 genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Gen (SynTree BinOp Char)
-genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals 0 = illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
-genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands = do
-    ifUseError <- frequency [(1, return True), (ands, return False)]
-    if ifUseError
-    then do
-        illegalClause <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
-        legalSubTree <- genSynTreeWithCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
-        return (Binary And illegalClause legalSubTree)
-    else do
-        legalClause <- legalCluaseTree (minClauseLength, maxClauseLength) usedLiterals
-        illegalSubTree <- genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (ands - 1)
-        return (Binary And legalClause illegalSubTree)
+genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
+    | ands == 0 = illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
+    | otherwise = do
+        clauseList <- genClauseList (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
+        illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
+        let illLength = length (collectLeaves illegalTree)
+        return (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
+
+genTreeWithListAndIllegal :: [Setform.Clause] -> Maybe (SynTree BinOp Char) -> Int -> SynTree BinOp Char
+genTreeWithListAndIllegal [clause] Nothing _ = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
+genTreeWithListAndIllegal [clause] (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause) then Binary And illegalTree (genTreeWithListAndIllegal [clause] Nothing illLength) else Binary And (genTreeWithListAndIllegal [clause] Nothing illLength) illegalTree
+genTreeWithListAndIllegal clauseList Nothing _ = transferCnfToSyntree (Setform.Cnf (fromList clauseList))
+genTreeWithListAndIllegal (clause:clauseList) (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause)
+                                                                             then Binary And illegalTree (genTreeWithListAndIllegal (clause:clauseList) Nothing illLength)
+                                                                             else Binary And (transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))) (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
+genTreeWithListAndIllegal _ _ _ = error "will not occured"
 
 genLegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
 genLegalClauses (minClauseLength, maxClauseLength) usedLiterals (Not a) = Not <$> genLegalClauses (minClauseLength, maxClauseLength) usedLiterals a
