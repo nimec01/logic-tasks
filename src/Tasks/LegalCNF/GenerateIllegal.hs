@@ -35,7 +35,7 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
         clauseList <- genClauseList (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
         let illLength = length (collectLeaves illegalTree)
-        return (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
+        return (genTreeWithListAndIllegal (sort clauseList) (Just illegalTree) illLength)
 
 genTreeWithListAndIllegal :: [Setform.Clause] -> Maybe (SynTree BinOp Char) -> Int -> SynTree BinOp Char
 genTreeWithListAndIllegal [clause] Nothing _ = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
