@@ -52,7 +52,10 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = Just "maxClauseLength can not less than minClauseLength"
     | (maxClauseLength > 2 * length usedLiterals) || (externalGenFormulas > 0 && maxClauseLength > length usedLiterals)
       = Just "The Used Literal can not generate a Clause with maxClauseLength"
-    | maxClauses 15 (fromIntegral maxClauseLength) (2 * fromIntegral (length usedLiterals)) (fromIntegral maxClauseAmount) || (externalGenFormulas > 0 && maxClauses 15 (fromIntegral maxClauseLength) (fromIntegral (length usedLiterals)) (fromIntegral maxClauseAmount))
+    | let limit beginNumber = product (take maxClauseLength (reverse [1 .. beginNumber :: Integer])),
+      let literalLength = fromIntegral (length usedLiterals),
+      fromIntegral maxClauseAmount > min 15 (limit (2 * literalLength))
+    || externalGenFormulas > 0 && fromIntegral maxClauseAmount > min 15 (limit literalLength)
       = Just "The maxClauseAmount is too big and have the risk contain same Clauses in the CNF"
     | fromIntegral formulas > (fromIntegral (maxClauseLength - minClauseLength + 1) ^ (fromIntegral (maxClauseAmount - minClauseAmount + 1) :: Integer)) `div` (2 :: Integer) + 1
       = Just  "Formulas is too big and have risk to generate similar CNF"
@@ -70,9 +73,6 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = Just "The minimum Number of ClauseAmount is too big and the external generator can not generate such CNF "
     | otherwise
       = Nothing
-
-maxClauses :: Integer -> Integer -> Integer -> Integer -> Bool
-maxClauses maxBoundary listLength beginNumber maxClauseAmount = maxClauseAmount > min maxBoundary (product (take (fromIntegral listLength) (reverse [1 .. beginNumber])))
 
 lengthBound :: Int -> Int -> (Int, Int) -> Int --This function is in the logic Type when generate cnf
 lengthBound 1 len (_,_)= 2*len
