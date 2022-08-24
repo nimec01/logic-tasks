@@ -35,7 +35,7 @@ import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
 import Data.Either(rights)
-import Data.List(intercalate, intersperse, delete, nub, transpose)
+import Data.List(intercalate, delete, nub, transpose)
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
@@ -320,24 +320,11 @@ instance Arbitrary Cnf where
 --   The used atomic formulae are drawn from the list of chars.
 
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) lits
-    | null nLits || invalidLen || invalidNum = pure (Cnf empty)
-    | otherwise = do
-        num <- choose (minNum, minimum [maxNum,upperBound])
-        cnf <- generateClauses nLits empty num
-        pure (Cnf cnf)
+genCnf (minNum,maxNum) (minLen,maxLen) lits = do
+    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
+    cnf <- generateClauses nLits empty num
+    pure (Cnf cnf)
   where
-    nLits = nub lits
-    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
-    invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    lengthBound 1 len = 2*len
-    lengthBound n len
-        | n == maxLen && n == minLen = 2^n
-        | n == minLen = 2^n * len
-        | n == len = 2^n + lengthBound (n-1) len
-        | otherwise = 2^n * len + lengthBound (n-1) len
-    upperBound = lengthBound maxLen (length nLits)
-
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
     generateClauses usedLits set num
         | Set.size set == num = pure set
@@ -540,24 +527,11 @@ instance Arbitrary Dnf where
 --   The used atomic formulae are drawn from the list of chars.
 
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) lits
-    | null nLits || invalidLen || invalidNum = pure (Dnf empty)
-    | otherwise = do
-        num <- choose (minNum, minimum [maxNum,upperBound])
-        dnf <- generateCons nLits empty num
-        pure (Dnf dnf)
+genDnf (minNum,maxNum) (minLen,maxLen) lits = do
+    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
+    dnf <- generateCons nLits empty num
+    pure (Dnf dnf)
   where
-    nLits = nub lits
-    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
-    invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    lengthBound 1 len = 2*len
-    lengthBound n len
-        | n == maxLen && n == minLen = 2^n
-        | n == minLen = 2^n * len
-        | n == len = 2^n + lengthBound (n-1) len
-        | otherwise = 2^n * len + lengthBound (n-1) len
-    upperBound = lengthBound maxLen (length nLits)
-
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
     generateCons usedLits set num
         | Set.size set == num = pure set
@@ -683,10 +657,32 @@ newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (E
 instance Show PrologClause where
   show pc
     | null lits = "{ }"
-    | otherwise = concat $ intersperse (" \\/ ") $ map show lits
+    | otherwise = intercalate " \\/ " $ map show lits
     where lits = terms pc
 
 
 
 terms :: PrologClause -> [PrologLiteral]
 terms (PrologClause set) = Set.toList set
+
+-------------------------------------------------------------
+
+
+genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
+genForNF (minNum,maxNum) (minLen,maxLen) lits
+    | null nLits || invalidLen || invalidNum = pure (0, [])
+    | otherwise = do
+      num <- choose (minNum, minimum [maxNum,upperBound])
+      pure (num, nLits)
+  where
+    nLits = nub lits
+    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
+    invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
+    lengthBound 1 len = 2*len
+    lengthBound n len
+        | n == maxLen && n == minLen = 2^n
+        | n == minLen = 2^n * len
+        | n == len = 2^n + lengthBound (n-1) len
+        | otherwise = 2^n * len + lengthBound (n-1) len
+    upperBound = lengthBound maxLen (length nLits)
+

@@ -190,7 +190,7 @@ completeGrade ResolutionInst{..} sol =
                      german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
                      english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
 
-        Just solClauses -> if (any isEmptyClause solClauses)
+        Just solClauses -> if any isEmptyClause solClauses
                             then pure()
                             else refuse $ indent $ translate $ do
                                    german "Die Leere Klausel wurde nicht korrekt abgeleitet."
