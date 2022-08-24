@@ -7,9 +7,9 @@ import Test.QuickCheck.Gen (vectorOf, oneof)
 import qualified Types as Setform
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList)
-import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves)
-import Data.List((\\))
-import Tasks.LegalCNF.GenerateLegal (genClause, genLiteral)
+import Trees.Helpers(relabelShape, transferLiteral, transferClause)
+import Data.List((\\), sort)
+import Tasks.LegalCNF.GenerateLegal (genClause, genLiteral, genSynTreeWithCnf)
 import Auxiliary(listNoDuplicate)
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
@@ -26,21 +26,21 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
             genLegalClauses (minClauseLength, maxClauseLength) usedLiterals firstSyntaxShape
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
-            firstSyntaxShape <- genLegalCNFShape (clauses - 1)
-            genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals firstSyntaxShape
+            genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1)
 
-genIllegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
-genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals (Binary And a b) = do
-    let leftNodes = length (collectLeaves a)
-        rightNodes = length (collectLeaves b)
-    (illegalShape, legalShape) <- frequency [(leftNodes, return (a,b)), (rightNodes, return (b,a))]
-    illegalSubTree <- genIllegalClauses (minClauseLength, maxClauseLength) usedLiterals illegalShape
-    legalSubTree <- genLegalClauses (minClauseLength, maxClauseLength) usedLiterals legalShape
-    node <- elements [Binary And, flip (Binary And)]
-    return (node illegalSubTree legalSubTree)
-genIllegalClauses len usedLiterals (Leaf ()) = illegalClauseTree len usedLiterals
-genIllegalClauses _ _ (Binary _ _ _) = error "except for And, will never happen"
-genIllegalClauses _ _ (Not _) = error "will never happen"
+genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Gen (SynTree BinOp Char)
+genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals 0 = illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
+genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands = do
+    ifUseError <- frequency [(1, return True), (ands, return False)]
+    if ifUseError
+    then do
+        illegalClause <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
+        legalSubTree <- genSynTreeWithCnf (ands + 1, ands + 1) (minClauseLength, maxClauseLength) usedLiterals
+        return (Binary And illegalClause legalSubTree)
+    else do
+        legalClause <- legalCluaseTree (minClauseLength, maxClauseLength) usedLiterals
+        illegalSubTree <- genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (ands - 1)
+        return (Binary And legalClause illegalSubTree)
 
 genLegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
 genLegalClauses (minClauseLength, maxClauseLength) usedLiterals (Not a) = Not <$> genLegalClauses (minClauseLength, maxClauseLength) usedLiterals a
@@ -60,51 +60,44 @@ legalCluaseTree (minClauseLength, maxClauseLength) usedLiterals = do
 illegalClauseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do
     len <- choose (max 2 minClauseLength, maxClauseLength)
-    illegalSynTreeShape <- illegalClauseShape True (len - 1)
+    illegalSynTreeShape <- genIllegalClauseShape True (len - 1)
     leaves <- vectorOf len (genLiteral usedLiterals) `suchThat` listNoDuplicate
-    return (transferLiteral (relabelShape illegalSynTreeShape leaves))
+    return (transferLiteral (relabelShape illegalSynTreeShape (sort leaves)))
 
-illegalClauseShape :: Bool -> Int -> Gen (SynTree BinOp ())
-illegalClauseShape _ 0 = error "impossible"
-illegalClauseShape ifFirstlayer ors = do
+genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp ())) -> BinOp -> Gen (SynTree BinOp ())
+genIllegalShapeInSubTree opers illegalFunc oper = do
+    opersIllegalSide <- choose (1, opers - 1)
+    node <- elements [Binary oper, flip (Binary oper)]
+    illegalSubTree <- illegalFunc opersIllegalSide
+    return (node illegalSubTree (legalClauseShape (opers - 1 - opersIllegalSide)))
+
+
+genIllegalClauseShape :: Bool -> Int -> Gen (SynTree BinOp ())
+genIllegalClauseShape _ 0 = error "impossible"
+genIllegalClauseShape ifFirstlayer ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
-    then oneof [Not <$> legalClauseShape ors, genIllegalOper legalClauseShape (if ifFirstlayer then [Equi, Impl] else [Equi, Impl, And]) ors]
-    else do
-        orsIllegalSide <- choose (1, ors - 1)
-        illegalSubTree <- illegalClauseShape False orsIllegalSide
-        legalSubTree <- legalClauseShape (ors - 1 - orsIllegalSide)
-        node <- elements [Binary Or, flip (Binary Or)]
-        return (node illegalSubTree legalSubTree)
+    then oneof [return (Not (legalClauseShape ors)), genIllegalOper legalClauseShape (if ifFirstlayer then [Equi, Impl] else [Equi, Impl, And]) ors]
+    else genIllegalShapeInSubTree ors (genIllegalClauseShape False) Or
 
-legalClauseShape :: Int -> Gen (SynTree BinOp ())
-legalClauseShape 0 = return (Leaf ())
-legalClauseShape ors =  Binary Or (Leaf ()) <$> legalClauseShape (ors - 1)
-
+legalClauseShape :: Int -> SynTree BinOp ()
+legalClauseShape ors = foldr (Binary Or . Leaf) (Leaf ()) (replicate ors ())
 
 genIllegalCNFShape :: Int -> Gen (SynTree BinOp ())
 genIllegalCNFShape 0 = error "impossible"
-genIllegalCNFShape 1 = oneof [Not <$> genLegalCNFShape 1, genIllegalOper genLegalCNFShape (allBinaryOperators \\ [And, Or]) 1]
+genIllegalCNFShape 1 = oneof [return (Not (legalCNFShape 1)), genIllegalOper legalCNFShape (allBinaryOperators \\ [And, Or]) 1]
 genIllegalCNFShape ands = do
     ifUseError <- frequency[(1, return True), (ands - 1, return False)]
     if ifUseError
-    then oneof [Not <$> genLegalCNFShape ands, genIllegalOper genLegalCNFShape (allBinaryOperators \\ [And]) ands]
-    else do
-        andsIllegalSide <- choose (1, ands - 1)
-        illegalSubTree <- genIllegalCNFShape andsIllegalSide
-        legalSubTree <- genLegalCNFShape (ands - 1 - andsIllegalSide)
-        node <- elements [Binary And, flip (Binary And)]
-        return (node illegalSubTree legalSubTree)
+    then oneof [return (Not (legalCNFShape ands)), genIllegalOper legalCNFShape (allBinaryOperators \\ [And]) ands]
+    else genIllegalShapeInSubTree ands genIllegalCNFShape And
 
-genLegalCNFShape :: Int -> Gen (SynTree BinOp ())
-genLegalCNFShape 0 = return (Leaf ())
-genLegalCNFShape ands = Binary And (Leaf ()) <$> genLegalCNFShape (ands - 1)
+legalCNFShape :: Int -> SynTree BinOp ()
+legalCNFShape ands = foldr (Binary And . Leaf) (Leaf ()) (replicate ands ())
 
-genIllegalOper :: (Int -> Gen (SynTree BinOp ())) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
+genIllegalOper :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
 genIllegalOper recF opers restOpers =
     do
         errorOper <- elements opers
         leftOpers <- choose (0, restOpers - 1)
-        leftSubTree <- recF leftOpers
-        rightSubTree <- recF (restOpers - 1 - leftOpers)
-        return (Binary errorOper leftSubTree rightSubTree)
+        return (Binary errorOper (recF leftOpers) (recF (restOpers - 1 - leftOpers)))

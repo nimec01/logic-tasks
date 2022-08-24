@@ -38,6 +38,8 @@ determineLegalCNFConfig = do
     externalGenFormulas' <- offerChange "externalGenFormulas" externalGenFormulas
     includeFormWithJustOneClause' <- offerChange "includeFormWithJustOneClause" includeFormWithJustOneClause
     includeFormWithJustOneLiteralPerClause' <- offerChange "includeFormWithJustOneLiteralPerClause" includeFormWithJustOneLiteralPerClause
+    maxStringSize' <- offerChange "maxStringSize" maxStringSize
+    minStringSize' <- offerChange "minStringSize" minStringSize
     let newBaseConfig = baseConf {minClauseLength = minClauseLength', maxClauseLength = maxClauseLength', usedLiterals = usedLiterals'}
         newCNFConfig = cnfConfig {baseConf = newBaseConfig, minClauseAmount = minClauseAmount', maxClauseAmount = maxClauseAmount'}
         newConfig = defaultLegalCNFConfig{
@@ -46,7 +48,9 @@ determineLegalCNFConfig = do
           , cnfConfig = newCNFConfig
           , includeFormWithJustOneLiteralPerClause = includeFormWithJustOneLiteralPerClause'
           , includeFormWithJustOneClause = includeFormWithJustOneClause'
-          , externalGenFormulas = externalGenFormulas'}
+          , externalGenFormulas = externalGenFormulas'
+          , maxStringSize = maxStringSize'
+          , minStringSize = minStringSize'}
     case checkLegalCNFConfig newConfig of
       Nothing ->
         return newConfig

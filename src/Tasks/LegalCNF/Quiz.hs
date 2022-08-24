@@ -28,7 +28,9 @@ generateLegalCNFInst lCConfig@LegalCNFConfig {cnfConfig = CnfConfig{baseConf = B
     serialsOfJustOneClause <- vectorOf (if includeFormWithJustOneClause then 1 else 0) (elements serial2)
     let serial3 = serial2 \\ serialsOfJustOneClause
     serialsOfJustOneLiteralPerClause <- vectorOf (if includeFormWithJustOneLiteralPerClause then 1 else 0) (elements serial3)
-    treeList <- genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause [1.. formulas] lCConfig `suchThat` \treeList -> let treeList' = map (fmap (const 'a')) treeList in listNoDuplicate (map simplestDisplay treeList')
+    treeList <- genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause [1.. formulas] lCConfig `suchThat` \treeList -> let treeList' = map (fmap (const 'a')) treeList
+                                                                                                                                                                            strings = map simplestDisplay treeList'
+                                                                                                                                                                        in listNoDuplicate strings && and (map (checkSize maxStringSize minStringSize) strings)
     return $ LegalCNFInst {serialsOfWrong = fromList serialsOfWrong, formulaStrings = map simplestDisplay treeList}
 
 
@@ -45,6 +47,9 @@ genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause ser
     | serial `elem` serialsOfJustOneClause = genSynTreeWithCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals
     | serial `elem` serialsOfJustOneLiteralPerClause = genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals
     | otherwise = genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+
+checkSize :: Int -> Int -> String -> Bool
+checkSize maxStringSize minStringSize formula = let stringLength = length formula in stringLength <= maxStringSize && stringLength >= minStringSize
 
 feedback :: LegalCNFInst -> String -> Bool
 feedback LegalCNFInst {serialsOfWrong} input = illegalPropositionStringParse input == Right serialsOfWrong

@@ -50,7 +50,9 @@ validBoundsLegalCNF = do
           illegals,
           includeFormWithJustOneClause,
           includeFormWithJustOneLiteralPerClause,
-          externalGenFormulas
+          externalGenFormulas,
+          maxStringSize = 1000,
+          minStringSize = 1
         }
 
 invalidBoundsLegalCNF :: Gen LegalCNFConfig
@@ -64,6 +66,8 @@ invalidBoundsLegalCNF = do
     formulas <- choose (-10, max 15 (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1))
     illegals <- choose (-5, -1)
     externalGenFormulas <- choose (-10, 100)
+    minStringSize <- choose (minClauseLength * (2 + minClauseAmount), 300)
+    maxStringSize <- choose (1, minStringSize)
     return $ LegalCNFConfig
         {
           cnfConfig = CnfConfig{
@@ -79,7 +83,9 @@ invalidBoundsLegalCNF = do
           illegals,
           includeFormWithJustOneClause = True,
           includeFormWithJustOneLiteralPerClause = False,
-          externalGenFormulas
+          externalGenFormulas,
+          maxStringSize,
+          minStringSize
         }
 
 illegaltest :: [Int] -> [String] -> Bool

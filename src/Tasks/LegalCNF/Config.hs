@@ -24,6 +24,8 @@ data LegalCNFConfig =
     , illegals :: Int
     , includeFormWithJustOneClause :: Bool
     , includeFormWithJustOneLiteralPerClause :: Bool
+    , maxStringSize :: Int
+    , minStringSize :: Int
   } deriving Show
 
 defaultLegalCNFConfig :: LegalCNFConfig
@@ -36,6 +38,8 @@ defaultLegalCNFConfig =
   , illegals = 2
   , includeFormWithJustOneClause = False
   , includeFormWithJustOneLiteralPerClause = True
+  , maxStringSize = 30
+  , minStringSize = 4
   }
 
 checkLegalCNFConfig :: LegalCNFConfig -> Maybe String
@@ -71,6 +75,10 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = Just "The formulas used to generate special formula is not enough"
     | externalGenFormulas > 0 && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
       = Just "The minimum Number of ClauseAmount is too big and the external generator can not generate such CNF "
+    | minStringSize < 0
+      = Just "Can not generate String with such minStringSize"
+    | maxStringSize < minStringSize
+      = Just "maxStringSize must larger than minStringSize"
     | otherwise
       = Nothing
 
