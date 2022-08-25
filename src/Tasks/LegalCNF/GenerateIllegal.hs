@@ -47,24 +47,10 @@ genTreeWithListAndIllegal [x] = x
 genTreeWithListAndIllegal (x:xs) = Binary And x (genTreeWithListAndIllegal xs)
 genTreeWithListAndIllegal _ = error "will not occured"
 
-
--- genTreeWithListAndIllegal :: [Setform.Clause] -> Maybe (SynTree BinOp Char) -> Int -> SynTree BinOp Char
--- genTreeWithListAndIllegal [clause] Nothing _ = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
--- genTreeWithListAndIllegal [clause] (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause) then Binary And illegalTree (genTreeWithListAndIllegal [clause] Nothing illLength) else Binary And (genTreeWithListAndIllegal [clause] Nothing illLength) illegalTree
--- genTreeWithListAndIllegal clauseList Nothing _ = transferCnfToSyntree (Setform.Cnf (fromList clauseList))
--- genTreeWithListAndIllegal (clause:clauseList) (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause)
---                                                                              then Binary And illegalTree (genTreeWithListAndIllegal (clause:clauseList) Nothing illLength)
---                                                                              else Binary And (transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))) (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
--- genTreeWithListAndIllegal _ _ _ = error "will not occured"
-
 genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
-genIllegalCNF (Binary oper a b) clauseList =
-    let leftNodes = length (collectLeaves a)
-        leftList = take leftNodes clauseList
-    in Binary oper (genIllegalCNF a leftList) (genIllegalCNF b (clauseList \\ leftList))
-genIllegalCNF (Not a) clauseList = Not (genIllegalCNF a clauseList)
-genIllegalCNF (Leaf ()) [clause] = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
-genIllegalCNF _ _ = error "will not occured"
+genIllegalCNF treeShape clauses = let clauses' = map (toList . Setform.literalSet) clauses
+                                      tree = relabelShape treeShape clauses'
+                                  in  transferLiteral (transferClause tree)
 
 illegalClauseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do

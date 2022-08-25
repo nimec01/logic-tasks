@@ -121,10 +121,13 @@ transferCnf (a:cnfList) = Binary And (Leaf a) (transferCnf cnfList)
 transferCnf [] = error "size of the list should be positive"
 
 transferClause :: SynTree BinOp [Setform.Literal] -> SynTree BinOp Setform.Literal
-transferClause (Binary And a b) = Binary And (transferClause a) (transferClause b)
+transferClause (Binary oper a b) = Binary oper (transferClause a) (transferClause b)
+transferClause (Not a) = Not (transferClause a)
 transferClause (Leaf [a]) = Leaf a
 transferClause (Leaf (a:clauseList)) = Binary Or (Leaf a) (transferClause (Leaf clauseList))
 transferClause _ = error "no such cases"
+
+
 
 transferLiteral :: SynTree BinOp Setform.Literal -> SynTree BinOp Char
 transferLiteral (Binary oper a b) = Binary oper (transferLiteral a) (transferLiteral b)
