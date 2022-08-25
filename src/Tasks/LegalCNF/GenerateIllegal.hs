@@ -40,7 +40,7 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
             (first, second) = span (\(Clause clause) -> illLength >= size clause) (sort clauseList)
             headTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) first
             tailTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) second
-        return (foldl1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
+        return (foldr1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
 
 genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
 genIllegalCNF treeShape clauses = let clauses' = map (toList . Setform.literalSet) clauses
