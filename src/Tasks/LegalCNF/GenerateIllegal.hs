@@ -6,11 +6,12 @@ import Test.QuickCheck (choose, Gen, suchThat, elements, frequency)
 import Test.QuickCheck.Gen (vectorOf, oneof)
 import qualified Types as Setform
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
-import Data.Set (toList, size, fromList)
-import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves, transferCnfToSyntree)
+import Data.Set (toList, size)
+import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves)
 import Data.List((\\), sort)
 import Tasks.LegalCNF.GenerateLegal (genLiteral, genClauseList)
 import Auxiliary(listNoDuplicate)
+import Types (Clause(Clause))
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
@@ -36,16 +37,25 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
         clauseList <- genClauseList (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
         let illLength = length (collectLeaves illegalTree)
-        return (genTreeWithListAndIllegal (sort clauseList) (Just illegalTree) illLength)
+            (first, second) = span (\(Clause clause) -> illLength >= size clause) (sort clauseList)
+            headTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) first
+            tailTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) second
+        return (genTreeWithListAndIllegal (headTrees ++ (illegalTree : tailTrees)))
 
-genTreeWithListAndIllegal :: [Setform.Clause] -> Maybe (SynTree BinOp Char) -> Int -> SynTree BinOp Char
-genTreeWithListAndIllegal [clause] Nothing _ = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
-genTreeWithListAndIllegal [clause] (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause) then Binary And illegalTree (genTreeWithListAndIllegal [clause] Nothing illLength) else Binary And (genTreeWithListAndIllegal [clause] Nothing illLength) illegalTree
-genTreeWithListAndIllegal clauseList Nothing _ = transferCnfToSyntree (Setform.Cnf (fromList clauseList))
-genTreeWithListAndIllegal (clause:clauseList) (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause)
-                                                                             then Binary And illegalTree (genTreeWithListAndIllegal (clause:clauseList) Nothing illLength)
-                                                                             else Binary And (transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))) (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
-genTreeWithListAndIllegal _ _ _ = error "will not occured"
+genTreeWithListAndIllegal :: [SynTree BinOp Char] -> SynTree BinOp Char
+genTreeWithListAndIllegal [x] = x
+genTreeWithListAndIllegal (x:xs) = Binary And x (genTreeWithListAndIllegal xs)
+genTreeWithListAndIllegal _ = error "will not occured"
+
+
+-- genTreeWithListAndIllegal :: [Setform.Clause] -> Maybe (SynTree BinOp Char) -> Int -> SynTree BinOp Char
+-- genTreeWithListAndIllegal [clause] Nothing _ = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
+-- genTreeWithListAndIllegal [clause] (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause) then Binary And illegalTree (genTreeWithListAndIllegal [clause] Nothing illLength) else Binary And (genTreeWithListAndIllegal [clause] Nothing illLength) illegalTree
+-- genTreeWithListAndIllegal clauseList Nothing _ = transferCnfToSyntree (Setform.Cnf (fromList clauseList))
+-- genTreeWithListAndIllegal (clause:clauseList) (Just illegalTree) illLength = if illLength <= size (Setform.literalSet clause)
+--                                                                              then Binary And illegalTree (genTreeWithListAndIllegal (clause:clauseList) Nothing illLength)
+--                                                                              else Binary And (transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))) (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
+-- genTreeWithListAndIllegal _ _ _ = error "will not occured"
 
 genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
 genIllegalCNF (Binary oper a b) clauseList =
