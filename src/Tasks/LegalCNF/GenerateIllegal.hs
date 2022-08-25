@@ -43,9 +43,7 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
         return (genTreeWithListAndIllegal (headTrees ++ (illegalTree : tailTrees)))
 
 genTreeWithListAndIllegal :: [SynTree BinOp Char] -> SynTree BinOp Char
-genTreeWithListAndIllegal [x] = x
-genTreeWithListAndIllegal (x:xs) = Binary And x (genTreeWithListAndIllegal xs)
-genTreeWithListAndIllegal _ = error "will not occured"
+genTreeWithListAndIllegal  = foldl1 (Binary And)
 
 genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
 genIllegalCNF treeShape clauses = let clauses' = map (toList . Setform.literalSet) clauses
