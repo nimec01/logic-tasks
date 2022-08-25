@@ -51,7 +51,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     | minClauseLength < 1
       = Just "The number of Literals per clause must be positive"
     | maxClauseAmount < minClauseAmount
-      = Just "maxCluases can not less than minClauseAmount"
+      = Just "maxClauses can not less than minClauseAmount"
     | maxClauseLength < minClauseLength
       = Just "maxClauseLength can not less than minClauseLength"
     | (maxClauseLength > 2 * length usedLiterals) || (externalGenFormulas > 0 && maxClauseLength > length usedLiterals)
@@ -78,7 +78,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     | minStringSize <= 0
       = Just "Can not generate String with such minStringSize"
     | maxStringSize < minStringSize
-      = Just "The maxmun length of formula string can not less than the minimun length of formula string"
+      = Just "The maxmun length of formula string can not less than the minimum length of formula string"
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1)
       = Just "Can not generate String with such minimun length of formula string"
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5)

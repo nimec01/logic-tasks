@@ -11,16 +11,16 @@ import Trees.Helpers (treeNodes, numberAllBinaryNodes)
 superfluousBracketsDisplay :: SynTree BinOp Char -> Integer -> Gen String
 superfluousBracketsDisplay synTree brackets =
     let synTreeWithSerial = numberAllBinaryNodes synTree
-        serialsOfsameOperator = sameAssociativeOperatorAdjacentSerial synTreeWithSerial Nothing
+        serialsOfSameOperator = sameAssociativeOperatorAdjacentSerial synTreeWithSerial Nothing
     in  do
-        serial <- elements serialsOfsameOperator
+        serial <- elements serialsOfSameOperator
         rootDisplay synTreeWithSerial (brackets -1) serial
 
 rootDisplay :: SynTree (BinOp, Integer) Char -> Integer -> Integer -> Gen String
 rootDisplay (Leaf _) _ _ =  error "can not have only one node"
 rootDisplay synTree@(Not a) brackets serial = do
-    ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
-    if ifUsebrackets
+    ifUseBrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
+    if ifUseBrackets
     then do
         formula <- nonRootDisplay a (brackets - 1) Nothing (Just serial)
         return ("(" ++ showOperatorNot ++ formula ++ ")")
@@ -37,9 +37,9 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets hasFather fatherOperator
     | otherwise = let rightNodes =  treeNodes b
                       leftNodes =  treeNodes a
                 in  do
-                ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (rightNodes + leftNodes + 1 - brackets), return False)]
-                let brackets' = if ifUsebrackets then brackets - 1 else brackets
-                    addBracket = (if ifUsebrackets then 1 else 0) + (if not hasFather || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
+                ifUseBrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (rightNodes + leftNodes + 1 - brackets), return False)]
+                let brackets' = if ifUseBrackets then brackets - 1 else brackets
+                    addBracket = (if ifUseBrackets then 1 else 0) + (if not hasFather || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
                 leftBrackets <- choose (max 0 (brackets' - rightNodes) , min leftNodes brackets')
                 leftFormula <- nonRootDisplay a leftBrackets (Just oper) serial
                 rightFormula <- nonRootDisplay b (brackets' - leftBrackets) (Just oper) serial
@@ -49,8 +49,8 @@ nonRootDisplay :: SynTree (BinOp, Integer) Char -> Integer -> Maybe BinOp -> May
 nonRootDisplay (Leaf a) 0 _ _ = return [a]
 nonRootDisplay (Leaf a) 1 _ _ = return ("("++ (a : ")"))
 nonRootDisplay synTree@(Not a) brackets _ serial = do
-    ifUsebrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
-    if ifUsebrackets
+    ifUseBrackets <- frequency [(fromIntegral brackets, return True), (fromIntegral (treeNodes synTree - brackets), return False)]
+    if ifUseBrackets
     then do
         formula <- nonRootDisplay a (brackets - 1) Nothing serial
         return ("(" ++ showOperatorNot ++ formula ++ ")")
