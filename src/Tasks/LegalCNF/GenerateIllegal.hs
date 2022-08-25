@@ -40,10 +40,7 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
             (first, second) = span (\(Clause clause) -> illLength >= size clause) (sort clauseList)
             headTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) first
             tailTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) second
-        return (genTreeWithListAndIllegal (headTrees ++ (illegalTree : tailTrees)))
-
-genTreeWithListAndIllegal :: [SynTree BinOp Char] -> SynTree BinOp Char
-genTreeWithListAndIllegal  = foldr1 (Binary And)
+        return (foldl1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
 
 genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
 genIllegalCNF treeShape clauses = let clauses' = map (toList . Setform.literalSet) clauses
@@ -62,7 +59,7 @@ genIllegalShapeInSubTree opers illegalFunc oper = do
     opersIllegalSide <- choose (1, opers - 1)
     node <- elements [Binary oper, flip (Binary oper)]
     illegalSubTree <- illegalFunc opersIllegalSide
-    return (node illegalSubTree (legalClauseShape (opers - 1 - opersIllegalSide)))
+    return (node illegalSubTree (legalShape Or (opers - 1 - opersIllegalSide)))
 
 
 genIllegalClauseShape :: Bool -> Int -> Gen (SynTree BinOp ())
@@ -70,23 +67,17 @@ genIllegalClauseShape _ 0 = error "impossible"
 genIllegalClauseShape ifFirstlayer ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
-    then oneof [return (Not (legalClauseShape ors)), genIllegalOper legalClauseShape (if ifFirstlayer then [Equi, Impl] else [Equi, Impl, And]) ors]
+    then oneof [return (Not (legalShape Or ors)), genIllegalOper (legalShape Or) (if ifFirstlayer then [Equi, Impl] else [Equi, Impl, And]) ors]
     else genIllegalShapeInSubTree ors (genIllegalClauseShape False) Or
-
-legalClauseShape :: Int -> SynTree BinOp ()
-legalClauseShape = legalShape Or
 
 genIllegalCNFShape :: Int -> Gen (SynTree BinOp ())
 genIllegalCNFShape 0 = error "impossible"
-genIllegalCNFShape 1 = oneof [return (Not (legalCNFShape 1)), genIllegalOper legalCNFShape (allBinaryOperators \\ [And, Or]) 1]
+genIllegalCNFShape 1 = oneof [return (Not (legalShape And 1)), genIllegalOper (legalShape And) (allBinaryOperators \\ [And, Or]) 1]
 genIllegalCNFShape ands = do
     ifUseError <- frequency[(1, return True), (ands - 1, return False)]
     if ifUseError
-    then oneof [return (Not (legalCNFShape ands)), genIllegalOper legalCNFShape (allBinaryOperators \\ [And]) ands]
+    then oneof [return (Not (legalShape And ands)), genIllegalOper (legalShape And) (allBinaryOperators \\ [And]) ands]
     else genIllegalShapeInSubTree ands genIllegalCNFShape And
-
-legalCNFShape :: Int -> SynTree BinOp ()
-legalCNFShape = legalShape And
 
 genIllegalOper :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
 genIllegalOper recF opers restOpers =
