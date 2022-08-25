@@ -24,7 +24,7 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalCNFShape (clauses - 1)
             clauseList <- genClauseList (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
-            return (genLegalClauses firstSyntaxShape (sort clauseList))
+            return (genIllegalCNF firstSyntaxShape (sort clauseList))
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
             genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1)
@@ -47,14 +47,14 @@ genTreeWithListAndIllegal (clause:clauseList) (Just illegalTree) illLength = if 
                                                                              else Binary And (transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))) (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
 genTreeWithListAndIllegal _ _ _ = error "will not occured"
 
-genLegalClauses :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
-genLegalClauses (Binary oper a b) clauseList =
+genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
+genIllegalCNF (Binary oper a b) clauseList =
     let leftNodes = length (collectLeaves a)
         leftList = take leftNodes clauseList
-    in Binary oper (genLegalClauses a leftList) (genLegalClauses b (clauseList \\ leftList))
-genLegalClauses (Not a) clauseList = Not (genLegalClauses a clauseList)
-genLegalClauses (Leaf ()) [clause] = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
-genLegalClauses _ _ = error "will not occured"
+    in Binary oper (genIllegalCNF a leftList) (genIllegalCNF b (clauseList \\ leftList))
+genIllegalCNF (Not a) clauseList = Not (genIllegalCNF a clauseList)
+genIllegalCNF (Leaf ()) [clause] = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
+genIllegalCNF _ _ = error "will not occured"
 
 illegalClauseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do
