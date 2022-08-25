@@ -9,7 +9,7 @@ import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList, size, fromList)
 import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves, transferCnfToSyntree)
 import Data.List((\\), sort)
-import Tasks.LegalCNF.GenerateLegal (genClause, genLiteral, genClauseList)
+import Tasks.LegalCNF.GenerateLegal (genLiteral, genClauseList)
 import Auxiliary(listNoDuplicate)
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
@@ -23,7 +23,8 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
         then do
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalCNFShape (clauses - 1)
-            genLegalClauses (minClauseLength, maxClauseLength) usedLiterals firstSyntaxShape
+            clauseList <- genClauseList (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
+            return (genLegalClauses firstSyntaxShape (sort clauseList))
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
             genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1)
@@ -46,20 +47,14 @@ genTreeWithListAndIllegal (clause:clauseList) (Just illegalTree) illLength = if 
                                                                              else Binary And (transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))) (genTreeWithListAndIllegal clauseList (Just illegalTree) illLength)
 genTreeWithListAndIllegal _ _ _ = error "will not occured"
 
-genLegalClauses :: (Int,Int) -> [Char] -> SynTree BinOp () -> Gen (SynTree BinOp Char)
-genLegalClauses (minClauseLength, maxClauseLength) usedLiterals (Not a) = Not <$> genLegalClauses (minClauseLength, maxClauseLength) usedLiterals a
-genLegalClauses (minClauseLength, maxClauseLength) usedLiterals (Binary oper a b) = do
-    leftTree <- genLegalClauses (minClauseLength, maxClauseLength) usedLiterals a
-    rightTree <- genLegalClauses (minClauseLength, maxClauseLength) usedLiterals b
-    return (Binary oper leftTree rightTree)
-genLegalClauses len usedLiterals (Leaf ()) = legalCluaseTree len usedLiterals
-
-
-legalCluaseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
-legalCluaseTree (minClauseLength, maxClauseLength) usedLiterals = do
-    clause <- genClause (minClauseLength, maxClauseLength) usedLiterals
-    let clauseSynTree = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
-    return clauseSynTree
+genLegalClauses :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
+genLegalClauses (Binary oper a b) clauseList =
+    let leftNodes = length (collectLeaves a)
+        leftList = take leftNodes clauseList
+    in Binary oper (genLegalClauses a leftList) (genLegalClauses b (clauseList \\ leftList))
+genLegalClauses (Not a) clauseList = Not (genLegalClauses a clauseList)
+genLegalClauses (Leaf ()) [clause] = transferLiteral(transferClause (Leaf (toList (Setform.literalSet clause))))
+genLegalClauses _ _ = error "will not occured"
 
 illegalClauseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do
