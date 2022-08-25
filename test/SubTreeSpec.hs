@@ -45,7 +45,7 @@ invalidBoundsSubTree = do
 spec :: Spec
 spec = do
     describe "checkSubTreeConfig" $ do
-        it "should reject invalid bounde in checkSubTreeConfig" $
+        it "should reject invalid bound in checkSubTreeConfig" $
             forAll invalidBoundsSubTree (isJust . checkSubTreeConfig)
         it "should accept the default config" $
             isNothing (checkSubTreeConfig defaultSubTreeConfig)

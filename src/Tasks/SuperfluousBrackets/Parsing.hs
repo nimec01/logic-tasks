@@ -10,14 +10,14 @@ import ParsingHelpers (whitespace, lexeme)
 import Data.Char (isLetter)
 import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
 
-parseLettertoStr :: Parser String
-parseLettertoStr = do
+parseLetterToStr :: Parser String
+parseLetterToStr = do
     letter <- satisfy isLetter
     return [letter]
 
 operatorAndLeavesParse :: Parser String
 operatorAndLeavesParse = do
-    listOfString <- many1 . lexeme $ parseLettertoStr <|> foldr (<|>) (string "(" <|> string ")" <|> string showOperatorNot) (map (string . showOperator) allBinaryOperators)
+    listOfString <- many1 . lexeme $ parseLetterToStr <|> foldr (<|>) (string "(" <|> string ")" <|> string showOperatorNot) (map (string . showOperator) allBinaryOperators)
     return (concat listOfString)
 
 superfluousBracketsExcParser :: String -> Either ParseError String

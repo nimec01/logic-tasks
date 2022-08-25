@@ -88,11 +88,11 @@ invalidBoundsLegalCNF = do
           minStringSize
         }
 
-illegaltest :: [Int] -> [String] -> Bool
-illegaltest xs strings = all (\ x -> isLeft (cnfParse (strings !! (x - 1)))) xs
+illegalTest :: [Int] -> [String] -> Bool
+illegalTest xs strings = all (\ x -> isLeft (cnfParse (strings !! (x - 1)))) xs
 
-legaltest :: [Int] -> [String] -> Bool
-legaltest xs strings = all (\ x -> isRight (cnfParse (strings !! (x - 1)))) xs
+legalTest :: [Int] -> [String] -> Bool
+legalTest xs strings = all (\ x -> isRight (cnfParse (strings !! (x - 1)))) xs
 
 spec :: Spec
 spec = do
@@ -112,13 +112,13 @@ spec = do
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll (genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) $ \synTree -> judgeCNFSynTree synTree
     describe "generateLegalCNFInst" $
-        it "all of the formulas in the woring serial should not be Cnf" $
+        it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig ->
-                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> illegaltest (toList serialsOfWrong) formulaStrings
+                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> illegalTest (toList serialsOfWrong) formulaStrings
     describe "generateLegalCNFInst" $ do
-        it "all of the formulas not in the woring serial should be Cnf" $
+        it "all of the formulas not in the wrong serial should be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig@LegalCNFConfig{..} ->
-                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> legaltest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
+                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} -> legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalCNF $ \lCConfig ->
                 forAll (generateLegalCNFInst lCConfig) $ \lCInst@LegalCNFInst {..} -> feedback lCInst (transferSetIntToString serialsOfWrong)

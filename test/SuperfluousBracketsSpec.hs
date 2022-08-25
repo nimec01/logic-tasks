@@ -70,7 +70,7 @@ spec = do
         it "after remove all bracket two strings should be same" $
             forAll validBoundsSuperfluousBrackets $ \sBConfig ->
                 forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} -> deleteBrackets stringWithSuperfluousBrackets == deleteBrackets simplestString
-    describe "validformula" $
+    describe "valid formula" $
         it "the formula Parser can accept when brackets is max number" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
                 forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations `suchThat` sameAssociativeOperatorAdjacent) $

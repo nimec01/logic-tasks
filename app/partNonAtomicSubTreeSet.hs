@@ -21,7 +21,7 @@ main = do
   pPrint inst
   putStrLn ("\nThe task will give a formula and your task is to input a set which at least have " ++ show minInputTrees ++ " non-atomic Formulas")
   putStrLn "\nInput form is {subformula1,subformula2..}"
-  putStrLn "\nDo not keep unnecessary parentheses outside subformulas and do not add any addtional parentheses"
+  putStrLn "\nDo not keep unnecessary parentheses outside subformulas and do not add any additional parentheses"
   feedbackLoop (feedback inst) ("One of the sample solution is " ++ show correctFormulas)
 
 determineSubTreeConfig :: IO SubTreeConfig

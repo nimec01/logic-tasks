@@ -51,11 +51,11 @@ invalidBoundsLegalProposition = do
             , bracketFormulas
         }
 
-illegaltest :: [Int] -> [String] -> Bool
-illegaltest xs strings = all (\ x -> isLeft (formulaParse (strings !! (x - 1)))) xs
+illegalTest :: [Int] -> [String] -> Bool
+illegalTest xs strings = all (\ x -> isLeft (formulaParse (strings !! (x - 1)))) xs
 
-legaltest :: [Int] -> [String] -> Bool
-legaltest xs strings = all (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs
+legalTest :: [Int] -> [String] -> Bool
+legalTest xs strings = all (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs
 
 transferSetIntToString :: Set Int -> String
 transferSetIntToString setInt ="{" ++ intercalate "," (map show (toList setInt)) ++ "}"
@@ -94,10 +94,10 @@ spec = do
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             forAll validBoundsLegalProposition $ \lPConfig ->
-                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> illegaltest (toList serialsOfWrong) pseudoFormulas
+                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> illegalTest (toList serialsOfWrong) pseudoFormulas
         it "the generateLegalPropositionInst should generate expected legal number" $
             forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig{..} ->
-                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> legaltest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
+                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} -> legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalProposition $ \lPConfig ->
                 forAll (generateLegalPropositionInst lPConfig) $ \lPInst@LegalPropositionInst{..} -> feedback lPInst (transferSetIntToString serialsOfWrong)
