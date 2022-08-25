@@ -42,7 +42,7 @@ invalidBoundsSuperfluousBrackets = do
 spec :: Spec
 spec = do
     describe "checkSuperfluousBracketsConfig" $ do
-        it "should reject invalid bounde in checkSuperfluousBracketsConfig" $
+        it "should reject invalid bound in checkSuperfluousBracketsConfig" $
             forAll invalidBoundsSuperfluousBrackets (isJust . checkSuperfluousBracketsConfig)
         it "should accept the default config" $
             isNothing (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig)

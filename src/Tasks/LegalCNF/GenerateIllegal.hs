@@ -64,10 +64,10 @@ genIllegalShapeInSubTree opers illegalFunc oper = do
 
 genIllegalClauseShape :: Bool -> Int -> Gen (SynTree BinOp ())
 genIllegalClauseShape _ 0 = error "impossible"
-genIllegalClauseShape ifFirstlayer ors = do
+genIllegalClauseShape ifFirstLayer ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
-    then oneof [return (Not (legalShape Or ors)), genIllegalOper (legalShape Or) (if ifFirstlayer then [Equi, Impl] else [Equi, Impl, And]) ors]
+    then oneof [return (Not (legalShape Or ors)), genIllegalOper (legalShape Or) (if ifFirstLayer then [Equi, Impl] else [Equi, Impl, And]) ors]
     else genIllegalShapeInSubTree ors (genIllegalClauseShape False) Or
 
 genIllegalCNFShape :: Int -> Gen (SynTree BinOp ())

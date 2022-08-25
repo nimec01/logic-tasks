@@ -18,9 +18,9 @@ import Data.Set (fromList, Set)
 subTreeParse :: Parser (Set (SynTree BinOp Char))
 subTreeParse = do
     lexeme $ char '{'
-    subTreelist <- parserS `sepBy` lexeme (char ',')
+    subTreeList <- parserS `sepBy` lexeme (char ',')
     lexeme $ char '}'
-    return $ fromList subTreelist
+    return $ fromList subTreeList
 
 subTreeStringParse :: String -> Either ParseError (Set (SynTree BinOp Char))
 subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
