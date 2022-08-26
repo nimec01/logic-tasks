@@ -29,10 +29,9 @@ genClause (minClauseLength, maxClauseLength) usedLiterals = do
 genClauseList :: (Int,Int) -> (Int,Int) -> [Char] -> Gen [Setform.Clause]
 genClauseList (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
   clauses <- choose (minClauseAmount, maxClauseAmount)
-  vectorOf clauses (genClause (minClauseLength, maxClauseLength) usedLiterals) `suchThat` \cnf -> listNoDuplicate cnf
+  vectorOf clauses (genClause (minClauseLength, maxClauseLength) usedLiterals) `suchThat` listNoDuplicate
 
 genSynTreeWithCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
-    clauses <- choose (minClauseAmount, maxClauseAmount)
-    cnf <- vectorOf clauses (genClause (minClauseLength, maxClauseLength) usedLiterals) `suchThat` \cnf -> listNoDuplicate cnf
+    cnf <- genClauseList (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     return (transferCnfToSyntree (Setform.Cnf (fromList cnf)))
