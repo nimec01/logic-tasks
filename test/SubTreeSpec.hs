@@ -16,12 +16,12 @@ import Tasks.SynTree.Config (SynTreeConfig(..),)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
-import SynTreeSpec (validBoundsSyntr)
+import SynTreeSpec (validBoundsSynTree)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
     allowDupelTree <- elements [True,False]
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr `suchThat` ((4<=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((4<=) . minNodes)
     minSubTrees <- choose (2, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
@@ -33,7 +33,7 @@ validBoundsSubTree = do
 invalidBoundsSubTree :: Gen SubTreeConfig
 invalidBoundsSubTree = do
     allowDupelTree <- elements [True,False]
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree
     minSubTrees <- choose (minNodes - maxLeavesForNodes minNodes + 1, 100)
     return $ SubTreeConfig
       {

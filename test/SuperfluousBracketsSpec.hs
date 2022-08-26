@@ -10,7 +10,7 @@ import Test.Hspec (Spec, describe, it)
 import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst, feedback)
 import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), checkSuperfluousBracketsConfig, defaultSuperfluousBracketsConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import SynTreeSpec (validBoundsSyntr)
+import SynTreeSpec (validBoundsSynTree)
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)
@@ -21,7 +21,7 @@ import Trees.Generate (genSynTree)
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr `suchThat` ((5<=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((5<=) . minNodes)
     superfluousBracketPairs <- choose (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
@@ -31,7 +31,7 @@ validBoundsSuperfluousBrackets = do
 
 invalidBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 invalidBoundsSuperfluousBrackets = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSyntr
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree
     superfluousBracketPairs <- choose (minNodes + 1, 26)
     return $ SuperfluousBracketsConfig
         {
