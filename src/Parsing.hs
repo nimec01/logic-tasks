@@ -17,12 +17,12 @@ withSpaces = trailSpaces . char
 
 
 parseOr :: Parser ()
-parseOr = ((trailSpaces $ void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
+parseOr = (trailSpaces (void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
 
 
 
 parseAnd :: Parser ()
-parseAnd = ((trailSpaces $ void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
+parseAnd = (trailSpaces (void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
 
 class Parse a where
   parser :: Parser a

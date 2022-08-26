@@ -17,7 +17,7 @@ parseLetterToStr = do
 
 operatorAndLeavesParse :: Parser String
 operatorAndLeavesParse = do
-    listOfString <- many1 . lexeme $ parseLetterToStr <|> foldr (<|>) (string "(" <|> string ")" <|> string showOperatorNot) (map (string . showOperator) allBinaryOperators)
+    listOfString <- many1 . lexeme $ parseLetterToStr <|> foldr ((<|>) . string . showOperator) (string "(" <|> string ")" <|> string showOperatorNot) allBinaryOperators
     return (concat listOfString)
 
 superfluousBracketsExcParser :: String -> Either ParseError String

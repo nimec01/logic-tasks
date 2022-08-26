@@ -44,7 +44,7 @@ defaultLegalCNFConfig =
 
 checkLegalCNFConfig :: LegalCNFConfig -> Maybe String
 checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
-    | any (not . isLetter) usedLiterals
+    | not (all isLetter usedLiterals)
       = Just "Only letters are allowed as literals."
     | minClauseAmount < 1
       = Just "The number of Clauses must be positive"

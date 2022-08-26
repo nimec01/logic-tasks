@@ -37,7 +37,7 @@ defaultSynTreeConfig =
 
 checkSynTreeConfig :: SynTreeConfig -> Maybe String
 checkSynTreeConfig SynTreeConfig {..}
-    | any (not . isLetter) usedLiterals
+    | not (all isLetter usedLiterals)
       = Just "Only letters are allowed as literals."
     | maxConsecutiveNegations < 0
       = Just "Minimal number of consecutive negations must not be negative"
