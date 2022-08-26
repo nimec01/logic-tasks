@@ -20,7 +20,7 @@ ifUseBracket useBracket synTree@(Not a) = let addPositions = notAndLeaves a in
     if not useBracket
     then return (normalShow synTree)
     else frequency [(1, return("(" ++ showOperatorNot ++ normalShow a ++ ")")), (addPositions, subTreeBracket synTree)]
-ifUseBracket useBracket synTree@(Binary _ _ _) =
+ifUseBracket useBracket synTree@Binary {} =
     if not useBracket
     then return (normalShow synTree)
     else subTreeBracket synTree

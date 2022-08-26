@@ -1,5 +1,4 @@
-{-# LANGUAGE NamedFieldPuns, RecordWildCards #-}
-
+{-# LANGUAGE RecordWildCards #-}
 module Main (main) where
 
 import Test.QuickCheck (generate)
