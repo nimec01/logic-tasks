@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns, StandaloneDeriving #-}
 
 module LegalCNFSpec where
 
@@ -10,14 +10,14 @@ import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf)
 import Data.List((\\))
 
 import ParsingHelpers (whitespace)
-import Types (Cnf)
+import Types (Cnf(..), Clause(..), Literal(..))
 import Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, eof, parse)
 import Config (CnfConfig(..), BaseConfig(..))
-import Trees.Helpers(judgeCNFSynTree)
+import Trees.Helpers (cnfToSynTree, judgeCNFSynTree)
 import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig, defaultLegalCNFConfig, lengthBound)
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
-import Tasks.LegalCNF.GenerateLegal (genSynTreeWithCnf)
+import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst, feedback)
 import LegalPropositionSpec(transferSetIntToString)
 
@@ -107,10 +107,10 @@ spec = do
         it "the syntax Tree are not CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll (genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) $ \synTree -> not (judgeCNFSynTree synTree)
-    describe "genSynTreeWithCnf" $
+    describe "genCnf and cnfToSynTree" $
         it "the syntax Tree are CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
-                forAll (genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) $ \synTree -> judgeCNFSynTree synTree
+                forAll (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) (judgeCNFSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $
         it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig ->
@@ -125,3 +125,7 @@ spec = do
 
 cnfParse :: String -> Either ParseError Cnf
 cnfParse = parse (whitespace >> parser <* eof) ""
+
+deriving instance Show Literal
+deriving instance Show Clause
+deriving instance Show Cnf

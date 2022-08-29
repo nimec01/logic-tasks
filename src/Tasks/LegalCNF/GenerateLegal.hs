@@ -1,16 +1,12 @@
 module Tasks.LegalCNF.GenerateLegal (
-  genSynTreeWithCnf,
   genClause,
-  genLiteral,
-  genClauseList
+  genCnf
 ) where
 
 import Test.QuickCheck (choose, Gen, suchThat, elements)
 import Test.QuickCheck.Gen (vectorOf)
 import qualified Types as Setform
-import Trees.Types (SynTree(..), BinOp(..))
 import Data.Set (fromList)
-import Trees.Helpers(transferCnfToSyntree,)
 import Auxiliary (listNoDuplicate)
 
 genLiteral :: [Char] -> Gen Setform.Literal
@@ -26,12 +22,8 @@ genClause (minClauseLength, maxClauseLength) usedLiterals = do
     clause <- vectorOf literals (genLiteral usedLiterals) `suchThat` listNoDuplicate
     return (Setform.Clause (fromList clause))
 
-genClauseList :: (Int,Int) -> (Int,Int) -> [Char] -> Gen [Setform.Clause]
-genClauseList (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
+genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Setform.Cnf
+genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
   clauses <- choose (minClauseAmount, maxClauseAmount)
-  vectorOf clauses (genClause (minClauseLength, maxClauseLength) usedLiterals) `suchThat` listNoDuplicate
-
-genSynTreeWithCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
-genSynTreeWithCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
-    cnf <- genClauseList (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
-    return (transferCnfToSyntree (Setform.Cnf (fromList cnf)))
+  cnf <- vectorOf clauses (genClause (minClauseLength, maxClauseLength) usedLiterals) `suchThat` listNoDuplicate
+  return (Setform.Cnf (fromList cnf))

@@ -2,15 +2,14 @@ module Tasks.LegalCNF.GenerateIllegal (
   genIllegalSynTree,
 ) where
 
-import Test.QuickCheck (choose, Gen, suchThat, elements, frequency)
-import Test.QuickCheck.Gen (vectorOf, oneof)
+import Test.QuickCheck (choose, Gen, elements, frequency)
+import Test.QuickCheck.Gen (oneof)
 import qualified Types as Setform
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList, size)
 import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves)
-import Data.List((\\), sort)
-import Tasks.LegalCNF.GenerateLegal (genLiteral, genClauseList)
-import Auxiliary(listNoDuplicate)
+import Data.List ((\\))
+import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
 import Types (Clause(Clause))
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
@@ -24,8 +23,8 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
         then do
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalCNFShape (clauses - 1)
-            clauseList <- genClauseList (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
-            return (genIllegalCNF firstSyntaxShape (sort clauseList))
+            clauseList <- toList . Setform.clauseSet <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
+            return (genIllegalCNF firstSyntaxShape clauseList)
         else do
             clauses <- choose (minClauseAmount, maxClauseAmount)
             genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1)
@@ -34,10 +33,10 @@ genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Gen (SynTree BinOp C
 genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
     | ands == 0 = illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
     | otherwise = do
-        clauseList <- genClauseList (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
+        clauseList <- toList . Setform.clauseSet <$> genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
         let illLength = length (collectLeaves illegalTree)
-            (first, second) = span (\(Clause clause) -> illLength >= size clause) (sort clauseList)
+            (first, second) = span (\(Clause clause) -> illLength >= size clause) clauseList
             headTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) first
             tailTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) second
         return (foldr1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
@@ -51,8 +50,8 @@ illegalClauseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do
     len <- choose (max 2 minClauseLength, maxClauseLength)
     illegalSynTreeShape <- genIllegalClauseShape True (len - 1)
-    leaves <- vectorOf len (genLiteral usedLiterals) `suchThat` listNoDuplicate
-    return (transferLiteral (relabelShape illegalSynTreeShape (sort leaves)))
+    leaves <- toList . Setform.literalSet <$> genClause (len,len) usedLiterals
+    return (transferLiteral (relabelShape illegalSynTreeShape leaves))
 
 genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp ())) -> BinOp -> Gen (SynTree BinOp ())
 genIllegalShapeInSubTree opers illegalFunc oper = do

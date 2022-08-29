@@ -15,7 +15,7 @@ module Trees.Helpers
     sameAssociativeOperatorAdjacent,
     similarExist,
     consecutiveNegations,
-    transferCnfToSyntree,
+    cnfToSynTree,
     transferClause,
     transferLiteral,
     judgeCNFSynTree,
@@ -109,8 +109,8 @@ continueNot :: SynTree o c -> Integer
 continueNot (Not a) = 1 + continueNot a
 continueNot _ = 0
 
-transferCnfToSyntree :: Setform.Cnf -> SynTree BinOp Char
-transferCnfToSyntree cnf = let cnfList = map (toList . Setform.literalSet) (toList (Setform.clauseSet cnf))
+cnfToSynTree :: Setform.Cnf -> SynTree BinOp Char
+cnfToSynTree cnf         = let cnfList = map (toList . Setform.literalSet) (toList (Setform.clauseSet cnf))
                                synTreeWithClause = transferCnf cnfList
                                synTreeWithLiteral = transferClause synTreeWithClause
                            in transferLiteral synTreeWithLiteral
