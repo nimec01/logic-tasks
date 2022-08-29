@@ -21,6 +21,7 @@ module Trees.Helpers
     judgeCNFSynTree,
     ) where
 
+import Control.Monad (void)
 import Control.Monad.State (get, put, runState, evalState)
 import Data.Set(fromList, Set, toList)
 import Data.List.Extra (nubBy)
@@ -92,10 +93,7 @@ checkNextOperator (Binary Or _ _) Or = True
 checkNextOperator _ _ = False
 
 similarTree :: Eq o => SynTree o c -> SynTree o c -> Bool
-similarTree (Binary o1 a b) (Binary o2 c d) | o1 == o2 = similarTree a c && similarTree b d
-similarTree (Not a) (Not c) = similarTree a c
-similarTree (Leaf _) (Leaf _) = True
-similarTree _ _ = False
+similarTree t1 t2 = void t1 == void t2
 
 similarExist :: Eq o => [SynTree o c] -> Bool
 similarExist trees = length (nubBy similarTree trees) /= length trees
