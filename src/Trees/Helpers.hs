@@ -16,7 +16,7 @@ module Trees.Helpers
     similarExist,
     consecutiveNegations,
     cnfToSynTree,
-    transferClause,
+    clauseToSynTree,
     transferLiteral,
     judgeCNFSynTree,
     ) where
@@ -110,30 +110,17 @@ continueNot (Not a) = 1 + continueNot a
 continueNot _ = 0
 
 cnfToSynTree :: Setform.Cnf -> SynTree BinOp Char
-cnfToSynTree cnf         = let cnfList = map (toList . Setform.literalSet) (toList (Setform.clauseSet cnf))
-                               synTreeWithClause = transferCnf cnfList
-                               synTreeWithLiteral = transferClause synTreeWithClause
-                           in transferLiteral synTreeWithLiteral
+cnfToSynTree = foldr1 (Binary And) . map clauseToSynTree . toList . Setform.clauseSet
 
-transferCnf :: [[Setform.Literal]] -> SynTree BinOp [Setform.Literal]
-transferCnf [a] = Leaf a
-transferCnf (a:cnfList) = Binary And (Leaf a) (transferCnf cnfList)
-transferCnf [] = error "size of the list should be positive"
+clauseToSynTree :: Setform.Clause -> SynTree BinOp Char
+clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . Setform.literalSet
 
-transferClause :: SynTree BinOp [Setform.Literal] -> SynTree BinOp Setform.Literal
-transferClause (Binary oper a b) = Binary oper (transferClause a) (transferClause b)
-transferClause (Not a) = Not (transferClause a)
-transferClause (Leaf [a]) = Leaf a
-transferClause (Leaf (a:clauseList)) = Binary Or (Leaf a) (transferClause (Leaf clauseList))
-transferClause _ = error "no such cases"
+transferLiteral :: SynTree o Setform.Literal -> SynTree o Char
+transferLiteral = (>>= literalToSynTree)
 
-
-
-transferLiteral :: SynTree BinOp Setform.Literal -> SynTree BinOp Char
-transferLiteral (Binary oper a b) = Binary oper (transferLiteral a) (transferLiteral b)
-transferLiteral (Not a) = Not (transferLiteral a)
-transferLiteral (Leaf (Setform.Literal a)) = Leaf a
-transferLiteral (Leaf (Setform.Not a)) = Not (Leaf a)
+literalToSynTree :: Setform.Literal -> SynTree o Char
+literalToSynTree (Setform.Literal a) = Leaf a
+literalToSynTree (Setform.Not a) = Not (Leaf a)
 
 judgeCNFSynTree :: SynTree BinOp a -> Bool
 judgeCNFSynTree (Binary And a b) = judgeCNFSynTree a && judgeCNFSynTree b

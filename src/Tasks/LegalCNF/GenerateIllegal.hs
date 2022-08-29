@@ -7,10 +7,11 @@ import Test.QuickCheck.Gen (oneof)
 import qualified Types as Setform
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList, size)
-import Trees.Helpers(relabelShape, transferLiteral, transferClause, collectLeaves)
+import Trees.Helpers (relabelShape, transferLiteral, clauseToSynTree, collectLeaves)
 import Data.List ((\\))
 import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
 import Types (Clause(Clause))
+import Control.Monad (join)
 
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do
@@ -37,14 +38,12 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals
         let illLength = length (collectLeaves illegalTree)
             (first, second) = span (\(Clause clause) -> illLength >= size clause) clauseList
-            headTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) first
-            tailTrees = map (transferLiteral . transferClause . Leaf . toList . Setform.literalSet) second
+            headTrees = map clauseToSynTree first
+            tailTrees = map clauseToSynTree second
         return (foldr1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
 
 genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
-genIllegalCNF treeShape clauses = let clauses' = map (toList . Setform.literalSet) clauses
-                                      tree = relabelShape treeShape clauses'
-                                  in  transferLiteral (transferClause tree)
+genIllegalCNF treeShape = join . relabelShape treeShape . map clauseToSynTree
 
 illegalClauseTree :: (Int,Int) -> [Char] -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals = do
