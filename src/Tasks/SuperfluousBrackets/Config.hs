@@ -23,7 +23,7 @@ defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
-      syntaxTreeConfig = defaultSynTreeConfig { useImplEqui = True }
+      syntaxTreeConfig = defaultSynTreeConfig { allowArrowOperators = True }
     , superfluousBracketPairs = 2
     }
 

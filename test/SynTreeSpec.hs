@@ -16,7 +16,7 @@ import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
 
 validBoundsSynTree :: Gen SynTreeConfig
 validBoundsSynTree = do
-  useImplEqui <- elements [True, False]
+  allowArrowOperators <- elements [True, False]
   maxConsecutiveNegations <- choose(0, 3)
   usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
   minNodes' <- choose (1, 20) `suchThat` \minNodes' -> maxConsecutiveNegations /= 0 || odd minNodes'
@@ -35,7 +35,7 @@ validBoundsSynTree = do
         maxDepth,
         usedLiterals,
         atLeastOccurring,
-        useImplEqui,
+        allowArrowOperators,
         maxConsecutiveNegations
       }
 
@@ -53,7 +53,7 @@ invalidBoundsSynTree = do
         maxDepth,
         usedLiterals,
         atLeastOccurring = fromIntegral (length usedLiterals),
-        useImplEqui = True,
+        allowArrowOperators = True,
         maxConsecutiveNegations
       }
 

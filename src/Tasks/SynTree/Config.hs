@@ -19,7 +19,7 @@ data SynTreeConfig =
   , maxDepth :: Integer
   , usedLiterals :: String
   , atLeastOccurring :: Integer
-  , useImplEqui :: Bool
+  , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   } deriving Show
 
@@ -31,7 +31,7 @@ defaultSynTreeConfig =
     , maxDepth = 6
     , usedLiterals = "ABCDE"
     , atLeastOccurring = 3
-    , useImplEqui = False
+    , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     }
 

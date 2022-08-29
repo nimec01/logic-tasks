@@ -25,7 +25,7 @@ showOperatorNot :: String
 showOperatorNot = "~"
 
 data SynTree o c
-    = Binary o (SynTree o c) (SynTree o c)    -- {op :: o, lefttree :: SynTree o c, righttree :: SynTree o c}
+    = Binary o (SynTree o c) (SynTree o c)
     | Not (SynTree o c)
     | Leaf c
   deriving (Eq, Ord, Show, Functor, Foldable, Traversable)

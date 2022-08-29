@@ -17,7 +17,7 @@ import Data.Char (isSpace)
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    syntaxTree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations
+    syntaxTree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
       `suchThat` sameAssociativeOperatorAdjacent
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay syntaxTree superfluousBracketPairs
     return $ SuperfluousBracketsInst

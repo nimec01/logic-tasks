@@ -56,16 +56,16 @@ spec = do
     describe "sameAssociativeOperatorAdjacent... functions" $
         it "is a consistent pair of functions" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $
                     \synTree -> sameAssociativeOperatorAdjacent synTree ==> notNull (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing)
     describe "simplestDisplay and superfluousBracketsDisplay" $ do
         it "simplestDisplay should have less brackets than or equal to normal formula" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $
                     \synTree -> length (sameAssociativeOperatorAdjacentSerial (numberAllBinaryNodes synTree) Nothing) * 2 == length (display synTree) - length (simplestDisplay synTree)
         it "the number of brackets generate by simplestDisplay should equal to display if not satisfy sameAssociativeOperatorAdjacent" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations) $
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations) $
                     \synTree -> not (sameAssociativeOperatorAdjacent synTree) ==> display synTree == simplestDisplay synTree
         it "after remove all bracket two strings should be same" $
             forAll validBoundsSuperfluousBrackets $ \sBConfig ->
@@ -73,7 +73,7 @@ spec = do
     describe "valid formula" $
         it "the formula Parser can accept when brackets is max number" $
             forAll validBoundsSuperfluousBrackets $ \SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}} ->
-                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring useImplEqui maxConsecutiveNegations `suchThat` sameAssociativeOperatorAdjacent) $
+                forAll (genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations `suchThat` sameAssociativeOperatorAdjacent) $
                     \synTree -> forAll (superfluousBracketsDisplay synTree (treeNodes synTree + 1)) $ \stringWithSuperfluousBrackets -> formulaParse stringWithSuperfluousBrackets == Right synTree
     describe "generateSuperfluousBracketsInst" $ do
         it "the correct store in Inst should be accept by feedback" $

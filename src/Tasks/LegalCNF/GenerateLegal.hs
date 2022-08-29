@@ -23,7 +23,7 @@ genLiteral lits = do
 genClause :: (Int,Int) -> [Char] -> Gen Setform.Clause
 genClause (minClauseLength, maxClauseLength) usedLiterals = do
     literals <- choose (minClauseLength, maxClauseLength)
-    clause <- vectorOf literals (genLiteral usedLiterals) `suchThat` \clause -> listNoDuplicate clause
+    clause <- vectorOf literals (genLiteral usedLiterals) `suchThat` listNoDuplicate
     return (Setform.Clause (fromList clause))
 
 genClauseList :: (Int,Int) -> (Int,Int) -> [Char] -> Gen [Setform.Clause]
