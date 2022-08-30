@@ -38,7 +38,7 @@ genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOf
 
 genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)
 genSynTreeWithSerial serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} serial
-    | serial `elem` serialsOfWrong = genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+    | serial `elem` serialsOfWrong = genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
     | serial `elem` serialsOfExternal =
         cnfToSynTree <$>
         Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals

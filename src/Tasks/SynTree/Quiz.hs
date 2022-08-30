@@ -16,11 +16,11 @@ generateSynTreeInst :: SynTreeConfig -> Gen SynTreeInst
 generateSynTreeInst SynTreeConfig {..} = do
     tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
     return $ SynTreeInst
-      { instSyntree = tree
+      { instSynTree = tree
       , latexImage = transferToPicture tree
       , correct = display tree
       }
 
 feedback :: SynTreeInst -> String -> Bool
-feedback SynTreeInst {instSyntree} input =
-  formulaParse input == Right instSyntree
+feedback SynTreeInst {instSynTree} input =
+  formulaParse input == Right instSynTree

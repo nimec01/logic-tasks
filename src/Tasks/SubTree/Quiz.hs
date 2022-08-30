@@ -21,7 +21,7 @@ import Text.Parsec (ParseError)
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
 generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
-      `suchThat` \synTree -> (allowDupelTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
+      `suchThat` \synTree -> (allowSameSubTree || noSameSubTree synTree) && fromIntegral (size (allNotLeafSubTrees synTree)) >= minSubTrees
     let correctTrees = allNotLeafSubTrees tree
     return $ SubTreeInst
       { minInputTrees = minSubTrees

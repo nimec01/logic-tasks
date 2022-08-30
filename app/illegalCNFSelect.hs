@@ -39,6 +39,7 @@ determineLegalCNFConfig = do
     includeFormWithJustOneLiteralPerClause' <- offerChange "includeFormWithJustOneLiteralPerClause" includeFormWithJustOneLiteralPerClause
     maxStringSize' <- offerChange "maxStringSize" maxStringSize
     minStringSize' <- offerChange "minStringSize" minStringSize
+    allowArrowOperators' <- offerChange "allowArrowOperators" allowArrowOperators
     let newBaseConfig = baseConf {minClauseLength = minClauseLength', maxClauseLength = maxClauseLength', usedLiterals = usedLiterals'}
         newCNFConfig = cnfConfig {baseConf = newBaseConfig, minClauseAmount = minClauseAmount', maxClauseAmount = maxClauseAmount'}
         newConfig = defaultLegalCNFConfig{
@@ -49,7 +50,8 @@ determineLegalCNFConfig = do
           , includeFormWithJustOneClause = includeFormWithJustOneClause'
           , externalGenFormulas = externalGenFormulas'
           , maxStringSize = maxStringSize'
-          , minStringSize = minStringSize'}
+          , minStringSize = minStringSize'
+          , allowArrowOperators = allowArrowOperators'}
     case checkLegalCNFConfig newConfig of
       Nothing ->
         return newConfig

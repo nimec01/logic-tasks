@@ -20,25 +20,25 @@ import SynTreeSpec (validBoundsSynTree)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
-    allowDupelTree <- elements [True,False]
+    allowSameSubTree <- elements [True,False]
     syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((4<=) . minNodes)
     minSubTrees <- choose (2, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
         syntaxTreeConfig
-      , allowDupelTree
+      , allowSameSubTree
       , minSubTrees
       }
 
 invalidBoundsSubTree :: Gen SubTreeConfig
 invalidBoundsSubTree = do
-    allowDupelTree <- elements [True,False]
+    allowSameSubTree <- elements [True,False]
     syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree
     minSubTrees <- choose (minNodes - maxLeavesForNodes minNodes + 1, 100)
     return $ SubTreeConfig
       {
         syntaxTreeConfig
-      , allowDupelTree
+      , allowSameSubTree
       , minSubTrees
       }
 

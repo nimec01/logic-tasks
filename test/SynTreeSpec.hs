@@ -81,13 +81,13 @@ spec = do
         forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst (deleteSpaces correct)
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSyntree >= minNodes && treeNodes instSyntree <= maxNodes
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSynTree >= minNodes && treeNodes instSynTree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeDepth instSyntree <= maxDepth
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeDepth instSynTree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> fromIntegral (length (nubOrd (collectLeaves instSyntree))) >= atLeastOccurring
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> fromIntegral (length (nubOrd (collectLeaves instSynTree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->  not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display instSyntree))
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->  not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display instSynTree))

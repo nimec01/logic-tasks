@@ -6,7 +6,7 @@ import Data.Set (toList)
 import Data.Either(isLeft, isRight)
 import Test.Hspec (Spec, describe, it)
 import Data.Maybe (isJust, isNothing)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements)
 import Data.List((\\))
 
 import ParsingHelpers (whitespace)
@@ -35,6 +35,7 @@ validBoundsLegalCNF = do
     externalGenFormulas <- choose (0, formulas - illegals)
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals - externalGenFormulas > 0
         includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals - externalGenFormulas > 1
+    allowArrowOperators <- elements [True, False]
     return $ LegalCNFConfig
         {
           cnfConfig = CnfConfig{
@@ -52,7 +53,8 @@ validBoundsLegalCNF = do
           includeFormWithJustOneLiteralPerClause,
           externalGenFormulas,
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
-          minStringSize = minClauseAmount * ((minClauseLength - 1) * 5 + 1)
+          minStringSize = minClauseAmount * ((minClauseLength - 1) * 5 + 1),
+          allowArrowOperators
         }
 
 invalidBoundsLegalCNF :: Gen LegalCNFConfig
@@ -85,7 +87,8 @@ invalidBoundsLegalCNF = do
           includeFormWithJustOneLiteralPerClause = False,
           externalGenFormulas,
           maxStringSize,
-          minStringSize
+          minStringSize,
+          allowArrowOperators = False
         }
 
 illegalTest :: [Int] -> [String] -> Bool
@@ -105,8 +108,8 @@ spec = do
             forAll validBoundsLegalCNF (isNothing . checkLegalCNFConfig)
     describe "genIllegalSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
-            forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
-                forAll (genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) $ \synTree -> not (judgeCNFSynTree synTree)
+            forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+                forAll (genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators) $ \synTree -> not (judgeCNFSynTree synTree)
     describe "genCnf and cnfToSynTree" $
         it "the syntax Tree are CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->

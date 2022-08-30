@@ -18,7 +18,7 @@ data SubTreeConfig =
   SubTreeConfig
     {
       syntaxTreeConfig :: SynTreeConfig
-    , allowDupelTree :: Bool
+    , allowSameSubTree :: Bool
     , minSubTrees :: Integer
     } deriving Show
 
@@ -26,7 +26,7 @@ defaultSubTreeConfig :: SubTreeConfig
 defaultSubTreeConfig =
     SubTreeConfig
     { syntaxTreeConfig = defaultSynTreeConfig
-    , allowDupelTree = True
+    , allowSameSubTree = True
     , minSubTrees = 3
     }
 

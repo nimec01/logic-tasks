@@ -26,6 +26,7 @@ data LegalCNFConfig =
     , includeFormWithJustOneLiteralPerClause :: Bool
     , maxStringSize :: Int
     , minStringSize :: Int
+    , allowArrowOperators :: Bool
   } deriving Show
 
 defaultLegalCNFConfig :: LegalCNFConfig
@@ -40,6 +41,7 @@ defaultLegalCNFConfig =
   , includeFormWithJustOneLiteralPerClause = True
   , maxStringSize = 30
   , minStringSize = 4
+  , allowArrowOperators = True
   }
 
 checkLegalCNFConfig :: LegalCNFConfig -> Maybe String
