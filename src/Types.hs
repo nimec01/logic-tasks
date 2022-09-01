@@ -68,12 +68,40 @@ instance Ord Clause where
 -- | Generates a random clause. The length of the generated clause lies in the given length bounds.
 --   The used atomic formulae are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
-genClause (minlen,maxlen) lits
-    | null lits || minlen > length nLits || invalidLen = pure (Clause empty)
+genClause (minlen,maxlen) lits = do
+    genLits <- genForBasic (minlen,maxlen) lits
+    pure (Clause genLits)
+
+
+-- | A datatype representing a formula in conjunctive normalform.
+newtype Cnf = Cnf { clauseSet :: Set Clause}
+     deriving (Eq,Typeable,Generic)
+
+
+-- | Generates a random cnf satisfying the given bounds
+--   for the amount and the length of the contained clauses.
+--   The used atomic formulae are drawn from the list of chars.
+
+genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
+genCnf (minNum,maxNum) (minLen,maxLen) lits = do
+    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
+    cnf <- generateClauses nLits empty num
+    pure (Cnf cnf)
+  where
+    generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
+    generateClauses usedLits set num
+        | Set.size set == num = pure set
+        | otherwise = do
+            clause <- genClause (minLen,maxLen) usedLits
+            generateClauses usedLits (Set.insert clause set) num
+
+
+genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
+genForBasic (minlen,maxlen) lits
+    | null lits || minlen > length nLits || invalidLen = pure empty
     | otherwise = do
         len <- choose (minlen,minimum [length nLits, maxlen])
-        genLits <- generateLiterals nLits empty len
-        pure (Clause genLits)
+        generateLiterals nLits empty len
   where
     nLits = nub lits
     invalidLen = minlen > maxlen || minlen <= 0
@@ -89,24 +117,14 @@ genClause (minlen,maxlen) lits
             generateLiterals restLits newSet len
 
 
---------------------------------------------------------------
-
--- | A datatype representing a formula in conjunctive normalform.
-newtype Cnf = Cnf { clauseSet :: Set Clause}
-     deriving (Eq,Typeable,Generic)
 
 
--- | Generates a random cnf satisfying the given bounds
---   for the amount and the length of the contained clauses.
---   The used atomic formulae are drawn from the list of chars.
-
-genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) lits
-    | null nLits || invalidLen || invalidNum = pure (Cnf empty)
+genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
+genForNF (minNum,maxNum) (minLen,maxLen) lits
+    | null nLits || invalidLen || invalidNum = pure (0, [])
     | otherwise = do
-        num <- choose (minNum, minimum [maxNum,upperBound])
-        cnf <- generateClauses nLits empty num
-        pure (Cnf cnf)
+      num <- choose (minNum, minimum [maxNum,upperBound])
+      pure (num, nLits)
   where
     nLits = nub lits
     invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
@@ -118,10 +136,3 @@ genCnf (minNum,maxNum) (minLen,maxLen) lits
         | n == len = 2^n + lengthBound (n-1) len
         | otherwise = 2^n * len + lengthBound (n-1) len
     upperBound = lengthBound maxLen (length nLits)
-
-    generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
-    generateClauses usedLits set num
-        | Set.size set == num = pure set
-        | otherwise = do
-            clause <- genClause (minLen,maxLen) usedLits
-            generateClauses usedLits (Set.insert clause set) num
