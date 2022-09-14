@@ -62,5 +62,5 @@ implementIllegal _ (Leaf _) _ = do
     elements [oper,""]
 
 illegalParentheses :: SynTree BinOp Char -> SynTree BinOp Char -> String -> [(Int, Gen String)]
-illegalParentheses  a b usedOperator = [(1, return (formulaStr ++ ")")),(1, return ("(" ++ formulaStr)), (1, return formulaStr)]
+illegalParentheses  a b usedOperator = [(1, return (formulaStr ++ ")")),(1, return ("(" ++ formulaStr))]
     where formulaStr = normalShow a ++ " " ++ usedOperator ++ " " ++ normalShow b
