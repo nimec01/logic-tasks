@@ -3,6 +3,8 @@ version:             0.1.0.0
 
 dependencies:
 - base >= 4.7 && < 5
+- extra
+- mtl
 - QuickCheck >= 2.14
 - random
 - containers
@@ -31,10 +33,100 @@ library:
     - LogicTasks.Printing
     - LogicTasks.Parsing
     - LogicTasks.Util
+    - Trees.Types
+    - Trees.Helpers
+    - Trees.Parsing
+    - Trees.Generate
+    - Trees.Print
+    - Tasks.SynTree.Config
+    - Tasks.SynTree.Quiz
+    - Tasks.SubTree.Config
+    - Tasks.SubTree.Parsing
+    - Tasks.SubTree.Quiz
+    - Tasks.LegalProposition.Config
+    - Tasks.LegalProposition.Parsing
+    - Tasks.LegalProposition.PrintIllegal
+    - Tasks.LegalProposition.PrintBracket
+    - Tasks.LegalProposition.Quiz
+    - Tasks.SuperfluousBrackets.Config
+    - Tasks.SuperfluousBrackets.Parsing
+    - Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
+    - Tasks.SuperfluousBrackets.Quiz
+    - Tasks.LegalCNF.Config
+    - Tasks.LegalCNF.Quiz
+    - Tasks.LegalCNF.GenerateIllegal
+    - Tasks.LegalCNF.GenerateLegal
+    - Parsing
+    - ParsingHelpers
+    - Config
+    - Types
 
   ghc-options:
   - -Wall
+  - -Widentities
   - -fno-warn-unused-do-bind
+
+executables:
+  formulaFromSyntaxTree:
+    main: formulaFromSyntaxTree.hs
+    source-dirs: app
+    dependencies:
+      - logic-tasks
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Widentities
+      - -Werror
+  partNonAtomicSubTreeSet:
+    main: partNonAtomicSubTreeSet.hs
+    source-dirs: app
+    dependencies:
+      - logic-tasks
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Widentities
+      - -Werror
+  illegalPseudoFormulasSelect:
+    main: illegalPseudoFormulasSelect.hs
+    source-dirs: app
+    dependencies:
+      - logic-tasks
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Widentities
+      - -Werror
+  simplestFormula:
+    main: simplestFormula.hs
+    source-dirs: app
+    dependencies:
+      - logic-tasks
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Widentities
+      - -Werror
+  illegalCNFSelect:
+    main: illegalCNFSelect.hs
+    source-dirs: app
+    dependencies:
+      - logic-tasks
+      - pretty-simple
+    ghc-options:
+      - -Wunused-imports
+      - -Wmissing-signatures
+      - -Wunused-matches
+      - -Widentities
+      - -Werror
 
 tests:
   src-test:
@@ -44,5 +136,10 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Wunused-imports
+    - -Wmissing-signatures
+    - -Wunused-matches
+    - -Widentities
+    - -Werror
     dependencies:
     - logic-tasks

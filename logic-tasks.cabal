@@ -25,27 +25,179 @@ library
       LogicTasks.Printing
       LogicTasks.Parsing
       LogicTasks.Util
-  other-modules:
-      Config
-      Formula
+      Trees.Types
+      Trees.Helpers
+      Trees.Parsing
+      Trees.Generate
+      Trees.Print
+      Tasks.SynTree.Config
+      Tasks.SynTree.Quiz
+      Tasks.SubTree.Config
+      Tasks.SubTree.Parsing
+      Tasks.SubTree.Quiz
+      Tasks.LegalProposition.Config
+      Tasks.LegalProposition.Parsing
+      Tasks.LegalProposition.PrintIllegal
+      Tasks.LegalProposition.PrintBracket
+      Tasks.LegalProposition.Quiz
+      Tasks.SuperfluousBrackets.Config
+      Tasks.SuperfluousBrackets.Parsing
+      Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
+      Tasks.SuperfluousBrackets.Quiz
+      Tasks.LegalCNF.Config
+      Tasks.LegalCNF.Quiz
+      Tasks.LegalCNF.GenerateIllegal
+      Tasks.LegalCNF.GenerateLegal
       Parsing
+      ParsingHelpers
+      Config
+      Types
+  other-modules:
+      Auxiliary
+      Formula
       Printing
       Resolution
       Table
-      Types
       Util
       Paths_logic_tasks
   hs-source-dirs:
       src
-  ghc-options: -Wall -fno-warn-unused-do-bind
+  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind
   build-depends:
       QuickCheck >=2.14
     , base >=4.7 && <5
     , containers
+    , extra
     , hspec
     , minisat-solver
+    , mtl
     , output-monad
     , parsec
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
+
+executable formulaFromSyntaxTree
+  main-is: formulaFromSyntaxTree.hs
+  other-modules:
+      AppHelp
+      Paths_logic_tasks
+  hs-source-dirs:
+      app
+  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , extra
+    , hspec
+    , logic-tasks
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
+
+executable illegalCNFSelect
+  main-is: illegalCNFSelect.hs
+  other-modules:
+      AppHelp
+      Paths_logic_tasks
+  hs-source-dirs:
+      app
+  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , extra
+    , hspec
+    , logic-tasks
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
+
+executable illegalPseudoFormulasSelect
+  main-is: illegalPseudoFormulasSelect.hs
+  other-modules:
+      AppHelp
+      Paths_logic_tasks
+  hs-source-dirs:
+      app
+  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , extra
+    , hspec
+    , logic-tasks
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
+
+executable partNonAtomicSubTreeSet
+  main-is: partNonAtomicSubTreeSet.hs
+  other-modules:
+      AppHelp
+      Paths_logic_tasks
+  hs-source-dirs:
+      app
+  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , extra
+    , hspec
+    , logic-tasks
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
+    , random
+    , text
+    , wl-pprint-text
+  default-language: Haskell2010
+
+executable simplestFormula
+  main-is: simplestFormula.hs
+  other-modules:
+      AppHelp
+      Paths_logic_tasks
+  hs-source-dirs:
+      app
+  ghc-options: -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
+  build-depends:
+      QuickCheck >=2.14
+    , base >=4.7 && <5
+    , containers
+    , extra
+    , hspec
+    , logic-tasks
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
     , random
     , text
     , wl-pprint-text
@@ -56,18 +208,27 @@ test-suite src-test
   main-is: Spec.hs
   other-modules:
       FormulaSpec
+      LegalCNFSpec
+      LegalPropositionSpec
+      ParsingSpec
+      SubTreeSpec
+      SuperfluousBracketsSpec
+      SynTreeSpec
       TableSpec
+      TestHelpers
       Paths_logic_tasks
   hs-source-dirs:
       test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Werror
   build-depends:
       QuickCheck >=2.14
     , base >=4.7 && <5
     , containers
+    , extra
     , hspec
     , logic-tasks
     , minisat-solver
+    , mtl
     , output-monad
     , parsec
     , random
