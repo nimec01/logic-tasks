@@ -31,9 +31,7 @@ genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClause
             genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals (clauses - 1) allowArrowOperators
 
 genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Bool -> Gen (SynTree BinOp Char)
-genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands allowArrowOperators
-    | ands == 0 = illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
-    | otherwise = do
+genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands allowArrowOperators = do
         clauseList <- toList . Setform.clauseSet <$> genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
         let illLength = length (collectLeaves illegalTree)
