@@ -110,9 +110,9 @@ spec = do
     describe "genIllegalSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
-                forAll (genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators) $ \synTree -> not (judgeCNFSynTree synTree)
-    describe "genCnf and cnfToSynTree" $
-        it "the syntax Tree are CNF syntax tree" $
+                forAll (genIllegalSynTree (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators) (not . judgeCNFSynTree)
+    describe "judgeCNFSynTree" $
+        it "is reasonably implemented" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals) (judgeCNFSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $
