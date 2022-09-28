@@ -10,7 +10,6 @@ import Data.Set (fromList)
 import Auxiliary (listNoDuplicate)
 
 genLiteral :: [Char] -> Gen Setform.Literal
-genLiteral [] = error "Can not construct Literal from empty list."
 genLiteral lits = do
    rChar <- elements lits
    elements [Setform.Literal rChar, Setform.Not rChar]
