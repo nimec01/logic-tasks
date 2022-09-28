@@ -6,8 +6,9 @@ module Tasks.LegalCNF.Config(
     defaultLegalCNFConfig,
     LegalCNFInst(..),
     LegalCNFConfig(..),
-    lengthBound
 ) where
+
+import Types (lengthBound)
 import Data.Set (Set)
 import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
 import Data.Char (isLetter)
@@ -84,14 +85,6 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = Just "Can not generate String with such maximum length of formula string"
     | otherwise
       = Nothing
-
-lengthBound :: Int -> Int -> (Int, Int) -> Int --This function is in the logic Type when generate cnf
-lengthBound 1 len (_,_)= 2*len
-lengthBound n len (maxLen,minLen)
-    | n == maxLen && n == minLen = 2^n
-    | n == minLen = 2^n * len
-    | n == len = 2^n + lengthBound (n-1) len (maxLen,minLen)
-    | otherwise = 2^n * len + lengthBound (n-1) len (maxLen,minLen)
 
 data LegalCNFInst =
     LegalCNFInst

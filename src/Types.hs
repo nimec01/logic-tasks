@@ -27,6 +27,7 @@ module Types
        , PrologLiteral(..)
        , PrologClause(..)
        , terms
+       , lengthBound
        ) where
 
 
@@ -584,11 +585,12 @@ genForNF (minNum,maxNum) (minLen,maxLen) lits
     nLits = nub lits
     invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    lengthBound 1 len = 2*len
-    lengthBound n len
-        | n == maxLen && n == minLen = 2^n
-        | n == minLen = 2^n * len
-        | n == len = 2^n + lengthBound (n-1) len
-        | otherwise = 2^n * len + lengthBound (n-1) len
-    upperBound = lengthBound maxLen (length nLits)
+    upperBound = lengthBound maxLen (length nLits) (minLen,maxLen)
 
+lengthBound :: Int -> Int -> (Int, Int) -> Int
+lengthBound 1 len (_,_) = 2*len
+lengthBound n len (minLen,maxLen)
+  | n == maxLen && n == minLen = 2^n
+  | n == minLen = 2^n * len
+  | n == len = 2^n + lengthBound (n-1) len (minLen,maxLen)
+  | otherwise = 2^n * len + lengthBound (n-1) len (minLen,maxLen)
