@@ -22,15 +22,15 @@ notE = do
     lexeme $ string showOperatorNot
     Not <$> parserT
 
-parserTToS :: Parser (SynTree BinOp Char)
-parserTToS = do
+parserTtoS :: Parser (SynTree BinOp Char)
+parserTtoS = do
    lexeme $ char '('
    e <- parserS
    lexeme $ char ')'
    return e
 
 parserT :: Parser (SynTree BinOp Char)
-parserT = leafE <|> parserTToS <|> notE
+parserT = leafE <|> parserTtoS <|> notE
 
 parserS :: Parser (SynTree BinOp Char)
 parserS = do
