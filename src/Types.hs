@@ -34,7 +34,6 @@ module Types
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
-import Data.Either(rights)
 import Data.List(intercalate, delete, nub, transpose)
 import Data.Set (Set,empty)
 import Data.Typeable
@@ -169,21 +168,6 @@ instance Formula Clause where
        lits = map (evaluate xs) (literals ys)
 
 
-
-
-
-partEvalClause :: Clause -> (Literal,Bool) -> Either Bool Clause
-partEvalClause (Clause set) x
-    | Set.null set = Left False
-    | isIn || negIsIn =
-     if snd x then if isIn then Left True else if Set.null setWithoutNeg then Left False else Right (Clause setWithoutNeg)
-              else if isIn then if null setWithout then Left False else Right (Clause setWithout) else Left True
-    | otherwise = Right (Clause set)
-  where
-    (isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
-
-
-
 instance Arbitrary Clause where
    arbitrary = sized clause
      where
@@ -229,29 +213,6 @@ getClauses :: Cnf -> [Clause]
 getClauses (Cnf set) = Set.toList set
 
 
-
-
-partEvalCnf :: Cnf -> (Literal,Bool) -> Either Bool Cnf
-partEvalCnf cnf tup
-    | fst tup `notElem` lits = Right cnf
-    | otherwise = result (thin applied)
-  where
-    lits = literals cnf
-    clauses = getClauses cnf
-    applied = map (`partEvalClause` tup) clauses
-    thin :: [Either Bool Clause] -> [Either Bool Clause]
-    thin [] = []
-    thin (x:xs) =
-      case x of Left False   -> [Left False]
-                Left True    -> thin xs
-                Right clause -> Right clause : thin xs
-    result :: [Either Bool Clause] -> Either Bool Cnf
-    result xs
-      | Left False `elem` xs = Left False
-      | null xs = Left True
-      | otherwise = Right (Cnf (Set.fromList (rights xs)))
-
-
 instance Show Cnf where
     show = listShow . getClauses
       where
@@ -290,7 +251,7 @@ instance Arbitrary Cnf where
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
-            genCnf (1,maxLen ^2) (minLen,maxLen) lits
+            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits
 
 
 
@@ -361,20 +322,6 @@ instance Formula Con where
 
 
 
-
-
-partEvalCon :: Con -> (Literal,Bool) -> Either Bool Con
-partEvalCon (Con set) x
-    | Set.null set = Left True
-    | isIn || negIsIn =
-     if snd x then if isIn then Right (Con setWithout) else Right (Con set)
-              else if isIn then Left False else Right (Con setWithoutNeg)
-    | otherwise = Right (Con set)
-  where
-    (isIn,negIsIn,setWithout,setWithoutNeg) = partEvalHelper set x
-
-
-
 instance Arbitrary Con where
    arbitrary = sized disj
      where
@@ -415,29 +362,6 @@ getConjunctions :: Dnf -> [Con]
 getConjunctions (Dnf set) = Set.toList set
 
 
-
-
-partEvalDnf :: Dnf -> (Literal,Bool) -> Either Bool Dnf
-partEvalDnf dnf tup
-    | fst tup `notElem` lits = Right dnf
-    | otherwise = result (thin applied)
-  where
-    lits = literals dnf
-    disjs = getConjunctions dnf
-    applied = map (`partEvalCon` tup) disjs
-    thin :: [Either Bool Con] -> [Either Bool Con]
-    thin [] = []
-    thin (x:xs) =
-      case x of Left False   -> thin xs
-                Left True    -> [Left True]
-                Right disj -> Right disj : thin xs
-    result :: [Either Bool Con] -> Either Bool Dnf
-    result xs
-      | null xs = Left False
-      | Left True `elem` xs = Left True
-      | otherwise = Right (Dnf (Set.fromList (rights xs)))
-
-
 instance Show Dnf where
     show = listShow . getConjunctions
       where
@@ -475,7 +399,7 @@ instance Arbitrary Dnf where
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
-            genDnf (1,maxLen ^2) (minLen,maxLen) lits
+            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits
 
 
 
@@ -626,18 +550,6 @@ terms (PrologClause set) = Set.toList set
 
 
 -- Helpers to reduce duplicate code
-
-partEvalHelper :: Set Literal -> (Literal,Bool) -> (Bool,Bool,Set Literal, Set Literal)
-partEvalHelper set x = (isIn,negIsIn,setWithout,setWithoutNeg)
-  where
-    next = fst x
-    negNext = opposite next
-    isIn = next `Set.member` set
-    negIsIn = negNext `Set.member` set
-    setWithout = Set.delete next set
-    setWithoutNeg = Set.delete negNext set
-
-
 
 genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
 genForBasic (minlen,maxlen) lits

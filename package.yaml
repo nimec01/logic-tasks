@@ -65,6 +65,7 @@ library:
   - -Wall
   - -Widentities
   - -fno-warn-unused-do-bind
+  - -Werror
 
 executables:
   formulaFromSyntaxTree:

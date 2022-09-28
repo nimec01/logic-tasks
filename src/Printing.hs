@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# language RecordWildCards #-}
 {-# language OverloadedStrings #-}
 
@@ -39,7 +40,7 @@ instance Pretty ResStep where
     where
       litsOrNum = either prettyClause pretty
       curlyBracesList = encloseSep (char '{') (char '}') (char ',')
-      prettyClause c = curlyBracesList $ map pretty $ literals c
+      prettyClause = curlyBracesList . map pretty . literals
 
 
 

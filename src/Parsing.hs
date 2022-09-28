@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
 
 module Parsing where
 
@@ -238,4 +239,3 @@ instance Parse PickInst where
               char ','
               spaces
               char '{'
-
