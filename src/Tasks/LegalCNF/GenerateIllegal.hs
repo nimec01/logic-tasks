@@ -77,7 +77,9 @@ genIllegalClauseShape ifFirstLayer allowArrowOperators ors = do
 
 genIllegalCNFShape :: Bool -> Int -> Gen (SynTree BinOp ())
 genIllegalCNFShape _ 0 = error "impossible"
-genIllegalCNFShape True 1 = oneof [return (Not (legalShape And 1)), genIllegalOper (legalShape And) (allBinaryOperators \\ [And, Or]) 1]
+genIllegalCNFShape True 1 = oneof [ return (Not (legalShape And 1))
+                                  , genIllegalOper (legalShape And)
+                                      (allBinaryOperators \\ [And, Or]) 1]
 genIllegalCNFShape False 1 = return (Not (legalShape And 1))
 genIllegalCNFShape allowArrowOperators ands = do
     ifUseError <- frequency[(1, return True), (ands - 1, return False)]
