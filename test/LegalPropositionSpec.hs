@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
-module LegalPropositionSpec where
+module LegalPropositionSpec (spec, transferSetIntToString) where
 
 import Data.Set (toList, Set, singleton)
 import Data.Either (isLeft, isRight)

@@ -1,5 +1,5 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
-module SubTreeSpec where
+module SubTreeSpec (spec) where
 
 import Test.Hspec ( describe, it, Spec )
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)

@@ -1,4 +1,4 @@
-module ParsingSpec where
+module ParsingSpec (spec) where
 
 import Data.Either (isLeft, isRight)
 import Test.Hspec ( describe, it, Spec)

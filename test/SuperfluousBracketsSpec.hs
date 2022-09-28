@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
-module SuperfluousBracketsSpec where
+module SuperfluousBracketsSpec (spec) where
 
 import Test.QuickCheck (Gen, forAll, choose, suchThat, (==>))
 import Data.List.Extra (notNull)

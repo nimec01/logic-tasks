@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
-module LegalCNFSpec where
+module LegalCNFSpec (spec) where
 
 import Data.Set (toList)
 import Data.Either(isLeft, isRight)

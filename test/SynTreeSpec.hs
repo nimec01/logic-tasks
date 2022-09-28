@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module SynTreeSpec where
+module SynTreeSpec (spec, validBoundsSynTree) where
 
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
