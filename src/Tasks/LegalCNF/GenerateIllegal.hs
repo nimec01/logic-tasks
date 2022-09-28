@@ -64,8 +64,15 @@ genIllegalClauseShape ifFirstLayer allowArrowOperators ors = do
     ifUseError <- frequency [(1, return True), (ors - 1, return False)]
     if ifUseError
     then  if allowArrowOperators
-          then oneof [return (Not (legalShape Or ors)), genIllegalOper (legalShape Or) (if ifFirstLayer then [Equi, Impl] else [Equi, Impl, And]) ors]
-          else oneof (if ifFirstLayer then [return (Not (legalShape Or ors))] else [return (Not (legalShape Or ors)), genIllegalOper (legalShape Or) [And] ors])
+          then oneof [ return (Not (legalShape Or ors))
+                     , genIllegalOper (legalShape Or)
+                         (Equi : Impl : if ifFirstLayer then [] else [And]) ors
+                     ]
+          else  if ifFirstLayer
+                then return (Not (legalShape Or ors))
+                else oneof [ return (Not (legalShape Or ors))
+                           , genIllegalOper (legalShape Or) [And] ors
+                           ]
     else genIllegalShapeInSubTree ors (genIllegalClauseShape False allowArrowOperators) Or
 
 genIllegalCNFShape :: Bool -> Int -> Gen (SynTree BinOp ())
@@ -75,9 +82,10 @@ genIllegalCNFShape False 1 = return (Not (legalShape And 1))
 genIllegalCNFShape allowArrowOperators ands = do
     ifUseError <- frequency[(1, return True), (ands - 1, return False)]
     if ifUseError
-    then  if allowArrowOperators
-          then oneof [return (Not (legalShape And ands)), genIllegalOper (legalShape And) (allBinaryOperators \\ [And]) ands]
-          else oneof [return (Not (legalShape And ands)), genIllegalOper (legalShape And) (allBinaryOperators \\ [And, Equi, Impl]) ands]
+    then oneof [ return (Not (legalShape And ands))
+               , genIllegalOper (legalShape And)
+                   (if allowArrowOperators then allBinaryOperators \\ [And] else [Or]) ands
+               ]
     else genIllegalShapeInSubTree ands (genIllegalCNFShape allowArrowOperators) And
 
 genIllegalOper :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
