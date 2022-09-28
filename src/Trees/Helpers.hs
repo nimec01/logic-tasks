@@ -18,7 +18,6 @@ module Trees.Helpers
     cnfToSynTree,
     clauseToSynTree,
     transferLiteral,
-    judgeCNFSynTree,
     ) where
 
 import Control.Monad (void)
@@ -119,20 +118,3 @@ transferLiteral = (>>= literalToSynTree)
 literalToSynTree :: Setform.Literal -> SynTree o Char
 literalToSynTree (Setform.Literal a) = Leaf a
 literalToSynTree (Setform.Not a) = Not (Leaf a)
-
-judgeCNFSynTree :: SynTree BinOp a -> Bool
-judgeCNFSynTree (Binary And a b) = judgeCNFSynTree a && judgeCNFSynTree b
-judgeCNFSynTree (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
-judgeCNFSynTree (Not a) = judgeLeaf a
-judgeCNFSynTree (Leaf _) = True
-judgeCNFSynTree _ = False
-
-judgeCNFOr :: SynTree BinOp a -> Bool
-judgeCNFOr (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
-judgeCNFOr (Not a) = judgeLeaf a
-judgeCNFOr (Leaf _) = True
-judgeCNFOr _ = False
-
-judgeLeaf :: SynTree o a -> Bool
-judgeLeaf (Leaf _) = True
-judgeLeaf _ = False

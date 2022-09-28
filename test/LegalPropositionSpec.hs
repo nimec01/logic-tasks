@@ -1,11 +1,11 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
-module LegalPropositionSpec (spec, transferSetIntToString) where
+module LegalPropositionSpec (spec) where
 
-import Data.Set (toList, Set, singleton)
+import Data.Set (toList, singleton)
 import Data.Either (isLeft, isRight)
 import Data.Maybe (isJust, isNothing)
-import Data.List (intercalate, (\\))
+import Data.List ((\\))
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat)
 
@@ -20,7 +20,7 @@ import Trees.Generate (genSynTree)
 import Trees.Helpers (maxLeavesForNodes)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
-import TestHelpers (deleteBrackets, deleteSpaces)
+import TestHelpers (deleteBrackets, deleteSpaces, transferSetIntToString)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -56,9 +56,6 @@ illegalTest xs strings = all (\ x -> isLeft (formulaParse (strings !! (x - 1))))
 
 legalTest :: [Int] -> [String] -> Bool
 legalTest xs strings = all (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs
-
-transferSetIntToString :: Set Int -> String
-transferSetIntToString setInt ="{" ++ intercalate "," (map show (toList setInt)) ++ "}"
 
 spec :: Spec
 spec = do

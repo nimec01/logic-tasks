@@ -14,12 +14,13 @@ import Types (Cnf)
 import Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, eof, parse)
 import Config (CnfConfig(..), BaseConfig(..))
-import Trees.Helpers (cnfToSynTree, judgeCNFSynTree)
+import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Helpers (cnfToSynTree)
 import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig, defaultLegalCNFConfig, lengthBound)
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
 import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst, feedback)
-import LegalPropositionSpec(transferSetIntToString)
+import TestHelpers (transferSetIntToString)
 
 validBoundsLegalCNF :: Gen LegalCNFConfig
 validBoundsLegalCNF = do
@@ -125,6 +126,23 @@ spec = do
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalCNF $ \lCConfig ->
                 forAll (generateLegalCNFInst lCConfig) $ \lCInst@LegalCNFInst {..} -> feedback lCInst (transferSetIntToString serialsOfWrong)
+
+judgeCNFSynTree :: SynTree BinOp a -> Bool
+judgeCNFSynTree (Binary And a b) = judgeCNFSynTree a && judgeCNFSynTree b
+judgeCNFSynTree (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
+judgeCNFSynTree (Not a) = judgeLeaf a
+judgeCNFSynTree (Leaf _) = True
+judgeCNFSynTree _ = False
+
+judgeCNFOr :: SynTree BinOp a -> Bool
+judgeCNFOr (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
+judgeCNFOr (Not a) = judgeLeaf a
+judgeCNFOr (Leaf _) = True
+judgeCNFOr _ = False
+
+judgeLeaf :: SynTree o a -> Bool
+judgeLeaf (Leaf _) = True
+judgeLeaf _ = False
 
 cnfParse :: String -> Either ParseError Cnf
 cnfParse = parse (whitespace >> parser <* eof) ""
