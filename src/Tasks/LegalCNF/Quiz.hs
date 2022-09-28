@@ -23,12 +23,12 @@ generateLegalCNFInst :: LegalCNFConfig -> Gen LegalCNFInst
 generateLegalCNFInst lCConfig@LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} = do
     serialsOfWrong <- vectorOf illegals (choose (1, formulas) )`suchThat` listNoDuplicate
     let serial1 = [1.. formulas] \\ serialsOfWrong
-    serialsOfExternal <- vectorOf externalGenFormulas (elements serial1 )`suchThat` \list -> listNoDuplicate list
+    serialsOfExternal <- vectorOf externalGenFormulas (elements serial1 ) `suchThat` listNoDuplicate
     let serial2 = serial1 \\ serialsOfExternal
     serialsOfJustOneClause <- vectorOf (if includeFormWithJustOneClause then 1 else 0) (elements serial2)
     let serial3 = serial2 \\ serialsOfJustOneClause
     serialsOfJustOneLiteralPerClause <- vectorOf (if includeFormWithJustOneLiteralPerClause then 1 else 0) (elements serial3)
-    treeList <- genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause [1.. formulas] lCConfig `suchThat` \treeList -> let treeList' = map (fmap (const 'a')) treeList in listNoDuplicate (map simplestDisplay treeList')
+    treeList <- genSynTreeList serialsOfWrong serialsOfExternal serialsOfJustOneClause serialsOfJustOneLiteralPerClause [1 .. formulas] lCConfig `suchThat` (listNoDuplicate . map (simplestDisplay . fmap (const '_')))
     return $ LegalCNFInst {serialsOfWrong = fromList serialsOfWrong, formulaStrings = map simplestDisplay treeList}
 
 
