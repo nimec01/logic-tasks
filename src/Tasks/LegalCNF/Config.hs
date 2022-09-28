@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE RecordWildCards, StandaloneDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Tasks.LegalCNF.Config(
     checkLegalCNFConfig,
@@ -11,9 +11,6 @@ module Tasks.LegalCNF.Config(
 import Data.Set (Set)
 import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
 import Data.Char (isLetter)
-
-deriving instance Show BaseConfig
-deriving instance Show CnfConfig
 
 data LegalCNFConfig =
   LegalCNFConfig
