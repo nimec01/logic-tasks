@@ -17,7 +17,7 @@ module Trees.Helpers
     consecutiveNegations,
     cnfToSynTree,
     clauseToSynTree,
-    transferLiteral,
+    literalToSynTree,
     ) where
 
 import Control.Monad (void)
@@ -111,9 +111,6 @@ cnfToSynTree = foldr1 (Binary And) . map clauseToSynTree . toList . Setform.clau
 
 clauseToSynTree :: Setform.Clause -> SynTree BinOp Char
 clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . Setform.literalSet
-
-transferLiteral :: SynTree o Setform.Literal -> SynTree o Char
-transferLiteral = (>>= literalToSynTree)
 
 literalToSynTree :: Setform.Literal -> SynTree o Char
 literalToSynTree (Setform.Literal a) = Leaf a

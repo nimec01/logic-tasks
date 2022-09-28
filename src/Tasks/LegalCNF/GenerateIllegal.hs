@@ -7,7 +7,7 @@ import Test.QuickCheck.Gen (oneof)
 import qualified Types as Setform hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList, size)
-import Trees.Helpers (relabelShape, transferLiteral, clauseToSynTree, collectLeaves)
+import Trees.Helpers (relabelShape, literalToSynTree, clauseToSynTree, collectLeaves)
 import Data.List ((\\))
 import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
 import Types (Clause(Clause))
@@ -50,7 +50,7 @@ illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOper
     len <- choose (max 2 minClauseLength, maxClauseLength)
     illegalSynTreeShape <- genIllegalClauseShape True allowArrowOperators (len - 1)
     leaves <- toList . Setform.literalSet <$> genClause (len,len) usedLiterals
-    return (transferLiteral (relabelShape illegalSynTreeShape leaves))
+    return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree)
 
 genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp ())) -> BinOp -> Gen (SynTree BinOp ())
 genIllegalShapeInSubTree opers illegalFunc oper = do
