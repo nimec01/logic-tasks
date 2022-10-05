@@ -3,25 +3,15 @@
 module LogicTasks.Pick where
 
 
-
-
-import Config (BaseConfig(..), CnfConfig(..), PickConfig(..), PickInst(..), Number(..))
-import Formula
-import Types (atomics, genCnf, getTable, letter)
-import Printing (showIndexedList)
-import Util
-
-
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, elements, vectorOf)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
+import Formula (mkCnf, xorSat)
+import Types (atomics, genCnf, getTable, letter)
+import Printing (showIndexedList)
+import Util (checkCnfConf, tryGen)
 
 
 
@@ -66,7 +56,6 @@ description PickInst{..} = do
 
 
 
-
 verifyStatic :: OutputMonad m => PickInst -> LangM m
 verifyStatic PickInst{..}
     | null cnfs =
@@ -102,7 +91,6 @@ verifyQuiz PickConfig{..}
           english "The amount of options is higher than the amount of possible, distinct formulae."
 
     | otherwise = checkCnfConf cnfConf
-
   where
     base = baseConf cnfConf
 
@@ -128,4 +116,3 @@ completeGrade PickInst{..} sol =
                                       else refuse $ indent $ translate $ do
                                              german "Der gewählte Index ist falsch."
                                              english "You submitted the wrong index."
-

@@ -3,25 +3,17 @@
 module LogicTasks.Step where
 
 
-
-import Config (StepConfig(..), StepInst(..), BaseConfig(..))
-import Types
-import Formula
-import Util
-import Resolution
-
-import qualified Data.Set as Set
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.Maybe (fromMaybe)
 import Data.List (delete)
+import Data.Set (difference, fromList, member, toList, union)
 import Test.QuickCheck (Gen, elements)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+import Config (StepConfig(..), StepInst(..), BaseConfig(..))
+import Formula (isEmptyClause, mkClause)
+import Types (Clause, Literal(..), genClause, literals, opposite)
+import Resolution (resolvable, resolve)
+import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 
 
 
@@ -115,7 +107,7 @@ start = (Literal ' ', mkClause [])
 
 partialGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> LangM m
 partialGrade StepInst{..} sol = do
-  prevent (not (fst sol `Set.member` availLits)) $
+  prevent (not (fst sol `member` availLits)) $
     translate $ do
       german "Das gewählte Literal kommt in einer der Klauseln vor?"
       english "The chosen literal is contained in any of the clauses?"
@@ -131,11 +123,10 @@ partialGrade StepInst{..} sol = do
         english "The resolvent contains unknown literals. These literals are incorrect:"
       itemizeM $ map (text . show) extra
     )
-
   where
-     availLits = Set.fromList (literals clause1) `Set.union` Set.fromList (literals clause2)
-     solLits = Set.fromList $ literals $ snd sol
-     extra = Set.toList (solLits `Set.difference` availLits)
+     availLits = fromList (literals clause1) `union` fromList (literals clause2)
+     solLits = fromList $ literals $ snd sol
+     extra = toList (solLits `difference` availLits)
 
 
 

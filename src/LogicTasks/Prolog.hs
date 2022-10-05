@@ -3,28 +3,18 @@
 module LogicTasks.Prolog where
 
 
-
-import Config (PrologConfig(..), PrologInst(..))
-import Types
-import Formula
-import Resolution
-import Util(prevent, preventWithHint, tryGen)
-
---import qualified Data.Set as Set
-import Data.Maybe (fromMaybe, fromJust)
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Data.Maybe (fromJust, fromMaybe)
 import Data.List (delete)
 import Data.Set (difference, member, toList, union)
-import Data.Tuple(swap)
+import Data.Tuple (swap)
 import Test.QuickCheck (Gen, elements)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate,
-  refuse
-  )
+import Config (PrologConfig(..), PrologInst(..))
+import Types (Clause, Literal(..), PrologLiteral(..), PrologClause, genClause, literals, pliterals, opposite)
+import Formula (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
+import Resolution (resolvable, resolve)
+import Util(prevent, preventWithHint, tryGen)
 
 
 
@@ -105,7 +95,6 @@ verifyStatic PrologInst{..}
 
 
 
-
 verifyQuiz :: OutputMonad m => PrologConfig -> LangM m
 verifyQuiz PrologConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
@@ -155,7 +144,6 @@ partialGrade PrologInst{..} sol = do
         english "The resolvent contains unknown literals. These are incorrect:"
       itemizeM $ map (text . show) extra
     )
-
   where
      availLits = pliterals literals1 `union` pliterals literals2
      solLits = pliterals $ snd sol
@@ -182,8 +170,6 @@ completeGrade PrologInst{..} sol =
 
 
 
-
-
 transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(PrologLiteral,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
@@ -201,6 +187,7 @@ transform (pc1,pc2) = (clause1, clause2, applyPol)
     applyPol = map polLookup allPreds
     clause1 = transformProlog pc1 applyPol
     clause2 = transformProlog pc2 applyPol
+
 
 
 revertMapping :: [Literal] -> [(PrologLiteral,Literal)] -> [PrologLiteral]

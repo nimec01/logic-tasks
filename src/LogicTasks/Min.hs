@@ -3,25 +3,16 @@
 module LogicTasks.Min where
 
 
-
-
-import Config
-import Table
-import Types
-import Formula
-import Util
-
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
+import Table (readEntries)
+import Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
+import Formula (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
+import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
 
@@ -80,7 +71,6 @@ description MinInst{..} = do
 
 
 
-
 verifyStatic :: OutputMonad m => MinInst -> LangM m
 verifyStatic MinInst{..}
     | isEmptyDnf dnf || hasEmptyCon dnf =
@@ -89,7 +79,6 @@ verifyStatic MinInst{..}
           english "Please give a non empty formula."
 
     | otherwise = pure ()
-
 
 
 
@@ -108,7 +97,6 @@ verifyQuiz MinMaxConfig{..}
           english "The given restriction on true entries are not a valid range."
 
     | otherwise = checkCnfConf cnfConf
-
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries
 
@@ -180,8 +168,6 @@ partialGrade MinInst{..} sol = do
         english "The formula contains too many maxterms. Remove "
       text $ diff ++ "!"
     )
-
-
   where
     solLits = atomics sol
     corLits = atomics dnf
@@ -191,12 +177,6 @@ partialGrade MinInst{..} sol = do
     corrLen = length $ filter (== Just True) (readEntries table)
     solLen = amount sol
     diff = show $ abs (solLen - corrLen)
-
-
-
-
-
-
 
 
 
@@ -213,13 +193,6 @@ completeGrade MinInst{..} sol = do
         english "The following rows are not correct: "
       itemizeM $ map (text . show) diff
     )
-
   where
     solTable = getTable sol
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable dnf) [1..])
-
-
-
-
-
-

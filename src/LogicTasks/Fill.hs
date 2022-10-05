@@ -3,22 +3,15 @@
 module LogicTasks.Fill where
 
 
-import Config
-import Table
-import Types
-import Formula
-import Util
-
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.Maybe (fromMaybe, fromJust)
 import Test.QuickCheck(Gen)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+import Config ( BaseConfig(..), CnfConfig(..), FillConfig(..), FillInst(..))
+import Formula (hasEmptyClause, isEmptyCnf)
+import Table (gapsAt, readEntries)
+import Types (TruthValue, atomics, genCnf, getTable, truth)
+import Util (checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 
 
 
@@ -69,7 +62,6 @@ description FillInst{..} = do
 
 
 
-
 verifyStatic :: OutputMonad m => FillInst -> LangM m
 verifyStatic FillInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
@@ -96,11 +88,8 @@ verifyStatic FillInst{..}
 
 
 
-
 verifyQuiz :: OutputMonad m => FillConfig -> LangM m
 verifyQuiz FillConfig{..}
-
-
     | isOutside 1 100 percentageOfGaps =
         refuse $ indent $ translate$ do
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
@@ -118,7 +107,6 @@ verifyQuiz FillConfig{..}
           english "The given restriction on true entries are not a valid range."
 
     | otherwise = checkCnfConf cnfConf
-
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries
 
@@ -126,6 +114,7 @@ verifyQuiz FillConfig{..}
 
 start :: [TruthValue]
 start = []
+
 
 
 partialGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
@@ -149,7 +138,6 @@ partialGrade FillInst{..} sol = do
       german $ "Lösung enthält zu wenige Werte. Es " ++ ger ++ " hinzugefügt werden."
       english $ "Solution does not contain enough values. Please add " ++ eng ++ " to proceed."
     )
-
   where
     acLen = length missing
     solLen = length sol
@@ -172,7 +160,6 @@ completeGrade FillInst{..} sol = do
       german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
       english $ "Your solution contains " ++ display ++ " mistakes."
     )
-
   where
     table = getTable cnf
     correct = [ fromJust (readEntries table !! i) | i <- map (\x -> x-1) missing]

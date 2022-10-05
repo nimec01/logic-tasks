@@ -9,16 +9,16 @@ import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
 import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
-import Table
-import Types
-import Formula
-import Util
+import Formula (isEmptyCnf, hasEmptyClause)
+import Table (flipAt, readEntries)
+import Types (atomics, genCnf, getTable)
+import Util (checkCnfConf, isOutside, preventWithHint, remove)
 
 
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
-genDecideInst DecideConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = do
+genDecideInst DecideConfig{cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..} = do
     cnf <- getCnf
     let
       tableLen = length $ readEntries $ getTable cnf

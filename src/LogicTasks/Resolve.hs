@@ -3,32 +3,24 @@
 module LogicTasks.Resolve where
 
 
-
-
-import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
-import Types
-import Formula
-import Util
-import Resolution
-
-import qualified Data.Set as Set
+import Data.Set (fromList, member, toList, unions)
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.List (sort)
-import Data.Maybe (fromMaybe, fromJust)
+import Data.Maybe (fromJust, fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
+import Formula (isEmptyClause, mkCnf, sat)
+import Resolution (applySteps, genRes, resolvableWith, resolve)
+import Types (Clause, ResStep(..), literals)
+import Util (checkBaseConf, prevent, preventWithHint)
 
 
 
 
 fst3 :: (a,b,c) -> a
 fst3 (a,_,_) = a
+
 
 snd3 :: (a,b,c) -> b
 snd3 (_,b,_) = b
@@ -178,14 +170,13 @@ partialGrade ResolutionInst{..} sol = do
     translate $ do
       german "Letzter Schritt leitet die leere Klausel ab?"
       english "The last step derives the empty clause?"
-
   where
     checkMapping = correctMapping sol $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
     checkEmptyClause = null steps || not (isEmptyClause $ thrd3 $ last steps)
-    availLits = Set.unions (map (Set.fromList . literals) clauses)
-    stepLits (c1,c2,r) = Set.toList $ Set.unions $ map (Set.fromList . literals) [c1,c2,r]
-    wrongLitsSteps = filter (not . all (`Set.member` availLits) . stepLits) steps
+    availLits = unions (map (fromList . literals) clauses)
+    stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
+    wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
     noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x -> fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
 
 
@@ -202,7 +193,6 @@ completeGrade ResolutionInst{..} sol =
                             else refuse $ indent $ translate $ do
                                    german "Die Leere Klausel wurde nicht korrekt abgeleitet."
                                    english "The Empty clause was not derived correctly."
-
       where
         steps = replaceAll sol $ baseMapping clauses
 
@@ -210,6 +200,7 @@ completeGrade ResolutionInst{..} sol =
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
+
 
 
 correctMapping :: OutputMonad m => [ResStep] -> [(Int,Clause)] -> LangM m
@@ -226,18 +217,13 @@ correctMapping (Res (c1,c2,(c3,i)): rest) mapping = do
       english "No index is in duplicate use?"
 
   correctMapping rest newMapping
-
-
   where
     newMapping = case i of Nothing      -> mapping
                            (Just index) -> (index,c3) : mapping
 
-
     unknown (Left _) = False
     unknown (Right n) = n `notElem` map fst mapping
-
     checkIndices = unknown c1 || unknown c2
-
     alreadyUsed Nothing = False
     alreadyUsed (Just n) = n `elem` map fst mapping
 

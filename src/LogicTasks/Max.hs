@@ -3,25 +3,16 @@
 module LogicTasks.Max where
 
 
-
-
-import Config
-import Table
-import Types
-import Formula
-import Util
-
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
+import Formula (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
+import Table (readEntries)
+import Types (Cnf, Literal(..), amount, atomics, genCnf, getClauses, getTable)
+import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
 
@@ -80,8 +71,6 @@ description MaxInst{..} = do
 
 
 
-
-
 verifyStatic :: OutputMonad m => MaxInst -> LangM m
 verifyStatic MaxInst{..}
     | isEmptyCnf cnf || hasEmptyClause cnf =
@@ -90,7 +79,6 @@ verifyStatic MaxInst{..}
           english "Please give a non empty formula."
 
     | otherwise = pure()
-
 
 
 
@@ -109,7 +97,6 @@ verifyQuiz MinMaxConfig{..}
           english "The given restriction on true entries are not a valid range."
 
     | otherwise = checkCnfConf cnfConf
-
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries
 
@@ -153,7 +140,6 @@ partialGrade MaxInst{..} sol = do
       german "Alle Klauseln sind Maxterme?"
       english "All clauses are maxterms?"
 
-
   preventWithHint (solLen < corrLen)
     (translate $ do
       german "Genügend Maxterme in Lösung?"
@@ -170,7 +156,6 @@ partialGrade MaxInst{..} sol = do
         english "!"
     )
 
-
   preventWithHint (solLen > corrLen)
     (translate $ do
       german "Nicht zu viele Maxterme in Lösung?"
@@ -183,7 +168,6 @@ partialGrade MaxInst{..} sol = do
         english "The formula contains too many maxterms. Remove "
       text $ diff ++ "!"
     )
-
   where
     solLits = atomics sol
     corLits = atomics cnf
@@ -193,8 +177,6 @@ partialGrade MaxInst{..} sol = do
     corrLen = length $ filter (== Just False) (readEntries table)
     solLen = amount sol
     diff = show $ abs (solLen - corrLen)
-
-
 
 
 
@@ -212,13 +194,6 @@ completeGrade MaxInst{..} sol =
         english "The following rows are not correct: "
       itemizeM $ map (text . show) diff
     )
-
   where
     solTable = getTable sol
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable cnf) [1..])
-
-
-
-
-
-

@@ -3,7 +3,7 @@
 module Util where
 
 
-import Control.Monad.Output
+import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate, yesNo)
 import Control.Monad.State (put, get, lift, evalStateT)
 import Data.List (delete)
 import Test.QuickCheck(Gen, elements)
