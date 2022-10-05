@@ -7,12 +7,13 @@ module LogicTasks.Pick where
 
 import Config (BaseConfig(..), CnfConfig(..), PickConfig(..), PickInst(..), Number(..))
 import Formula
-import Types (getTable)
+import Types (atomics, genCnf, getTable, letter)
 import Printing (showIndexedList)
 import Util
 
 
 import Data.Maybe (fromMaybe)
+import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Control.Monad.Output (
   LangM,
@@ -22,6 +23,22 @@ import Control.Monad.Output (
   translate
   )
 
+
+
+
+genPickInst :: PickConfig -> Gen PickInst
+genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..} = do
+    first <- getCnf usedLiterals
+    let
+      cnfLits = atomics first
+      generator = tryGen (getCnf $ map letter cnfLits) 100 (\cnf -> atomics cnf == cnfLits && xorSat first cnf)
+    rest <- vectorOf (amountOfOptions - 1) generator
+    let
+      cnfs = first : rest
+    corrIndex <- elements [1..length cnfs -1]
+    pure $ PickInst cnfs corrIndex extraText
+  where
+    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
 
 
 

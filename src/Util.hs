@@ -3,9 +3,14 @@
 module Util where
 
 
-import Config (BaseConfig(..), CnfConfig(..))
-
 import Control.Monad.Output
+import Control.Monad.State (put, get, lift, evalStateT)
+import Data.List (delete)
+import Test.QuickCheck(Gen, elements)
+
+import Config (BaseConfig(..), CnfConfig(..))
+import Types (Formula, getTable)
+import Table (readEntries)
 
 
 
@@ -14,12 +19,14 @@ prevent :: OutputMonad m => Bool -> LangM m -> LangM m
 prevent b = assertion $ not b
 
 
+
 preventWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
 preventWithHint b desc hint = do
   yesNo (not b) desc
   if b
     then refuse $ indent hint
     else pure()
+
 
 
 pairwiseCheck :: Eq a => [(a,a,Int)] -> ([Int],[Int])
@@ -31,11 +38,46 @@ pairwiseCheck ((x,y,index):xs)
 
 
 
-
 isOutside :: Int -> Int -> Int -> Bool
 isOutside lower upper x = x < lower || x > upper
 
 
+
+remove :: Int -> [Int] -> Gen [Int]
+remove _ [] = pure []
+remove 0 xs = pure xs
+remove num xs = do
+    out <- elements xs
+    remove (num-1) $ delete out xs
+
+
+
+withRatio :: Formula a => (Int,Int) -> a -> Bool
+withRatio (lower,upper) form =
+    length trueEntries <= maximum [upperBound,if upper == 0 then 0 else 1]
+        && length trueEntries >= maximum [if lower == 0 then 0 else 1, lowerBound]
+  where
+    tableEntries = readEntries (getTable form)
+    trueEntries = filter (== Just True) tableEntries
+    percentage :: Int -> Int
+    percentage num = length tableEntries *num `div` 100
+    upperBound = percentage upper
+    lowerBound = percentage lower
+
+
+
+tryGen :: Gen a -> Int -> (a -> Bool) -> Gen a
+tryGen gen n b = evalStateT state 0
+  where
+    state = do
+       runs <- get
+       if runs > n
+         then error "Maximum amount of tries exceeded by generator!"
+         else do
+           res <- lift gen
+           if b res then pure res
+                    else do put (runs +1)
+                            state
 
 
 

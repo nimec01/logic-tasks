@@ -14,7 +14,7 @@ import Resolution
 import qualified Data.Set as Set
 import Data.List (sort)
 import Data.Maybe (fromMaybe, fromJust)
-
+import Test.QuickCheck (Gen)
 
 import Control.Monad.Output (
   LangM,
@@ -36,6 +36,13 @@ snd3 (_,b,_) = b
 
 thrd3 :: (a,b,c) -> c
 thrd3 (_,_,c) = c
+
+
+
+genResInst :: ResolutionConfig -> Gen ResolutionInst
+genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = ResolutionInst <$> inst <*> pure extraText
+  where
+    inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
 
 

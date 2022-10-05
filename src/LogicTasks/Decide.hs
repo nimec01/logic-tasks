@@ -3,24 +3,30 @@
 module LogicTasks.Decide where
 
 
+import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Data.List (nub)
+import Data.Maybe (fromMaybe)
+import Test.QuickCheck (Gen)
 
-
-import Config
+import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
 import Table
 import Types
 import Formula
 import Util
 
-import Data.List (nub)
-import Data.Maybe (fromMaybe)
 
-import Control.Monad.Output (
-  LangM,
-  OutputMonad (..),
-  english,
-  german,
-  translate
-  )
+
+
+genDecideInst :: DecideConfig -> Gen DecideInst
+genDecideInst DecideConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = do
+    cnf <- getCnf
+    let
+      tableLen = length $ readEntries $ getTable cnf
+      mistakeCount = maximum [tableLen * percentageOfChanged `div` 100, 1]
+    mistakes <- remove (tableLen - mistakeCount) [1..tableLen]
+    pure $ DecideInst cnf mistakes extraText
+  where
+    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
 
 
 
@@ -49,8 +55,6 @@ description DecideInst{..} = do
     code "[1,4,5]"
 
   paragraph $ text (fromMaybe "" addText)
-
-
 
 
 
@@ -84,7 +88,6 @@ verifyStatic DecideInst{..}
 
 
 
-
 verifyQuiz :: OutputMonad m => DecideConfig -> LangM m
 verifyQuiz DecideConfig{..}
     | isOutside 1 100 percentageOfChanged =
@@ -98,8 +101,6 @@ verifyQuiz DecideConfig{..}
 
 start :: [Int]
 start = []
-
-
 
 
 
@@ -136,7 +137,6 @@ partialGrade DecideInst{..} sol = do
 
 
 
-
 completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
 completeGrade DecideInst{..} sol = do
   preventWithHint (diff /= 0)
@@ -148,13 +148,7 @@ completeGrade DecideInst{..} sol = do
       german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
       english $ "Your solution contains " ++ display ++ " mistakes."
     )
-
   where
     nubSol = nub sol
     diff = length $ filter (`notElem` changed) nubSol
     display = show diff
-
-
-
-
-

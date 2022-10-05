@@ -13,6 +13,7 @@ import Util
 
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
+import Test.QuickCheck (Gen)
 
 import Control.Monad.Output (
   LangM,
@@ -23,6 +24,13 @@ import Control.Monad.Output (
   )
 
 
+
+
+genMaxInst :: MinMaxConfig -> Gen MaxInst
+genMaxInst MinMaxConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = MaxInst <$> cnfInRange <*> pure extraText
+  where
+    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+    cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
 
 
 

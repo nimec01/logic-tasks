@@ -4,7 +4,7 @@ module LogicTasks.Step where
 
 
 
-import Config (StepConfig(..), StepInst(..))
+import Config (StepConfig(..), StepInst(..), BaseConfig(..))
 import Types
 import Formula
 import Util
@@ -12,6 +12,8 @@ import Resolution
 
 import qualified Data.Set as Set
 import Data.Maybe (fromMaybe)
+import Data.List (delete)
+import Test.QuickCheck (Gen, elements)
 
 import Control.Monad.Output (
   LangM,
@@ -21,6 +23,26 @@ import Control.Monad.Output (
   translate
   )
 
+
+
+
+genStepInst :: StepConfig -> Gen StepInst
+genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
+    rChar <- elements usedLiterals
+    rLit <- elements [Literal rChar, Not rChar]
+    let
+      restLits = delete rChar usedLiterals
+    minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
+    minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
+    clause1 <- genClause (minLen1,maxClauseLength-1) restLits
+    let
+      lits1 = literals clause1
+    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
+        (all (\lit -> opposite lit `notElem` lits1) .  literals)
+    let
+      litAddedClause1 = mkClause $ rLit : lits1
+      litAddedClause2 = mkClause $ opposite rLit : literals clause2
+    pure $ StepInst litAddedClause1 litAddedClause2 extraText
 
 
 

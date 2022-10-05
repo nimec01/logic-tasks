@@ -10,6 +10,7 @@ import Formula
 import Util
 
 import Data.Maybe (fromMaybe, fromJust)
+import Test.QuickCheck(Gen)
 
 import Control.Monad.Output (
   LangM,
@@ -20,6 +21,19 @@ import Control.Monad.Output (
   )
 
 
+
+
+genFillInst :: FillConfig -> Gen FillInst
+genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..} = do
+    cnf <- cnfInRange
+    let
+      tableLen = length $ readEntries $ getTable cnf
+      gapCount = maximum [tableLen * percentageOfGaps `div` 100, 1]
+    gaps <- remove (tableLen - gapCount) [1..tableLen]
+    pure $ FillInst cnf gaps extraText
+  where
+    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+    cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
 
 
 

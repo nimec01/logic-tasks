@@ -8,12 +8,14 @@ import Config (PrologConfig(..), PrologInst(..))
 import Types
 import Formula
 import Resolution
-import Util(prevent, preventWithHint)
+import Util(prevent, preventWithHint, tryGen)
 
-import qualified Data.Set as Set
+--import qualified Data.Set as Set
 import Data.Maybe (fromMaybe, fromJust)
+import Data.List (delete)
+import Data.Set (difference, member, toList, union)
 import Data.Tuple(swap)
-
+import Test.QuickCheck (Gen, elements)
 
 import Control.Monad.Output (
   LangM,
@@ -24,6 +26,33 @@ import Control.Monad.Output (
   refuse
   )
 
+
+
+
+genPrologInst :: PrologConfig -> Gen PrologInst
+genPrologInst PrologConfig{..} = do
+    rChar <- elements usedLiterals
+    rLit <- elements [Literal rChar, Not rChar]
+    let
+      restLits = delete rChar usedLiterals
+    minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
+    minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
+    clause1 <- genClause (minLen1,maxClauseLength-1) restLits
+    let
+      lits1 = literals clause1
+    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
+        (all (\lit -> opposite lit `notElem` lits1) .  literals)
+    let
+      termAddedClause1 = mkPrologClause $ map remap (rLit : lits1)
+      termAddedClause2 = mkPrologClause $ map remap (opposite rLit : literals clause2)
+    pure $ PrologInst termAddedClause1 termAddedClause2 extraText
+  where
+    mapping = zip usedPredicates ['A'..'Z']
+    usedLiterals = map snd mapping
+    reverseMapping = map swap mapping
+    remap l = if isPositive l then predicate else flipPol predicate
+      where
+        predicate = fromJust (lookup (letter l) reverseMapping)
 
 
 
@@ -110,7 +139,7 @@ start = (PrologLiteral True " " [], mkPrologClause [])
 
 partialGrade :: OutputMonad m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 partialGrade PrologInst{..} sol = do
-  prevent (not (fst sol `Set.member` availLits)) $
+  prevent (not (fst sol `member` availLits)) $
     translate $ do
       german "Gewähltes Literal kommt in den Klauseln vor?"
       english "Chosen literal is contained in any of the clauses?"
@@ -128,9 +157,9 @@ partialGrade PrologInst{..} sol = do
     )
 
   where
-     availLits = pliterals literals1 `Set.union` pliterals literals2
+     availLits = pliterals literals1 `union` pliterals literals2
      solLits = pliterals $ snd sol
-     extra = Set.toList $ solLits `Set.difference` availLits
+     extra = toList $ solLits `difference` availLits
 
 
 
@@ -158,7 +187,7 @@ completeGrade PrologInst{..} sol =
 transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(PrologLiteral,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
-    allPreds = Set.toList (Set.union (pliterals pc1) (pliterals pc2))
+    allPreds = toList (union (pliterals pc1) (pliterals pc2))
     noDups = map (\(PrologLiteral _ n f) -> PrologLiteral True n f) allPreds
     mapping = zip noDups ['A'..'Z']
 
