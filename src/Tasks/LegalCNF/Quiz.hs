@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
+
 module Tasks.LegalCNF.Quiz  (
     generateLegalCNFInst,
     feedback,
@@ -20,7 +21,7 @@ import Trees.Helpers (cnfToSynTree)
 import qualified Types (genCnf)
 
 generateLegalCNFInst :: LegalCNFConfig -> Gen LegalCNFInst
-generateLegalCNFInst lCConfig@LegalCNFConfig {cnfConfig = CnfConfig{..}, ..} = do
+generateLegalCNFInst lCConfig@LegalCNFConfig {..} = do
     serialsOfWrong <- vectorOf illegals (choose (1, formulas) )`suchThat` listNoDuplicate
     let serial1 = [1.. formulas] \\ serialsOfWrong
     serialsOfExternal <- vectorOf externalGenFormulas (elements serial1 ) `suchThat` listNoDuplicate
