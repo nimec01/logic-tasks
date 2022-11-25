@@ -56,7 +56,7 @@ description FillInst{..} = do
     translate $ do
       german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen:"
       english "A valid solution for four blanks could look like this:"
-    code "[f,t,t,t]"
+    code "[0,1,1,1]"
 
   paragraph $ text (fromMaybe "" addText)
 
