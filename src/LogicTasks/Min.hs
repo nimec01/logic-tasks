@@ -135,7 +135,7 @@ partialGrade MinInst{..} sol = do
       itemizeM $ map (text . show) missing
     )
 
-  prevent (all (\c -> amount c == length corLits) $ getConjunctions sol) $
+  prevent (not $ all (\c -> amount c == length corLits) $ getConjunctions sol) $
     translate $ do
       german "Alle Konjunktionen sind Minterme?"
       english "All conjunctions are minterms?"
