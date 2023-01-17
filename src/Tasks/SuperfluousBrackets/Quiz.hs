@@ -12,8 +12,10 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Print (simplestDisplay)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
-import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
-import Data.Char (isSpace)
+import Trees.Types (PropFormula(..))
+
+
+
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
@@ -21,9 +23,10 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       `suchThat` sameAssociativeOperatorAdjacent
     stringWithSuperfluousBrackets <- superfluousBracketsDisplay syntaxTree superfluousBracketPairs
     return $ SuperfluousBracketsInst
-      { stringWithSuperfluousBrackets
+      { syntaxTree
+      , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay syntaxTree
       }
 
-feedback :: SuperfluousBracketsInst -> String -> Bool
-feedback SuperfluousBracketsInst {simplestString} input = superfluousBracketsExcParser input == Right (filter (not . isSpace) simplestString)
+feedback :: SuperfluousBracketsInst -> PropFormula -> Bool
+feedback SuperfluousBracketsInst {simplestString} simForm = show simForm == simplestString

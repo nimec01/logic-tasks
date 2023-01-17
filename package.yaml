@@ -14,6 +14,12 @@ dependencies:
 - parsec
 - text
 - output-monad
+- pretty-simple
+- latex-svg-image >= 0.2
+- bytestring
+- utf8-string
+- SHA
+- directory
 
 library:
   source-dirs: src
@@ -33,11 +39,11 @@ library:
     - LogicTasks.Printing
     - LogicTasks.Parsing
     - LogicTasks.Util
-    - Trees.Types
-    - Trees.Helpers
-    - Trees.Parsing
-    - Trees.Generate
-    - Trees.Print
+    - LogicTasks.Syntax.IllegalCnfs
+    - LogicTasks.Syntax.IllegalFormulas
+    - LogicTasks.Syntax.SimplestFormula
+    - LogicTasks.Syntax.SubTreeSet
+    - LogicTasks.Syntax.TreeToFormula
     - Tasks.SynTree.Config
     - Tasks.SynTree.Quiz
     - Tasks.SubTree.Config
@@ -56,6 +62,11 @@ library:
     - Tasks.LegalCNF.Quiz
     - Tasks.LegalCNF.GenerateIllegal
     - Tasks.LegalCNF.GenerateLegal
+    - Trees.Types
+    - Trees.Parsing
+    - Trees.Print
+    - Trees.Helpers
+    - Trees.Generate
     - Parsing
     - ParsingHelpers
     - Config
@@ -67,67 +78,6 @@ library:
   - -fno-warn-unused-do-bind
   - -Werror
 
-executables:
-  formulaFromSyntaxTree:
-    main: formulaFromSyntaxTree.hs
-    source-dirs: app
-    dependencies:
-      - logic-tasks
-      - pretty-simple
-    ghc-options:
-      - -Wunused-imports
-      - -Wmissing-signatures
-      - -Wunused-matches
-      - -Widentities
-      - -Werror
-  partNonAtomicSubTreeSet:
-    main: partNonAtomicSubTreeSet.hs
-    source-dirs: app
-    dependencies:
-      - logic-tasks
-      - pretty-simple
-    ghc-options:
-      - -Wunused-imports
-      - -Wmissing-signatures
-      - -Wunused-matches
-      - -Widentities
-      - -Werror
-  illegalPseudoFormulasSelect:
-    main: illegalPseudoFormulasSelect.hs
-    source-dirs: app
-    dependencies:
-      - logic-tasks
-      - pretty-simple
-    ghc-options:
-      - -Wunused-imports
-      - -Wmissing-signatures
-      - -Wunused-matches
-      - -Widentities
-      - -Werror
-  simplestFormula:
-    main: simplestFormula.hs
-    source-dirs: app
-    dependencies:
-      - logic-tasks
-      - pretty-simple
-    ghc-options:
-      - -Wunused-imports
-      - -Wmissing-signatures
-      - -Wunused-matches
-      - -Widentities
-      - -Werror
-  illegalCNFSelect:
-    main: illegalCNFSelect.hs
-    source-dirs: app
-    dependencies:
-      - logic-tasks
-      - pretty-simple
-    ghc-options:
-      - -Wunused-imports
-      - -Wmissing-signatures
-      - -Wunused-matches
-      - -Widentities
-      - -Werror
 
 tests:
   src-test:

@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.SubTree.Config (
     SubTreeInst(..),
@@ -7,12 +8,16 @@ module Tasks.SubTree.Config (
     checkSubTreeConfig
   ) where
 
+
+import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
 import Data.Set (Set)
-import Control.Applicative              (Alternative ((<|>)))
+import GHC.Generics
 
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
-import Trees.Types (SynTree, BinOp)
 import Trees.Helpers (maxLeavesForNodes)
+import Trees.Types (SynTree, BinOp)
+
+
 
 data SubTreeConfig =
   SubTreeConfig
@@ -20,7 +25,7 @@ data SubTreeConfig =
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
     , minSubTrees :: Integer
-    } deriving Show
+    } deriving (Show,Generic)
 
 defaultSubTreeConfig :: SubTreeConfig
 defaultSubTreeConfig =
@@ -30,23 +35,30 @@ defaultSubTreeConfig =
     , minSubTrees = 3
     }
 
-checkSubTreeConfig :: SubTreeConfig -> Maybe String
+checkSubTreeConfig :: OutputMonad m => SubTreeConfig -> LangM m
 checkSubTreeConfig subConfig@SubTreeConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
-    <|> checkAdditionalConfig subConfig
+    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig subConfig
 
-checkAdditionalConfig :: SubTreeConfig -> Maybe String
+
+checkAdditionalConfig :: OutputMonad m => SubTreeConfig -> LangM m
 checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
     | minSubTrees < 2
-      = Just "The task makes no sense if not at least two subtrees should be given."
+      = reject "The task makes no sense if not at least two subtrees are generated."
+               "Es müssen mindestens zwei Unterbäume erzeugt werden."
     | minNodes - maxLeavesForNodes minNodes < minSubTrees
-      = Just "In this case, it is possible to have too much leaves nodes and lead to not enough non-atomic SubTrees"
-    | otherwise = Nothing
+      = reject "In this case, it is possible to have too many leaves nodes. This leads to not having enough non-atomic SubTrees."
+               "MIt diesen Einstellungen können nicht genügend nicht-triviale Unterbäume erzeugt werden."
+    | otherwise = pure()
+  where
+    reject e g  = refuse $ indent $ translate $ do
+      english e
+      german g
 
 data SubTreeInst =
     SubTreeInst
-    { formula :: String
+    { tree :: SynTree BinOp Char
+    , formula :: String
     , correctTrees :: Set (SynTree BinOp Char)
     , correctFormulas :: Set String
     , minInputTrees :: Integer
-    } deriving Show
+    } deriving (Show,Generic)

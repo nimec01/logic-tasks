@@ -1,5 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 
 module Tasks.LegalCNF.Config(
     checkLegalCNFConfig,
@@ -8,10 +10,17 @@ module Tasks.LegalCNF.Config(
     LegalCNFConfig(..),
 ) where
 
-import Types (lengthBound)
-import Data.Set (Set)
-import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
+
+import Control.Monad.Output(OutputMonad(..), LangM, english, german, translate)
 import Data.Char (isLetter)
+import Data.Set (Set)
+import GHC.Generics
+import Types (lengthBound)
+
+import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
+
+
+
 
 data LegalCNFConfig =
   LegalCNFConfig
@@ -25,7 +34,7 @@ data LegalCNFConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
-  } deriving Show
+  } deriving (Show,Generic)
 
 defaultLegalCNFConfig :: LegalCNFConfig
 defaultLegalCNFConfig =
@@ -42,53 +51,62 @@ defaultLegalCNFConfig =
   , allowArrowOperators = True
   }
 
-checkLegalCNFConfig :: LegalCNFConfig -> Maybe String
+checkLegalCNFConfig :: OutputMonad m => LegalCNFConfig -> LangM m
 checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals)
-      = Just "Only letters are allowed as literals."
-    | minClauseAmount < 1
-      = Just "The number of Clauses must be positive"
-    | minClauseLength < 1
-      = Just "The number of Literals per clause must be positive"
-    | maxClauseAmount < minClauseAmount
-      = Just "maxClauses can not less than minClauseAmount"
-    | maxClauseLength < minClauseLength
-      = Just "maxClauseLength can not less than minClauseLength"
+      = reject "Only letters are allowed as literals."
+               "Nur Buchstaben können Literale sein."
+    | negArgs
+      = reject "The following parameters need to be greater than zero: minClauseAmount, minClauseLength, minStringSize, formulas."
+               "Diese Parameter müssen größer als null sein: minClauseAmount, minClauseLength, minStringSize, formulas."
+    | zeroArgs
+      = reject "The following parameters need to be zero or greater: illegals, externalGenFormulas."
+               "Diese Parameter müssen null oder größer sein: illegals, externalGenFormulas."
+    | boundsError
+      = reject "At least one upper bound is smaller than its corresponding lower bound."
+               "Mindestens eine Obergrenze ist niedriger als die zugehörige Untergrenze."
     | (maxClauseLength > 2 * length usedLiterals) || (externalGenFormulas > 0 && maxClauseLength > length usedLiterals)
-      = Just "The Used Literal can not generate a Clause with maxClauseLength"
+      = reject "The Used Literals can not generate a Clause with maxClauseLength"
+               "Die angegebenen Literale können die maximale Klauselgröße nicht generieren."
     | let limit beginNumber = product (take maxClauseLength (reverse [1 .. beginNumber :: Integer])),
       let literalLength = fromIntegral (length usedLiterals),
       fromIntegral maxClauseAmount > min 15 (limit (2 * literalLength))
     || externalGenFormulas > 0 && fromIntegral maxClauseAmount > min 15 (limit literalLength)
-      = Just "The maxClauseAmount is too big and have the risk contain same Clauses in the CNF"
+      = reject "The maxClauseAmount is too big. There is the risk of duplicate clauses in the CNF."
+               "maxClauseAmount ist zu groß. Es ist möglich, dass eine Klausel mehrfach in der CNF vorkommt."
     | fromIntegral formulas > (fromIntegral (maxClauseLength - minClauseLength + 1) ^ (fromIntegral (maxClauseAmount - minClauseAmount + 1) :: Integer)) `div` (2 :: Integer) + 1
-      = Just  "Formulas is too big and have risk to generate similar CNF"
+      = reject  "Amount of Formulas is too big and bears the risk of generating similar CNFs."
+                "Menge an Formeln ist zu groß. Eine Formeln könnte mehrfach generiert werden."
     | maxClauseLength == 1 && maxClauseAmount == 1
-      = Just "Atomic propositions have no illegal forms"
-    | formulas < 1
-      = Just "The number of formulas must be positive"
-    | illegals < 0
-      = Just "The number of illegals can not be negative"
-    | externalGenFormulas < 0
-      = Just "The number external generated formulas can not be negative"
+      = reject "Atomic propositions have no illegal forms"
+               "Atomare Aussagen können nicht syntaktisch falsch sein."
     | formulas - illegals - externalGenFormulas <  (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
-      = Just "The formulas used to generate special formula is not enough"
+      = reject "The formulas used to generate special formula are not sufficient."
+               "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
     | externalGenFormulas > 0 && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
-      = Just "The minimum Number of ClauseAmount is too big and the external generator can not generate such CNF "
-    | minStringSize <= 0
-      = Just "Can not generate String with such minStringSize"
-    | maxStringSize < minStringSize
-      = Just "The maximum length of formula string can not less than the minimum length of formula string"
+      = reject "minClauseAmount is too large. The external generator can not generate a CNF."
+               "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 5 + 1)
-      = Just "Can not generate String with such minimum length of formula string"
+      = reject "Can not generate String with given minStringSize."
+               "String kann mit gegebenen minStringSize nicht generiert werden."
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5)
-      = Just "Can not generate String with such maximum length of formula string"
+      = reject "Can not generate String with given maxStringSize."
+               "String kann mit gegebenen maxStringSize nicht generiert werden."
     | otherwise
-      = Nothing
+      = pure()
+  where
+    reject e g  = refuse $ indent $ translate $ do
+      english e
+      german g
+
+    negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
+    zeroArgs = any (<0) [illegals, externalGenFormulas]
+    boundsError = any (\(a,b) -> b < a) [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
+
 
 data LegalCNFInst =
     LegalCNFInst
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]
-    } deriving Show
+    } deriving (Show,Generic)

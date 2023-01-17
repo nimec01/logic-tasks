@@ -18,6 +18,8 @@ module Trees.Helpers
     cnfToSynTree,
     clauseToSynTree,
     literalToSynTree,
+    numOfOps,
+    formulaToTree
     ) where
 
 import Control.Monad (void)
@@ -25,7 +27,7 @@ import Control.Monad.State (get, put, runState, evalState)
 import Data.Set(fromList, Set, toList)
 import Data.List.Extra (nubBy)
 import qualified Types as Setform hiding (Dnf(..), Con(..))
-import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
 
 numberAllBinaryNodes :: SynTree o c -> SynTree (o, Integer) c
@@ -115,3 +117,16 @@ clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . Setform.l
 literalToSynTree :: Setform.Literal -> SynTree o Char
 literalToSynTree (Setform.Literal a) = Leaf a
 literalToSynTree (Setform.Not a) = Not (Leaf a)
+
+
+numOfOps :: SynTree o c -> Integer
+numOfOps (Binary _ t1 t2)= 1 + numOfOps t1 + numOfOps t2
+numOfOps (Not t) = numOfOps t
+numOfOps _ = 0
+
+
+formulaToTree :: PropFormula -> SynTree BinOp Char
+formulaToTree (Atomic c) = Leaf c
+formulaToTree (Neg f) = Not $ formulaToTree f
+formulaToTree (Brackets f) = formulaToTree f
+formulaToTree (Assoc op f1 f2) = Binary op (formulaToTree f1) (formulaToTree f2)

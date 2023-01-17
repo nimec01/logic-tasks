@@ -1,23 +1,28 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.SuperfluousBrackets.Config(
     SuperfluousBracketsConfig (..),
     SuperfluousBracketsInst (..),
-
     defaultSuperfluousBracketsConfig,
     checkSuperfluousBracketsConfig
 )where
 
-import Control.Applicative              (Alternative ((<|>)))
+
+import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
+import GHC.Generics
 
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
+import Trees.Types (BinOp, SynTree)
+
+
 
 data SuperfluousBracketsConfig =
     SuperfluousBracketsConfig
     {
       syntaxTreeConfig :: SynTreeConfig
     , superfluousBracketPairs :: Integer
-    } deriving Show
+    } deriving (Show,Generic)
 
 defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
@@ -27,25 +32,34 @@ defaultSuperfluousBracketsConfig =
     , superfluousBracketPairs = 2
     }
 
-checkSuperfluousBracketsConfig :: SuperfluousBracketsConfig -> Maybe String
+checkSuperfluousBracketsConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkSuperfluousBracketsConfig sBConfig@SuperfluousBracketsConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig
-    <|> checkAdditionalConfig sBConfig
+    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig sBConfig
 
-checkAdditionalConfig :: SuperfluousBracketsConfig -> Maybe String
+checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}
     | minNodes < 5
-      = Just "Minimal number of nodes must larger than 4"
+      = reject "Minimal number of nodes must larger than 4"
+               "Minimale Anzahl Blätter muss größer 4 sein."
     | superfluousBracketPairs > minNodes `div` 2
-      = Just "The number of superfluous brackets is excessive, given your node numbers."
+      = reject "The number of superfluous brackets is excessive, given your node numbers."
+               "Die Anzahl zusätzlicher Klammern ist zu hoch für die Menge an Blättern."
     | superfluousBracketPairs < 1
-      = Just "Add at least one extra Brackets"
+      = reject "Add at least one extra pair of brackets."
+               "Es muss mindestens ein KLammerpaar hinzugefügt werden."
     | otherwise
-      = Nothing
+      = pure()
+  where
+    reject e g  = refuse $ indent $ translate $ do
+      english e
+      german g
+
+
 
 data SuperfluousBracketsInst =
     SuperfluousBracketsInst
     {
-      stringWithSuperfluousBrackets :: String
+      syntaxTree :: SynTree BinOp Char
+    , stringWithSuperfluousBrackets :: String
     , simplestString :: String
-    } deriving Show
+    } deriving (Show,Generic)
