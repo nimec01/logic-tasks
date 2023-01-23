@@ -9,7 +9,7 @@ import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
 import Formula (mkCnf, xorSat)
-import Types (atomics, genCnf, getTable, letter)
+import Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
 
@@ -34,26 +34,27 @@ genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
 
 description :: OutputMonad m => PickInst -> LangM m
 description PickInst{..} = do
-  paragraph $ do
-    translate $ do
-      german "Betrachten Sie die folgende Formel:"
-      english "Consider the following formula:"
-    indent $ code $ "F = " ++ show (cnfs !! (correct - 1))
+    paragraph $ do
+      translate $ do
+        german "Betrachten Sie die folgende Formel:"
+        english "Consider the following formula:"
+      indent $ code $ availableLetter (literals sTable) : " = " ++ show sTable
 
-  paragraph $ do
-    translate $ do
-      german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
-      english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
-    indent $ code $ showIndexedList 120 5 $ map getTable cnfs
+    paragraph $ do
+      translate $ do
+        german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
+        english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
+      indent $ code $ showIndexedList 120 5 $ map getTable cnfs
 
-  paragraph $ indent $ do
-    translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A valid solution could look like this: "
-    code "1"
+    paragraph $ indent $ do
+      translate $ do
+        german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
+        english "A valid solution could look like this: "
+      code "1"
 
-  paragraph $ text (fromMaybe "" addText)
-
+    paragraph $ text (fromMaybe "" addText)
+  where
+    sTable = cnfs !! (correct - 1)
 
 
 verifyStatic :: OutputMonad m => PickInst -> LangM m

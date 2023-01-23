@@ -14,7 +14,6 @@ import Table (readEntries)
 
 
 
-
 prevent :: OutputMonad m => Bool -> LangM m -> LangM m
 prevent b = assertion $ not b
 
