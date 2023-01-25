@@ -169,7 +169,7 @@ completeGrade FillInst{..} sol = do
   preventWithHint (not ((null diffShort && solLen == length missing) || (null diffLong && solLen == length allEntries)))
     (translate $ do
       german "Lösung ist korrekt?"
-      english "Solution is korrekt?"
+      english "Solution is correct?"
     )
     (translate $ do
       german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
