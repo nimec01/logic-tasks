@@ -148,8 +148,8 @@ partialGrade MinInst{..} sol = do
 
     (paragraph $ do
       translate $ do
-        german "Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
-        english "The formula does not contain enough maxterms. Add "
+        german "Die angegebene Formel enthält zu wenige Minterme. Fügen sie "
+        english "The formula does not contain enough minterms. Add "
       text diff
       translate $ do
         german " hinzu!"
@@ -158,14 +158,14 @@ partialGrade MinInst{..} sol = do
 
   preventWithHint (solLen > corrLen)
     (translate $ do
-      german "Nicht zu viele Maxterme in Lösung?"
-      english "Not too many maxterms in solution?"
+      german "Nicht zu viele Minterme in Lösung?"
+      english "Not too many minterms in solution?"
     )
 
     (paragraph $ do
       translate $ do
-        german " Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
-        english "The formula contains too many maxterms. Remove "
+        german " Die angegebene Formel enthält zu viele Minterme. Entfernen sie "
+        english "The formula contains too many minterms. Remove "
       text $ diff ++ "!"
     )
   where
