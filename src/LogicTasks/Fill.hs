@@ -21,7 +21,7 @@ genFillInst FillConfig{ cnfConf = CnfConfig { baseConf = BaseConfig{..}, ..}, ..
     cnf <- cnfInRange
     let
       tableLen = length $ readEntries $ getTable cnf
-      gapCount = maximum [tableLen * percentageOfGaps `div` 100, 1]
+      gapCount = max (tableLen * percentageOfGaps `div` 100) 1
     gaps <- remove (tableLen - gapCount) [1..tableLen]
     pure $ FillInst cnf gaps extraText
   where

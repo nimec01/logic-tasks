@@ -22,7 +22,7 @@ genDecideInst DecideConfig{cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, 
     cnf <- getCnf
     let
       tableLen = length $ readEntries $ getTable cnf
-      mistakeCount = maximum [tableLen * percentageOfChanged `div` 100, 1]
+      mistakeCount = max (tableLen * percentageOfChanged `div` 100) 1
     mistakes <- remove (tableLen - mistakeCount) [1..tableLen]
     pure $ DecideInst cnf mistakes extraText
   where

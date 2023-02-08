@@ -563,7 +563,7 @@ genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
 genForBasic (minlen,maxlen) lits
     | null lits || minlen > length nLits || invalidLen = pure empty
     | otherwise = do
-        len <- choose (minlen,minimum [length nLits, maxlen])
+        len <- choose (minlen, min (length nLits) maxlen)
         generateLiterals nLits empty len
   where
     nLits = nub lits
@@ -586,7 +586,7 @@ genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
 genForNF (minNum,maxNum) (minLen,maxLen) lits
     | null nLits || invalidLen || invalidNum = pure (0, [])
     | otherwise = do
-      num <- choose (minNum, minimum [maxNum,upperBound])
+      num <- choose (minNum, min maxNum upperBound)
       pure (num, nLits)
   where
     nLits = nub lits

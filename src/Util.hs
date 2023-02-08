@@ -5,6 +5,7 @@ module Util where
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate, yesNo)
 import Control.Monad.State (put, get, lift, evalStateT)
+import Control.Monad (when)
 import Data.List (delete)
 import Test.QuickCheck(Gen, elements)
 
@@ -22,9 +23,7 @@ prevent b = assertion $ not b
 preventWithHint :: OutputMonad m => Bool -> LangM m -> LangM m -> LangM m
 preventWithHint b desc hint = do
   yesNo (not b) desc
-  if b
-    then refuse $ indent hint
-    else pure()
+  when b (refuse $ indent hint)
 
 
 
@@ -53,8 +52,8 @@ remove num xs = do
 
 withRatio :: Formula a => (Int,Int) -> a -> Bool
 withRatio (lower,upper) form =
-    length trueEntries <= maximum [upperBound,if upper == 0 then 0 else 1]
-        && length trueEntries >= maximum [if lower == 0 then 0 else 1, lowerBound]
+    length trueEntries <= max upperBound (if upper == 0 then 0 else 1)
+        && length trueEntries >= max (if lower == 0 then 0 else 1) lowerBound
   where
     tableEntries = readEntries (getTable form)
     trueEntries = filter (== Just True) tableEntries
@@ -119,7 +118,7 @@ checkCnfConf CnfConfig {..}
           german "Die untere Grenze der Klauselanzahl ist höher als die obere."
           english "The minimum amount of clauses is greater than the maximum amount."
 
-    | minClauseAmount > minimum [2^maxClauseLength baseConf, 2^length (usedLiterals baseConf)] =
+    | minClauseAmount > 2 ^ min (maxClauseLength baseConf) (length (usedLiterals baseConf)) =
         refuse $ indent $ translate $ do
           german "Mit diesen Einstellungen kann die gewünschte Anzahl und Länge an Klauseln nicht erfüllt werden."
           english "There are not enough combinations available to satisfy your amount and length settings."
