@@ -2,9 +2,7 @@ name: Haskell Linter
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: ['**']
 
 jobs:
   run:
@@ -15,11 +13,10 @@ jobs:
     - name: 'Set up HLint'
       uses: rwe/actions-hlint-setup@v1
       with:
-        version: '3.1.6'
-
+        version: '3.5'
 
     - name: 'Run HLint'
       uses: rwe/actions-hlint-run@v2
       with:
         path: src/
-        fail-on: warning
+        fail-on: suggestion
