@@ -43,10 +43,12 @@ collectLeaves = foldMap ( : [])
 
 relabelShape :: SynTree o () -> [c] -> SynTree o c
 relabelShape shape contents =
-    let (tree,[])
+    let (tree, rest)
           = runState (traverse adorn shape) contents
     in
-        tree
+        if null rest
+        then tree
+        else error "This should not happen!"
     where
       adorn _ =
         do {current <- get; put (tail current); return (head current)}
