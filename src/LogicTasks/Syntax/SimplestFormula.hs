@@ -30,7 +30,7 @@ description SuperfluousBracketsInst{..} = do
     focus "A /\\ B /\\ C"
 
     instruct
-      "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional formula."
+      "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
       "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
 
     example
@@ -91,5 +91,5 @@ completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> Lang
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
-      "Ihre Abgabe ist nicht die korrekte Lösung"
+      "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()

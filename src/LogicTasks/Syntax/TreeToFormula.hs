@@ -28,12 +28,12 @@ description path SynTreeInst{..} = do
     image picture
 
     instruct
-      "Find the propositional logic formula represented by this syntax tree."
+      "Give the propositional logic formula represented by this syntax tree."
       "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
 
     instruct
-      "You are allowed to add arbitrarily many additional pairs of brackets, provided that they do not change the interpretation of the formula."
-      "Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen, solange diese die Bedeutung der Formel nicht verändern."
+      "(You are allowed to add arbitrarily many additional pairs of brackets.)"
+      "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
 
 
@@ -62,7 +62,7 @@ completeGrade :: OutputMonad m => SynTreeInst -> PropFormula -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
-      "Ihre Abgabe ist nicht die korrekte Lösung"
+      "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()
 
 

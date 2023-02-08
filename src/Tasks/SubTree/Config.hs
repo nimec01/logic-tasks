@@ -47,7 +47,7 @@ checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
                "Es müssen mindestens zwei Unterbäume erzeugt werden."
     | minNodes - maxLeavesForNodes minNodes < minSubTrees
       = reject "In this case, it is possible to have too many leaves nodes. This leads to not having enough non-atomic SubTrees."
-               "MIt diesen Einstellungen können nicht genügend nicht-triviale Unterbäume erzeugt werden."
+               "Mit diesen Einstellungen können nicht genügend nicht-triviale Unterbäume erzeugt werden."
     | otherwise = pure()
   where
     reject e g  = refuse $ indent $ translate $ do

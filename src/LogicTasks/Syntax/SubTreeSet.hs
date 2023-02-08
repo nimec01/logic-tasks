@@ -22,7 +22,7 @@ description SubTreeInst{..} = do
     focus formula
 
     instruct
-      ("Find " ++ show minInputTrees ++ " non atomic subformulae that are contained in it.")
+      ("Find " ++ show minInputTrees ++ " non-atomic subformulae that are contained in it.")
       ("Finden Sie " ++ show minInputTrees ++ " nicht atomare Subformeln, die in dieser Formel enthalten sind.")
 
     instruct
@@ -30,8 +30,8 @@ description SubTreeInst{..} = do
       "Geben Sie die Lösung als eine Liste der Subformeln an."
 
     instruct
-      "Remove bracket pairs which only serve to enclose entire Subformulae and do not add any additional brackets."
-      "Entfernen Sie dabei Klammerpaare, die eine Subformel komplett umschließen und fügen Sie keine zusätzlichen Klammern hinzu."
+      "Remove bracket pairs which only serve to enclose entire subformulae, and do not add any additional brackets."
+      "Entfernen Sie dabei Klammerpaare, die eine Subformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
     example
       "For example, if ~(A \\/ B) is the given formula and one subformula is required, then the solution is:"
@@ -87,5 +87,5 @@ completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
-      "Ihre Abgabe ist nicht die korrekte Lösung"
+      "Ihre Abgabe ist keine korrekte Lösung."
     | otherwise = pure()

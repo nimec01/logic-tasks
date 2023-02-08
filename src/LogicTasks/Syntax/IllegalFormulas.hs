@@ -16,14 +16,14 @@ import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalProposition
 description :: OutputMonad m => LegalPropositionInst -> LangM m
 description LegalPropositionInst{..} = do
     instruct
-      "Consider the following propositional formulae:"
-      "Betrachten Sie die folgenden aussagenlogischen Formeln:"
+      "Consider the following propositional (pseudo) formulae:"
+      "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
 
     focus $ unlines $ indexed pseudoFormulas
 
     instruct
-      "Some of these formulae are syntactically incorrect. Which of these formulae are invalid?"
-      "Einige dieser Formeln enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
+      "Some of these are syntactically incorrect. Which of these formulae are invalid?"
+      "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
 
     instruct
       "Enter a list containing the indices of the invalid formulae to submit your answer."
