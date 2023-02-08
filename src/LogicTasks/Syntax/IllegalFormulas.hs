@@ -56,16 +56,10 @@ partialGrade LegalPropositionInst{..} sol
       "At least one index in the list does not exist."
       "Mindestens einer der Indices existiert nicht."
 
-    | wrongAmount = reject
-      "The amount of indices is wrong."
-      "Die Anzahl der Indices ist falsch."
-
     | otherwise = pure()
   where
     nubSol = nub sol
-    correct = toList serialsOfWrong
     invalidIndex = any (`notElem` [1..length pseudoFormulas]) nubSol
-    wrongAmount = length nubSol /= length correct
 
 
 
