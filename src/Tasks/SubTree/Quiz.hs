@@ -24,7 +24,6 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
     return $ SubTreeInst
       { tree
       , minInputTrees = minSubTrees
-      , formula = display tree
       , correctFormulas = Data.Set.map display correctTrees
       }
 

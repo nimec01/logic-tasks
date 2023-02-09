@@ -10,6 +10,7 @@ import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Tasks.SubTree.Quiz (feedback)
 import Trees.Types (PropFormula(..))
+import Trees.Print (display)
 import Trees.Helpers
 
 
@@ -19,7 +20,7 @@ description SubTreeInst{..} = do
       "Consider the following propositional logic formula:"
       "Betrachten Sie die folgende aussagenlogische Formel:"
 
-    focus formula
+    focus (display tree)
 
     instruct
       ("Find " ++ show minInputTrees ++ " non-atomic subformulae that are contained in it.")

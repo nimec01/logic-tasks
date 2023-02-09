@@ -57,7 +57,6 @@ checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
 data SubTreeInst =
     SubTreeInst
     { tree :: SynTree BinOp Char
-    , formula :: String
     , correctFormulas :: Set String
     , minInputTrees :: Integer
     } deriving (Show,Generic)

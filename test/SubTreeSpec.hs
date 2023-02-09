@@ -58,7 +58,7 @@ spec = do
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees
         it "all subformulas is the sublist of formula" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let correctFormulas' = toList correctFormulas in all (`isInfixOf` formula) correctFormulas'
+                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let correctFormulas' = toList correctFormulas in all (`isInfixOf` display tree) correctFormulas'
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" s)) $ toList correctFormulas
