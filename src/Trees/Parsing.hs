@@ -69,7 +69,7 @@ parseOp o = do
 
 
 parseAnyOp :: Parser BinOp
-parseAnyOp = parseOp And <|> parseOp Or <|> parseOp Impl <|> parseOp Equi
+parseAnyOp = foldr1 (<|>) (map parseOp allBinaryOperators)
 
 
 
@@ -95,4 +95,3 @@ parsePropForm = do
      Nothing   -> pure form1
      (Just op) ->
        do Assoc op form1 <$> parsePropForm
-
