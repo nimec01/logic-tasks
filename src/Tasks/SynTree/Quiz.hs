@@ -7,9 +7,8 @@ module Tasks.SynTree.Quiz (
 
 import Test.QuickCheck (Gen)
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
-
-import Trees.Helpers (formulaToTree)
 import Trees.Print (display, transferToPicture)
+import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
 import Trees.Types (PropFormula(..))
 
@@ -26,4 +25,4 @@ generateSynTreeInst SynTreeConfig {..} = do
 
 feedback :: SynTreeInst -> PropFormula -> Bool
 feedback SynTreeInst {instSynTree} input =
-  formulaToTree input == instSynTree
+  formulaParse (show input) == Right instSynTree
