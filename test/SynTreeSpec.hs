@@ -6,7 +6,6 @@ module SynTreeSpec (spec, validBoundsSynTree) where
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat, arbitrary)
 import Data.List.Extra ( nubOrd, isInfixOf )
-import Data.Either (isRight)
 
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
@@ -70,10 +69,10 @@ spec = do
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> isRight $ formulaParse correct
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right instSynTree
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, even without spaces" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> isRight $ formulaParse $ deleteSpaces correct
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right instSynTree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSynTree >= minNodes && treeNodes instSynTree <= maxNodes
