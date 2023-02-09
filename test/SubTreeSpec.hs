@@ -12,7 +12,7 @@ import Data.Set (size, toList, map)
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
 import Tasks.SubTree.Quiz (generateSubTreeInst, feedback)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
-import Trees.Helpers (maxLeavesForNodes)
+import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
@@ -49,10 +49,10 @@ spec = do
     describe "generateSubTreeInst" $ do
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subTreeStringParse (displaySubTrees (toList correctTrees)) == Right correctTrees
+                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> let correctTrees = allNotLeafSubTrees tree in subTreeStringParse (displaySubTrees (toList correctTrees)) == Right correctTrees
         it "parse should works well" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> subFormulasStringParse (deleteSpaces (displaySubTrees (toList correctTrees))) == Right (Data.Set.map deleteSpaces correctFormulas)
+                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} -> let correctTrees = allNotLeafSubTrees tree in subFormulasStringParse (deleteSpaces (displaySubTrees (toList correctTrees))) == Right (Data.Set.map deleteSpaces correctFormulas)
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> fromIntegral (size correctFormulas) >= minSubTrees

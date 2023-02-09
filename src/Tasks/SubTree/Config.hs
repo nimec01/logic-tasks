@@ -58,7 +58,6 @@ data SubTreeInst =
     SubTreeInst
     { tree :: SynTree BinOp Char
     , formula :: String
-    , correctTrees :: Set (SynTree BinOp Char)
     , correctFormulas :: Set String
     , minInputTrees :: Integer
     } deriving (Show,Generic)
