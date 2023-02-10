@@ -47,14 +47,14 @@ formulaParse = parse (whitespace >> parserS <* eof) ""
 
 -- Parsers for formulas with reduced brackets
 
-parseAtomic :: Parser PropFormula
+parseAtomic :: Parser (PropFormula Char)
 parseAtomic = do
   c <- lexeme (satisfy isLetter)
   pure $ Atomic c
 
 
 
-parseNeg :: Parser PropFormula
+parseNeg :: Parser (PropFormula Char)
 parseNeg = do
   lexeme $ char '~'
   Neg <$> parseBasic
@@ -73,7 +73,7 @@ parseAnyOp = foldr1 (<|>) (map parseOp allBinaryOperators)
 
 
 
-parseBrackets :: Parser PropFormula
+parseBrackets :: Parser (PropFormula Char)
 parseBrackets = do
   lexeme $ char '('
   form <- parsePropForm
@@ -82,12 +82,12 @@ parseBrackets = do
 
 
 
-parseBasic :: Parser PropFormula
+parseBasic :: Parser (PropFormula Char)
 parseBasic = parseAtomic <|> parseBrackets <|> parseNeg
 
 
 
-parsePropForm :: Parser PropFormula
+parsePropForm :: Parser (PropFormula Char)
 parsePropForm = do
    form1 <- parseBasic
    mOp <- optionMaybe parseAnyOp

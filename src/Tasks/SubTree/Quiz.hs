@@ -27,7 +27,7 @@ generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = 
       , correctFormulas = Data.Set.map display correctTrees
       }
 
-feedback :: SubTreeInst -> [PropFormula] -> Bool
+feedback :: SubTreeInst -> [PropFormula Char] -> Bool
 feedback SubTreeInst {correctFormulas} ps = inputSet `isSubsetOf` correctFormulas
   where
     inputSet = fromList (Prelude.map show ps)

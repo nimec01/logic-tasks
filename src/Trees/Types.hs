@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Trees.Types
     (
@@ -48,22 +49,21 @@ instance Monad (SynTree o) where
   Leaf a          >>= k = k a
 
 
-data PropFormula = Atomic Char | Neg PropFormula | Brackets PropFormula | Assoc BinOp PropFormula PropFormula
-  deriving (Eq)
+data PropFormula c = Atomic c | Neg (PropFormula c) | Brackets (PropFormula c) | Assoc BinOp (PropFormula c) (PropFormula c)
+  deriving (Eq, Foldable)
 
 
-instance Show PropFormula where
+instance Show (PropFormula Char) where
   show (Atomic c) = [c]
   show (Neg f) = showOperatorNot ++ show f
   show (Brackets f) = '(' : show f ++ ")"
   show (Assoc o f1 f2) = show f1 ++ " " ++ showOperator o ++ " " ++ show f2
 
 
-instance Arbitrary PropFormula where
+instance Arbitrary (PropFormula Char) where
    arbitrary = sized pf
      where
-       pf :: Int -> Gen PropFormula
+       pf :: Int -> Gen (PropFormula Char)
        pf 0 = Atomic <$> elements ['A'..'Z']
        pf n = oneof [Neg <$> next, Brackets <$> next, Assoc <$> elements allBinaryOperators <*> next <*> next]
          where next = pf (n-1)
-

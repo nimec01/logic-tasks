@@ -19,7 +19,7 @@ module Trees.Helpers
     clauseToSynTree,
     literalToSynTree,
     numOfOps,
-    formulaToTree
+    numOfOpsInFormula
     ) where
 
 import Control.Monad (void)
@@ -38,7 +38,7 @@ numberAllBinaryNodes = flip evalState 1 . go
       go (Binary o t1 t2) = do { l <- next; t1' <- go t1; t2' <- go t2; return (Binary (o,l) t1' t2') }
       next = do {current <- get; put (current + 1); return current}
 
-collectLeaves :: SynTree o c -> [c]
+collectLeaves :: Foldable t => t c -> [c]
 collectLeaves = foldMap ( : [])
 
 relabelShape :: SynTree o () -> [c] -> SynTree o c
@@ -127,8 +127,8 @@ numOfOps (Not t) = numOfOps t
 numOfOps _ = 0
 
 
-formulaToTree :: PropFormula -> SynTree BinOp Char
-formulaToTree (Atomic c) = Leaf c
-formulaToTree (Neg f) = Not $ formulaToTree f
-formulaToTree (Brackets f) = formulaToTree f
-formulaToTree (Assoc op f1 f2) = Binary op (formulaToTree f1) (formulaToTree f2)
+numOfOpsInFormula :: PropFormula c -> Integer
+numOfOpsInFormula (Atomic _) = 0
+numOfOpsInFormula (Neg f) = numOfOpsInFormula f
+numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
+numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2

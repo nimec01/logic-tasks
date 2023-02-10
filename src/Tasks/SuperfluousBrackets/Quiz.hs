@@ -12,7 +12,7 @@ import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Print (simplestDisplay)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
-import Trees.Types (PropFormula(..))
+import Trees.Types (PropFormula)
 
 
 
@@ -28,5 +28,5 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       , simplestString = simplestDisplay tree
       }
 
-feedback :: SuperfluousBracketsInst -> PropFormula -> Bool
+feedback :: SuperfluousBracketsInst -> PropFormula Char -> Bool
 feedback SuperfluousBracketsInst {simplestString} simForm = show simForm == simplestString

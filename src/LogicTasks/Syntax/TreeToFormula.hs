@@ -48,17 +48,17 @@ verifyConfig = checkSynTreeConfig
 
 
 
-start :: PropFormula
+start :: PropFormula Char
 start = Atomic ' '
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> PropFormula -> LangM m
+partialGrade :: OutputMonad m => SynTreeInst -> PropFormula c -> LangM m
 partialGrade _ _ = pure()
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> PropFormula -> LangM m
+completeGrade :: OutputMonad m => SynTreeInst -> PropFormula Char -> LangM m
 completeGrade inst sol
     | not $ feedback inst (show sol) = reject
       "Your solution is not correct."

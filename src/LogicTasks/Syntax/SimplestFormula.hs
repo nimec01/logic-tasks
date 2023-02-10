@@ -50,12 +50,12 @@ verifyConfig = checkSuperfluousBracketsConfig
 
 
 
-start :: PropFormula
+start :: PropFormula Char
 start = Atomic ' '
 
 
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula Char -> LangM m
 partialGrade SuperfluousBracketsInst{..} f
     | any (`notElem` correctLits) literals =
       reject
@@ -79,15 +79,14 @@ partialGrade SuperfluousBracketsInst{..} f
 
     | otherwise = pure()
   where
-    formulaTree = formulaToTree f
-    literals = sort $ nub $ collectLeaves  formulaTree
-    opsNum = numOfOps formulaTree
+    literals = sort $ nub $ collectLeaves f
+    opsNum = numOfOpsInFormula f
     correctLits = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
 
 
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula -> LangM m
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula Char -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."

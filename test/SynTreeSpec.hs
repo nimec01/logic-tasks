@@ -65,7 +65,7 @@ spec = do
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \sTConfig ->
         forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} ->
-          forAll (arbitrary :: Gen PropFormula) $ \pFormula -> not $ feedback sTInst (show pFormula)
+          forAll (arbitrary :: Gen (PropFormula Char)) $ \pFormula -> not $ feedback sTInst (show pFormula)
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->

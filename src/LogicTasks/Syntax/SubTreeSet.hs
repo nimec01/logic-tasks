@@ -9,7 +9,7 @@ import Data.List (nub, sort)
 import LogicTasks.Syntax.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Tasks.SubTree.Quiz (feedback)
-import Trees.Types (PropFormula(..))
+import Trees.Types (PropFormula)
 import Trees.Print (display)
 import Trees.Helpers
 
@@ -51,12 +51,12 @@ verifyConfig = checkSubTreeConfig
 
 
 
-start :: [PropFormula]
+start :: [PropFormula c]
 start = []
 
 
 
-partialGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
+partialGrade :: OutputMonad m => SubTreeInst -> [PropFormula Char] -> LangM m
 partialGrade SubTreeInst{..} fs
     | any (`notElem` origLits) literals =
       reject
@@ -76,15 +76,14 @@ partialGrade SubTreeInst{..} fs
     | otherwise = pure()
   where
     amount = fromIntegral $ length $ nub fs
-    formTrees = map formulaToTree fs
-    literals = sort $ nub $ concatMap collectLeaves formTrees
-    opsNum = map numOfOps formTrees
+    literals = sort $ nub $ concatMap collectLeaves fs
+    opsNum = map numOfOpsInFormula fs
     origLits = sort $ nub $ collectLeaves tree
     origOpsNum = numOfOps tree
 
 
 
-completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula] -> LangM m
+completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula Char] -> LangM m
 completeGrade inst sol
     | not $ feedback inst sol = reject
       "Your solution is not correct."
