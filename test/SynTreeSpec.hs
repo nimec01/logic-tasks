@@ -9,7 +9,7 @@ import Data.List.Extra ( nubOrd, isInfixOf )
 
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
-import Trees.Parsing (formulaParse)
+import Trees.Types (PropFormula)
 import Tasks.SynTree.Config (SynTreeConfig (..), SynTreeInst (..))
 import Trees.Helpers (collectLeaves, treeDepth, treeNodes, maxLeavesForNodes, maxNodesForDepth, minDepthForNodes)
 import Tasks.SynTree.Quiz (generateSynTreeInst, feedback)
@@ -65,14 +65,14 @@ spec = do
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \sTConfig ->
         forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} ->
-          forAll arbitrary $ \pFormula -> not $ feedback sTInst pFormula
+          forAll (arbitrary :: Gen PropFormula) $ \pFormula -> not $ feedback sTInst (show pFormula)
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right instSynTree
+        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst correct
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, even without spaces" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right instSynTree
+        forAll (generateSynTreeInst sTConfig) $ \sTInst@SynTreeInst{..} -> feedback sTInst (deleteSpaces correct)
     it "should generate a random SyntaxTree from the given parament and in the node area" $
       forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
         forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeNodes instSynTree >= minNodes && treeNodes instSynTree <= maxNodes

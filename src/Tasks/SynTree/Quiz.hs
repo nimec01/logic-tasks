@@ -10,7 +10,6 @@ import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
 import Trees.Print (display, transferToPicture)
 import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
-import Trees.Types (PropFormula(..))
 
 
 
@@ -23,6 +22,6 @@ generateSynTreeInst SynTreeConfig {..} = do
       , correct = display tree
       }
 
-feedback :: SynTreeInst -> PropFormula -> Bool
+feedback :: SynTreeInst -> String -> Bool
 feedback SynTreeInst {instSynTree} input =
-  formulaParse (show input) == Right instSynTree
+  formulaParse input == Right instSynTree
