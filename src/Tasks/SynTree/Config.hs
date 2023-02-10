@@ -89,7 +89,7 @@ checkSynTreeConfig SynTreeConfig {..}
 
 data SynTreeInst =
     SynTreeInst
-    { instSynTree :: SynTree BinOp Char
+    { tree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
     } deriving (Show,Generic)

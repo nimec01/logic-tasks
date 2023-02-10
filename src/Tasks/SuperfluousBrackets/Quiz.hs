@@ -19,13 +19,13 @@ import Trees.Types (PropFormula(..))
 
 generateSuperfluousBracketsInst :: SuperfluousBracketsConfig -> Gen SuperfluousBracketsInst
 generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
-    syntaxTree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
+    tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
       `suchThat` sameAssociativeOperatorAdjacent
-    stringWithSuperfluousBrackets <- superfluousBracketsDisplay syntaxTree superfluousBracketPairs
+    stringWithSuperfluousBrackets <- superfluousBracketsDisplay tree superfluousBracketPairs
     return $ SuperfluousBracketsInst
-      { syntaxTree
+      { tree
       , stringWithSuperfluousBrackets
-      , simplestString = simplestDisplay syntaxTree
+      , simplestString = simplestDisplay tree
       }
 
 feedback :: SuperfluousBracketsInst -> PropFormula -> Bool

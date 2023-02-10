@@ -82,8 +82,8 @@ partialGrade SuperfluousBracketsInst{..} f
     formulaTree = formulaToTree f
     literals = sort $ nub $ collectLeaves  formulaTree
     opsNum = numOfOps formulaTree
-    correctLits = sort $ nub $ collectLeaves syntaxTree
-    correctOpsNum = numOfOps syntaxTree
+    correctLits = sort $ nub $ collectLeaves tree
+    correctOpsNum = numOfOps tree
 
 
 

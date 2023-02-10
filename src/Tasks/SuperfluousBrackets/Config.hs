@@ -59,7 +59,7 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
 data SuperfluousBracketsInst =
     SuperfluousBracketsInst
     {
-      syntaxTree :: SynTree BinOp Char
+      tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
     } deriving (Show,Generic)
