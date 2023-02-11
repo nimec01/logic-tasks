@@ -64,7 +64,7 @@ spec = do
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> not $ formulaParse (tail correct) == Right tree
+        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (tail correct) /= Right tree
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
       forAll validBoundsSynTree $ \sTConfig ->
