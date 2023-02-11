@@ -61,7 +61,7 @@ spec = do
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} -> let correctFormulas' = toList correctFormulas in all (`isInfixOf` display tree) correctFormulas'
         it "the correct store in Inst should be accept by feedback" $
             forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" s)) $ toList correctFormulas
+                forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (fromRight (Atomic ' ') . parse parsePropForm " ") $ toList correctFormulas
         it "the correct store in Inst should be accept by feedback, even without spaces" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \subConfig@SubTreeInst{..} ->  feedback subConfig $ Prelude.map (\s -> fromRight (Atomic ' ') (parse parsePropForm "" $ deleteSpaces s)) $ toList correctFormulas

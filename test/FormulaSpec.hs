@@ -39,7 +39,7 @@ validBoundsClause = do
 validBoundsCnf :: Gen ((Int,Int),(Int,Int),[Char])
 validBoundsCnf = do
     ((minLen,maxLen),chars) <- validBoundsClause
-    let upperBound = minimum [2^ maxLen, 2^length chars]
+    let upperBound = min (2^maxLen) (2^length chars)
     minNum <- chooseInt (1,upperBound)
     maxNum <- chooseInt (minNum,upperBound)
     pure ((minNum,maxNum),(minLen,maxLen),chars)
