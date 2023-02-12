@@ -15,7 +15,13 @@ import Trees.Types (SynTree, BinOp)
 
 generateSynTreeInst :: SynTreeConfig -> Gen SynTreeInst
 generateSynTreeInst SynTreeConfig {..} = do
-    tree <- genSynTree (minNodes, maxNodes) maxDepth usedLiterals atLeastOccurring allowArrowOperators maxConsecutiveNegations
+    tree <- genSynTree
+      (minNodes, maxNodes)
+      maxDepth
+      usedLiterals
+      atLeastOccurring
+      allowArrowOperators
+      maxConsecutiveNegations
     return $ SynTreeInst
       { tree
       , latexImage = transferToPicture tree
