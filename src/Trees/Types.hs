@@ -48,7 +48,11 @@ instance Monad (SynTree o) where
   Leaf a          >>= k = k a
 
 
-data PropFormula c = Atomic c | Neg (PropFormula c) | Brackets (PropFormula c) | Assoc BinOp (PropFormula c) (PropFormula c)
+data PropFormula c
+    = Atomic c
+    | Neg (PropFormula c)
+    | Brackets (PropFormula c)
+    | Assoc BinOp (PropFormula c) (PropFormula c)
   deriving (Eq, Foldable)
 
 
