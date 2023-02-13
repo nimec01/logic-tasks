@@ -1,10 +1,9 @@
 
 module LogicTasks.Resolution
-      ( module Resolution
+      ( module Formula.Resolution
       , ResStep
       ) where
 
 
-import Resolution
-import Types (ResStep)
-
+import Formula.Resolution
+import Formula.Types (ResStep)

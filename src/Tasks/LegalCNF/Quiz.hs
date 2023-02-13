@@ -18,7 +18,7 @@ import Data.Set (fromList)
 import Auxiliary (listNoDuplicate)
 import Data.List ( (\\) )
 import Trees.Helpers (cnfToSynTree)
-import qualified Types (genCnf)
+import qualified Formula.Types (genCnf)
 
 generateLegalCNFInst :: LegalCNFConfig -> Gen LegalCNFInst
 generateLegalCNFInst lCConfig@LegalCNFConfig {..} = do
@@ -76,7 +76,7 @@ genSynTreeWithSerial
           allowArrowOperators
     | serial `elem` serialsOfExternal =
         cnfToSynTree <$>
-        Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
+        Formula.Types.genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals
     | serial `elem` serialsOfJustOneClause =
         cnfToSynTree <$>
         Tasks.LegalCNF.GenerateLegal.genCnf (1, 1) (minClauseLength, maxClauseLength) usedLiterals

@@ -1,4 +1,4 @@
-module LogicTasks.Parsing (module Parsing) where
+module LogicTasks.Parsing (module Formula.Parsing) where
 
 
-import Parsing
+import Formula.Parsing

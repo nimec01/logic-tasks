@@ -1,6 +1,6 @@
 {-# language RecordWildCards #-}
 
-module LogicTasks.Fill where
+module LogicTasks.Semantics.Fill where
 
 
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
@@ -8,9 +8,9 @@ import Data.Maybe (fromMaybe, fromJust)
 import Test.QuickCheck(Gen)
 
 import Config ( BaseConfig(..), CnfConfig(..), FillConfig(..), FillInst(..))
-import Formula (hasEmptyClause, isEmptyCnf)
-import Table (gapsAt, readEntries)
-import Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
+import Formula.Util (hasEmptyClause, isEmptyCnf)
+import Formula.Table (gapsAt, readEntries)
+import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
 import Util (checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 
 
