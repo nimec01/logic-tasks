@@ -13,6 +13,7 @@ import Config (StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
+import LogicTasks.Helpers (clauseKey)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 
 
@@ -47,19 +48,7 @@ description StepInst{..} = do
     english $ "Provide the literal used for the step and the resolvent in the following tuple form: " ++
               "(literal, resolvent as ASCII based clause)."
 
-  paragraph $ translate $ do
-    german "Beachten Sie dabei für die ASCII-Formel diese Legende:"
-    english "Consider this key for the ASCII based formula:"
-
-  paragraph $ indent $ do
-    text "Negation:"
-    code "~"
-
-  paragraph $ indent $ do
-    translate $ do
-      german "Oder:"
-      english "Or:"
-    code "\\/"
+  clauseKey
 
   paragraph $ indent $ do
     translate $ do

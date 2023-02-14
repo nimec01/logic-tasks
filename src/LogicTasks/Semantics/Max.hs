@@ -12,6 +12,7 @@ import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Literal(..), amount, atomics, genCnf, getClauses, getTable)
+import LogicTasks.Helpers (cnfKey)
 import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
@@ -42,25 +43,7 @@ description MaxInst{..} = do
     german "Reichen Sie ihre Lösung als ascii-basierte Formel ein."
     english "Provide the solution as an ascii based formula."
 
-  paragraph $ translate $ do
-    german "Beachten Sie dabei die folgende Legende:"
-    english "Use the following key:"
-
-  paragraph $ indent $ do
-    text "Negation:"
-    code "~"
-
-  paragraph $ indent $ do
-    translate $ do
-      german "Oder:"
-      english "Or:"
-    code "\\/"
-
-  paragraph $ indent $ do
-    translate $ do
-      german "Und:"
-      english "And:"
-    code "/\\"
+  cnfKey
 
   paragraph $ indent $ do
     translate $ do

@@ -50,6 +50,35 @@ reject e g  = refuse $ indent $ bilingual e g
 
 
 
+clauseKey :: OutputMonad m => LangM m
+clauseKey = do
+  paragraph $ translate $ do
+    german "Beachten Sie dabei die folgende Legende:"
+    english "Use the following key:"
+
+  paragraph $ indent $ do
+    text "Negation:"
+    code "~"
+
+  paragraph $ indent $ do
+    translate $ do
+      german "Oder:"
+      english "Or:"
+    code "\\/"
+
+
+
+cnfKey :: OutputMonad m => LangM m
+cnfKey = do
+  clauseKey
+  paragraph $ indent $ do
+    translate $ do
+      german "Und:"
+      english "And:"
+    code "/\\"
+
+
+
 cacheIO
   :: (MonadIO m, Show a)
   => FilePath

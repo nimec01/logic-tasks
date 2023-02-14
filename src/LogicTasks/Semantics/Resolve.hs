@@ -13,6 +13,7 @@ import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
+import LogicTasks.Helpers (clauseKey)
 import Util (checkBaseConf, prevent, preventWithHint)
 
 
@@ -55,19 +56,7 @@ description ResolutionInst{..} = do
              "wobei diese folgendermaßen aufgebaut sind: (Erste Klausel, Zweite Klausel, Resolvente)"
     english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
 
-  paragraph $ translate $ do
-    german "Beachten Sie dabei für die ASCII-Formel diese Legende:"
-    english "Consider this key for the ASCII based formula:"
-
-  paragraph $ indent $ do
-    text "Negation:"
-    code "~"
-
-  paragraph $ indent $ do
-    translate $ do
-      german "Oder:"
-      english "Or:"
-    code "\\/"
+  clauseKey
 
   paragraph $ indent $ do
     translate $ do
