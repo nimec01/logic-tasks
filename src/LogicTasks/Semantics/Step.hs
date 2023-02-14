@@ -20,20 +20,10 @@ import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 
 genStepInst :: StepConfig -> Gen StepInst
 genStepInst StepConfig{ baseConf = BaseConfig{..}, ..} = do
-    rChar <- elements usedLiterals
-    rLit <- elements [Literal rChar, Not rChar]
+    (clause2, resolveLit, lits1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
     let
-      restLits = delete rChar usedLiterals
-    minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
-    minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
-    clause1 <- genClause (minLen1,maxClauseLength-1) restLits
-    let
-      lits1 = literals clause1
-    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
-        (all (\lit -> opposite lit `notElem` lits1) .  literals)
-    let
-      litAddedClause1 = mkClause $ rLit : lits1
-      litAddedClause2 = mkClause $ opposite rLit : literals clause2
+      litAddedClause1 = mkClause $ resolveLit : lits1
+      litAddedClause2 = mkClause $ opposite resolveLit : literals clause2
     pure $ StepInst litAddedClause1 litAddedClause2 extraText
 
 
@@ -144,3 +134,20 @@ completeGrade StepInst{..} sol =
                             else refuse $ indent $ translate $ do
                                    german "Resolvente ist nicht korrekt."
                                    english "Resolvent is not correct."
+
+
+
+genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])
+genResStepClause minClauseLength maxClauseLength usedLiterals = do
+    rChar <- elements usedLiterals
+    resolveLit <- elements [Literal rChar, Not rChar]
+    let
+      restLits = delete rChar usedLiterals
+    minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
+    minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
+    clause1 <- genClause (minLen1,maxClauseLength-1) restLits
+    let
+      lits1 = literals clause1
+    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
+        (all (\lit -> opposite lit `notElem` lits1) .  literals)
+    pure (clause2, resolveLit, lits1)

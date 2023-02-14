@@ -5,36 +5,26 @@ module LogicTasks.Semantics.Prolog where
 
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
 import Data.Maybe (fromJust, fromMaybe)
-import Data.List (delete)
 import Data.Set (difference, member, toList, union)
 import Data.Tuple (swap)
-import Test.QuickCheck (Gen, elements)
+import Test.QuickCheck (Gen)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause, genClause, literals, pliterals, opposite)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause, literals, pliterals, opposite)
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
-import Util(prevent, preventWithHint, tryGen)
+import LogicTasks.Semantics.Step (genResStepClause)
+import Util(prevent, preventWithHint)
 
 
 
 
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = do
-    rChar <- elements usedLiterals
-    rLit <- elements [Literal rChar, Not rChar]
+    (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
     let
-      restLits = delete rChar usedLiterals
-    minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
-    minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
-    clause1 <- genClause (minLen1,maxClauseLength-1) restLits
-    let
-      lits1 = literals clause1
-    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
-        (all (\lit -> opposite lit `notElem` lits1) .  literals)
-    let
-      termAddedClause1 = mkPrologClause $ map remap (rLit : lits1)
-      termAddedClause2 = mkPrologClause $ map remap (opposite rLit : literals clause2)
+      termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
+      termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
     pure $ PrologInst termAddedClause1 termAddedClause2 extraText
   where
     mapping = zip usedPredicates ['A'..'Z']
