@@ -46,7 +46,7 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
                "Die Anzahl zusätzlicher Klammern ist zu hoch für die Menge an Blättern."
     | superfluousBracketPairs < 1
       = reject "Add at least one extra pair of brackets."
-               "Es muss mindestens ein KLammerpaar hinzugefügt werden."
+               "Es muss mindestens ein Klammerpaar hinzugefügt werden."
     | otherwise
       = pure()
   where
