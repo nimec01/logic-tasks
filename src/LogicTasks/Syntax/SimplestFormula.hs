@@ -6,7 +6,7 @@ module LogicTasks.Syntax.SimplestFormula where
 import Control.Monad.Output (LangM, OutputMonad(..))
 import Data.List (nub, sort)
 
-import LogicTasks.Syntax.Helpers
+import LogicTasks.Helpers
 import Tasks.SuperfluousBrackets.Config (
     checkSuperfluousBracketsConfig
   , SuperfluousBracketsConfig(..)

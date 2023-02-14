@@ -6,7 +6,7 @@ module LogicTasks.Syntax.SubTreeSet where
 import Control.Monad.Output (LangM, OutputMonad(..))
 import Data.List (nub, sort)
 
-import LogicTasks.Syntax.Helpers
+import LogicTasks.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
 import Tasks.SubTree.Quiz (feedback)
 import Trees.Types (PropFormula)

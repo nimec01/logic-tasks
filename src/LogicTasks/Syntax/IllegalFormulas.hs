@@ -7,7 +7,7 @@ import Control.Monad.Output (LangM, OutputMonad(..))
 import Data.List (nub, sort)
 import Data.Set (toList)
 
-import LogicTasks.Syntax.Helpers
+import LogicTasks.Helpers
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 
 

@@ -9,7 +9,7 @@ import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Syntax.Helpers
+import LogicTasks.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Tasks.SynTree.Quiz (feedback)
 import Trees.Types (BinOp, SynTree(..))

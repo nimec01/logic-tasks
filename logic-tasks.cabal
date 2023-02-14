@@ -63,7 +63,7 @@ library
       Formula.Resolution
       Formula.Table
       Formula.Util
-      LogicTasks.Syntax.Helpers
+      LogicTasks.Helpers
       Util
       Paths_logic_tasks
   hs-source-dirs:

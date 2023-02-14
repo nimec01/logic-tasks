@@ -1,5 +1,5 @@
 
-module LogicTasks.Syntax.Helpers where
+module LogicTasks.Helpers where
 
 
 import qualified Data.ByteString as BS (readFile, writeFile)
