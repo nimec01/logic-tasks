@@ -1,5 +1,6 @@
 module Trees.Generate (
  genSynTree,
+ syntaxShape,
 ) where
 
 import Test.QuickCheck (choose, Gen, oneof, shuffle, suchThat, elements)
