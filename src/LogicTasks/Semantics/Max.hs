@@ -195,4 +195,4 @@ completeMinMax correct solution =
 
 
 completeGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-completeGrade MaxInst{..} sol = completeMinMax cnf sol
+completeGrade MaxInst{..} = completeMinMax cnf

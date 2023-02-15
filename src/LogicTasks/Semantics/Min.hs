@@ -85,4 +85,4 @@ partialGrade MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms Fal
 
 
 completeGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
-completeGrade MinInst{..} sol = Max.completeMinMax dnf sol
+completeGrade MinInst{..} = Max.completeMinMax dnf
