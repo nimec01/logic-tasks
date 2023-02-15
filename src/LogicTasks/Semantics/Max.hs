@@ -174,20 +174,25 @@ partialGrade MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
 
 
 
-completeGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-completeGrade MaxInst{..} sol =
-  preventWithHint (not $ null diff)
-    (translate $ do
-       german "Lösung liefert korrekte Wahrheitstabelle?"
-       english "Solution gives correct truth table?"
-    )
+completeMinMax :: (OutputMonad m, Formula f) => f -> f -> LangM m
+completeMinMax correct solution =
+    preventWithHint (not $ null diff)
+      (translate $ do
+         german "Lösung liefert korrekte Wahrheitstabelle?"
+         english "Solution gives correct truth table?"
+      )
 
-    (paragraph $ do
-      translate $ do
-        german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-        english "The following rows are not correct: "
-      itemizeM $ map (text . show) diff
-    )
+      (paragraph $ do
+        translate $ do
+          german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
+          english "The following rows are not correct: "
+        itemizeM $ map (text . show) diff
+      )
   where
-    solTable = getTable sol
-    (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable cnf) [1..])
+    solTable = getTable solution
+    (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable correct) [1..])
+
+
+
+completeGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
+completeGrade MaxInst{..} sol = completeMinMax cnf sol

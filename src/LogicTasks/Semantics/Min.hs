@@ -10,11 +10,10 @@ import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
 import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
-import Formula.Table (readEntries)
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
 import LogicTasks.Helpers (cnfKey)
-import Util (pairwiseCheck, preventWithHint, tryGen, withRatio)
+import Util (tryGen, withRatio)
 
 
 
@@ -86,18 +85,4 @@ partialGrade MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms Fal
 
 
 completeGrade :: OutputMonad m => MinInst -> Dnf -> LangM m
-completeGrade MinInst{..} sol = do
-  preventWithHint (not $ null diff)
-    (translate $ do
-      german "Lösung liefert korrekte Wahrheitstabelle?"
-      english "Solution gives correct truth table?"
-    )
-    (paragraph $ do
-      translate $ do
-        german "Es existieren falsche Einträge in den folgenden Tabellenspalten: "
-        english "The following rows are not correct: "
-      itemizeM $ map (text . show) diff
-    )
-  where
-    solTable = getTable sol
-    (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable dnf) [1..])
+completeGrade MinInst{..} sol = Max.completeMinMax dnf sol
