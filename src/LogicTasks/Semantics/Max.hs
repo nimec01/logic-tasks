@@ -11,7 +11,7 @@ import Test.QuickCheck (Gen)
 import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
-import Formula.Types (Cnf, Literal(..), amount, atomics, genCnf, getClauses, getTable)
+import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
 import LogicTasks.Helpers (cnfKey)
 import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
@@ -91,8 +91,8 @@ start = mkCnf []
 
 
 
-partialGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
-partialGrade MaxInst{..} sol = do
+partialMinMax :: (OutputMonad m, Formula f) => [Literal] -> f -> f -> Bool -> Bool -> LangM m
+partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
   preventWithHint (not $ null extra)
     (translate $ do
       german "Angegebene Literale kommen in Aufgabe vor?"
@@ -119,21 +119,21 @@ partialGrade MaxInst{..} sol = do
       itemizeM $ map (text . show) missing
     )
 
-  prevent (not $ all (\c -> amount c == length corLits) $ getClauses sol) $
+  prevent allValidTerms $
     translate $ do
-      german "Alle Klauseln sind Maxterme?"
-      english "All clauses are maxterms?"
+      german $ "Alle " ++ gSubElems ++ " sind " ++ gTerms ++ "?"
+      english $ "All " ++ eSubElems ++ " are " ++ eTerms ++ "?"
 
   preventWithHint (solLen < corrLen)
     (translate $ do
-      german "Genügend Maxterme in Lösung?"
-      english "Solution contains enough maxterms?"
+      german $ "Genügend " ++ gTerms ++ " in Lösung?"
+      english $ "Solution contains enough " ++ eTerms ++ "?"
     )
 
     (paragraph $ do
       translate $ do
-        german "Die angegebene Formel enthält zu wenige Maxterme. Fügen sie "
-        english "The formula does not contain enough maxterms. Add "
+        german $ "Die angegebene Formel enthält zu wenige " ++ gTerms ++ ". Fügen sie "
+        english $ "The formula does not contain enough " ++ eTerms ++ ". Add "
       text diff
       translate $ do
         german " hinzu!"
@@ -142,25 +142,35 @@ partialGrade MaxInst{..} sol = do
 
   preventWithHint (solLen > corrLen)
     (translate $ do
-      german "Nicht zu viele Maxterme in Lösung?"
-      english "Not too many maxterms in solution?"
+      german $ "Nicht zu viele " ++ gTerms ++ " in Lösung?"
+      english $ "Not too many " ++ eTerms ++ " in solution?"
     )
 
     (paragraph $ do
       translate $ do
-        german " Die angegebene Formel enthält zu viele Maxterme. Entfernen sie "
-        english "The formula contains too many maxterms. Remove "
+        german $ " Die angegebene Formel enthält zu viele " ++ gTerms ++ ". Entfernen sie "
+        english $ "The formula contains too many " ++ eTerms ++ ". Remove "
       text $ diff ++ "!"
     )
-  where
-    solLits = atomics sol
-    corLits = atomics cnf
-    extra = solLits \\ corLits
-    missing = corLits \\ solLits
-    table = getTable cnf
+ where
+    solLits = atomics solution
+    extra = solLits \\ correctLits
+    missing = correctLits \\ solLits
+    table = getTable correct
     corrLen = length $ filter (== Just False) (readEntries table)
-    solLen = amount sol
+    solLen = amount solution
     diff = show $ abs (solLen - corrLen)
+    (gTerms, gSubElems, eTerms, eSubElems)= if isMaxTermTask
+      then ("Maxterme", "Klauseln", "maxterms", "clauses")
+      else ("MinTerme", "Konjunktionen", "minterms", "conjunctions")
+
+
+
+partialGrade :: OutputMonad m => MaxInst -> Cnf -> LangM m
+partialGrade MaxInst{..} sol = partialMinMax corLits cnf sol allMaxTerms True
+  where
+    corLits = atomics cnf
+    allMaxTerms = not $ all (\c -> amount c == length corLits) $ getClauses sol
 
 
 

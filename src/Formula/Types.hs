@@ -1,5 +1,6 @@
 {-# language DeriveGeneric #-}
 {-# language DuplicateRecordFields #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 -- | Some basic types for propositional logic
 module Formula.Types
