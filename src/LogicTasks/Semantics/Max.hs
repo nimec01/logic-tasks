@@ -162,7 +162,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
     diff = show $ abs (solLen - corrLen)
     (gTerms, gSubElems, eTerms, eSubElems)= if isMaxTermTask
       then ("Maxterme", "Klauseln", "maxterms", "clauses")
-      else ("MinTerme", "Konjunktionen", "minterms", "conjunctions")
+      else ("Minterme", "Konjunktionen", "minterms", "conjunctions")
 
 
 
