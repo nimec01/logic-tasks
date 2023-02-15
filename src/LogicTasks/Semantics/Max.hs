@@ -13,7 +13,7 @@ import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
 import LogicTasks.Helpers (cnfKey)
-import Util (checkCnfConf, isOutside, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
+import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
 
@@ -67,20 +67,7 @@ verifyStatic MaxInst{..}
 
 
 verifyQuiz :: OutputMonad m => MinMaxConfig -> LangM m
-verifyQuiz MinMaxConfig{..}
-
-
-    | isOutside 0 100 low || isOutside 0 100 high =
-        refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-          english "The given restriction on true entries are not in the range of 0 to 100 percent."
-
-    | low > high =
-        refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-          english "The given restriction on true entries are not a valid range."
-
-    | otherwise = checkCnfConf cnfConf
+verifyQuiz MinMaxConfig{..} = checkTruthValueRange (low,high) cnfConf
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries
 

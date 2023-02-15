@@ -11,7 +11,7 @@ import Config ( BaseConfig(..), CnfConfig(..), FillConfig(..), FillInst(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf)
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, literals, truth)
-import Util (checkCnfConf, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
+import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 
 
 
@@ -102,18 +102,7 @@ verifyQuiz FillConfig{..}
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
           english "The percentile of gaps has to be set between 1 and 100."
 
-    | isOutside 0 100 low || isOutside 0 100 high =
-        refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
-          english "The given restriction on true entries are not in the range of 0 to 100 percent."
-
-
-    | low > high =
-        refuse $ indent $ translate $ do
-          german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
-          english "The given restriction on true entries are not a valid range."
-
-    | otherwise = checkCnfConf cnfConf
+    | otherwise = checkTruthValueRange (low,high) cnfConf
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries
 

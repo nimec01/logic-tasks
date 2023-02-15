@@ -79,6 +79,22 @@ tryGen gen n b = evalStateT state 0
 
 
 
+checkTruthValueRange :: OutputMonad m => (Int,Int) -> CnfConfig -> LangM m
+checkTruthValueRange (low,high) cnfConf
+    | isOutside 0 100 low || isOutside 0 100 high =
+        refuse $ indent $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge liegt nicht zwischen 0 und 100 Prozent."
+          english "The given restriction on true entries are not in the range of 0 to 100 percent."
+
+    | low > high =
+        refuse $ indent $ translate $ do
+          german "Die Beschränkung der Wahr-Einträge liefert keine gültige Reichweite."
+          english "The given restriction on true entries are not a valid range."
+
+    | otherwise = checkCnfConf cnfConf
+
+
+
 checkBaseConf :: OutputMonad m => BaseConfig -> LangM m
 checkBaseConf BaseConfig{..}
     | any (<1) [minClauseLength, maxClauseLength] =
