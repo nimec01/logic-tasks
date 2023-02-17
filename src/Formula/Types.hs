@@ -185,8 +185,8 @@ instance Arbitrary Clause where
 -- | Generates a random clause. The length of the generated clause lies in the given length bounds.
 --   The used atomic formulae are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
-genClause (minlen,maxlen) lits = do
-    genLits <- genForBasic (minlen,maxlen) lits
+genClause (minLength,maxLength) lits = do
+    genLits <- genForBasic (minLength,maxLength) lits
     pure (Clause genLits)
 
 
@@ -197,7 +197,7 @@ type Allocation = [(Literal, Bool)]
 
 --------------------------------------------------------------
 
--- | A datatype representing a formula in conjunctive normalform.
+-- | A datatype representing a formula in conjunctive normal form.
 newtype Cnf = Cnf { clauseSet :: Set Clause}
      deriving (Eq,Typeable,Generic)
 
@@ -239,9 +239,9 @@ instance Formula Cnf where
 
     amount (Cnf set) = Set.size set
 
-    evaluate alloc cnf = and <$> sequence clauses
+    evaluate xs cnf = and <$> sequence clauses
       where
-        clauses = map (evaluate alloc) (getClauses cnf)
+        clauses = map (evaluate xs) (getClauses cnf)
 
 
 
@@ -329,18 +329,18 @@ instance Formula Con where
 
 
 instance Arbitrary Con where
-   arbitrary = sized disj
+   arbitrary = sized conjunction
      where
-       disj :: Int -> Gen Con
-       disj 0 = genCon (0,0) []
-       disj n = genCon (1,maxBound) (take n ['A'..'Z'])
+       conjunction :: Int -> Gen Con
+       conjunction 0 = genCon (0,0) []
+       conjunction n = genCon (1,maxBound) (take n ['A'..'Z'])
 
 
 -- | Generates a random conjunction. The length of the generated conjunction lies in the given length bounds.
 --   The used atomic formulae are drawn from the list of chars.
 genCon :: (Int,Int) -> [Char] -> Gen Con
-genCon (minlen,maxlen) lits = do
-    genLits <- genForBasic (minlen,maxlen) lits
+genCon (minLength,maxLength) lits = do
+    genLits <- genForBasic (minLength,maxLength) lits
     pure (Con genLits)
 
 
@@ -464,10 +464,10 @@ instance Show Table where
               where
                 comb :: Int -> Int -> [[Int]]
                 comb 0 _ = []
-                comb len n =
-                    concat (replicate n $ repNum 0 ++ repNum 1) : comb (len-1) (n*2)
+                comb columns n =
+                    concat (replicate n $ repNum 0 ++ repNum 1) : comb (columns-1) (n*2)
                   where
-                    num = 2^(len -1)
+                    num = 2^(columns -1)
 
                     repNum :: a -> [a]
                     repNum = replicate num
@@ -539,7 +539,7 @@ instance Show PrologLiteral where
 ---------------------------------------------------------------------------------
 
 
-newtype PrologClause = PrologClause {pliterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
+newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral} deriving (Eq,Typeable,Generic)
 
 
 
@@ -560,14 +560,14 @@ terms (PrologClause set) = Set.toList set
 -- Helpers to reduce duplicate code
 
 genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
-genForBasic (minlen,maxlen) lits
-    | null lits || minlen > length nLits || invalidLen = pure empty
+genForBasic (minLength,maxLength) lits
+    | null lits || minLength > length nLits || invalidLen = pure empty
     | otherwise = do
-        len <- choose (minlen, min (length nLits) maxlen)
+        len <- choose (minLength, min (length nLits) maxLength)
         generateLiterals nLits empty len
   where
     nLits = nub lits
-    invalidLen = minlen > maxlen || minlen <= 0
+    invalidLen = minLength > maxLength || minLength <= 0
 
     generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
     generateLiterals usedLits xs len

@@ -131,7 +131,4 @@ mkPrologClause ls = PrologClause (Set.fromList ls)
 transformProlog :: PrologClause -> [(PrologLiteral,Literal)] -> Clause
 transformProlog pc mapping = mkClause $ map (fromJust . (`lookup` mapping)) lits
   where
-    lits = Set.toList (pliterals pc)
-
-
-
+    lits = Set.toList (pLiterals pc)

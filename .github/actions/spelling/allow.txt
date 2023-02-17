@@ -6,8 +6,13 @@ GHC
 Graphviz
 HUnit
 Hspec
+Leftrightarrow
+Leijen
 UML
+XOR
+cnf
 concat
+dnf
 fmap
 fmidue
 foldl
@@ -23,4 +28,5 @@ snd
 uncurry
 unlines
 workflows
+xor
 

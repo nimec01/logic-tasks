@@ -10,7 +10,7 @@ import Data.Tuple (swap)
 import Test.QuickCheck (Gen)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause, literals, pliterals, opposite)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite)
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
@@ -135,8 +135,8 @@ partialGrade PrologInst{..} sol = do
       itemizeM $ map (text . show) extra
     )
   where
-     availLits = pliterals literals1 `union` pliterals literals2
-     solLits = pliterals $ snd sol
+     availLits = pLiterals literals1 `union` pLiterals literals2
+     solLits = pLiterals $ snd sol
      extra = toList $ solLits `difference` availLits
 
 
@@ -163,7 +163,7 @@ completeGrade PrologInst{..} sol =
 transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(PrologLiteral,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
-    allPreds = toList (pliterals pc1 `union` pliterals pc2)
+    allPreds = toList (pLiterals pc1 `union` pLiterals pc2)
     noDups = map (\(PrologLiteral _ n f) -> PrologLiteral True n f) allPreds
     mapping = zip noDups ['A'..'Z']
 

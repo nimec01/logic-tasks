@@ -130,7 +130,7 @@ instance Pretty PrologLiteral where
 
 instance Pretty PrologClause where
     pretty pc
-        | Set.null (pliterals pc) = text "{ }"
+        | Set.null (pLiterals pc) = text "{ }"
         | otherwise = hsep $ punctuate (text " \\/ ") $ map pretty $ terms pc
 
 
