@@ -9,10 +9,11 @@ module Tasks.SubTree.Config (
   ) where
 
 
-import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
+import Control.Monad.Output(LangM, OutputMonad(..), english, german)
 import Data.Set (Set)
 import GHC.Generics
 
+import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Helpers (maxLeavesForNodes)
 import Trees.Types (SynTree, BinOp)
@@ -42,17 +43,15 @@ checkSubTreeConfig subConfig@SubTreeConfig {..} =
 
 checkAdditionalConfig :: OutputMonad m => SubTreeConfig -> LangM m
 checkAdditionalConfig SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..}
-    | minSubTrees < 2
-      = reject "The task makes no sense if not at least two subtrees are generated."
-               "Es müssen mindestens zwei Unterbäume erzeugt werden."
-    | minNodes - maxLeavesForNodes minNodes < minSubTrees
-      = reject "These settings do not allow for enough non-atomic subtrees."
-               "Mit diesen Einstellungen können nicht genügend nicht-triviale Unterbäume erzeugt werden."
+    | minSubTrees < 2 = reject $ do
+        english "The task makes no sense if not at least two subtrees are generated."
+        german "Es müssen mindestens zwei Unterbäume erzeugt werden."
+    | minNodes - maxLeavesForNodes minNodes < minSubTrees = reject $ do
+        english "These settings do not allow for enough non-atomic subtrees."
+        german "Mit diesen Einstellungen können nicht genügend nicht-triviale Unterbäume erzeugt werden."
     | otherwise = pure()
-  where
-    reject e g  = refuse $ indent $ translate $ do
-      english e
-      german g
+
+
 
 data SubTreeInst =
     SubTreeInst

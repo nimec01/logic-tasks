@@ -9,10 +9,11 @@ module Tasks.SynTree.Config (
   ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..), english, german, translate)
+import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.Char (isLetter)
 import GHC.Generics
 
+import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
 import Trees.Types (SynTree, BinOp)
 
@@ -44,48 +45,45 @@ defaultSynTreeConfig =
 
 checkSynTreeConfig :: OutputMonad m => SynTreeConfig -> LangM m
 checkSynTreeConfig SynTreeConfig {..}
-    | not (all isLetter usedLiterals)
-      = reject "Only letters are allowed as literals."
-               "Nur Buchstaben dürfen Literale sein."
-    | maxConsecutiveNegations < 0
-      = reject "Minimal number of consecutive negations must not be negative"
-               "Minimale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
-    | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes)
-      = reject "Syntax tree with no negation can not have even nodes"
-               "Syntaxbaum ohne Negation kann keine gerade Anzahl Blätter haben."
-    | minNodes < 1
-      = reject "Minimal number of nodes must be positive."
-               "Minimale Anzahl Blätter muss positiv sein."
-    | maxNodes < minNodes
-      = reject "Maximal number of nodes must not be smaller than minimal number."
-               "Maximale Anzahl Blätter ist kleiner als minimale."
-    | maxDepth < 1
-      = reject "Non-positive depth makes no sense."
-               "Baum hat negative Tiefe."
-    | atLeastOccurring < 1
-      = reject "At least one literal occurs in each formula."
-               "Formel ohne Literale existiert nicht."
-    | fromIntegral (length usedLiterals) < atLeastOccurring
-      = reject "You have provided too few literals."
-               "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
-    | minNodes < atLeastOccurring * 2 - 1
-      = reject "Your minimum number of nodes does not permit enough leaves for all desired literals."
-               "Minimale Anzahl der Blätter ist zu niedrig um alle Literale zu verwenden."
-    | maxNodes > maxNodesForDepth maxDepth
-      = reject "Your minimum number of nodes is larger than what your maximum depth enables."
-               "Minimale Anzahl der Blätter würde eingestellte Tiefe verletzen."
+    | not (all isLetter usedLiterals) = reject $ do
+        english "Only letters are allowed as literals."
+        german "Nur Buchstaben dürfen Literale sein."
+    | maxConsecutiveNegations < 0 = reject $ do
+        english "Minimal number of consecutive negations must not be negative"
+        german "Minimale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
+    | maxConsecutiveNegations == 0 && (even maxNodes || even minNodes) = reject $ do
+        english "Syntax tree with no negation can not have even nodes"
+        german "Syntaxbaum ohne Negation kann keine gerade Anzahl Blätter haben."
+    | minNodes < 1 = reject$ do
+        english"Minimal number of nodes must be positive."
+        german "Minimale Anzahl Blätter muss positiv sein."
+    | maxNodes < minNodes = reject $ do
+        english "Maximal number of nodes must not be smaller than minimal number."
+        german "Maximale Anzahl Blätter ist kleiner als minimale."
+    | maxDepth < 1 = reject $ do
+        english "Non-positive depth makes no sense."
+        german "Baum hat negative Tiefe."
+    | atLeastOccurring < 1 = reject $ do
+        english "At least one literal occurs in each formula."
+        german "Formel ohne Literale existiert nicht."
+    | fromIntegral (length usedLiterals) < atLeastOccurring = reject $ do
+        english "You have provided too few literals."
+        german "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
+    | minNodes < atLeastOccurring * 2 - 1 = reject $ do
+        english "Your minimum number of nodes does not permit enough leaves for all desired literals."
+        german "Minimale Anzahl der Blätter ist zu niedrig um alle Literale zu verwenden."
+    | maxNodes > maxNodesForDepth maxDepth = reject $ do
+        english "Your minimum number of nodes is larger than what your maximum depth enables."
+        german "Minimale Anzahl der Blätter würde eingestellte Tiefe verletzen."
     | let maxNodes' = maxNodes - 1
           maxConsecutiveNegations' = maxConsecutiveNegations + 2
           (result, rest) =
             maxNodes' `divMod` maxConsecutiveNegations',
             maxDepth > 1 + result * (maxConsecutiveNegations + 1) + min maxConsecutiveNegations rest
-      = reject "Your maximum depth value is unreasonably large, given your other settings."
-               "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
+      = reject $ do
+        english "Your maximum depth value is unreasonably large, given your other settings."
+        german "Maximale Tiefe des Baumes ist zu hoch für eingestellte Parameter."
     | otherwise = pure()
-  where
-    reject e g  = refuse $ indent $ translate $ do
-      english e
-      german g
 
 
 

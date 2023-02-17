@@ -9,9 +9,10 @@ module Tasks.SuperfluousBrackets.Config(
 )where
 
 
-import Control.Monad.Output(LangM, OutputMonad(..), english, german, translate)
+import Control.Monad.Output(LangM, OutputMonad(..), english, german)
 import GHC.Generics
 
+import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Types (BinOp, SynTree)
 
@@ -38,21 +39,16 @@ checkSuperfluousBracketsConfig sBConfig@SuperfluousBracketsConfig {..} =
 
 checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}
-    | minNodes < 5
-      = reject "Minimal number of nodes must larger than 4"
-               "Minimale Anzahl Blätter muss größer 4 sein."
-    | superfluousBracketPairs > minNodes `div` 2
-      = reject "The number of superfluous brackets is excessive, given your node numbers."
-               "Die Anzahl zusätzlicher Klammern ist zu hoch für die Menge an Blättern."
-    | superfluousBracketPairs < 1
-      = reject "Add at least one extra pair of brackets."
-               "Es muss mindestens ein Klammerpaar hinzugefügt werden."
-    | otherwise
-      = pure()
-  where
-    reject e g  = refuse $ indent $ translate $ do
-      english e
-      german g
+    | minNodes < 5 = reject $ do
+        english "Minimal number of nodes must larger than 4"
+        german "Minimale Anzahl Blätter muss größer 4 sein."
+    | superfluousBracketPairs > minNodes `div` 2 = reject $ do
+        english "The number of superfluous brackets is excessive, given your node numbers."
+        german "Die Anzahl zusätzlicher Klammern ist zu hoch für die Menge an Blättern."
+    | superfluousBracketPairs < 1 = reject $ do
+        english "Add at least one extra pair of brackets."
+        german "Es muss mindestens ein Klammerpaar hinzugefügt werden."
+    | otherwise = pure()
 
 
 
