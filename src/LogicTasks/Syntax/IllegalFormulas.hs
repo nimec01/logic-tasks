@@ -3,7 +3,7 @@
 module LogicTasks.Syntax.IllegalFormulas where
 
 
-import Control.Monad.Output (LangM, OutputMonad(..))
+import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.List (nub, sort)
 import Data.Set (toList)
 
@@ -15,25 +15,23 @@ import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalProposition
 
 description :: OutputMonad m => LegalPropositionInst -> LangM m
 description LegalPropositionInst{..} = do
-    instruct
-      "Consider the following propositional (pseudo) formulae:"
-      "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
+    instruct $ do
+      english "Consider the following propositional (pseudo) formulae:"
+      german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
 
     focus $ unlines $ indexed pseudoFormulas
 
-    instruct
-      "Some of these are syntactically incorrect. Which of these formulae are invalid?"
-      "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
+    instruct $ do
+      english "Some of these are syntactically incorrect. Which of these formulae are invalid?"
+      german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln nicht korrekt sind."
 
-    instruct
-      "Enter a list containing the indices of the invalid formulae to submit your answer."
-      "Geben Sie eine Liste der Indices aller syntaktisch falschen Formeln als Ihre Lösung an."
+    instruct $ do
+      english "Enter a list containing the indices of the invalid formulae to submit your answer."
+      german "Geben Sie eine Liste der Indices aller syntaktisch falschen Formeln als Ihre Lösung an."
 
-    example
-      "For example, if only choices 2 and 3 are incorrect, then the solution is:"
-      "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
-      "[2,3]"
-
+    example "[2,3]" $ do
+      english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
+      german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 falsch, dann ist diese Lösung korrekt:"
 
 
 
@@ -45,6 +43,8 @@ verifyInst _ = pure()
 verifyConfig :: OutputMonad m => LegalPropositionConfig -> LangM m
 verifyConfig = checkLegalPropositionConfig
 
+
+
 start :: [Int]
 start = []
 
@@ -52,9 +52,9 @@ start = []
 
 partialGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
 partialGrade LegalPropositionInst{..} sol
-    | invalidIndex = reject
-      "At least one index in the list does not exist."
-      "Mindestens einer der Indices existiert nicht."
+    | invalidIndex = reject $ do
+      english "At least one index in the list does not exist."
+      german "Mindestens einer der Indices existiert nicht."
 
     | otherwise = pure()
   where
@@ -65,9 +65,9 @@ partialGrade LegalPropositionInst{..} sol
 
 completeGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
 completeGrade LegalPropositionInst{..} sol
-    | wrongSolution = reject
-      "Your solution is incorrect."
-      "Ihre Lösung ist falsch."
+    | wrongSolution = reject $ do
+      english "Your solution is incorrect."
+      german "Ihre Lösung ist falsch."
 
     | otherwise = pure()
   where

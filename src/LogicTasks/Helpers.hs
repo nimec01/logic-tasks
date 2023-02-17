@@ -6,7 +6,9 @@ import qualified Data.ByteString as BS (readFile, writeFile)
 
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO (liftIO))
-import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
+import Control.Monad.Output (LangM, Language, OutputMonad (..), english, german, translate)
+import Control.Monad.State (State)
+import Data.Map (Map)
 import Data.ByteString.Lazy (fromStrict)
 import Data.ByteString.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha256, showDigest)
@@ -20,16 +22,8 @@ indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])
 
 
 
-bilingual :: OutputMonad m => String -> String -> LangM m
-bilingual e g =
-    translate $ do
-      german g
-      english e
-
-
-
-instruct :: OutputMonad m => String -> String -> LangM m
-instruct e g = paragraph $ bilingual e g
+instruct :: OutputMonad m => State (Map Language String) a -> LangM m
+instruct = paragraph . translate
 
 
 
@@ -38,15 +32,15 @@ focus = indent . code
 
 
 
-example :: OutputMonad m => String -> String -> String -> LangM m
-example e g correct = indent $ do
-      instruct e g
-      code correct
+example :: OutputMonad m => String -> State (Map Language String) a -> LangM m
+example correct s = indent $ do
+    instruct s
+    code correct
 
 
 
-reject :: OutputMonad m => String -> String -> LangM m
-reject e g  = refuse $ indent $ bilingual e g
+reject :: OutputMonad m => State (Map Language String) a -> LangM m
+reject  = refuse . indent . translate
 
 
 

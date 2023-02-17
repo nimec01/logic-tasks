@@ -4,7 +4,7 @@ module LogicTasks.Syntax.TreeToFormula where
 
 
 import Control.Monad.IO.Class(MonadIO (liftIO))
-import Control.Monad.Output (LangM, OutputMonad(..))
+import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
@@ -19,21 +19,21 @@ import Trees.Types (BinOp, SynTree(..))
 
 description :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> LangM m
 description path SynTreeInst{..} = do
-    instruct
-      "Consider the following syntax tree:"
-      "Betrachten Sie den folgenden Syntaxbaum:"
+    instruct $ do
+      english "Consider the following syntax tree:"
+      german "Betrachten Sie den folgenden Syntaxbaum:"
 
     picture <- liftIO $ cacheTree latexImage path
 
     image picture
 
-    instruct
-      "Give the propositional logic formula represented by this syntax tree."
-      "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
+    instruct $ do
+      english "Give the propositional logic formula represented by this syntax tree."
+      german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
 
-    instruct
-      "(You are allowed to add arbitrarily many additional pairs of brackets.)"
-      "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+    instruct $ do
+      english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
+      german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
 
 
@@ -60,9 +60,9 @@ partialGrade _ _ = pure()
 
 completeGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
 completeGrade inst sol
-    | not $ feedback inst sol = reject
-      "Your solution is not correct."
-      "Ihre Abgabe ist nicht die korrekte Lösung."
+    | not $ feedback inst sol = reject $ do
+      english "Your solution is not correct."
+      german "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()
 
 
@@ -78,7 +78,6 @@ getImage s = do
   render <- imageForFormula defaultEnv treeOptions iTree
   case render of (Left _) -> error "failed to render an image with the given formula."
                  (Right svg) -> pure svg
-
 
 
 
