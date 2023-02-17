@@ -1,5 +1,6 @@
 Autotool
 Cnf
+CNFs
 Dnf
 DSL
 GHC
@@ -9,8 +10,10 @@ Hspec
 Leftrightarrow
 Leijen
 UML
+UTF
 XOR
 cnf
+cnfs
 concat
 dnf
 fmap

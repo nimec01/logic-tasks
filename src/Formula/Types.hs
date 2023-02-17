@@ -346,7 +346,7 @@ genCon (minLength,maxLength) lits = do
 
 --------------------------------------------------------------
 
--- | A datatype representing a formula in disjunctive normalform.
+-- | A datatype representing a formula in disjunctive normal form.
 newtype Dnf = Dnf { clauseSet :: Set Con}
      deriving (Eq,Typeable,Generic)
 
@@ -389,9 +389,9 @@ instance Formula Dnf where
 
     amount (Dnf set) = Set.size set
 
-    evaluate alloc dnf = or <$> sequence cons
+    evaluate xs dnf = or <$> sequence cons
       where
-        cons = map (evaluate alloc) (getConjunctions dnf)
+        cons = map (evaluate xs) (getConjunctions dnf)
 
 
 
@@ -563,21 +563,21 @@ genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
 genForBasic (minLength,maxLength) lits
     | null lits || minLength > length nLits || invalidLen = pure empty
     | otherwise = do
-        len <- choose (minLength, min (length nLits) maxLength)
-        generateLiterals nLits empty len
+        chosenLength <- choose (minLength, min (length nLits) maxLength)
+        generateLiterals nLits empty chosenLength
   where
     nLits = nub lits
     invalidLen = minLength > maxLength || minLength <= 0
 
     generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
-    generateLiterals usedLits xs len
-        | Set.size xs == len = pure xs
+    generateLiterals usedLits xs n
+        | Set.size xs == n = pure xs
         | otherwise = do
             literal <- genLiteral usedLits
             let
               restLits = delete (letter literal) usedLits
               newSet = Set.insert literal xs
-            generateLiterals restLits newSet len
+            generateLiterals restLits newSet n
 
 
 
@@ -594,10 +594,12 @@ genForNF (minNum,maxNum) (minLen,maxLen) lits
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
     upperBound = lengthBound maxLen (length nLits) (minLen,maxLen)
 
+
+
 lengthBound :: Int -> Int -> (Int, Int) -> Int
-lengthBound 1 len (_,_) = 2*len
-lengthBound n len (minLen,maxLen)
+lengthBound 1 literalLength (_,_) = 2*literalLength
+lengthBound n literalLength (minLen,maxLen)
   | n == maxLen && n == minLen = 2^n
-  | n == minLen = 2^n * len
-  | n == len = 2^n + lengthBound (n-1) len (minLen,maxLen)
-  | otherwise = 2^n * len + lengthBound (n-1) len (minLen,maxLen)
+  | n == minLen = 2^n * literalLength
+  | n == literalLength = 2^n + lengthBound (n-1) literalLength (minLen,maxLen)
+  | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
