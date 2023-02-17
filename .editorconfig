@@ -11,5 +11,5 @@ max_line_length = 120
 [**.{yml,yaml,md}]
 max_line_length = unset
 
-[src/LogicTasks/{Semantics, Syntax}/*]
+[src/LogicTasks/{Semantics,Syntax}/*]
 max_line_length = unset
