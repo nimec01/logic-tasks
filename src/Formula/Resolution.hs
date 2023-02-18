@@ -60,12 +60,12 @@ resolvableWith c1 c2
 
 applyStep :: [Clause] -> (Clause,Clause,Clause) -> Maybe [Clause]
 applyStep [] _ = Just []
-applyStep xs (c1,c2,resol)
+applyStep xs (c1,c2,resolvent)
     | c1 `notElem` xs || c2 `notElem` xs = Nothing
     | otherwise = do
         literal <- resolvableWith c1 c2
         new <- resolve c1 c2 literal
-        if new == resol
+        if new == resolvent
           then pure (new:xs)
           else Nothing
 

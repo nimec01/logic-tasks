@@ -34,8 +34,8 @@ defaultSuperfluousBracketsConfig =
     }
 
 checkSuperfluousBracketsConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
-checkSuperfluousBracketsConfig sBConfig@SuperfluousBracketsConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig sBConfig
+checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig config
 
 checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}

@@ -163,8 +163,8 @@ completeGrade PrologInst{..} sol =
 transform :: (PrologClause,PrologClause) -> (Clause,Clause,[(PrologLiteral,Literal)])
 transform (pc1,pc2) = (clause1, clause2, applyPol)
   where
-    allPreds = toList (pLiterals pc1 `union` pLiterals pc2)
-    noDups = map (\(PrologLiteral _ n f) -> PrologLiteral True n f) allPreds
+    allPredicates = toList (pLiterals pc1 `union` pLiterals pc2)
+    noDups = map (\(PrologLiteral _ n f) -> PrologLiteral True n f) allPredicates
     mapping = zip noDups ['A'..'Z']
 
     polLookup p = (p,lit)
@@ -174,7 +174,7 @@ transform (pc1,pc2) = (clause1, clause2, applyPol)
                                   Just l2 -> Not l2
                                   Nothing -> error "each literal should have a mapping."
 
-    applyPol = map polLookup allPreds
+    applyPol = map polLookup allPredicates
     clause1 = transformProlog pc1 applyPol
     clause2 = transformProlog pc2 applyPol
 

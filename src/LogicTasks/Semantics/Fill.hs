@@ -143,9 +143,9 @@ partialGrade FillInst{..} sol = do
     solLen = length sol
     diffToTable = abs (solLen - tableLen)
     diffToMissing = abs (solLen - missingLen)
-    (gerLong,engLong) = gereng diffToTable
-    (gerShort,engShort) = gereng diffToMissing
-    gereng diff = if diff == 1
+    (gerLong,engLong) = gerEng diffToTable
+    (gerShort,engShort) = gerEng diffToMissing
+    gerEng diff = if diff == 1
         then ("muss " ++ display ++ " Wert", display ++ " value")
         else ("müssen " ++ display ++ " Werte", display ++ " values")
       where

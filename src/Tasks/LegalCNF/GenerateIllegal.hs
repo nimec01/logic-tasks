@@ -4,7 +4,7 @@ module Tasks.LegalCNF.GenerateIllegal (
 
 import Test.QuickCheck (choose, Gen, elements, frequency)
 import Test.QuickCheck.Gen (oneof)
-import qualified Formula.Types as Setform hiding (Dnf(..), Con(..))
+import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
 import Data.Set (toList, size)
 import Trees.Helpers (relabelShape, literalToSynTree, clauseToSynTree, collectLeaves)
@@ -28,7 +28,7 @@ genIllegalSynTree
         then do
             clauses <- choose (max 2 minClauseAmount, maxClauseAmount)
             firstSyntaxShape <- genIllegalCNFShape allowArrowOperators (clauses - 1)
-            clauseList <- toList . Setform.clauseSet
+            clauseList <- toList . SetFormula.clauseSet
               <$> genCnf (clauses, clauses) (minClauseLength, maxClauseLength) usedLiterals
             return (genIllegalCNF firstSyntaxShape clauseList)
         else do
@@ -37,7 +37,7 @@ genIllegalSynTree
 
 genCNFWithOneIllegalClause :: (Int,Int) -> [Char] -> Int -> Bool -> Gen (SynTree BinOp Char)
 genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands allowArrowOperators = do
-        clauseList <- toList . Setform.clauseSet <$> genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
+        clauseList <- toList . SetFormula.clauseSet <$> genCnf (ands, ands) (minClauseLength, maxClauseLength) usedLiterals
         illegalTree <- illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
         let illLength = length (collectLeaves illegalTree)
             (first, second) = span (\(Clause clause) -> illLength >= size clause) clauseList
@@ -45,22 +45,22 @@ genCNFWithOneIllegalClause (minClauseLength, maxClauseLength) usedLiterals ands 
             tailTrees = map clauseToSynTree second
         return (foldr1 (Binary And) (headTrees ++ (illegalTree : tailTrees)))
 
-genIllegalCNF :: SynTree BinOp () -> [Setform.Clause] -> SynTree BinOp Char
+genIllegalCNF :: SynTree BinOp () -> [SetFormula.Clause] -> SynTree BinOp Char
 genIllegalCNF treeShape = join . relabelShape treeShape . map clauseToSynTree
 
 illegalClauseTree :: (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
 illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators = do
-    len <- choose (max 2 minClauseLength, maxClauseLength)
-    illegalSynTreeShape <- genIllegalClauseShape True allowArrowOperators (len - 1)
-    leaves <- toList . Setform.literalSet <$> genClause (len,len) usedLiterals
+    treeLength <- choose (max 2 minClauseLength, maxClauseLength)
+    illegalSynTreeShape <- genIllegalClauseShape True allowArrowOperators (treeLength - 1)
+    leaves <- toList . SetFormula.literalSet <$> genClause (treeLength,treeLength) usedLiterals
     return (relabelShape illegalSynTreeShape leaves >>= literalToSynTree)
 
 genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp ())) -> BinOp -> Gen (SynTree BinOp ())
-genIllegalShapeInSubTree opers illegalFunc oper = do
-    opersIllegalSide <- choose (1, opers - 1)
-    node <- elements [Binary oper, flip (Binary oper)]
+genIllegalShapeInSubTree amount illegalFunc operator = do
+    opersIllegalSide <- choose (1, amount - 1)
+    node <- elements [Binary operator, flip (Binary operator)]
     illegalSubTree <- illegalFunc opersIllegalSide
-    return (node illegalSubTree (legalShape Or (opers - 1 - opersIllegalSide)))
+    return (node illegalSubTree (legalShape Or (amount - 1 - opersIllegalSide)))
 
 
 genIllegalClauseShape :: Bool -> Bool -> Int -> Gen (SynTree BinOp ())
@@ -70,37 +70,36 @@ genIllegalClauseShape ifFirstLayer allowArrowOperators ors = do
     if ifUseError
     then  if allowArrowOperators
           then oneof [ return (Not (legalShape Or ors))
-                     , genIllegalOper (legalShape Or)
-                         (Equi : Impl : [And | not ifFirstLayer]) ors
+                     , genIllegalOperator (legalShape Or) (Equi : Impl : [And | not ifFirstLayer]) ors
                      ]
           else  if ifFirstLayer
                 then return (Not (legalShape Or ors))
                 else oneof [ return (Not (legalShape Or ors))
-                           , genIllegalOper (legalShape Or) [And] ors
+                           , genIllegalOperator (legalShape Or) [And] ors
                            ]
     else genIllegalShapeInSubTree ors (genIllegalClauseShape False allowArrowOperators) Or
 
 genIllegalCNFShape :: Bool -> Int -> Gen (SynTree BinOp ())
 genIllegalCNFShape _ 0 = error "impossible"
 genIllegalCNFShape True 1 = oneof [ return (Not (legalShape And 1))
-                                  , genIllegalOper (legalShape And)
-                                      (allBinaryOperators \\ [And, Or]) 1]
+                                  , genIllegalOperator (legalShape And) (allBinaryOperators \\ [And, Or]) 1
+                                  ]
 genIllegalCNFShape False 1 = return (Not (legalShape And 1))
 genIllegalCNFShape allowArrowOperators ands = do
     ifUseError <- frequency[(1, return True), (ands - 1, return False)]
     if ifUseError
     then oneof [ return (Not (legalShape And ands))
-               , genIllegalOper (legalShape And)
+               , genIllegalOperator (legalShape And)
                    (if allowArrowOperators then allBinaryOperators \\ [And] else [Or]) ands
                ]
     else genIllegalShapeInSubTree ands (genIllegalCNFShape allowArrowOperators) And
 
-genIllegalOper :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
-genIllegalOper recF opers restOpers =
+genIllegalOperator :: (Int -> SynTree BinOp ()) -> [BinOp] -> Int -> Gen (SynTree BinOp ())
+genIllegalOperator recF operators restOperators =
     do
-        errorOper <- elements opers
-        leftOpers <- choose (0, restOpers - 1)
-        return (Binary errorOper (recF leftOpers) (recF (restOpers - 1 - leftOpers)))
+        errorOperator <- elements operators
+        leftOperators <- choose (0, restOperators - 1)
+        return (Binary errorOperator (recF leftOperators) (recF (restOperators - 1 - leftOperators)))
 
 legalShape :: BinOp -> Int -> SynTree BinOp ()
-legalShape oper opers = foldr (Binary oper . Leaf) (Leaf ()) (replicate opers ())
+legalShape operator amount = foldr (Binary operator . Leaf) (Leaf ()) (replicate amount ())

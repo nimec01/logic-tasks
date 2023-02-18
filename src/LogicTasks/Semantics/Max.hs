@@ -108,8 +108,8 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
 
   prevent allValidTerms $
     translate $ do
-      german $ "Alle " ++ gSubElems ++ " sind " ++ gTerms ++ "?"
-      english $ "All " ++ eSubElems ++ " are " ++ eTerms ++ "?"
+      german $ "Alle " ++ gSubElements ++ " sind " ++ gTerms ++ "?"
+      english $ "All " ++ eSubElements ++ " are " ++ eTerms ++ "?"
 
   preventWithHint (solLen < corrLen)
     (translate $ do
@@ -147,7 +147,7 @@ partialMinMax correctLits correct solution allValidTerms isMaxTermTask = do
     corrLen = length $ filter (== Just False) (readEntries table)
     solLen = amount solution
     diff = show $ abs (solLen - corrLen)
-    (gTerms, gSubElems, eTerms, eSubElems)= if isMaxTermTask
+    (gTerms, gSubElements, eTerms, eSubElements)= if isMaxTermTask
       then ("Maxterme", "Klauseln", "maxterms", "clauses")
       else ("Minterme", "Konjunktionen", "minterms", "conjunctions")
 

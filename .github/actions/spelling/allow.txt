@@ -2,6 +2,7 @@ Autotool
 Cnf
 CNFs
 Dnf
+DNFs
 DSL
 GHC
 Graphviz
@@ -22,12 +23,19 @@ foldl
 foldr
 fst
 github
+hcat
+hsep
 hspec
 https
+maxterms
+minterms
 oneof
 println
 scanl
 snd
+subformula
+subformulae
+tupled
 uncurry
 unlines
 workflows

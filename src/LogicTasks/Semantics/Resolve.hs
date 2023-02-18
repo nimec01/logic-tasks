@@ -27,8 +27,8 @@ snd3 :: (a,b,c) -> b
 snd3 (_,b,_) = b
 
 
-thrd3 :: (a,b,c) -> c
-thrd3 (_,_,c) = c
+third3 :: (a,b,c) -> c
+third3 (_,_,c) = c
 
 
 
@@ -162,7 +162,7 @@ partialGrade ResolutionInst{..} sol = do
   where
     checkMapping = correctMapping sol $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
-    checkEmptyClause = null steps || not (isEmptyClause $ thrd3 $ last steps)
+    checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps

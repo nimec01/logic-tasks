@@ -41,8 +41,8 @@ defaultLegalPropositionConfig =
     }
 
 checkLegalPropositionConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
-checkLegalPropositionConfig lPConfig@LegalPropositionConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig lPConfig
+checkLegalPropositionConfig config@LegalPropositionConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig config
 
 
 checkAdditionalConfig :: OutputMonad m => LegalPropositionConfig ->LangM m
