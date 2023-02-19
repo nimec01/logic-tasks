@@ -2,16 +2,16 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Tasks.SynTree.Config (
-  SynTreeConfig(..),
-  SynTreeInst(..),
-  checkSynTreeConfig,
-  defaultSynTreeConfig,
-  ) where
+    SynTreeConfig(..),
+    SynTreeInst(..),
+    checkSynTreeConfig,
+    defaultSynTreeConfig,
+    ) where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.Char (isLetter)
-import GHC.Generics
+import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
@@ -31,6 +31,8 @@ data SynTreeConfig =
   , maxConsecutiveNegations :: Integer
   } deriving (Show,Generic)
 
+
+
 defaultSynTreeConfig :: SynTreeConfig
 defaultSynTreeConfig =
     SynTreeConfig
@@ -42,6 +44,8 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     }
+
+
 
 checkSynTreeConfig :: OutputMonad m => SynTreeConfig -> LangM m
 checkSynTreeConfig SynTreeConfig {..}

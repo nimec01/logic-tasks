@@ -1,15 +1,19 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module Tasks.LegalProposition.Parsing (
-  illegalPropositionStringParse
-  ) where
+    illegalPropositionStringParse
+    ) where
 
-import Text.Parsec.String (Parser)
-import Text.Parsec (eof, ParseError, parse, sepBy, many1)
+
+import Data.Set (Set, fromList)
+import Text.Parsec (ParseError, eof, many1, parse, sepBy)
 import Text.Parsec.Char (char, digit)
-import ParsingHelpers (whitespace, lexeme)
+import Text.Parsec.String (Parser)
 
-import Data.Set (fromList, Set)
+import ParsingHelpers (lexeme, whitespace)
+
+
+
 
 illegalPropositionParse :: Parser (Set Int)
 illegalPropositionParse = do
@@ -17,6 +21,7 @@ illegalPropositionParse = do
     illegalList <- lexeme (many1 digit) `sepBy` lexeme (char ',')
     lexeme $ char '}'
     return $ fromList (map read illegalList)
+
 
 
 illegalPropositionStringParse :: String -> Either ParseError (Set Int)

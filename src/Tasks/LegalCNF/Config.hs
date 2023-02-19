@@ -2,22 +2,21 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-
-module Tasks.LegalCNF.Config(
-    checkLegalCNFConfig,
-    defaultLegalCNFConfig,
-    LegalCNFInst(..),
+module Tasks.LegalCNF.Config (
     LegalCNFConfig(..),
-) where
+    LegalCNFInst(..),
+    checkLegalCNFConfig,
+    defaultLegalCNFConfig
+    ) where
 
 
-import Control.Monad.Output(OutputMonad(..), LangM, english, german)
+import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.Char (isLetter)
 import Data.Set (Set)
-import GHC.Generics
-import Formula.Types (lengthBound)
+import GHC.Generics (Generic)
 
-import Config(CnfConfig(..), BaseConfig(..), dCnfConf)
+import Config (BaseConfig(..), CnfConfig(..), dCnfConf)
+import Formula.Types (lengthBound)
 import LogicTasks.Helpers (reject)
 
 
@@ -37,6 +36,8 @@ data LegalCNFConfig =
     , allowArrowOperators :: Bool
   } deriving (Show,Generic)
 
+
+
 defaultLegalCNFConfig :: LegalCNFConfig
 defaultLegalCNFConfig =
   LegalCNFConfig
@@ -51,6 +52,8 @@ defaultLegalCNFConfig =
   , minStringSize = 4
   , allowArrowOperators = True
   }
+
+
 
 checkLegalCNFConfig :: OutputMonad m => LegalCNFConfig -> LangM m
 checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
@@ -108,6 +111,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     zeroArgs = any (<0) [illegals, externalGenFormulas]
     boundsError = any (\(a,b) -> b < a)
       [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
+
 
 
 data LegalCNFInst =

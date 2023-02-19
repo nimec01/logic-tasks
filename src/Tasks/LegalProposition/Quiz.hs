@@ -3,22 +3,26 @@
 module Tasks.LegalProposition.Quiz (
     generateLegalPropositionInst,
     feedback,
-) where
+    ) where
 
-import Test.QuickCheck (Gen, choose, vectorOf, suchThat)
-import Data.Set (fromList)
 
-import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
-import Tasks.SynTree.Config (SynTreeConfig (..))
-import Tasks.LegalProposition.PrintIllegal (illegalDisplay )
-import Tasks.LegalProposition.PrintBracket (bracketDisplay)
-import Trees.Generate (genSynTree)
-import Trees.Types (SynTree, BinOp)
-import Trees.Helpers (similarExist,)
-import Auxiliary (listNoDuplicate)
-import Trees.Print (display)
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Data.Char (isLetter)
+import Data.Set (fromList)
+import Test.QuickCheck (Gen, choose, suchThat, vectorOf)
+
+import Auxiliary (listNoDuplicate)
+import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst (..))
+import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
+import Tasks.LegalProposition.PrintBracket (bracketDisplay)
+import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
+import Tasks.SynTree.Config (SynTreeConfig(..))
+import Trees.Generate (genSynTree)
+import Trees.Helpers (similarExist)
+import Trees.Print (display)
+import Trees.Types (BinOp, SynTree)
+
+
+
 
 generateLegalPropositionInst :: LegalPropositionConfig -> Gen LegalPropositionInst
 generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
@@ -43,6 +47,8 @@ generateLegalPropositionInst LegalPropositionConfig  {syntaxTreeConfig = SynTree
         , pseudoFormulas = pseudoFormulas
         }
 
+
+
 genPseudoList :: [Int] -> [Int] -> [SynTree BinOp Char] -> Gen [String]
 genPseudoList serialsOfWrong serialsOfBracket trees =
     let pointedTrees = zip [1..] trees
@@ -53,17 +59,27 @@ genPseudoList serialsOfWrong serialsOfBracket trees =
                 then bracketDisplay tree
                 else legalDisplay tree) pointedTrees
 
+
+
 legalDisplay :: SynTree BinOp Char -> Gen String
 legalDisplay syntaxTree = return (display syntaxTree)
+
+
 
 feedback :: LegalPropositionInst -> String -> Bool
 feedback  LegalPropositionInst {serialsOfWrong}  input = illegalPropositionStringParse input == Right serialsOfWrong
 
+
+
 noSimilarFormulas :: [String] -> Bool
 noSimilarFormulas pseudoFormulas = let pseudoFormulas' = map replace pseudoFormulas in  listNoDuplicate pseudoFormulas'
 
+
+
 replace :: String -> String
 replace = map judgeAndChange
+
+
 
 judgeAndChange :: Char -> Char
 judgeAndChange symbol = if isLetter symbol then '_' else symbol

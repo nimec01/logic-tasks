@@ -1,13 +1,20 @@
-module Tasks.LegalCNF.GenerateLegal (
-  genClause,
-  genCnf
-) where
 
-import Test.QuickCheck (choose, Gen, suchThat, elements)
-import Test.QuickCheck.Gen (vectorOf)
+module Tasks.LegalCNF.GenerateLegal (
+    genClause,
+    genCnf
+    ) where
+
+
 import qualified Formula.Types as Setform
+
 import Data.Set (fromList)
+import Test.QuickCheck (Gen, choose, elements, suchThat)
+import Test.QuickCheck.Gen (vectorOf)
+
 import Auxiliary (listNoDuplicate)
+
+
+
 
 genLiteral :: [Char] -> Gen Setform.Literal
 genLiteral lits = do
@@ -15,11 +22,14 @@ genLiteral lits = do
    elements [Setform.Literal rChar, Setform.Not rChar]
 
 
+
 genClause :: (Int,Int) -> [Char] -> Gen Setform.Clause
 genClause (minClauseLength, maxClauseLength) usedLiterals = do
     literals <- choose (minClauseLength, maxClauseLength)
     clause <- vectorOf literals (genLiteral usedLiterals) `suchThat` listNoDuplicate
     return (Setform.Clause (fromList clause))
+
+
 
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Setform.Cnf
 genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals = do

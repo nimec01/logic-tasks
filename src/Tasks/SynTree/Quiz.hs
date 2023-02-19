@@ -5,11 +5,14 @@ module Tasks.SynTree.Quiz (
     generateSynTreeInst,
     ) where
 
+
 import Test.QuickCheck (Gen)
+
 import Tasks.SynTree.Config (SynTreeConfig(..), SynTreeInst(..))
-import Trees.Print (display, transferToPicture)
 import Trees.Generate (genSynTree)
-import Trees.Types (SynTree, BinOp)
+import Trees.Print (display, transferToPicture)
+import Trees.Types (BinOp, SynTree)
+
 
 
 
@@ -27,6 +30,8 @@ generateSynTreeInst SynTreeConfig {..} = do
       , latexImage = transferToPicture tree
       , correct = display tree
       }
+
+
 
 feedback :: SynTreeInst -> SynTree BinOp Char -> Bool
 feedback SynTreeInst {tree} input =

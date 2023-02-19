@@ -1,24 +1,29 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
-
-module Tasks.LegalCNF.Quiz  (
-    generateLegalCNFInst,
+module Tasks.LegalCNF.Quiz (
     feedback,
-) where
+    generateLegalCNFInst
+    ) where
 
-import Tasks.LegalCNF.Config (LegalCNFInst(..), LegalCNFConfig(..))
-import Config(CnfConfig(..), BaseConfig(..))
-import Test.QuickCheck (Gen, suchThat, choose, vectorOf, elements)
-import Trees.Types (SynTree(..), BinOp(..))
-import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
-import qualified Tasks.LegalCNF.GenerateLegal (genCnf)
-import Trees.Print(simplestDisplay)
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
+
+import qualified Formula.Types
+import qualified Tasks.LegalCNF.GenerateLegal
+
+import Data.List ((\\))
 import Data.Set (fromList)
+import Test.QuickCheck (Gen, choose, elements, suchThat, vectorOf)
+
 import Auxiliary (listNoDuplicate)
-import Data.List ( (\\) )
+import Config (BaseConfig(..), CnfConfig(..))
+import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..))
+import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree)
 import Trees.Helpers (cnfToSynTree)
-import qualified Formula.Types (genCnf)
+import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
+import Trees.Print (simplestDisplay)
+import Trees.Types (BinOp(..), SynTree(..))
+
+
+
 
 generateLegalCNFInst :: LegalCNFConfig -> Gen LegalCNFInst
 generateLegalCNFInst config@LegalCNFConfig {..} = do
@@ -42,6 +47,7 @@ generateLegalCNFInst config@LegalCNFConfig {..} = do
     return $ LegalCNFInst {serialsOfWrong = fromList serialsOfWrong, formulaStrings = map simplestDisplay treeList}
 
 
+
 genSynTreeList :: [Int] -> [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Gen [SynTree BinOp Char]
 genSynTreeList
   serialsOfWrong
@@ -59,6 +65,8 @@ genSynTreeList
         lCConfig
         serial
       `suchThat` checkSize minStringSize maxStringSize) formulasList
+
+
 
 genSynTreeWithSerial :: [Int] -> [Int] -> [Int] -> [Int] -> LegalCNFConfig -> Int -> Gen (SynTree BinOp Char)
 genSynTreeWithSerial
@@ -90,12 +98,16 @@ genSynTreeWithSerial
           (minClauseLength, maxClauseLength)
           usedLiterals
 
+
+
 checkSize :: Int -> Int -> SynTree BinOp Char -> Bool
 checkSize minStringSize maxStringSize synTree =
   let
     stringLength = length (simplestDisplay synTree)
   in
     stringLength <= maxStringSize && stringLength >= minStringSize
+
+
 
 feedback :: LegalCNFInst -> String -> Bool
 feedback LegalCNFInst {serialsOfWrong} input = illegalPropositionStringParse input == Right serialsOfWrong

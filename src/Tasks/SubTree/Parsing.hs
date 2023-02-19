@@ -5,15 +5,19 @@ module Tasks.SubTree.Parsing (
   subFormulasStringParse,
   ) where
 
-import Trees.Types (SynTree, BinOp)
 
-import Text.Parsec.String (Parser)
-import Text.Parsec (eof, ParseError, parse, sepBy, many1)
+
+import Data.Set (Set, fromList)
+import Text.Parsec (ParseError, eof, many1, parse, sepBy)
 import Text.Parsec.Char (char)
-import ParsingHelpers (whitespace, lexeme, formulaSymbol)
-import Trees.Parsing (parserS)
+import Text.Parsec.String (Parser)
 
-import Data.Set (fromList, Set)
+import ParsingHelpers (formulaSymbol, lexeme, whitespace)
+import Trees.Parsing (parserS)
+import Trees.Types (BinOp, SynTree)
+
+
+
 
 subTreeParse :: Parser (Set (SynTree BinOp Char))
 subTreeParse = do
@@ -22,8 +26,12 @@ subTreeParse = do
     lexeme $ char '}'
     return $ fromList subTreeList
 
+
+
 subTreeStringParse :: String -> Either ParseError (Set (SynTree BinOp Char))
 subTreeStringParse = parse (whitespace >> subTreeParse <* eof) ""
+
+
 
 subFormulasParse :: Parser (Set String)
 subFormulasParse = do

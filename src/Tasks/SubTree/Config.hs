@@ -6,17 +6,18 @@ module Tasks.SubTree.Config (
     SubTreeConfig(..),
     defaultSubTreeConfig,
     checkSubTreeConfig
-  ) where
+    ) where
 
 
 import Control.Monad.Output(LangM, OutputMonad(..), english, german)
 import Data.Set (Set)
-import GHC.Generics
+import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Helpers (maxLeavesForNodes)
-import Trees.Types (SynTree, BinOp)
+import Trees.Types (BinOp, SynTree)
+
 
 
 
@@ -28,6 +29,8 @@ data SubTreeConfig =
     , minSubTrees :: Integer
     } deriving (Show,Generic)
 
+
+
 defaultSubTreeConfig :: SubTreeConfig
 defaultSubTreeConfig =
     SubTreeConfig
@@ -36,9 +39,12 @@ defaultSubTreeConfig =
     , minSubTrees = 3
     }
 
+
+
 checkSubTreeConfig :: OutputMonad m => SubTreeConfig -> LangM m
 checkSubTreeConfig subConfig@SubTreeConfig {..} =
     checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig subConfig
+
 
 
 checkAdditionalConfig :: OutputMonad m => SubTreeConfig -> LangM m

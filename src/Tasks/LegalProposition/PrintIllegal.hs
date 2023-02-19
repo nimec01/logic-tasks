@@ -1,12 +1,17 @@
+
 module Tasks.LegalProposition.PrintIllegal (
     illegalDisplay,
-) where
+    ) where
 
-import Test.QuickCheck (Gen, frequency, elements)
 
-import Trees.Types (SynTree(..), BinOp(..), showOperator, showOperatorNot, allBinaryOperators)
-import Trees.Helpers (treeNodes, collectLeaves)
+import Test.QuickCheck (Gen, elements, frequency)
+
+import Trees.Helpers (collectLeaves, treeNodes)
 import Trees.Print (normalShow)
+import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators, showOperator, showOperatorNot)
+
+
+
 
 illegalDisplay :: SynTree BinOp Char -> Gen String
 illegalDisplay (Leaf _) = elements (showOperatorNot : map showOperator allBinaryOperators)
@@ -26,6 +31,8 @@ ifUseIllegal useBug notFirstLayer synTree usedLiterals =
           , (fromIntegral nodeNum - 1, subTreeIllegal notFirstLayer synTree usedLiterals)
           ]
 
+
+
 subTreeIllegal ::Bool -> SynTree BinOp Char -> String -> Gen String
 subTreeIllegal notFirstLayer (Binary oper a b) usedLiterals =
     allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator oper)
@@ -33,6 +40,8 @@ subTreeIllegal _ (Not a) usedLiterals = do
     left <- ifUseIllegal True True a usedLiterals
     return (showOperatorNot ++ left)
 subTreeIllegal _ (Leaf _) _ = error "This will not happen but must be write"
+
+
 
 allocateBugToSubtree :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> String -> Gen String
 allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
@@ -42,6 +51,8 @@ allocateBugToSubtree notFirstLayer a b usedLiterals usedOperator = do
     if notFirstLayer
     then return ("(" ++ left ++ " " ++ usedOperator ++ " " ++ right ++ ")")
     else return (left ++ " " ++ usedOperator ++ " " ++ right)
+
+
 
 illegalShow :: Bool -> SynTree BinOp Char -> SynTree BinOp Char -> String -> String -> Gen String
 illegalShow notFirstLayer a b usedLiterals usedOperator =
@@ -56,10 +67,13 @@ illegalShow notFirstLayer a b usedLiterals usedOperator =
         frequency (map (\(probability, replacedOperator) ->
           (probability, combineNormalShow a b replacedOperator False)) [(2, ""), (1, showOperatorNot), (1, [letter])])
 
+
+
 combineNormalShow :: SynTree BinOp Char -> SynTree BinOp Char -> String -> Bool -> Gen String
 combineNormalShow a b replacedOperator False = return (normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b)
 combineNormalShow a b replacedOperator True =
     return $ "(" ++ normalShow a ++ " " ++ replacedOperator ++ " " ++ normalShow b ++ ")"
+
 
 
 implementIllegal :: Bool -> SynTree BinOp Char -> String -> Gen String
@@ -71,6 +85,8 @@ implementIllegal _ (Not a) usedLiterals = do
 implementIllegal _ (Leaf _) _ = do
     oper <- elements (showOperatorNot : map showOperator allBinaryOperators)
     elements [oper,""]
+
+
 
 illegalParentheses :: SynTree BinOp Char -> SynTree BinOp Char -> String -> [(Int, Gen String)]
 illegalParentheses  a b usedOperator = [(1, return (formulaStr ++ ")")),(1, return ("(" ++ formulaStr))]

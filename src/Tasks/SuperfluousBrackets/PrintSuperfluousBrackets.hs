@@ -1,12 +1,16 @@
-module Tasks.SuperfluousBrackets.PrintSuperfluousBrackets(
+module Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
     superfluousBracketsDisplay,
     sameAssociativeOperatorAdjacentSerial,
-)where
+    )where
 
-import Test.QuickCheck (Gen, frequency, elements, choose)
 
-import Trees.Types (SynTree (..), BinOp(..), showOperator, showOperatorNot)
+import Test.QuickCheck (Gen, choose, elements, frequency)
+
 import Trees.Helpers (treeNodes, numberAllBinaryNodes)
+import Trees.Types (BinOp(..), SynTree (..), showOperator, showOperatorNot)
+
+
+
 
 superfluousBracketsDisplay :: SynTree BinOp Char -> Integer -> Gen String
 superfluousBracketsDisplay synTree brackets =
@@ -15,6 +19,8 @@ superfluousBracketsDisplay synTree brackets =
     in  do
         serial <- elements serialsOfSameOperator
         rootDisplay synTreeWithSerial (brackets -1) serial
+
+
 
 rootDisplay :: SynTree (BinOp, Integer) Char -> Integer -> Integer -> Gen String
 rootDisplay (Leaf _) _ _ =  error "can not have only one node"
@@ -33,6 +39,8 @@ rootDisplay synTree@(Not a) brackets serial = do
         return (showOperatorNot ++ formula)
 rootDisplay (Binary operWithSerial a b) brackets serial =
     allocateBracketToSubtree a b operWithSerial brackets False Nothing (Just serial)
+
+
 
 allocateBracketToSubtree
     :: SynTree (BinOp, Integer) Char
@@ -75,6 +83,8 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets hasFather fatherOperator
                   rightFormula ++
                   replicate addBracket ')'
 
+
+
 nonRootDisplay :: SynTree (BinOp, Integer) Char -> Integer -> Maybe BinOp -> Maybe Integer -> Gen String
 nonRootDisplay (Leaf a) 0 _ _ = return [a]
 nonRootDisplay (Leaf a) 1 _ _ = return ("("++ (a : ")"))
@@ -94,6 +104,8 @@ nonRootDisplay synTree@(Not a) brackets _ serial = do
 nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial =
     allocateBracketToSubtree a b operWithSerial brackets True fatherOperator serial
 nonRootDisplay (Leaf _) _ _ _ = error "All relevant cases handled!"
+
+
 
 sameAssociativeOperatorAdjacentSerial :: SynTree (BinOp, Integer) c -> Maybe BinOp -> [Integer]
 sameAssociativeOperatorAdjacentSerial (Leaf _) _ = []

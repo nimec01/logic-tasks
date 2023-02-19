@@ -1,20 +1,21 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Tasks.SuperfluousBrackets.Config(
+module Tasks.SuperfluousBrackets.Config (
     SuperfluousBracketsConfig (..),
     SuperfluousBracketsInst (..),
     defaultSuperfluousBracketsConfig,
     checkSuperfluousBracketsConfig
-)where
+    )where
 
 
 import Control.Monad.Output(LangM, OutputMonad(..), english, german)
-import GHC.Generics
+import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
 import Tasks.SynTree.Config(SynTreeConfig(..), checkSynTreeConfig, defaultSynTreeConfig)
 import Trees.Types (BinOp, SynTree)
+
 
 
 
@@ -25,6 +26,8 @@ data SuperfluousBracketsConfig =
     , superfluousBracketPairs :: Integer
     } deriving (Show,Generic)
 
+
+
 defaultSuperfluousBracketsConfig :: SuperfluousBracketsConfig
 defaultSuperfluousBracketsConfig =
     SuperfluousBracketsConfig
@@ -33,9 +36,13 @@ defaultSuperfluousBracketsConfig =
     , superfluousBracketPairs = 2
     }
 
+
+
 checkSuperfluousBracketsConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
     checkSynTreeConfig syntaxTreeConfig >> checkAdditionalConfig config
+
+
 
 checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, ..}

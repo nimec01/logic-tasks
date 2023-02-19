@@ -1,18 +1,21 @@
+
 module Tasks.LegalCNF.GenerateIllegal (
-  genIllegalSynTree,
-) where
+    genIllegalSynTree
+    ) where
 
 
-import Test.QuickCheck (choose, Gen, elements, frequency)
-import Test.QuickCheck.Gen (oneof)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
-import Trees.Types (SynTree(..), BinOp(..), allBinaryOperators)
-import Data.Set (toList, size)
-import Trees.Helpers (relabelShape, literalToSynTree, clauseToSynTree, collectLeaves)
-import Data.List ((\\))
-import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
-import Formula.Types (Clause(Clause))
+
 import Control.Monad (join)
+import Data.List ((\\))
+import Data.Set (size, toList)
+import Test.QuickCheck (Gen, choose, elements, frequency)
+import Test.QuickCheck.Gen (oneof)
+
+import Formula.Types (Clause(Clause))
+import Tasks.LegalCNF.GenerateLegal (genClause, genCnf)
+import Trees.Helpers (clauseToSynTree, collectLeaves, literalToSynTree, relabelShape)
+import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators)
 
 
 

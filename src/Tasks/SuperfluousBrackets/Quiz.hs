@@ -3,15 +3,17 @@
 module Tasks.SuperfluousBrackets.Quiz (
     feedback,
     generateSuperfluousBracketsInst
-)where
+    )where
 
-import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..), )
-import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets(superfluousBracketsDisplay)
+
 import Test.QuickCheck (Gen, suchThat)
+
+import Tasks.SuperfluousBrackets.Config (SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
+import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (superfluousBracketsDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Trees.Print (simplestDisplay)
 import Trees.Helpers (sameAssociativeOperatorAdjacent)
 import Trees.Generate (genSynTree)
+import Trees.Print (simplestDisplay)
 import Trees.Types (PropFormula)
 
 
@@ -33,6 +35,8 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
       }
+
+
 
 feedback :: SuperfluousBracketsInst -> PropFormula Char -> Bool
 feedback SuperfluousBracketsInst {simplestString} simForm = show simForm == simplestString

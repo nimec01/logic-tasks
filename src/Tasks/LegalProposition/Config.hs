@@ -4,15 +4,14 @@
 module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
     LegalPropositionInst (..),
-
+    checkLegalPropositionConfig,
     defaultLegalPropositionConfig,
-    checkLegalPropositionConfig
-) where
+    ) where
 
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.Set (Set)
-import GHC.Generics
+import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxLeavesForNodes)
