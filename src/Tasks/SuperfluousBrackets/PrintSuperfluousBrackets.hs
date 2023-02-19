@@ -104,8 +104,8 @@ nonRootDisplay synTree@(Not a) brackets _ serial = do
     else do
         formula <- nonRootDisplay a brackets Nothing serial
         return (showOperatorNot ++ formula)
-nonRootDisplay (Binary operWithSerial a b) brackets fatherOperator serial =
-    allocateBracketToSubtree a b operWithSerial brackets True fatherOperator serial
+nonRootDisplay (Binary operatorWithSerial a b) brackets fatherOperator serial =
+    allocateBracketToSubtree a b operatorWithSerial brackets True fatherOperator serial
 nonRootDisplay (Leaf _) _ _ _ = error "All relevant cases handled!"
 
 
