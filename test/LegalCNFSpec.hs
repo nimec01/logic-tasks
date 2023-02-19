@@ -123,8 +123,8 @@ spec = do
                   illegalTest (toList serialsOfWrong) formulaStrings
     describe "generateLegalCNFInst" $ do
         it "all of the formulas not in the wrong serial should be Cnf" $
-            forAll validBoundsLegalCNF $ \lCConfig@LegalCNFConfig{..} ->
-                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} ->
+            forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
+                forAll (generateLegalCNFInst config) $ \LegalCNFInst {..} ->
                   legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalCNF $ \config ->

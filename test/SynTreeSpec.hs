@@ -72,20 +72,20 @@ spec = do
         forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse correct == Right tree
     it ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
         "even without spaces") $
-      forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right tree
+      forAll validBoundsSynTree $ \config ->
+        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse (deleteSpaces correct) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
-      forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->
+      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
           treeNodes tree >= minNodes && treeNodes tree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
-      forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> treeDepth tree <= maxDepth
+      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-      forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->
+      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
           fromIntegral (length (nubOrd (collectLeaves tree))) >= atLeastOccurring
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
-      forAll validBoundsSynTree $ \sTConfig@SynTreeConfig {..} ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} ->
+      forAll validBoundsSynTree $ \config@SynTreeConfig {..} ->
+        forAll (generateSynTreeInst config) $ \SynTreeInst{..} ->
           not (replicate (fromIntegral maxConsecutiveNegations + 1) '~' `isInfixOf` deleteSpaces (display tree))

@@ -16,28 +16,28 @@ transferToPicture (Binary Impl a b) = "[ $\\to  $ " ++ transferToPicture a ++ tr
 transferToPicture (Binary Equi a b) = "[ $\\Leftrightarrow  $ " ++ transferToPicture a ++ transferToPicture b ++"  ]"
 
 display :: SynTree BinOp Char -> String
-display (Binary oper a b) = normalShow a ++ " " ++ showOperator oper ++ " " ++ normalShow b
+display (Binary operator a b) = normalShow a ++ " " ++ showOperator operator ++ " " ++ normalShow b
 display (Leaf a) = a : ""
 display (Not a) = showOperatorNot ++ normalShow a
 
 normalShow :: SynTree BinOp Char -> String
-normalShow (Binary oper a b) = "(" ++ normalShow a ++ " " ++ showOperator oper ++ " " ++ normalShow b ++ ")"
+normalShow (Binary operator a b) = "(" ++ normalShow a ++ " " ++ showOperator operator ++ " " ++ normalShow b ++ ")"
 normalShow (Leaf a) = a : ""
 normalShow (Not a) = showOperatorNot ++ normalShow a
 
 simplestDisplay :: SynTree BinOp Char -> String
 simplestDisplay (Leaf a)=  a : ""
 simplestDisplay (Not a) = showOperatorNot ++ simplestShow a Nothing
-simplestDisplay (Binary oper a b) =
-    simplestShow a (Just oper) ++ " " ++ showOperator oper ++ " " ++ simplestShow b (Just oper)
+simplestDisplay (Binary operator a b) =
+    simplestShow a (Just operator) ++ " " ++ showOperator operator ++ " " ++ simplestShow b (Just operator)
 
 simplestShow :: SynTree BinOp Char -> Maybe BinOp -> String
 simplestShow (Leaf a) _ =  a : ""
 simplestShow (Not a) _ = showOperatorNot ++ simplestShow a Nothing
 simplestShow (Binary And a b) j@(Just And) = simplestShow a j ++ " " ++ showOperator And ++ " " ++ simplestShow b j
 simplestShow (Binary Or a b) j@(Just Or) = simplestShow a j ++ " " ++ showOperator Or ++ " " ++ simplestShow b j
-simplestShow (Binary oper a b) _ =
+simplestShow (Binary operator a b) _ =
   let
-    j = Just oper
+    j = Just operator
   in
-    "(" ++ simplestShow a j ++ " " ++ showOperator oper ++ " " ++ simplestShow b j ++ ")"
+    "(" ++ simplestShow a j ++ " " ++ showOperator operator ++ " " ++ simplestShow b j ++ ")"

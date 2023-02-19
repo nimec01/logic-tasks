@@ -37,8 +37,8 @@ rootDisplay synTree@(Not a) brackets serial = do
     else do
         formula <- nonRootDisplay a brackets Nothing (Just serial)
         return (showOperatorNot ++ formula)
-rootDisplay (Binary operWithSerial a b) brackets serial =
-    allocateBracketToSubtree a b operWithSerial brackets False Nothing (Just serial)
+rootDisplay (Binary operatorWithSerial a b) brackets serial =
+    allocateBracketToSubtree a b operatorWithSerial brackets False Nothing (Just serial)
 
 
 

@@ -77,14 +77,14 @@ combineNormalShow a b replacedOperator True =
 
 
 implementIllegal :: Bool -> SynTree BinOp Char -> String -> Gen String
-implementIllegal notFirstLayer (Binary oper a b) usedLiterals =
-    illegalShow notFirstLayer a b usedLiterals (showOperator oper)
+implementIllegal notFirstLayer (Binary operator a b) usedLiterals =
+    illegalShow notFirstLayer a b usedLiterals (showOperator operator)
 implementIllegal _ (Not a) usedLiterals = do
     letter <- elements usedLiterals
     elements  $ map (++ (' ' : normalShow a)) ([letter] : map showOperator allBinaryOperators)
 implementIllegal _ (Leaf _) _ = do
-    oper <- elements (showOperatorNot : map showOperator allBinaryOperators)
-    elements [oper,""]
+    operator <- elements (showOperatorNot : map showOperator allBinaryOperators)
+    elements [operator,""]
 
 
 

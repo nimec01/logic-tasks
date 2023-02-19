@@ -127,8 +127,8 @@ spec = do
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   illegalTest (toList serialsOfWrong) pseudoFormulas
         it "the generateLegalPropositionInst should generate expected legal number" $
-            forAll validBoundsLegalProposition $ \lPConfig@LegalPropositionConfig{..} ->
-                forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} ->
+            forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
+                forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
             forAll validBoundsLegalProposition $ \config ->
