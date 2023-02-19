@@ -66,7 +66,7 @@ spec = do
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} ->
                   fromIntegral (size correctFormulas) >= minSubTrees
-        it "all subformulas is the sublist of formula" $
+        it "all subformulae are the sublist of the formula" $
             forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} ->
                   let

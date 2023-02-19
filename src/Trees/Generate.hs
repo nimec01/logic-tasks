@@ -15,8 +15,8 @@ chooseList allowArrowOperators = if allowArrowOperators
         else [And, Or]
 
 randomList :: [c] -> [c] -> Integer -> Gen [c]
-randomList availableLetters atLeastOccurring len = let
-    restLength = fromIntegral len - length atLeastOccurring
+randomList availableLetters atLeastOccurring listLength = let
+    restLength = fromIntegral listLength - length atLeastOccurring
     in do
         randomRest <- vectorOf restLength (elements availableLetters)
         shuffle (atLeastOccurring ++ randomRest)

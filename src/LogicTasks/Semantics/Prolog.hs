@@ -181,8 +181,8 @@ transform (pc1,pc2) = (clause1, clause2, applyPol)
 
 
 revertMapping :: [Literal] -> [(PrologLiteral,Literal)] -> [PrologLiteral]
-revertMapping ls mapping = map fromJust getPreds
+revertMapping ls mapping = map fromJust getPredicates
   where
     reverseM = map swap mapping
-    getPreds = map (`lookup` reverseM) ls
+    getPredicates = map (`lookup` reverseM) ls
 

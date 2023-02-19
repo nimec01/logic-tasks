@@ -55,14 +55,14 @@ genSynTreeList
   serialsOfJustOneClause
   serialsOfJustOneLiteralPerClause
   formulasList
-  lCConfig@LegalCNFConfig{..} =
+  config@LegalCNFConfig{..} =
     mapM (\serial ->
       genSynTreeWithSerial
         serialsOfWrong
         serialsOfExternal
         serialsOfJustOneClause
         serialsOfJustOneLiteralPerClause
-        lCConfig
+        config
         serial
       `suchThat` checkSize minStringSize maxStringSize) formulasList
 

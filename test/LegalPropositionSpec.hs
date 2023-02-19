@@ -131,6 +131,6 @@ spec = do
                 forAll (generateLegalPropositionInst lPConfig) $ \LegalPropositionInst{..} ->
                   legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
         it "the feedback designed for Instance can works good" $
-            forAll validBoundsLegalProposition $ \lPConfig ->
-                forAll (generateLegalPropositionInst lPConfig) $ \lPInst@LegalPropositionInst{..} ->
-                  feedback lPInst (transferSetIntToString serialsOfWrong)
+            forAll validBoundsLegalProposition $ \config ->
+                forAll (generateLegalPropositionInst config) $ \inst@LegalPropositionInst{..} ->
+                  feedback inst (transferSetIntToString serialsOfWrong)

@@ -109,13 +109,13 @@ spec = do
                      usedLiterals
                      allowArrowOperators
                   )
-                  (not . judgeCNFSynTree)
+                  (not . judgeCnfSynTree)
     describe "judgeCNFSynTree" $
         it "is reasonably implemented" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
-                  (judgeCNFSynTree . cnfToSynTree)
+                  (judgeCnfSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $
         it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \lCConfig ->
@@ -127,22 +127,22 @@ spec = do
                 forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} ->
                   legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
         it "the feedback designed for Instance can works good" $
-            forAll validBoundsLegalCNF $ \lCConfig ->
-                forAll (generateLegalCNFInst lCConfig) $ \lCInst@LegalCNFInst {..} ->
-                  feedback lCInst (transferSetIntToString serialsOfWrong)
+            forAll validBoundsLegalCNF $ \config ->
+                forAll (generateLegalCNFInst config) $ \inst@LegalCNFInst {..} ->
+                  feedback inst (transferSetIntToString serialsOfWrong)
 
-judgeCNFSynTree :: SynTree BinOp a -> Bool
-judgeCNFSynTree (Binary And a b) = judgeCNFSynTree a && judgeCNFSynTree b
-judgeCNFSynTree (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
-judgeCNFSynTree (Not a) = judgeLeaf a
-judgeCNFSynTree (Leaf _) = True
-judgeCNFSynTree _ = False
+judgeCnfSynTree :: SynTree BinOp a -> Bool
+judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b
+judgeCnfSynTree (Binary Or a b) =  judgeCnfOr a && judgeCnfOr b
+judgeCnfSynTree (Not a) = judgeLeaf a
+judgeCnfSynTree (Leaf _) = True
+judgeCnfSynTree _ = False
 
-judgeCNFOr :: SynTree BinOp a -> Bool
-judgeCNFOr (Binary Or a b) =  judgeCNFOr a && judgeCNFOr b
-judgeCNFOr (Not a) = judgeLeaf a
-judgeCNFOr (Leaf _) = True
-judgeCNFOr _ = False
+judgeCnfOr :: SynTree BinOp a -> Bool
+judgeCnfOr (Binary Or a b) =  judgeCnfOr a && judgeCnfOr b
+judgeCnfOr (Not a) = judgeLeaf a
+judgeCnfOr (Leaf _) = True
+judgeCnfOr _ = False
 
 judgeLeaf :: SynTree o a -> Bool
 judgeLeaf (Leaf _) = True

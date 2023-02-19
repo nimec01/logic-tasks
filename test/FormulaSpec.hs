@@ -9,22 +9,6 @@ import LogicTasks.Formula
 
 
 
-allocGen :: Gen Allocation
-allocGen = do
-    alloc <- arbitrary
-    let flipped = flipNegs alloc
-    pure flipped
-  where
-    flipNegs = map flipper
-    flipper x
-        | negative first = (opposite first,not (snd x))
-        | otherwise      = x
-      where
-        first = fst x
-    negative (Not _) = True
-    negative _ = False
-
-
 
 validBoundsClause :: Gen ((Int,Int),[Char])
 validBoundsClause = do
@@ -67,7 +51,7 @@ spec = do
 
 
   describe "genCnf" $ do
-    it "should return the empty conjuncion when called with the empty list" $
+    it "should return the empty conjunction when called with the empty list" $
       property $ \bounds1 bounds2 -> forAll (genCnf bounds1 bounds2 []) isEmptyCnf
     it "should generate a random cnf formula with a correct amount of clauses if given valid parameters" $
       forAll validBoundsCnf $ \((lowerNum,upperNum),(lowerLen,upperLen),chars) ->

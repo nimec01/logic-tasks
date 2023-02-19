@@ -38,6 +38,7 @@ subformulae
 tupled
 uncurry
 unlines
+vcat
 workflows
 xor
 

@@ -34,8 +34,8 @@ ifUseIllegal useBug notFirstLayer synTree usedLiterals =
 
 
 subTreeIllegal ::Bool -> SynTree BinOp Char -> String -> Gen String
-subTreeIllegal notFirstLayer (Binary oper a b) usedLiterals =
-    allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator oper)
+subTreeIllegal notFirstLayer (Binary operator a b) usedLiterals =
+    allocateBugToSubtree notFirstLayer a b usedLiterals (showOperator operator)
 subTreeIllegal _ (Not a) usedLiterals = do
     left <- ifUseIllegal True True a usedLiterals
     return (showOperatorNot ++ left)

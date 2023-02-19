@@ -99,8 +99,8 @@ spec = do
                   \synTree -> not (sameAssociativeOperatorAdjacent synTree) ==>
                     display synTree == simplestDisplay synTree
         it "after remove all bracket two strings should be same" $
-            forAll validBoundsSuperfluousBrackets $ \sBConfig ->
-                forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} ->
+            forAll validBoundsSuperfluousBrackets $ \config ->
+                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   deleteBrackets stringWithSuperfluousBrackets == deleteBrackets simplestString
     describe "valid formula" $
         it "the formula Parser can accept when brackets is max number" $

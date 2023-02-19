@@ -110,9 +110,10 @@ nonRootDisplay (Leaf _) _ _ _ = error "All relevant cases handled!"
 sameAssociativeOperatorAdjacentSerial :: SynTree (BinOp, Integer) c -> Maybe BinOp -> [Integer]
 sameAssociativeOperatorAdjacentSerial (Leaf _) _ = []
 sameAssociativeOperatorAdjacentSerial (Not a) _ = sameAssociativeOperatorAdjacentSerial a Nothing
-sameAssociativeOperatorAdjacentSerial (Binary (oper, serial) a b) fatherOper
-    | Just oper == fatherOper && (oper == And || oper == Or) =
-        serial : sameAssociativeOperatorAdjacentSerial a (Just oper) ++
-        sameAssociativeOperatorAdjacentSerial b (Just oper)
+sameAssociativeOperatorAdjacentSerial (Binary (operator, serial) a b) fatherOperator
+    | Just operator == fatherOperator && (operator == And || operator == Or) =
+        serial : sameAssociativeOperatorAdjacentSerial a (Just operator) ++
+        sameAssociativeOperatorAdjacentSerial b (Just operator)
     | otherwise =
-        sameAssociativeOperatorAdjacentSerial a (Just oper) ++ sameAssociativeOperatorAdjacentSerial b (Just oper)
+        sameAssociativeOperatorAdjacentSerial a (Just operator) ++
+        sameAssociativeOperatorAdjacentSerial b (Just operator)

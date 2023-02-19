@@ -73,10 +73,10 @@ illegalClauseTree (minClauseLength, maxClauseLength) usedLiterals allowArrowOper
 
 genIllegalShapeInSubTree :: Int -> (Int -> Gen (SynTree BinOp ())) -> BinOp -> Gen (SynTree BinOp ())
 genIllegalShapeInSubTree amount illegalFunc operator = do
-    opersIllegalSide <- choose (1, amount - 1)
+    operatorsIllegalSide <- choose (1, amount - 1)
     node <- elements [Binary operator, flip (Binary operator)]
-    illegalSubTree <- illegalFunc opersIllegalSide
-    return (node illegalSubTree (legalShape Or (amount - 1 - opersIllegalSide)))
+    illegalSubTree <- illegalFunc operatorsIllegalSide
+    return (node illegalSubTree (legalShape Or (amount - 1 - operatorsIllegalSide)))
 
 
 
