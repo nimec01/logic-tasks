@@ -51,12 +51,12 @@ allocateBracketToSubtree
     -> Maybe BinOp
     -> Maybe Integer
     -> Gen String
-allocateBracketToSubtree a b (oper, nowSerial) brackets hasFather fatherOperator serial
+allocateBracketToSubtree a b (operator, nowSerial) brackets hasFather fatherOperator serial
     | Just nowSerial == serial = do
         formula <- allocateBracketToSubtree
           a
           b
-          (oper, error "never gonna need this")
+          (operator, error "never gonna need this")
           brackets
           hasFather
           fatherOperator
@@ -72,14 +72,17 @@ allocateBracketToSubtree a b (oper, nowSerial) brackets hasFather fatherOperator
                 let brackets' = if ifUseBrackets then brackets - 1 else brackets
                     addBracket =
                       (if ifUseBrackets then 1 else 0) +
-                      (if not hasFather || (fatherOperator == Just oper && (oper == And || oper == Or)) then 0 else 1)
+                      (if not hasFather ||
+                          (fatherOperator == Just operator && (operator == And || operator == Or))
+                        then 0
+                        else 1)
                 leftBrackets <- choose (max 0 (brackets' - rightNodes) , min leftNodes brackets')
-                leftFormula <- nonRootDisplay a leftBrackets (Just oper) serial
-                rightFormula <- nonRootDisplay b (brackets' - leftBrackets) (Just oper) serial
+                leftFormula <- nonRootDisplay a leftBrackets (Just operator) serial
+                rightFormula <- nonRootDisplay b (brackets' - leftBrackets) (Just operator) serial
                 return $
                   replicate addBracket '(' ++
                   leftFormula ++ " " ++
-                  showOperator oper ++ " " ++
+                  showOperator operator ++ " " ++
                   rightFormula ++
                   replicate addBracket ')'
 

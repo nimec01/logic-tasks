@@ -62,9 +62,11 @@ allNotLeafSubTrees :: (Ord o, Ord c) => SynTree o c -> Set (SynTree o c)
 allNotLeafSubTrees a = fromList (getNotLeafSubTrees a)
 
 noSameSubTree :: (Eq o, Ord o, Ord c) => SynTree o c -> Bool
-noSameSubTree synTree = let treeList = getNotLeafSubTrees synTree
-    in
-        listNoDuplicate treeList
+noSameSubTree synTree =
+  let
+    treeList = getNotLeafSubTrees synTree
+  in
+    listNoDuplicate treeList
 
 treeNodes :: SynTree o c -> Integer
 treeNodes (Binary _ a b) = 1 + treeNodes a + treeNodes b
@@ -88,9 +90,9 @@ maxLeavesForNodes nodes = (nodes + 1) `div` 2
 sameAssociativeOperatorAdjacent :: SynTree BinOp c -> Bool
 sameAssociativeOperatorAdjacent (Leaf _) = False
 sameAssociativeOperatorAdjacent (Not a) = sameAssociativeOperatorAdjacent a
-sameAssociativeOperatorAdjacent (Binary oper a b) =
-    checkNextOperator a oper ||
-    checkNextOperator b oper ||
+sameAssociativeOperatorAdjacent (Binary operator a b) =
+    checkNextOperator a operator ||
+    checkNextOperator b operator ||
     sameAssociativeOperatorAdjacent a ||
     sameAssociativeOperatorAdjacent b
 
