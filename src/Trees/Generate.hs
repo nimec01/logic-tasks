@@ -45,11 +45,11 @@ syntaxShape :: Integer -> Integer -> Bool -> Bool -> Gen (SynTree BinOp ())
 syntaxShape nodes maxDepth allowArrowOperators allowNegation
     | nodes == 1 = positiveLiteral
     | nodes == 2 = negativeLiteral
-    | not allowNegation = oneof binaryOper
-    | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof binaryOper
-    | otherwise = oneof $ negativeForm : binaryOper
+    | not allowNegation = oneof mapBinaryOperator
+    | maxNodesForDepth (maxDepth - 1) < nodes - 1 = oneof mapBinaryOperator
+    | otherwise = oneof $ negativeForm : mapBinaryOperator
     where
-        binaryOper = map (binaryOperator nodes maxDepth allowArrowOperators allowNegation . Binary) $
+        mapBinaryOperator = map (binaryOperator nodes maxDepth allowArrowOperators allowNegation . Binary) $
           chooseList allowArrowOperators
         negativeForm = negativeFormula nodes maxDepth allowArrowOperators
 

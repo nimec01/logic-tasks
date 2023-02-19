@@ -13,7 +13,7 @@ import Trees.Print (normalShow)
 
 
 bracketDisplay :: SynTree BinOp Char -> Gen String
-bracketDisplay (Binary oper a b) = allocateBracketToSubtree False a b (showOperator oper)
+bracketDisplay (Binary operator a b) = allocateBracketToSubtree False a b (showOperator operator)
 bracketDisplay (Leaf a)=  return ("("++ (a : ")"))
 bracketDisplay (Not a) = do
     aFormula <- ifUseBracket True a
@@ -35,11 +35,11 @@ ifUseBracket useBracket synTree@Binary {} =
 
 
 subTreeBracket :: SynTree BinOp Char -> Gen String
-subTreeBracket (Binary oper a b) = allocateBracketToSubtree True a b (showOperator oper)
+subTreeBracket (Binary operator a b) = allocateBracketToSubtree True a b (showOperator operator)
 subTreeBracket (Not a) = do
     left <- ifUseBracket True a
     return (showOperatorNot ++ left)
-subTreeBracket (Leaf _) = error "This will not happen but must be write"
+subTreeBracket (Leaf _) = error "This will never happen!"
 
 
 

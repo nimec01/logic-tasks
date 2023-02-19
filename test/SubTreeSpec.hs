@@ -63,12 +63,12 @@ spec = do
                     subFormulasStringParse (deleteSpaces $ displaySubTrees $ toList correctTrees)
                       == Right (Data.Set.map deleteSpaces correctFormulas)
         it "it should generate not less Syntax Sub tree number it required as excepted" $
-            forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} ->
+            forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
+                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
                   fromIntegral (size correctFormulas) >= minSubTrees
         it "all subformulae are the sublist of the formula" $
-            forAll validBoundsSubTree $ \sTconfig@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst sTconfig) $ \SubTreeInst{..} ->
+            forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
+                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
                   let
                     correctFormulas' = toList correctFormulas
                   in

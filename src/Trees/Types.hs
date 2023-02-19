@@ -43,9 +43,9 @@ instance Applicative (SynTree o) where
   m1 <*> m2 = m1 >>= \f -> m2 >>= \x -> return (f x)
 
 instance Monad (SynTree o) where
-  Binary oper a b >>= k = Binary oper (a >>= k) (b >>= k)
-  Not a           >>= k = Not (a >>= k)
-  Leaf a          >>= k = k a
+  Binary operator a b >>= k = Binary operator (a >>= k) (b >>= k)
+  Not a               >>= k = Not (a >>= k)
+  Leaf a              >>= k = k a
 
 
 data PropFormula c

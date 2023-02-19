@@ -47,7 +47,7 @@ spec = do
                    ==> forAll (genClause (lower,upper) lits) isEmptyClause
     it "should generate a random clause of the correct length if given valid parameters" $
       forAll validBoundsClause $ \((lower,upper),chars) -> forAll (genClause (lower,upper) chars) $ \clause ->
-        let len = length (literals clause) in len >= lower && len <= upper
+        let numOfLiterals = length (literals clause) in numOfLiterals >= lower && numOfLiterals <= upper
 
 
   describe "genCnf" $ do

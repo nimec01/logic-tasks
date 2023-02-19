@@ -26,7 +26,7 @@ import Control.Monad (void)
 import Control.Monad.State (get, put, runState, evalState)
 import Data.Set(fromList, Set, toList)
 import Data.List.Extra (nubBy)
-import qualified Formula.Types as Setform hiding (Dnf(..), Con(..))
+import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
 
@@ -114,15 +114,15 @@ continueNot :: SynTree o c -> Integer
 continueNot (Not a) = 1 + continueNot a
 continueNot _ = 0
 
-cnfToSynTree :: Setform.Cnf -> SynTree BinOp Char
-cnfToSynTree = foldr1 (Binary And) . map clauseToSynTree . toList . Setform.clauseSet
+cnfToSynTree :: SetFormula.Cnf -> SynTree BinOp Char
+cnfToSynTree = foldr1 (Binary And) . map clauseToSynTree . toList . SetFormula.clauseSet
 
-clauseToSynTree :: Setform.Clause -> SynTree BinOp Char
-clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . Setform.literalSet
+clauseToSynTree :: SetFormula.Clause -> SynTree BinOp Char
+clauseToSynTree = foldr1 (Binary Or) . map literalToSynTree . toList . SetFormula.literalSet
 
-literalToSynTree :: Setform.Literal -> SynTree o Char
-literalToSynTree (Setform.Literal a) = Leaf a
-literalToSynTree (Setform.Not a) = Not (Leaf a)
+literalToSynTree :: SetFormula.Literal -> SynTree o Char
+literalToSynTree (SetFormula.Literal a) = Leaf a
+literalToSynTree (SetFormula.Not a) = Not (Leaf a)
 
 
 numOfOps :: SynTree o c -> Integer

@@ -118,8 +118,8 @@ spec = do
                   (judgeCnfSynTree . cnfToSynTree)
     describe "generateLegalCNFInst" $
         it "all of the formulas in the wrong serial should not be Cnf" $
-            forAll validBoundsLegalCNF $ \lCConfig ->
-                forAll (generateLegalCNFInst lCConfig) $ \LegalCNFInst {..} ->
+            forAll validBoundsLegalCNF $ \config ->
+                forAll (generateLegalCNFInst config) $ \LegalCNFInst {..} ->
                   illegalTest (toList serialsOfWrong) formulaStrings
     describe "generateLegalCNFInst" $ do
         it "all of the formulas not in the wrong serial should be Cnf" $

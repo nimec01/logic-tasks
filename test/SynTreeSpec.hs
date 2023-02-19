@@ -68,8 +68,8 @@ spec = do
         forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse (tail correct) /= Right tree
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
-      forAll validBoundsSynTree $ \sTConfig ->
-        forAll (generateSynTreeInst sTConfig) $ \SynTreeInst{..} -> formulaParse correct == Right tree
+      forAll validBoundsSynTree $ \config ->
+        forAll (generateSynTreeInst config) $ \SynTreeInst{..} -> formulaParse correct == Right tree
     it ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
         "even without spaces") $
       forAll validBoundsSynTree $ \sTConfig ->

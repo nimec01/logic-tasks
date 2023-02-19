@@ -125,7 +125,7 @@ spec = do
                   \superfluousBracketsInst@SuperfluousBracketsInst{..} ->
                     feedback superfluousBracketsInst (fromRight (Atomic ' ') (parse parsePropForm "" simplestString))
         it "the stringWithSuperfluousBrackets should have right number of SuperfluousBrackets" $
-            forAll validBoundsSuperfluousBrackets $ \sBConfig@SuperfluousBracketsConfig {..} ->
-                forAll (generateSuperfluousBracketsInst sBConfig) $ \SuperfluousBracketsInst{..} ->
+            forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
+                forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   fromIntegral (length stringWithSuperfluousBrackets - length simplestString)
                     == superfluousBracketPairs * 2
