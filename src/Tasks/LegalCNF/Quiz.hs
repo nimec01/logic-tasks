@@ -5,8 +5,8 @@ module Tasks.LegalCNF.Quiz (
     ) where
 
 
-import qualified Formula.Types
-import qualified Tasks.LegalCNF.GenerateLegal
+import qualified Formula.Types (genCnf)
+import qualified Tasks.LegalCNF.GenerateLegal (genCnf)
 
 import Data.List ((\\))
 import Data.Set (fromList)

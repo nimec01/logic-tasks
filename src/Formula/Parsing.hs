@@ -169,9 +169,7 @@ instance Parse Cnf where
   parser = (lexeme parseCnf <?> "CNF")
            <|> fail "Could not parse a CNF: CNFs are composed out of clauses and the 'and operator' (/\\)."
     where
-      parseCnf = do
-        cs <- sepBy parser parseAnd
-        pure $ mkCnf cs
+      parseCnf = mkCnf <$> sepBy parser parseAnd
 
 
 

@@ -22,7 +22,7 @@ indexed = zipWith (\a b -> show a ++ ". " ++ b) ([1..] :: [Int])
 
 
 
-instruct :: OutputMonad m => State (Map Language String) a -> LangM m
+instruct :: OutputMonad m => State (Map Language String) () -> LangM m
 instruct = paragraph . translate
 
 
@@ -32,14 +32,14 @@ focus = indent . code
 
 
 
-example :: OutputMonad m => String -> State (Map Language String) a -> LangM m
+example :: OutputMonad m => String -> State (Map Language String) () -> LangM m
 example correct s = indent $ do
     instruct s
     code correct
 
 
 
-reject :: OutputMonad m => State (Map Language String) a -> LangM m
+reject :: OutputMonad m => State (Map Language String) () -> LangM m
 reject  = refuse . indent . translate
 
 

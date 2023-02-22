@@ -12,7 +12,7 @@ import Text.Parsec.String (Parser)
 
 import Data.Char (isLetter)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..), showOperator, showOperatorNot, allBinaryOperators)
-import ParsingHelpers (lexeme, whitespace)
+import ParsingHelpers (brackets, lexeme, whitespace)
 
 leafE :: Parser (SynTree o Char)
 leafE =
@@ -23,15 +23,8 @@ notE = do
     lexeme $ string showOperatorNot
     Not <$> parserT
 
-parserTreeToString :: Parser (SynTree BinOp Char)
-parserTreeToString = do
-   lexeme $ char '('
-   e <- parserS
-   lexeme $ char ')'
-   return e
-
 parserT :: Parser (SynTree BinOp Char)
-parserT = leafE <|> parserTreeToString <|> notE
+parserT = leafE <|> brackets parserS <|> notE
 
 parserS :: Parser (SynTree BinOp Char)
 parserS = do
@@ -74,11 +67,7 @@ parseAnyOp = foldr1 (<|>) (map parseOp allBinaryOperators)
 
 
 parseBrackets :: Parser (PropFormula Char)
-parseBrackets = do
-  lexeme $ char '('
-  form <- parsePropForm
-  lexeme $ char ')'
-  return $ Brackets form
+parseBrackets = Brackets <$> brackets parsePropForm
 
 
 

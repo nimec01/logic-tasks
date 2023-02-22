@@ -4,9 +4,10 @@ module ParsingHelpers (
   formulaSymbol,
   whitespace,
   lexeme,
+  brackets,
   ) where
 
-import Text.Parsec.Char (oneOf, satisfy, spaces)
+import Text.Parsec.Char (char, oneOf, satisfy, spaces)
 import Data.Char (isLetter)
 import Text.Parsec ((<|>))
 import Text.Parsec.String (Parser)
@@ -25,3 +26,10 @@ lexeme p = do
     x <- p
     whitespace
     return x
+
+brackets :: Parser a -> Parser a
+brackets p = do
+   lexeme $ char '('
+   x <- p
+   lexeme $ char ')'
+   return x
