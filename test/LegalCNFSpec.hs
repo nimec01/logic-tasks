@@ -19,8 +19,6 @@ import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..))
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
 import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
-import TestHelpers (transferSetIntToString)
 
 validBoundsLegalCNF :: Gen LegalCNFConfig
 validBoundsLegalCNF = do
@@ -93,12 +91,6 @@ invalidBoundsLegalCNF = do
           allowArrowOperators = False
         }
 
-illegalTest :: [Int] -> [String] -> Bool
-illegalTest xs strings = all (\ x -> isLeft (cnfParse (strings !! (x - 1)))) xs
-
-legalTest :: [Int] -> [String] -> Bool
-legalTest xs strings = all (\ x -> isRight (cnfParse (strings !! (x - 1)))) xs
-
 spec :: Spec
 spec = do
     describe "genIllegalSynTree" $
@@ -111,7 +103,7 @@ spec = do
                      allowArrowOperators
                   )
                   (not . judgeCnfSynTree)
-    describe "judgeCNFSynTree" $
+    describe "judgeCnfSynTree" $
         it "is reasonably implemented" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
@@ -121,16 +113,12 @@ spec = do
         it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \config ->
                 forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
-                  illegalTest (toList serialsOfWrong) formulaStrings
+                  all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) (toList serialsOfWrong)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas not in the wrong serial should be Cnf" $
             forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
                 forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
-                  legalTest ([1..formulas] \\ toList serialsOfWrong) formulaStrings
-        it "the feedback designed for Instance works as expected" $
-            forAll validBoundsLegalCNF $ \config ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
-                  illegalPropositionStringParse(transferSetIntToString serialsOfWrong) == Right serialsOfWrong
+                  all (\x -> isRight (cnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b

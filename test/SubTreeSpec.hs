@@ -4,20 +4,17 @@ module SubTreeSpec (spec) where
 import Test.Hspec (describe, it, Spec)
 import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Text.Parsec (parse)
-import Data.Either (fromRight)
-import Data.List (intercalate)
+import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
-import Data.Set (fromList, size, toList, map)
+import Data.Set (fromList, size, toList)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..))
 import Tasks.SubTree.Quiz (generateSubTreeInst)
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
-import Trees.Parsing (parsePropForm)
-import Tasks.SubTree.Parsing (subFormulasStringParse, subTreeStringParse)
+import Trees.Parsing (parsePropForm, parserS)
 import SynTreeSpec (validBoundsSynTree)
 
 validBoundsSubTree :: Gen SubTreeConfig
@@ -53,15 +50,15 @@ spec = do
                   let
                     correctTrees = allNotLeafSubTrees tree
                   in
-                    subTreeStringParse (displaySubTrees $ toList correctTrees) == Right correctTrees
-        it "parse should works well" $
+                    all (\tree -> parse parserS "" (display tree) == Right tree) $ toList correctTrees
+        it "correct formulas are stored" $
             forAll validBoundsSubTree $ \subTreeConfig ->
                 forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
                   let
                     correctTrees = allNotLeafSubTrees tree
                   in
-                    subFormulasStringParse (deleteSpaces $ displaySubTrees $ toList correctTrees)
-                      == Right (Data.Set.map deleteSpaces correctFormulas)
+                    fromList (map display $ toList correctTrees)
+                      == correctFormulas
         it "it should generate not less Syntax Sub tree number it required as excepted" $
             forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
                 forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
@@ -77,27 +74,19 @@ spec = do
             forAll validBoundsSubTree $ \config ->
                 forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
                   let
-                    propFormulae = Prelude.map
-                      (fromRight (Atomic ' ') . parse parsePropForm "")
+                    propFormulae = map
+                      (fromRight' . parse parsePropForm "")
                       (toList correctFormulas)
-                    inputSet = fromList (Prelude.map show propFormulae)
+                    inputSet = fromList (map show propFormulae)
                   in
                     inputSet == correctFormulas
         it "The above should be true even when deleting spaces in the input" $
             forAll validBoundsSubTree $ \config ->
                 forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
                   let
-                    propFormulae = Prelude.map
-                      (fromRight (Atomic ' ') . parse parsePropForm "" . deleteSpaces)
+                    propFormulae = map
+                      (fromRight' . parse parsePropForm "" . deleteSpaces)
                       (toList correctFormulas)
-                    inputSet = fromList (Prelude.map show propFormulae)
+                    inputSet = fromList (map show propFormulae)
                   in
                     inputSet == correctFormulas
-
-
-
-displaySubTrees :: [SynTree BinOp Char] -> String
-displaySubTrees trees = "{" ++ showTrees trees ++ "}"
-
-showTrees :: [SynTree BinOp Char] -> String
-showTrees synTreeList = intercalate ", " (Prelude.map display synTreeList)

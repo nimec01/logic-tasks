@@ -3,7 +3,7 @@
 module SuperfluousBracketsSpec (spec) where
 
 import Test.QuickCheck (Gen, forAll, choose, suchThat, (==>))
-import Data.Either (fromRight)
+import Data.Either.Extra (fromRight')
 import Data.List.Extra (notNull)
 import Test.Hspec (Spec, describe, it)
 import Text.Parsec (parse)
@@ -12,7 +12,7 @@ import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst)
 import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
+import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
@@ -119,10 +119,10 @@ spec = do
                         \stringWithSuperfluousBrackets ->
                           formulaParse stringWithSuperfluousBrackets == Right synTree
     describe "generateSuperfluousBracketsInst" $ do
-        it "the correct store in Inst should be accept by feedback" $
+        it "show and parse are inverse for parsePropForm (?)" $
             forAll validBoundsSuperfluousBrackets $ \config ->
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
-                  show (fromRight (Atomic ' ') (parse parsePropForm "" simplestString)) == simplestString
+                  show (fromRight' (parse parsePropForm "" simplestString)) == simplestString
         it "the stringWithSuperfluousBrackets should have right number of SuperfluousBrackets" $
             forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->

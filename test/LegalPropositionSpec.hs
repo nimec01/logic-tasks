@@ -2,25 +2,24 @@
 
 module LegalPropositionSpec (spec) where
 
-import Data.Set (toList, singleton)
+import Data.Set (toList)
 import Data.Either (isLeft, isRight)
 import Data.List ((\\))
+import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat)
 
 import Tasks.LegalProposition.Config (LegalPropositionConfig (..), LegalPropositionInst(..))
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Tasks.LegalProposition.PrintIllegal (illegalDisplay)
 import Tasks.LegalProposition.PrintBracket (bracketDisplay,)
 import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Parsing (formulaParse)
-import Tasks.SubTree.Parsing (subFormulasStringParse)
 import Trees.Generate (genSynTree)
 import Trees.Helpers (maxLeavesForNodes)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
-import TestHelpers (deleteBrackets, deleteSpaces, transferSetIntToString)
+import TestHelpers (deleteBrackets, deleteSpaces)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -51,12 +50,6 @@ invalidBoundsLegalProposition = do
             , bracketFormulas
         }
 
-illegalTest :: [Int] -> [String] -> Bool
-illegalTest xs strings = all (\ x -> isLeft (formulaParse (strings !! (x - 1)))) xs
-
-legalTest :: [Int] -> [String] -> Bool
-legalTest xs strings = all (\ x -> isRight (formulaParse (strings !! (x - 1)))) xs
-
 spec :: Spec
 spec = do
     describe "illegalDisplay" $ do
@@ -71,8 +64,8 @@ spec = do
                     allowArrowOperators
                     maxConsecutiveNegations
                   ) $ \synTree ->
-                      forAll (deleteSpaces <$> illegalDisplay synTree) $ \str ->
-                        subFormulasStringParse ("{" ++ str ++ "}") == Right (singleton str)
+                      forAll (deleteSpaces <$> illegalDisplay synTree) $
+                      all (\c -> c `elem` "()/\\<=>~" || isLetter c)
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
                 forAll
@@ -126,12 +119,8 @@ spec = do
         it "the generateLegalPropositionInst should generate expected illegal number" $
             forAll validBoundsLegalProposition $ \config ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  illegalTest (toList serialsOfWrong) pseudoFormulas
+                  all (\x -> isLeft (formulaParse (pseudoFormulas !! (x - 1)))) (toList serialsOfWrong)
         it "the generateLegalPropositionInst should generate expected legal number" $
             forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  legalTest ([1.. (fromIntegral formulas)] \\ toList serialsOfWrong) pseudoFormulas
-        it "the feedback designed for Instance works as expected" $
-            forAll validBoundsLegalProposition $ \config ->
-                forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  illegalPropositionStringParse (transferSetIntToString serialsOfWrong) == Right serialsOfWrong
+                  all (\x -> isRight (formulaParse (pseudoFormulas !! (x - 1)))) ([1 .. fromIntegral formulas] \\ toList serialsOfWrong)

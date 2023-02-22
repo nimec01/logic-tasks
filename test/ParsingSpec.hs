@@ -4,7 +4,6 @@ import Data.Either (isLeft, isRight)
 import Test.Hspec ( describe, it, Spec)
 
 import Trees.Parsing (formulaParse)
-import Tasks.LegalProposition.Parsing (illegalPropositionStringParse)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 
 spec :: Spec
@@ -16,9 +15,6 @@ spec = do
       isLeft $ formulaParse "A/\\B/\\C"
     it "correctly rejects stuff with strange spaces" $
       isLeft $ formulaParse "A/ \\B"
-  describe "illegalPropositionStringParse" $
-    it "correctly recognizes simple set" $
-      isRight $ illegalPropositionStringParse "{1,2,3,12,2}"
   describe "superfluousBracketsExcParser" $ do
     it "correctly recognizes stuff that isn't strictly well-bracketed" $
       isRight $ superfluousBracketsExcParser "A/\\B/\\C"
