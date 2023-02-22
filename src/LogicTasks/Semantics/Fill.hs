@@ -146,8 +146,8 @@ partialGrade FillInst{..} sol = do
     (gerLong,engLong) = gerEng diffToTable
     (gerShort,engShort) = gerEng diffToMissing
     gerEng diff = if diff == 1
-        then ("muss " ++ display ++ " Wert", display ++ " value")
-        else ("müssen " ++ display ++ " Werte", display ++ " values")
+        then ("muss " ++ display ++ " Wert", display ++ " value") -- no-spell-check
+        else ("müssen " ++ display ++ " Werte", display ++ " values") -- no-spell-check
       where
         display = show diff
 

@@ -132,8 +132,8 @@ partialGrade DecideInst{..} sol = do
     distance = abs (solLen - acLen)
     display = show distance
     (ger, eng) = if distance == 1
-    then ( "muss " ++ display ++ " spezifischer Wert", display ++ " unique value")
-    else ("müssen " ++ display ++ " spezifische Werte", display ++ " unique values")
+    then ( "muss " ++ display ++ " spezifischer Wert", display ++ " unique value") -- no-spell-check
+    else ("müssen " ++ display ++ " spezifische Werte", display ++ " unique values") -- no-spell-check
 
 
 

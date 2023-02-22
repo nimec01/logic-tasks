@@ -108,7 +108,7 @@ instance Parse TruthValue where
             pure t
               where
                 parseTrue = do
-                  string "1" <|> try (single "w") <|> try (single "t") <|> string "wahr" <|> string "true"
+                  string "1" <|> try (single "w") <|> try (single "t") <|> string "wahr" <|> string "true" -- no-spell-check
                   pure $ TruthValue True
                 parseFalse = do
                   string "0" <|> try (single "f") <|> eitherDeEn
@@ -120,7 +120,7 @@ instance Parse TruthValue where
                     notFollowedBy alphaNum
                     return res
 
-                eitherDeEn = string "fals" >> (try (string "e") <|> string "ch")
+                eitherDeEn = string "fals" >> (try (string "e") <|> string "ch") -- no-spell-check
 
 
 
