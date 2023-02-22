@@ -123,4 +123,6 @@ spec = do
         it "the generateLegalPropositionInst should generate expected legal number" $
             forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
-                  all (\x -> isRight (formulaParse (pseudoFormulas !! (x - 1)))) ([1 .. fromIntegral formulas] \\ toList serialsOfWrong)
+                  all
+                  (\x -> isRight (formulaParse (pseudoFormulas !! (x - 1))))
+                  ([1 .. fromIntegral formulas] \\ toList serialsOfWrong)
