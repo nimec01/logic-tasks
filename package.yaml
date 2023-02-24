@@ -39,7 +39,6 @@ library:
     - LogicTasks.Semantics.Resolve
     - LogicTasks.Printing
     - LogicTasks.Parsing
-    - LogicTasks.Util
     - LogicTasks.Syntax.IllegalCnfs
     - LogicTasks.Syntax.IllegalFormulas
     - LogicTasks.Syntax.SimplestFormula

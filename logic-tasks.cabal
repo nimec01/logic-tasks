@@ -24,7 +24,6 @@ library
       LogicTasks.Semantics.Resolve
       LogicTasks.Printing
       LogicTasks.Parsing
-      LogicTasks.Util
       LogicTasks.Syntax.IllegalCnfs
       LogicTasks.Syntax.IllegalFormulas
       LogicTasks.Syntax.SimplestFormula
@@ -62,6 +61,7 @@ library
       Formula.Table
       Formula.Util
       LogicTasks.Helpers
+      LogicTasks.Util
       Util
       Paths_logic_tasks
   hs-source-dirs:
