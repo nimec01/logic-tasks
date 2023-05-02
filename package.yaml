@@ -75,6 +75,7 @@ library:
     - -Widentities
     - -fno-warn-unused-do-bind
     - -Werror
+    - -Wwarn=incomplete-uni-patterns
 
 
 tests:
