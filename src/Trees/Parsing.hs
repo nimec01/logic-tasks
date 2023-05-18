@@ -10,7 +10,7 @@ import Text.Parsec.Char (char, satisfy, string)
 import Text.Parsec (eof, ParseError, parse, (<|>), optionMaybe)
 import Text.Parsec.String (Parser)
 
-import Data.Char (isLetter)
+import Data.Char (isLetter, isSpace)
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..), showOperator, showOperatorNot, allBinaryOperators)
 import ParsingHelpers (brackets, lexeme, whitespace)
 
@@ -42,7 +42,7 @@ formulaParse = parse (whitespace >> parserS <* eof) ""
 
 parseAtomic :: Parser (PropFormula Char)
 parseAtomic = do
-  c <- lexeme (satisfy isLetter)
+  c <- lexeme $ satisfy (\x -> isLetter x || isSpace x)
   pure $ Atomic c
 
 
