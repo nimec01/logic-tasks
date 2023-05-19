@@ -5,6 +5,7 @@ module LogicTasks.Syntax.SimplestFormula where
 
 import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.List (nub, sort)
+import Data.Maybe (isNothing, fromJust)
 
 import LogicTasks.Helpers
 import Tasks.SuperfluousBrackets.Config (
@@ -52,13 +53,18 @@ verifyConfig = checkSuperfluousBracketsConfig
 
 
 
-start :: PropFormula Char
-start = Atomic ' '
+start :: FormulaAnswer
+start = FormulaAnswer Nothing
 
 
 
-partialGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula Char -> LangM m
+partialGrade :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 partialGrade SuperfluousBracketsInst{..} f
+    | isNothing $ maybeForm f =
+      reject $ do
+        english "Your submission is empty."
+        german "Sie haben keine Formel angegeben."
+
     | any (`notElem` correctLits) literals =
       reject $ do
         english "Your solution contains unknown literals."
@@ -81,14 +87,15 @@ partialGrade SuperfluousBracketsInst{..} f
 
     | otherwise = pure()
   where
-    literals = sort $ nub $ collectLeaves f
-    opsNum = numOfOpsInFormula f
+    pForm = fromJust $ maybeForm f
+    literals = sort $ nub $ collectLeaves $ pForm
+    opsNum = numOfOpsInFormula pForm
     correctLits = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
 
 
 
-completeGrade :: OutputMonad m => SuperfluousBracketsInst -> PropFormula Char -> LangM m
+completeGrade :: OutputMonad m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 completeGrade inst sol
     | show sol /= simplestString inst = reject $ do
       english "Your solution is not correct."

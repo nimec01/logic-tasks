@@ -134,7 +134,7 @@ numOfOps _ = 0
 
 
 numOfOpsInFormula :: PropFormula c -> Integer
-numOfOpsInFormula (Atomic _) = 0
 numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
+numOfOpsInFormula _ = 0

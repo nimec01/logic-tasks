@@ -3,6 +3,7 @@
 module Trees.Parsing (
   parserS,
   formulaParse,
+  parseFormulaAnswer,
   parsePropForm
   ) where
 
@@ -10,8 +11,8 @@ import Text.Parsec.Char (char, satisfy, string)
 import Text.Parsec (eof, ParseError, parse, (<|>), optionMaybe)
 import Text.Parsec.String (Parser)
 
-import Data.Char (isLetter, isSpace)
-import Trees.Types (SynTree(..), BinOp(..), PropFormula(..), showOperator, showOperatorNot, allBinaryOperators)
+import Data.Char (isLetter)
+import Trees.Types (SynTree(..), BinOp(..), FormulaAnswer(..), PropFormula(..), showOperator, showOperatorNot, allBinaryOperators)
 import ParsingHelpers (brackets, lexeme, whitespace)
 
 leafE :: Parser (SynTree o Char)
@@ -42,7 +43,7 @@ formulaParse = parse (whitespace >> parserS <* eof) ""
 
 parseAtomic :: Parser (PropFormula Char)
 parseAtomic = do
-  c <- lexeme $ satisfy (\x -> isLetter x || isSpace x)
+  c <- lexeme $ satisfy isLetter
   pure $ Atomic c
 
 
@@ -78,9 +79,13 @@ parseBasic = parseAtomic <|> parseBrackets <|> parseNeg
 
 parsePropForm :: Parser (PropFormula Char)
 parsePropForm = do
-   form1 <- parseBasic
-   mOp <- optionMaybe parseAnyOp
-   case mOp of
-     Nothing   -> pure form1
-     (Just op) ->
-       do Assoc op form1 <$> parsePropForm
+    form1 <- parseBasic
+    mOp <- optionMaybe parseAnyOp
+    case mOp of
+      Nothing   -> pure form1
+      (Just op) -> Assoc op form1 <$> parsePropForm
+
+
+
+parseFormulaAnswer :: Parser FormulaAnswer
+parseFormulaAnswer = FormulaAnswer <$> optionMaybe parsePropForm

@@ -6,6 +6,7 @@ module Trees.Types
     (
     SynTree(..),
     BinOp(..),
+    FormulaAnswer(..),
     PropFormula(..),
     showOperator,
     showOperatorNot,
@@ -48,6 +49,7 @@ instance Monad (SynTree o) where
   Leaf a              >>= k = k a
 
 
+
 data PropFormula c
     = Atomic c
     | Neg (PropFormula c)
@@ -56,8 +58,17 @@ data PropFormula c
   deriving (Eq, Foldable)
 
 
+
 instance Show (PropFormula Char) where
   show (Atomic c) = [c]
   show (Neg f) = showOperatorNot ++ show f
   show (Brackets f) = '(' : show f ++ ")"
   show (Assoc o f1 f2) = show f1 ++ " " ++ showOperator o ++ " " ++ show f2
+
+
+
+newtype FormulaAnswer = FormulaAnswer {maybeForm :: Maybe (PropFormula Char)} deriving (Eq, Generic)
+
+instance Show FormulaAnswer where
+  show (FormulaAnswer (Just p)) = show p
+  show _ = ""
