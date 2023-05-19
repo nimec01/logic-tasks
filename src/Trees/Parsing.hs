@@ -12,7 +12,16 @@ import Text.Parsec (eof, ParseError, parse, (<|>), optionMaybe)
 import Text.Parsec.String (Parser)
 
 import Data.Char (isLetter)
-import Trees.Types (SynTree(..), BinOp(..), FormulaAnswer(..), PropFormula(..), showOperator, showOperatorNot, allBinaryOperators)
+import Trees.Types
+    ( SynTree(..)
+    , BinOp(..)
+    , FormulaAnswer(..)
+    , PropFormula(..)
+    , showOperator
+    , showOperatorNot
+    , allBinaryOperators
+    )
+
 import ParsingHelpers (brackets, lexeme, whitespace)
 
 leafE :: Parser (SynTree o Char)

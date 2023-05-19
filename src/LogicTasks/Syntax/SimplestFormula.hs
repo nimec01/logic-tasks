@@ -88,7 +88,7 @@ partialGrade SuperfluousBracketsInst{..} f
     | otherwise = pure()
   where
     pForm = fromJust $ maybeForm f
-    literals = sort $ nub $ collectLeaves $ pForm
+    literals = sort $ nub $ collectLeaves pForm
     opsNum = numOfOpsInFormula pForm
     correctLits = sort $ nub $ collectLeaves tree
     correctOpsNum = numOfOps tree
