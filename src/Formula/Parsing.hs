@@ -146,7 +146,7 @@ instance Parse Clause where
    where
      clauseParse = do
        braces <- lexeme $ optionMaybe $ char '('
-       lits <- sepBy parser parseOr
+       lits <- sepBy1 parser parseOr
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkClause lits
@@ -159,7 +159,7 @@ instance Parse Con where
    where
      conParse = do
        braces <- lexeme $ optionMaybe $ char '('
-       lits <- sepBy parser parseAnd
+       lits <- sepBy1 parser parseAnd
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkCon lits

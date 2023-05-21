@@ -372,7 +372,7 @@ instance Show Dnf where
     show = listShow . getConjunctions
       where
         listShow :: [Con] -> String
-        listShow [] = "{ }"
+        listShow [] = ""
         listShow [x] = withBraces x
         listShow (x:xs) = withBraces x ++ " \\/ " ++ listShow xs
         withBraces con = if amount con == 1 then show con else "(" ++ show con ++ ")"
