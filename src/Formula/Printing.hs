@@ -31,6 +31,10 @@ instance Pretty Number where
 
 
 
+instance Pretty StepAnswer where
+  pretty a = maybe empty pretty $ step a
+
+
 instance Pretty TruthValue where
   pretty tv = pretty $ truth tv
 

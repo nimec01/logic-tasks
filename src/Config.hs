@@ -14,6 +14,13 @@ import Formula.Util
 newtype Number = Number {value :: Maybe Int} deriving (Typeable, Generic)
 
 
+newtype StepAnswer = StepAnswer {step :: Maybe (Literal, Clause)} deriving (Typeable, Generic)
+
+instance Show StepAnswer where
+  show (StepAnswer (Just a)) = show a
+  show _ = ""
+
+
 
 data PickInst = PickInst {
                  cnfs    :: ![Cnf]

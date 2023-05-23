@@ -4,12 +4,12 @@ module LogicTasks.Semantics.Step where
 
 
 import Control.Monad.Output (LangM, OutputMonad (..), english, german, translate)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Data.List (delete)
 import Data.Set (difference, fromList, member, toList, union)
 import Test.QuickCheck (Gen, elements)
 
-import Config (StepConfig(..), StepInst(..), BaseConfig(..))
+import Config (StepAnswer(..), StepConfig(..), StepInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkClause)
 import Formula.Types (Clause, Literal(..), genClause, literals, opposite)
 import Formula.Resolution (resolvable, resolve)
@@ -84,9 +84,15 @@ start = (Literal ' ', mkClause [])
 
 
 
-partialGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> LangM m
+partialGrade :: OutputMonad m => StepInst -> StepAnswer -> LangM m
 partialGrade StepInst{..} sol = do
-  prevent (not (fst sol `member` availLits)) $
+
+  prevent (isNothing $ step sol) $
+    translate $ do
+      german "Lösung ist nicht leer?"
+      english "The solution is not empty?"
+
+  prevent (not (fst mSol `member` availLits)) $
     translate $ do
       german "Das gewählte Literal kommt in einer der Klauseln vor?"
       english "The chosen literal is contained in any of the clauses?"
@@ -103,25 +109,27 @@ partialGrade StepInst{..} sol = do
       itemizeM $ map (text . show) extra
     )
   where
+     mSol = fromJust $ step sol
      availLits = fromList (literals clause1) `union` fromList (literals clause2)
-     solLits = fromList $ literals $ snd sol
+     solLits = fromList $ literals $ snd mSol
      extra = toList (solLits `difference` availLits)
 
 
 
-completeGrade :: OutputMonad m => StepInst -> (Literal, Clause) -> LangM m
+completeGrade :: OutputMonad m => StepInst -> StepAnswer -> LangM m
 completeGrade StepInst{..} sol =
-    case resolve clause1 clause2 (fst sol) of
+    case resolve clause1 clause2 (fst mSol) of
         Nothing -> refuse $ indent $ translate $ do
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
                      english "This literal can not be used for a resolution step!"
 
-        Just solClause -> if solClause == snd sol
+        Just solClause -> if solClause == snd mSol
                             then pure()
                             else refuse $ indent $ translate $ do
                                    german "Resolvente ist nicht korrekt."
                                    english "Resolvent is not correct."
-
+  where
+    mSol = fromJust $ step sol
 
 
 genResStepClause :: Int -> Int -> [Char] -> Gen (Clause, Literal, [Literal])

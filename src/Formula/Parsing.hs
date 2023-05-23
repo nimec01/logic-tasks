@@ -85,6 +85,19 @@ instance Parse Number where
             pure $ Number $ fmap read result
 
 
+instance Parse StepAnswer where
+  parser = (lexeme stepParse <?> "Number") <|> fail "Could not parse a number"
+    where stepParse = do
+            result <- optionMaybe $ parseTuple
+            pure $ StepAnswer result
+          parseTuple = do
+            void $ lexeme $ char '('
+            lit <- parser
+            void $ lexeme $ char ','
+            resolvent <- parser
+            pure (lit, resolvent)
+
+
 
 
 instance Parse TruthValue where
