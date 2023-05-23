@@ -88,7 +88,7 @@ instance Parse Number where
 instance Parse StepAnswer where
   parser = (lexeme stepParse <?> "Number") <|> fail "Could not parse a number"
     where stepParse = do
-            result <- optionMaybe $ parseTuple
+            result <- optionMaybe parseTuple
             pure $ StepAnswer result
           parseTuple = do
             void $ lexeme $ char '('
@@ -157,8 +157,8 @@ instance Parse Clause where
  parser = (lexeme clauseParse <?> "Clause")
      <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
    where
-     clauseParse = parseElems <|> parseEmpty
-     parseElems = do
+     clauseParse = parseElements <|> parseEmpty
+     parseElements = do
        braces <- lexeme $ optionMaybe $ char '('
        lits <- sepBy1 parser parseOr
        case braces of Nothing -> pure ' '
