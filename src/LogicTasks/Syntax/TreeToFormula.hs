@@ -7,11 +7,12 @@ import Control.Monad.IO.Class(MonadIO (liftIO))
 import Control.Monad.Output (LangM, OutputMonad(..), english, german)
 import Data.ByteString.Lazy.UTF8 (fromString)
 import Data.Digest.Pure.SHA (sha1, showDigest)
+import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
 import LogicTasks.Helpers
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
-import Trees.Types (BinOp, SynTree(..))
+import Trees.Types (TreeFormulaAnswer(..))
 
 
 
@@ -47,19 +48,23 @@ verifyConfig = checkSynTreeConfig
 
 
 
-start :: SynTree BinOp Char
-start = Leaf ' '
+start :: TreeFormulaAnswer
+start = TreeFormulaAnswer Nothing
 
 
 
-partialGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
-partialGrade _ _ = pure()
+partialGrade :: OutputMonad m => SynTreeInst -> TreeFormulaAnswer -> LangM m
+partialGrade _ sol
+    | isNothing $ maybeTree sol = reject $ do
+      english "You did not submit a solution."
+      german "Die Abgabe ist leer."
+    | otherwise = pure()
 
 
 
-completeGrade :: OutputMonad m => SynTreeInst -> SynTree BinOp Char -> LangM m
+completeGrade :: OutputMonad m => SynTreeInst -> TreeFormulaAnswer -> LangM m
 completeGrade inst sol
-    | sol /= tree inst = reject $ do
+    | fromJust ( maybeTree sol) /= tree inst = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist nicht die korrekte Lösung."
     | otherwise = pure()

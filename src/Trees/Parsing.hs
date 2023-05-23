@@ -4,7 +4,8 @@ module Trees.Parsing (
   parserS,
   formulaParse,
   parseFormulaAnswer,
-  parsePropForm
+  parsePropForm,
+  parseTreeFormulaAnswer
   ) where
 
 import Text.Parsec.Char (char, satisfy, string)
@@ -17,6 +18,7 @@ import Trees.Types
     , BinOp(..)
     , FormulaAnswer(..)
     , PropFormula(..)
+    , TreeFormulaAnswer(..)
     , showOperator
     , showOperatorNot
     , allBinaryOperators
@@ -44,6 +46,11 @@ parserS = do
 
 formulaParse :: String -> Either ParseError (SynTree BinOp Char)
 formulaParse = parse (whitespace >> parserS <* eof) ""
+
+
+parseTreeFormulaAnswer :: Parser TreeFormulaAnswer
+parseTreeFormulaAnswer = TreeFormulaAnswer <$> optionMaybe parserS
+
 
 
 --------------------------------------

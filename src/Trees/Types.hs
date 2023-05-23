@@ -8,6 +8,7 @@ module Trees.Types
     BinOp(..),
     FormulaAnswer(..),
     PropFormula(..),
+    TreeFormulaAnswer(..),
     showOperator,
     showOperatorNot,
     allBinaryOperators,
@@ -48,6 +49,14 @@ instance Monad (SynTree o) where
   Not a               >>= k = Not (a >>= k)
   Leaf a              >>= k = k a
 
+
+newtype TreeFormulaAnswer = TreeFormulaAnswer {maybeTree :: Maybe (SynTree BinOp Char)} deriving (Eq, Generic)
+
+
+
+instance Show TreeFormulaAnswer where
+  show (TreeFormulaAnswer (Just p)) = show p
+  show _ = ""
 
 
 data PropFormula c
