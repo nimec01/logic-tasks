@@ -86,7 +86,7 @@ instance Parse Number where
 
 
 instance Parse StepAnswer where
-  parser = (lexeme stepParse <?> "Number") <|> fail "Could not parse a number"
+  parser = (lexeme stepParse <?> "Resolution Step") <|> fail "Could not parse a tuple"
     where stepParse = do
             result <- optionMaybe parseTuple
             pure $ StepAnswer result
@@ -95,6 +95,7 @@ instance Parse StepAnswer where
             lit <- parser
             void $ lexeme $ char ','
             resolvent <- parser
+            void $ lexeme $ char ')'
             pure (lit, resolvent)
 
 
