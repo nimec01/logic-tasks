@@ -79,8 +79,8 @@ verifyQuiz StepConfig{..} = checkBaseConf baseConf
 
 
 
-start :: (Literal, Clause)
-start = (Literal ' ', mkClause [])
+start :: StepAnswer
+start = StepAnswer Nothing
 
 
 
