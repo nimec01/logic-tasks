@@ -144,13 +144,17 @@ instance Parse Clause where
  parser = (lexeme clauseParse <?> "Clause")
      <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
    where
-     clauseParse = do
+     clauseParse = parseElems <|> parseEmpty
+     parseElems = do
        braces <- lexeme $ optionMaybe $ char '('
        lits <- sepBy1 parser parseOr
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkClause lits
-
+     parseEmpty = do
+       void $ lexeme $ char '{'
+       void $ lexeme $ char '}'
+       pure $ mkClause []
 
 
 instance Parse Con where

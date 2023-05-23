@@ -53,7 +53,7 @@ instance Pretty Literal where
 instance Pretty Clause where
     pretty clause = listShow $ literals clause
       where
-        listShow [] = empty
+        listShow [] = text "{ }"
         listShow [x] = pretty x
         listShow (x:xs) = hsep [pretty x, text "\\/", listShow xs]
 
