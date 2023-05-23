@@ -112,7 +112,7 @@ verifyQuiz PrologConfig{..}
 
 
 start :: (PrologLiteral, PrologClause)
-start = (PrologLiteral True " " [], mkPrologClause [])
+start = (PrologLiteral True "PredName" ["fact"], mkPrologClause [])
 
 
 
