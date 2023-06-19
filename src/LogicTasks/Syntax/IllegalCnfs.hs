@@ -26,7 +26,7 @@ description LegalCNFInst{..} = do
 
     instruct $ do
       english "Enter a list containing the indices of the non-cnf formulae to submit your answer."
-      german "Geben Sie eine Liste der Indices aller nicht in KNF vorliegenden Formeln als Ihre Lösung an."
+      german "Geben Sie eine Liste der Indizes aller nicht in KNF vorliegenden Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
       english "For example, if only choices 2 and 3 are non-cnf formulae, then the solution is:"
