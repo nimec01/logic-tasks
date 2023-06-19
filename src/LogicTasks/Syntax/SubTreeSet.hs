@@ -24,7 +24,7 @@ description SubTreeInst{..} = do
 
     instruct $ do
       english $ "Find " ++ show minInputTrees ++ " non-atomic subformulae that are contained in it."
-      german $ "Finden Sie " ++ show minInputTrees ++ " nicht atomare Teilformeln, die in dieser Formel enthalten sind."
+      german $ "Finden Sie " ++ show minInputTrees ++ " nicht-atomare Teilformeln, die in dieser Formel enthalten sind."
 
     instruct $ do
       english "Submit your solution as a list of subformulae."
