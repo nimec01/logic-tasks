@@ -26,6 +26,7 @@ import Control.Monad (void)
 import Control.Monad.State (get, put, runState, evalState)
 import Data.Set(fromList, Set, toList)
 import Data.List.Extra (nubBy)
+import qualified Data.Foldable as Foldable (toList)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
@@ -39,7 +40,7 @@ numberAllBinaryNodes = flip evalState 1 . go
       next = do {current <- get; put (current + 1); return current}
 
 collectLeaves :: Foldable t => t c -> [c]
-collectLeaves = foldMap ( : [])
+collectLeaves = Foldable.toList
 
 relabelShape :: SynTree o () -> [c] -> SynTree o c
 relabelShape shape contents =
@@ -134,7 +135,7 @@ numOfOps _ = 0
 
 
 numOfOpsInFormula :: PropFormula c -> Integer
+numOfOpsInFormula (Atomic _) = 0
 numOfOpsInFormula (Neg f) = numOfOpsInFormula f
 numOfOpsInFormula (Brackets f) = numOfOpsInFormula f
 numOfOpsInFormula (Assoc _ f1 f2) = 1 + numOfOpsInFormula f1 + numOfOpsInFormula f2
-numOfOpsInFormula _ = 0
