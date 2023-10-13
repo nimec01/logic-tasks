@@ -36,9 +36,9 @@ description SubTreeInst{..} = do
       english "Remove bracket pairs which only serve to enclose entire subformulae, and do not add any additional brackets."
       german "Entfernen Sie dabei Klammerpaare, die eine Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
-    example "[ A \\/ B ]" $ do
-      english "For example, if ~(A \\/ B) is the given formula and one subformula is required, then the solution is:"
-      german "Ist z.B. ~(A \\/ B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
+    example "[ A or B ]" $ do
+      english "For example, if not(A or B) is the given formula and one subformula is required, then the solution is:"
+      german "Ist z.B. not(A or B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
     pure ()
 
 

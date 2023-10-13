@@ -81,7 +81,7 @@ verifyQuiz = Max.verifyQuiz
 
 
 start :: Dnf
-start = mkDnf []
+start = mkDnf [mkCon [Literal 'A']]
 
 
 

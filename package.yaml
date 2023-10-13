@@ -76,6 +76,7 @@ library:
     - -fno-warn-unused-do-bind
     - -Werror
     - -Wwarn=incomplete-uni-patterns
+    - -fdefer-typed-holes
 
 
 tests:

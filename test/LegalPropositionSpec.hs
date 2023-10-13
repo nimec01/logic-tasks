@@ -65,7 +65,7 @@ spec = do
                     maxConsecutiveNegations
                   ) $ \synTree ->
                       forAll (deleteSpaces <$> illegalDisplay synTree) $
-                      all (\c -> c `elem` "()/\\<=>~" || isLetter c)
+                      all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
         it "the String after illegalDisplay can not parse " $
             forAll validBoundsSynTree $ \SynTreeConfig {..} ->
                 forAll

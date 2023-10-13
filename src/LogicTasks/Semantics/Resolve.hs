@@ -88,7 +88,7 @@ description ResolutionInst{..} = do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    code "[(1, 2, {A, ~B} = 5), (4, 5, { })]"
+    code "[(1, 2, {A, not B} = 5), (4, 5, { })]"
     pure ()
   paragraph $ text (fromMaybe "" addText)
   pure ()

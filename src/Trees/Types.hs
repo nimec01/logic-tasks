@@ -23,8 +23,8 @@ data BinOp = And | Or | Impl | Equi
   deriving (Eq, Generic, Ord, Show, Enum, Bounded)
 
 showOperator :: BinOp -> String
-showOperator And = "/\\"
-showOperator Or = "\\/"
+showOperator And = "∧"
+showOperator Or = "∨"
 showOperator Impl = "=>"
 showOperator Equi = "<=>"
 
@@ -32,7 +32,7 @@ allBinaryOperators :: [BinOp]
 allBinaryOperators = [minBound .. maxBound]
 
 showOperatorNot :: String
-showOperatorNot = "~"
+showOperatorNot = "¬"
 
 data SynTree o c
     = Binary o (SynTree o c) (SynTree o c)
@@ -65,6 +65,7 @@ data PropFormula c
     | Brackets (PropFormula c)
     | Assoc BinOp (PropFormula c) (PropFormula c)
   deriving (Eq, Foldable)
+
 
 
 

@@ -4,33 +4,25 @@ module Tasks.SuperfluousBrackets.Parsing (
     ) where
 
 
-import Data.Char (isLetter)
-import Text.Parsec (ParseError, eof, many1, parse, (<|>))
-import Text.Parsec.Char (satisfy, string)
+import Data.Functor (void)
+import Text.Parsec (ParseError, parse, many, (<|>))
 import Text.Parsec.String (Parser)
 
-import ParsingHelpers (lexeme, whitespace)
-import Trees.Types (showOperator, showOperatorNot, allBinaryOperators)
+import ParsingHelpers (fully, tokenSymbol)
+import UniversalParser (orParser, andParser, implicationParser, biImplicationParser, negationParser, atomParser)
 
 
+operatorAndLeavesParse :: Parser ()
+operatorAndLeavesParse =
+  void . many $
+      tokenSymbol "("
+  <|> tokenSymbol ")"
+  <|> orParser
+  <|> andParser
+  <|> implicationParser
+  <|> biImplicationParser
+  <|> negationParser
+  <|> void atomParser
 
-
-parseLetterToStr :: Parser String
-parseLetterToStr = do
-    letter <- satisfy isLetter
-    return [letter]
-
-
-
-operatorAndLeavesParse :: Parser String
-operatorAndLeavesParse = do
-    listOfString <- many1 . lexeme $
-      parseLetterToStr <|> foldr
-        ((<|>) . string . showOperator)
-        (string "(" <|> string ")" <|> string showOperatorNot) allBinaryOperators
-    return (concat listOfString)
-
-
-
-superfluousBracketsExcParser :: String -> Either ParseError String
-superfluousBracketsExcParser = parse (whitespace >> operatorAndLeavesParse <* eof) ""
+superfluousBracketsExcParser :: String -> Either ParseError ()
+superfluousBracketsExcParser = parse (fully operatorAndLeavesParse) ""

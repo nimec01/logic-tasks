@@ -84,14 +84,14 @@ instance Ord Literal where
    compare l1 l2 = compare (letter l1) (letter l2)
 
 
--- | '~' denotes a negative sign
+-- | '¬' denotes a negative sign
 instance Show Literal where
    show (Literal x) = [x]
-   show (Not x) = ['~', x]
+   show (Not x) = ['¬', x]
 
 
 instance Read Literal where
-   readsPrec _ ('~':x:rest) = [(Not x, rest) | x `elem` ['A' .. 'Z']]
+   readsPrec _ ('¬':x:rest) = [(Not x, rest) | x `elem` ['A' .. 'Z']]
    readsPrec _ (x:rest) = [(Literal x, rest) | x `elem` ['A' .. 'Z']]
    readsPrec _ _ = []
 
@@ -154,7 +154,7 @@ instance Show Clause where
        listShow :: [Literal] -> String
        listShow [] = "{ }"
        listShow [x] = show x
-       listShow (x:xs) = show x ++ " \\/ " ++ listShow xs
+       listShow (x:xs) = show x ++ " ∨ " ++ listShow xs
 
 
 
@@ -225,7 +225,7 @@ instance Show Cnf where
         listShow :: [Clause] -> String
         listShow [] = ""
         listShow [x] = withBraces x
-        listShow (x:xs) = withBraces x ++ " /\\ " ++ listShow xs
+        listShow (x:xs) = withBraces x ++ " ∧ " ++ listShow xs
         withBraces cl = if amount cl == 1 then show cl else "(" ++ show cl ++ ")"
 
 instance Formula Cnf where
@@ -307,7 +307,7 @@ instance Show Con where
        listShow :: [Literal] -> String
        listShow [] = " "
        listShow [x] = show x
-       listShow (x:xs) = show x ++ " /\\ " ++ listShow xs
+       listShow (x:xs) = show x ++ " ∧ " ++ listShow xs
 
 
 
@@ -374,7 +374,7 @@ instance Show Dnf where
         listShow :: [Con] -> String
         listShow [] = ""
         listShow [x] = withBraces x
-        listShow (x:xs) = withBraces x ++ " \\/ " ++ listShow xs
+        listShow (x:xs) = withBraces x ++ " ∨ " ++ listShow xs
         withBraces con = if amount con == 1 then show con else "(" ++ show con ++ ")"
 
 
@@ -546,7 +546,7 @@ newtype PrologClause = PrologClause {pLiterals :: Set PrologLiteral} deriving (E
 instance Show PrologClause where
   show pc
     | null lits = "{ }"
-    | otherwise = intercalate " \\/ " $ map show lits
+    | otherwise = intercalate " ∨ " $ map show lits
     where lits = terms pc
 
 

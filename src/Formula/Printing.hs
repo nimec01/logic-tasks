@@ -50,7 +50,7 @@ instance Pretty ResStep where
 
 instance Pretty Literal where
    pretty (Literal x) = char x
-   pretty (Not x) = myText ['~', x]
+   pretty (Not x) = myText ['¬', x]
 
 
 
@@ -59,7 +59,7 @@ instance Pretty Clause where
       where
         listShow [] = text "{ }"
         listShow [x] = pretty x
-        listShow (x:xs) = hsep [pretty x, text "\\/", listShow xs]
+        listShow (x:xs) = hsep [pretty x, text "∨", listShow xs]
 
 
 
@@ -68,7 +68,7 @@ instance Pretty Con where
       where
         listShow [] = empty
         listShow [x] = pretty x
-        listShow (x:xs) = hsep [pretty x, text "/\\", listShow xs]
+        listShow (x:xs) = hsep [pretty x, text "∧", listShow xs]
 
 
 
@@ -80,7 +80,7 @@ instance Pretty Cnf where
         listShow [x] = singlePrint x
         listShow (x:xs) = hsep
                            [ singlePrint x
-                           , text "/\\"
+                           , text "∧"
                            , listShow xs
                            ]
 
@@ -97,7 +97,7 @@ instance Pretty Dnf where
         listShow [x] = singlePrint x
         listShow (x:xs) = hsep
                            [ singlePrint x
-                           , text "\\/"
+                           , text "∨"
                            , listShow xs
                            ]
 
@@ -135,7 +135,7 @@ instance Pretty PrologLiteral where
 instance Pretty PrologClause where
     pretty pc
         | Set.null (pLiterals pc) = text "{ }"
-        | otherwise = hsep $ punctuate (text " \\/ ") $ map pretty $ terms pc
+        | otherwise = hsep $ punctuate (text " ∨ ") $ map pretty $ terms pc
 
 
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards, NamedFieldPuns, TypeApplications #-}
 
 module SuperfluousBracketsSpec (spec) where
 
@@ -12,16 +12,17 @@ import Tasks.SuperfluousBrackets.Quiz (generateSuperfluousBracketsInst)
 import Tasks.SuperfluousBrackets.Config(SuperfluousBracketsConfig(..), SuperfluousBracketsInst(..))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import SynTreeSpec (validBoundsSynTree)
-import Trees.Types (SynTree(..), BinOp(..))
+import Trees.Types (SynTree(..), BinOp(..), PropFormula)
 import Trees.Helpers (numberAllBinaryNodes, sameAssociativeOperatorAdjacent, treeNodes)
 import Trees.Print (display, simplestDisplay)
 import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
   superfluousBracketsDisplay,
   sameAssociativeOperatorAdjacentSerial
   )
-import Trees.Parsing(formulaParse, parsePropForm)
+import Trees.Parsing(formulaParse)
 import TestHelpers (deleteBrackets)
 import Trees.Generate (genSynTree)
+import Formula.Parsing (Parse(parser))
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
@@ -122,7 +123,7 @@ spec = do
         it "show and parse are inverse for parsePropForm (?)" $
             forAll validBoundsSuperfluousBrackets $ \config ->
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
-                  show (fromRight' (parse parsePropForm "" simplestString)) == simplestString
+                  show (fromRight' (parse (parser @(PropFormula Char)) "" simplestString)) == simplestString
         it "the stringWithSuperfluousBrackets should have right number of SuperfluousBrackets" $
             forAll validBoundsSuperfluousBrackets $ \config@SuperfluousBracketsConfig {..} ->
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->

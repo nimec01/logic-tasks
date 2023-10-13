@@ -83,7 +83,7 @@ verifyQuiz MinMaxConfig{..} = checkTruthValueRange (low,high) cnfConf
 
 
 start :: Cnf
-start = mkCnf []
+start = mkCnf [mkClause [Literal 'A']]
 
 
 

@@ -16,6 +16,9 @@ import Control.Monad.Output (
   english,
   german,
   translate,
+  translations,
+  translatedCode,
+  localise,
   )
 import Control.Monad.State (State)
 import Data.Map (Map)
@@ -62,13 +65,17 @@ clauseKey = do
 
   paragraph $ indent $ do
     text "Negation:"
-    code "~"
+    translatedCode $ flip localise $ translations $ do
+      german "-, ~, nicht"
+      english "-, ~, not"
     pure ()
   paragraph $ indent $ do
     translate $ do
       german "Oder:"
       english "Or:"
-    code "\\/"
+    translatedCode $ flip localise $ translations $ do
+      german "\\/, oder"
+      english "\\/, or"
     pure ()
   pure()
 
@@ -80,7 +87,9 @@ cnfKey = do
     translate $ do
       german "Und:"
       english "And:"
-    code "/\\"
+    translatedCode $ flip localise $ translations $ do
+      german "/\\, und"
+      english "/\\, and"
     pure ()
   pure ()
 

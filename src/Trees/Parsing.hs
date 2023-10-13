@@ -1,107 +1,114 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
-
 module Trees.Parsing (
-  parserS,
   formulaParse,
   parseFormulaAnswer,
   parsePropForm,
   parseTreeFormulaAnswer
   ) where
 
-import Text.Parsec.Char (char, satisfy, string)
-import Text.Parsec (eof, ParseError, parse, (<|>), optionMaybe)
+import Text.Parsec (ParseError, parse, (<|>))
 import Text.Parsec.String (Parser)
 
-import Data.Char (isLetter)
-import Trees.Types
+import Trees.Types as Formula (PropFormula(..), BinOp(..))
+import Trees.Types as Tree
     ( SynTree(..)
-    , BinOp(..)
     , FormulaAnswer(..)
-    , PropFormula(..)
     , TreeFormulaAnswer(..)
-    , showOperator
-    , showOperatorNot
-    , allBinaryOperators
     )
 
-import ParsingHelpers (brackets, lexeme, whitespace)
+import Formula.Parsing (Parse(..))
 
-leafE :: Parser (SynTree o Char)
-leafE =
-    Leaf <$> lexeme (satisfy isLetter)
+import ParsingHelpers (fully)
+import UniversalParser as Parser
 
-notE :: Parser (SynTree BinOp Char)
-notE = do
-    lexeme $ string showOperatorNot
-    Not <$> parserT
+instance Parse (SynTree BinOp Char)
+instance FromGrammar (SynTree BinOp Char) where
+  topLevelSpec = spec where
+    spec = LevelSpec
+      { allowOr = True
+      , allowAnd = True
+      , allowNegation = Everywhere
+      , allowAtomicProps = True
+      , allowImplication = True
+      , allowBiimplication = True
+      , strictParens = True
+      , allowSilentNesting = False
+      , nextLevelSpec = Just spec
+      }
 
-parserT :: Parser (SynTree BinOp Char)
-parserT = leafE <|> brackets parserS <|> notE
-
-parserS :: Parser (SynTree BinOp Char)
-parserS = do
-    firstT <- parserT
-    foldr1 (<|>) (map (\o -> lexeme (string $ showOperator o) >> Binary o firstT <$> parserT) allBinaryOperators) <|>
-      return firstT
+  fromGrammar WithPrecedence{} = Nothing
+  fromGrammar (OfNoFixity t) = fromNoFixity t
+    where
+      fromNoFixity (NoFixity f op g) = Binary (fromOp op) <$> fromBasic f <*> fromBasic g
+      fromNoFixity (OfBasic f) = fromBasic f
+      fromBasic (BasicNested f) = fromNested f
+      fromBasic (BasicNeg f) = fromNeg f
+      fromOp Parser.Or = Formula.Or
+      fromOp Parser.And = Formula.And
+      fromOp Parser.Impl = Formula.Impl
+      fromOp BiImpl = Equi
+      fromNeg :: Neg -> Maybe (SynTree BinOp Char)
+      fromNeg (NegAtom (Atom x)) = Just $ Not $ Leaf x
+      fromNeg (OfAtom (Atom x)) = Just $ Leaf x
+      fromNeg (Parser.Neg f) = Not <$> fromNeg f
+      fromNeg (OfNested f) = fromNested f
+      fromNested (Nested f) = fromGrammar f
 
 formulaParse :: String -> Either ParseError (SynTree BinOp Char)
-formulaParse = parse (whitespace >> parserS <* eof) ""
+formulaParse = parse (fully formulaParser) ""
 
+instance Parse TreeFormulaAnswer where
+  parser = TreeFormulaAnswer <$> (Just <$> parser <|> pure Nothing)
 
+{-# DEPRECATED parseTreeFormulaAnswer "use Parse instance" #-}
 parseTreeFormulaAnswer :: Parser TreeFormulaAnswer
-parseTreeFormulaAnswer = TreeFormulaAnswer <$> optionMaybe parserS
-
-
+parseTreeFormulaAnswer = parser
 
 --------------------------------------
 
 -- Parsers for formulas with reduced brackets
+instance Parse (PropFormula Char)
+instance FromGrammar (PropFormula Char) where
+  topLevelSpec = spec where
+    spec = LevelSpec
+      { allowOr = True
+      , allowAnd = True
+      , allowNegation = Everywhere
+      , allowAtomicProps = True
+      , allowImplication = True
+      , allowBiimplication = True
+      , strictParens = False
+      , allowSilentNesting = False
+      , nextLevelSpec = Just spec
+      }
 
-parseAtomic :: Parser (PropFormula Char)
-parseAtomic = do
-  c <- lexeme $ satisfy isLetter
-  pure $ Atomic c
+  fromGrammar OfNoFixity{} = Nothing
+  fromGrammar (WithPrecedence t) = fromOrs t
+    where
+      fromOrs (Ors f g) = Assoc Formula.Or <$> fromOrs f <*> fromAnds g
+      fromOrs (OfAnds f) = fromAnds f
+      fromAnds (Ands f g) = Assoc Formula.And <$> fromAnds f <*> fromImpls g
+      fromAnds (OfImpl f) = fromImpls f
+      fromImpls (Impls f g) = Assoc Formula.Impl <$> fromBiImpls f <*> fromImpls g
+      fromImpls (OfBiImpl f) = fromBiImpls f
+      fromBiImpls (BiImpls f g) = Assoc Equi <$> fromNeg f <*> fromBiImpls g
+      fromBiImpls (OfNeg f) = fromNeg f
+      fromNeg (NegAtom (Atom x)) = Just $ Formula.Neg $ Atomic x
+      fromNeg (OfAtom (Atom x)) = Just $ Atomic x
+      fromNeg (Parser.Neg f) = Formula.Neg <$> fromNeg f
+      fromNeg (OfNested f) = fromNested f
+      fromNested :: Nested -> Maybe (PropFormula Char)
+      fromNested (Nested f) = Brackets <$> fromGrammar f
 
-
-
-parseNeg :: Parser (PropFormula Char)
-parseNeg = do
-  lexeme $ char '~'
-  Neg <$> parseBasic
-
-
-
-parseOp :: BinOp -> Parser BinOp
-parseOp o = do
-  lexeme $ string $ showOperator o
-  pure o
-
-
-
-parseAnyOp :: Parser BinOp
-parseAnyOp = foldr1 (<|>) (map parseOp allBinaryOperators)
-
-
-
-parseBrackets :: Parser (PropFormula Char)
-parseBrackets = Brackets <$> brackets parsePropForm
-
-
-
-parseBasic :: Parser (PropFormula Char)
-parseBasic = parseAtomic <|> parseBrackets <|> parseNeg
-
-
-
+{-# DEPRECATED parsePropForm "use Parse instance" #-}
 parsePropForm :: Parser (PropFormula Char)
-parsePropForm = do
-    form1 <- parseBasic
-    mOp <- optionMaybe parseAnyOp
-    case mOp of
-      Nothing   -> pure form1
-      (Just op) -> Assoc op form1 <$> parsePropForm
+parsePropForm = parser
 
+instance Parse FormulaAnswer where
+  parser = FormulaAnswer <$> (Just <$> parser <|> pure Nothing)
 
-
+{-# DEPRECATED parseFormulaAnswer "use Parse instance" #-}
 parseFormulaAnswer :: Parser FormulaAnswer
-parseFormulaAnswer = FormulaAnswer <$> optionMaybe parsePropForm
+parseFormulaAnswer = parser

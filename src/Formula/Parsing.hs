@@ -1,34 +1,53 @@
-
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Formula.Parsing where
-
 
 import Config
 import Formula.Util
-import ParsingHelpers (lexeme)
+import ParsingHelpers (lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
 import Data.Char (toLower)
-import Text.ParserCombinators.Parsec
+import Text.ParserCombinators.Parsec (
+  Parser,
+  (<?>),
+  (<|>),
+  alphaNum,
+  between,
+  char,
+  digit,
+  getInput,
+  many1,
+  notFollowedBy,
+  optionMaybe,
+  satisfy,
+  sepBy,
+  setInput,
+  spaces,
+  string,
+  try,
+  )
 
-
+import UniversalParser
 
 instance Parse ResStep where
   parser = do
-    withSpaces '('
+    tokenSymbol "("
     cl1 <- parseEither resClause parseNum
-    withSpaces ','
+    tokenSymbol ","
     cl2 <- parseEither resClause parseNum
-    withSpaces ','
+    tokenSymbol ","
     cl3 <- resClause
     index <- optionMaybe indexParse
-    withSpaces ')'
+    tokenSymbol ")"
     pure $ Res (cl1,cl2,(cl3,index))
 
    where
-    braces = between (withSpaces '{') (withSpaces '}')
+    braces = between (tokenSymbol "{") (tokenSymbol "}")
 
-    indexParse = withSpaces '=' >> lexeme parseNum
+    indexParse = tokenSymbol "=" >> lexeme parseNum
 
     resClause = mkClause <$> braces (parser `sepBy` char ',')
 
@@ -38,21 +57,6 @@ instance Parse ResStep where
       i <- many1 digit
       pure (read i)
 
-
-
-withSpaces :: Char -> Parser Char
-withSpaces = lexeme . char
-
-
-parseOr :: Parser ()
-parseOr = (lexeme (void $ string "\\/") <?> "Disjunction") <|> fail "Could not parse a disjunction (\\/)"
-
-
-
-parseAnd :: Parser ()
-parseAnd = (lexeme (void $ string "/\\") <?> "Conjunction") <|> fail "Could not parse a conjunction (/\\)"
-
-
 notFollowedByElse :: Parser a -> (a -> Parser ()) -> Parser ()
 notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
@@ -60,7 +64,8 @@ notFollowedByElse p f = try ((try p >>= f) <|> pure ())
 
 class Parse a where
   parser :: Parser a
-
+  default parser :: FromGrammar a => Parser a
+  parser = formulaParser
 
 
 instance Parse a => Parse [a] where
@@ -71,9 +76,9 @@ instance Parse a => Parse [a] where
         )
     where
       listParse = do
-        withSpaces '[' <|> fail "could not parse an opening '['"
-        xs <- parser `sepBy` (withSpaces ',' <|> fail "parsed a wrong separator: Lists are comma-separated.")
-        withSpaces ']' <|> fail "could not parse an enclosing ']'"
+        tokenSymbol "[" <|> fail "could not parse an opening '['"
+        xs <- parser `sepBy` (tokenSymbol "," <|> fail "parsed a wrong separator: Lists are comma-separated.")
+        tokenSymbol "]" <|> fail "could not parse an enclosing ']'"
         pure xs
 
 
@@ -141,65 +146,111 @@ instance Parse TruthValue where
 
 
 
-instance Parse Literal where
-  parser = (lexeme litParse <?> "Literal")
-      <|> fail "Could not parse a literal: Literals are denoted by capital letters, negation is denoted by a '~'."
-    where
-      litParse = do
-        result <- optionMaybe $ char '~'
-        var <- satisfy $ flip elem ['A'..'Z']
-        case result of Nothing -> pure (Literal var)
-                       Just _  -> pure (Not var)
+instance Parse Literal
+instance FromGrammar Literal where
+  topLevelSpec = LevelSpec
+    { allowOr = False
+    , allowAnd = False
+    , allowNegation = LiteralsOnly
+    , allowAtomicProps = True
+    , allowImplication = False
+    , strictParens = False
+    , allowBiimplication = False
+    , allowSilentNesting = False
+    , nextLevelSpec = Nothing
+    }
 
-
-
+  fromGrammar (WithPrecedence (NoOrs (NoAnds (NoArrows (OfAtom (Atom x)))))) = Just $ Literal x
+  fromGrammar (WithPrecedence (NoOrs (NoAnds (NoArrows (NegAtom (Atom x)))))) = Just $ Not x
+  fromGrammar _ = Nothing
 
 instance Parse Clause where
- parser = (lexeme clauseParse <?> "Clause")
-     <|> fail "Could not parse a clause: Clauses are composed out of literals and the 'or operator' (\\/)."
-   where
-     clauseParse = parseElements <|> parseEmpty
-     parseElements = do
-       braces <- lexeme $ optionMaybe $ char '('
-       lits <- sepBy1 parser parseOr
-       case braces of Nothing -> pure ' '
-                      Just _ -> char ')'
-       pure $ mkClause lits
-     parseEmpty = do
-       void $ lexeme $ char '{'
-       void $ lexeme $ char '}'
-       pure $ mkClause []
+  parser = mkClause [] <$ tokenSymbol "{}" <|> formulaParser
 
+instance FromGrammar Clause where
+  topLevelSpec = LevelSpec
+    { allowOr = True
+    , allowAnd = False
+    , allowNegation = LiteralsOnly
+    , allowAtomicProps = True
+    , allowImplication = False
+    , allowBiimplication = False
+    , strictParens = False
+    , allowSilentNesting = False
+    , nextLevelSpec = Nothing
+    }
 
-instance Parse Con where
- parser = (lexeme conParse <?> "Conjunction")
-     <|> fail "Could not parse a conjunction: Conjunctions are composed out of literals and the 'and operator' (/\\)."
-   where
-     conParse = do
-       braces <- lexeme $ optionMaybe $ char '('
-       lits <- sepBy1 parser parseAnd
-       case braces of Nothing -> pure ' '
-                      Just _ -> char ')'
-       pure $ mkCon lits
-
-
-
-instance Parse Cnf where
-  parser = (lexeme parseCnf <?> "CNF")
-           <|> fail "Could not parse a CNF: CNFs are composed out of clauses and the 'and operator' (/\\)."
+  fromGrammar OfNoFixity{} = Nothing
+  fromGrammar (WithPrecedence f) =  mkClause <$> foldlOrs phi (Just []) f
     where
-      parseCnf = mkCnf <$> sepBy parser parseAnd
+      phi :: Maybe [Literal] -> Ands -> Maybe [Literal]
+      phi xs (NoAnds (NoArrows (OfAtom (Atom x)))) = (Literal x :) <$> xs
+      phi xs (NoAnds (NoArrows ((NegAtom (Atom x))))) = (Not x :) <$> xs
+      phi _ (NoAnds (NoArrows (Neg{}))) = Nothing
+      phi _ (NoAnds (NoArrows (OfNested{}))) = Nothing
+      phi _ (NoAnds NoImplBiImpl) = Nothing
+      phi _ (NoAnds Impls{}) = Nothing
+      phi _ Ands{} = Nothing
 
+instance Parse Con
+instance FromGrammar Con where
+  topLevelSpec = LevelSpec
+    { allowOr = False
+    , allowAnd = True
+    , allowNegation = LiteralsOnly
+    , allowAtomicProps = True
+    , allowImplication = False
+    , allowBiimplication = False
+    , strictParens = False
+    , allowSilentNesting = False
+    , nextLevelSpec = Nothing
+    }
 
-
-instance Parse Dnf where
-  parser = (lexeme parseDnf <?> "DNF")
-           <|> fail "Could not parse a DNF: DNFs are composed out of clauses and the 'or operator' (\\/)."
+  fromGrammar (WithPrecedence Ors{}) = Nothing
+  fromGrammar OfNoFixity{} = Nothing
+  fromGrammar (WithPrecedence (OfAnds f)) = mkCon <$> foldlAnds phi (Just []) f
     where
-      parseDnf = do
-        cons <- sepBy parser parseOr
-        pure $ mkDnf cons
+      phi :: Maybe [Literal] -> Impls -> Maybe [Literal]
+      phi xs (NoArrows (OfAtom (Atom x))) = (Literal x :) <$> xs
+      phi xs (NoArrows (NegAtom (Atom x))) = (Not x :) <$> xs
+      phi _ (NoArrows Neg{}) = Nothing
+      phi _ (NoArrows OfNested{}) = Nothing
+      phi _ NoImplBiImpl = Nothing
+      phi _ Impls{} = Nothing
 
+instance Parse Cnf
+instance FromGrammar Cnf where
+  topLevelSpec = (topLevelSpec @Con) { allowSilentNesting = True, nextLevelSpec = Just $ topLevelSpec @Clause }
+
+  fromGrammar = (mkCnf <$>) . go
+    where
+      go (WithPrecedence (OfAnds f)) = foldlAnds phi (Just []) f
+      go (WithPrecedence (SkipLevel f)) = pure <$> fromGrammar @Clause f
+      go (WithPrecedence (Ors{})) = Nothing
+      go OfNoFixity{} = Nothing
+      phi :: Maybe [Clause] -> Impls -> Maybe [Clause]
+      phi xs (NoArrows (OfNested (Nested f))) = (:) <$> fromGrammar f  <*> xs
+      phi xs (NoArrows (OfAtom (Atom x))) = (mkClause [Literal x] :) <$> xs
+      phi xs (NoArrows (NegAtom (Atom x))) = (mkClause [Not x] :) <$> xs
+      phi _ (NoArrows Neg{}) = Nothing
+      phi _ NoImplBiImpl = Nothing
+      phi _ Impls{} = Nothing
+
+instance Parse Dnf
+instance FromGrammar Dnf where
+  topLevelSpec = (topLevelSpec @Clause) { allowSilentNesting = True, nextLevelSpec = Just $ topLevelSpec @Con }
+
+  fromGrammar OfNoFixity{} = Nothing
+  fromGrammar (WithPrecedence f) = mkDnf <$> foldlOrs phi (Just []) f
+    where
+      phi :: Maybe [Con] -> Ands -> Maybe [Con]
+      phi xs (NoAnds (NoArrows (OfNested (Nested x)))) = (:) <$> fromGrammar x <*> xs
+      phi xs (NoAnds (NoArrows (OfAtom (Atom x)))) = (mkCon [Literal x] :) <$> xs
+      phi xs (NoAnds (NoArrows (NegAtom (Atom x)))) = (mkCon [Not x] :) <$> xs
+      phi _ (NoAnds (NoArrows Neg{})) = Nothing
+      phi _ (NoAnds Impls{}) = Nothing
+      phi _ (NoAnds NoImplBiImpl) = Nothing
+      phi _ (Ands{}) = Nothing
 
 
 instance Parse PrologLiteral where
@@ -227,7 +278,7 @@ instance Parse PrologClause where
    where
      clauseParse = do
        braces <- lexeme $ optionMaybe $ char '('
-       ts <- sepBy parser parseOr
+       ts <- sepBy parser orParser
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkPrologClause ts
@@ -244,7 +295,7 @@ instance Parse PickInst where
       instParse = do
         string "PickInst("
         cs <- parser
-        withSpaces ','
+        tokenSymbol ","
         index <- lexeme $ many1 digit
         text <- optionMaybe $ lexeme bonusText
         char ')'

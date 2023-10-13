@@ -8,10 +8,10 @@ import Test.Hspec (Spec, describe, it)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements)
 import Data.List((\\))
 
-import ParsingHelpers (whitespace)
+import ParsingHelpers (fully)
 import Formula.Types (Cnf, lengthBound)
 import Formula.Parsing (parser)
-import Text.ParserCombinators.Parsec (ParseError, eof, parse)
+import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree)
@@ -138,4 +138,4 @@ judgeLeaf (Leaf _) = True
 judgeLeaf _ = False
 
 cnfParse :: String -> Either ParseError Cnf
-cnfParse = parse (whitespace >> parser <* eof) ""
+cnfParse = parse (fully parser) ""
