@@ -12,6 +12,8 @@ import Control.Monad.Output (
   english,
   german,
   translate,
+  translations,
+  localise,
   )
 import Data.List ((\\))
 import Data.Maybe (fromMaybe)
@@ -21,7 +23,7 @@ import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
-import LogicTasks.Helpers (cnfKey)
+import LogicTasks.Helpers (formulaKey)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio)
 
 
@@ -48,17 +50,16 @@ description MaxInst{..} = do
     german "Geben Sie eine zu der Tafel passende Formel in konjunktiver Normalform an. Verwenden Sie dazu Max-Terme."
     english "Provide a formula in conjunctive normal form, that corresponds to the table. Use maxterms to do this."
 
-  paragraph $ translate $ do
-    german "Reichen Sie ihre Lösung als ascii-basierte Formel ein."
-    english "Provide the solution as an ascii based formula."
-
-  cnfKey
+  formulaKey
 
   paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A valid solution could look like this: "
-    code $ show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+      let formulaStr = show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+      german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
+      english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
+    translatedCode $ flip localise $ translations $ do
+      german "(A oder nicht B) und (nicht C oder nicht D)"
+      english "(A or not B) and (not C or not D)"
     pure ()
   paragraph $ text (fromMaybe "" addText)
   pure ()

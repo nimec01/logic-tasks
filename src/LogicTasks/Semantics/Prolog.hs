@@ -121,7 +121,7 @@ verifyQuiz PrologConfig{..}
 
 
 start :: (PrologLiteral, PrologClause)
-start = (PrologLiteral True "PredName" ["fact"], mkPrologClause [])
+start = (PrologLiteral True "a" ["x"], mkPrologClause [])
 
 
 
@@ -196,4 +196,3 @@ revertMapping ls mapping = map fromJust getPredicates
   where
     reverseM = map swap mapping
     getPredicates = map (`lookup` reverseM) ls
-

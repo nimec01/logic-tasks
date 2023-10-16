@@ -8,10 +8,11 @@ module LogicTasks.Syntax.SubTreeSet where
 import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.List (nub, sort)
 import Data.Set (fromList, isSubsetOf)
+import Data.Maybe (isNothing, fromJust)
 
 import LogicTasks.Helpers
 import Tasks.SubTree.Config (checkSubTreeConfig, SubTreeInst(..), SubTreeConfig(..))
-import Trees.Types (PropFormula)
+import Trees.Types (FormulaAnswer(..))
 import Trees.Print (display)
 import Trees.Helpers
 
@@ -36,9 +37,9 @@ description SubTreeInst{..} = do
       english "Remove bracket pairs which only serve to enclose entire subformulae, and do not add any additional brackets."
       german "Entfernen Sie dabei Klammerpaare, die eine Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
-    example "[ A or B ]" $ do
-      english "For example, if not(A or B) is the given formula and one subformula is required, then the solution is:"
-      german "Ist z.B. not(A or B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
+    example "[ A ∨ B ]" $ do
+      english "For example, if ¬(A ∨ B) is the given formula and one subformula is required, then the solution is:"
+      german "Ist z.B. ¬(A ∨ B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
     pure ()
 
 
@@ -52,13 +53,18 @@ verifyConfig = checkSubTreeConfig
 
 
 
-start :: [PropFormula c]
-start = []
+start :: [FormulaAnswer]
+start = [FormulaAnswer Nothing]
 
 
 
-partialGrade :: OutputMonad m => SubTreeInst -> [PropFormula Char] -> LangM m
+partialGrade :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
 partialGrade SubTreeInst{..} fs
+    | any (isNothing . maybeForm) fs =
+      reject $ do
+        english "At least one of your answers is not a valid formula."
+        german "Mindestens eine der Antworten ist keine gültige Formel."
+
     | any (`notElem` origLits) literals =
       reject $ do
         english "At least one subformula contains unknown literals."
@@ -77,14 +83,14 @@ partialGrade SubTreeInst{..} fs
     | otherwise = pure()
   where
     amount = fromIntegral $ length $ nub fs
-    literals = sort $ nub $ concatMap collectLeaves fs
-    opsNum = map numOfOpsInFormula fs
+    literals = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
+    opsNum = map (numOfOpsInFormula . fromJust . maybeForm) fs
     origLits = sort $ nub $ collectLeaves tree
     origOpsNum = numOfOps tree
 
 
 
-completeGrade :: OutputMonad m => SubTreeInst -> [PropFormula Char] -> LangM m
+completeGrade :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
 completeGrade SubTreeInst{..} sol
     | not partOfSolution = reject $ do
       english "Your solution is not correct."

@@ -50,7 +50,7 @@ description DecideInst{..} = do
   paragraph $ do
     translate $ do
       english "Find all faulty entries in the last column of the following truth table."
-      german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzen Spalte der folgenden Wahrheitstafel."
+      german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzten Spalte der folgenden Wahrheitstafel."
     indent $ code $ show (flipAt (getTable cnf) changed)
     pure ()
   paragraph $ translate $ do

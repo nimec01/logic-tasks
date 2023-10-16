@@ -5,7 +5,7 @@
 module LogicTasks.Syntax.SimplestFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german)
+import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, translate)
 import Data.List (nub, sort)
 import Data.Maybe (isNothing, fromJust)
 
@@ -30,18 +30,23 @@ description SuperfluousBracketsInst{..} = do
     focus stringWithSuperfluousBrackets
 
     instruct $ do
-      english "Since /\\ and \\/ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
-      german "Aufgrund der Assoziativität von /\\ und \\/ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
+      english "Since ∧ and ∨ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
+      german "Aufgrund der Assoziativität von ∧ und ∨ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
 
-    focus "A /\\ B /\\ C"
+    focus "A ∧ B ∧ C"
 
     instruct $ do
       english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
       german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
 
-    example "A \\/ B" $ do
-      english "For example, if (A \\/ B) is the given formula, then the solution is:"
-      german "Ist z.B. (A \\/ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
+    example "A ∨ B" $ do
+      english "For example, if (A ∨ B) is the given formula, then the solution is:"
+      german "Ist z.B. (A ∨ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
+
+    paragraph $ translate $ do
+      german "Sie können dafür die Ausgangsformel in die Abgabe kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the solution box and remove unnecessary brackets or use the following syntax:"
+    basicOpKey
     pure ()
 
 

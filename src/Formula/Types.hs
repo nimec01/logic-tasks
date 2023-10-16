@@ -156,8 +156,6 @@ instance Show Clause where
        listShow [x] = show x
        listShow (x:xs) = show x ++ " ∨ " ++ listShow xs
 
-
-
 instance Formula Clause where
    convert (Clause set)
         | Set.null set = Sat.No

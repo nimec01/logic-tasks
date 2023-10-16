@@ -59,30 +59,38 @@ reject  = refuse . indent . translate
 
 clauseKey :: OutputMonad m => LangM m
 clauseKey = do
-  paragraph $ translate $ do
-    german "Beachten Sie dabei die folgende Legende:"
-    english "Use the following key:"
-
-  paragraph $ indent $ do
-    text "Negation:"
-    translatedCode $ flip localise $ translations $ do
-      german "-, ~, nicht"
-      english "-, ~, not"
-    pure ()
-  paragraph $ indent $ do
-    translate $ do
-      german "Oder:"
-      english "Or:"
-    translatedCode $ flip localise $ translations $ do
-      german "\\/, oder"
-      english "\\/, or"
-    pure ()
+  keyHeading
+  negationKey
+  orKey
   pure()
-
 
 cnfKey :: OutputMonad m => LangM m
 cnfKey = do
   clauseKey
+  andKey
+  pure ()
+
+formulaKey :: OutputMonad m => LangM m
+formulaKey = do
+  keyHeading
+  basicOpKey
+  pure ()
+
+basicOpKey :: OutputMonad m => LangM m
+basicOpKey = do
+  negationKey
+  andKey
+  orKey
+  pure()
+
+keyHeading :: OutputMonad m => LangM m
+keyHeading =
+  paragraph $ translate $ do
+    german "Beachten Sie dabei die folgenden möglichen Schreibweisen:"
+    english "You can use any of the following notations:"
+
+andKey :: OutputMonad m => LangM m
+andKey =
   paragraph $ indent $ do
     translate $ do
       german "Und:"
@@ -91,8 +99,27 @@ cnfKey = do
       german "/\\, und"
       english "/\\, and"
     pure ()
-  pure ()
 
+orKey :: OutputMonad m => LangM m
+orKey =
+  paragraph $ indent $ do
+    translate $ do
+      german "Oder:"
+      english "Or:"
+    translatedCode $ flip localise $ translations $ do
+      german "\\/, oder"
+      english "\\/, or"
+    pure ()
+
+
+negationKey :: OutputMonad m => LangM m
+negationKey =
+  paragraph $ indent $ do
+    text "Negation:"
+    translatedCode $ flip localise $ translations $ do
+      german "-, ~, nicht"
+      english "-, ~, not"
+    pure ()
 
 cacheIO
   :: (MonadIO m, Show a)

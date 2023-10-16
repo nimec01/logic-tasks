@@ -14,6 +14,8 @@ import Control.Monad.Output (
   english,
   german,
   translate,
+  translations,
+  localise,
   )
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
@@ -21,7 +23,7 @@ import Test.QuickCheck (Gen)
 import Config (BaseConfig(..), CnfConfig(..), MinMaxConfig(..), MinInst(..))
 import Formula.Types (Dnf, Literal(..), amount, atomics, genDnf, getConjunctions, getTable)
 import Formula.Util (mkCon, mkDnf, hasEmptyCon, isEmptyDnf)
-import LogicTasks.Helpers (cnfKey)
+import LogicTasks.Helpers (formulaKey)
 import Util (tryGen, withRatio)
 
 
@@ -48,17 +50,16 @@ description MinInst{..} = do
     german "Geben Sie eine zu der Tafel passende Formel in disjunktiver Normalform an. Verwenden Sie dazu Min-Terme."
     english "Provide a formula in disjunctive normal form, that corresponds to the table. Use minterms to do this."
 
-  paragraph $ translate $ do
-    german "Reichen Sie ihre Lösung als ascii-basierte Formel ein."
-    english "Provide the solution as an ascii based formula."
-
-  cnfKey
+  formulaKey
 
   paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-      english "A valid solution could look like this: "
-    code $ show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+      let formulaStr = show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+      german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
+      english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
+    translatedCode $ flip localise $ translations $ do
+      german "(A und nicht B) oder (nicht C und nicht D)"
+      english "(A and not B) or (not C and not D)"
     pure ()
   paragraph $ text (fromMaybe "" addText)
   pure ()

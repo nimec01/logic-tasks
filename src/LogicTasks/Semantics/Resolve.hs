@@ -13,6 +13,8 @@ import Control.Monad.Output (
   english,
   german,
   translate,
+  translations,
+  localise,
   )
 import Data.List (sort)
 import Data.Maybe (fromJust, fromMaybe)
@@ -73,22 +75,24 @@ description ResolutionInst{..} = do
     code "{ }"
     pure ()
   paragraph $ translate $ do
-    german "Optional können Sie Klauseln auch durch Nummern substituieren."
-    english "You can optionally substitute clauses with numbers."
+    german "Optional können Sie Klauseln auch durch Nummern ersetzen."
+    english "You can optionally replace clauses with numbers."
 
   paragraph $ translate $ do
-    german "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)"
-    english "Clauses in the starting formula are already numbered by their order. first clause = 1, second clause = 2, ...)"
+    german "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
+    english "Clauses in the starting formula are already numbered by their order. first clause = 1, second clause = 2, ...)."
 
   paragraph $ translate $ do
-    german "neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
+    german "Neu resolvierte Klauseln können mit einer Nummer versehen werden, indem Sie '= NUMMER' an diese anfügen."
     english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
 
   paragraph $ indent $ do
     translate $ do
       german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
       english "A valid solution could look like this: "
-    code "[(1, 2, {A, not B} = 5), (4, 5, { })]"
+    translatedCode $ flip localise $ translations $ do
+      english "[(1, 2, {A, not B} = 5), (4, 5, { })]"
+      german "[(1, 2, {A, nicht B} = 5), (4, 5, { })]"
     pure ()
   paragraph $ text (fromMaybe "" addText)
   pure ()

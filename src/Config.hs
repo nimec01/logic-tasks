@@ -279,7 +279,7 @@ dPrologConf :: PrologConfig
 dPrologConf = PrologConfig
     { minClauseLength = 1
     , maxClauseLength = 3
-    , usedPredicates = [PrologLiteral True "pred" ["fact"]]
+    , usedPredicates = [PrologLiteral True "f" ["a"], PrologLiteral True "f" ["b"], PrologLiteral True "g" ["a"]]
     , extraText = Nothing
     }
 
