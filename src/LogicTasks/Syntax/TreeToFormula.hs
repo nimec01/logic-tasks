@@ -87,7 +87,7 @@ getImage :: String -> IO SVG
 getImage s = do
   let iTree = "\\begin{forest}" ++ s ++ "\\end{forest}"
   render <- imageForFormula defaultEnv treeOptions iTree
-  case render of (Left _) -> error "failed to render an image with the given formula."
+  case render of (Left err) -> error $ unlines ["failed to render an image with the given formula: ", show err]
                  (Right svg) -> pure svg
 
 
@@ -101,5 +101,5 @@ outputImage path tree = do
 
 
 cacheTree :: String -> FilePath -> IO FilePath
-cacheTree tree path = cacheIO path ext "tree" tree outputImage
+cacheTree tree path = cacheIO path ext "tree-" tree outputImage
   where ext = showDigest (sha1 . fromString $ tree) ++ ".svg"

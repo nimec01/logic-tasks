@@ -8,13 +8,13 @@ import Control.Monad.Output
 import Text.Parsec
 import Text.Parsec.String (Parser)
 
-showDescription :: (m ~ (GenericReportT Language (IO ()) IO)) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
+showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
 showDescription gen f = do
   inst <- generate gen
   runLangMReport (return ()) (>>) (f inst) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
 
 testTask ::
-  (m ~ (GenericReportT Language (IO ()) IO), Show a) =>
+  (m ~ GenericReportT Language (IO ()) IO, Show a) =>
   Gen inst ->
   (inst -> LangM m) ->
   (inst -> a -> LangM m) ->
