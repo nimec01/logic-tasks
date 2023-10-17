@@ -244,4 +244,5 @@ class FromGrammar a where
   fromGrammar :: FormulaGrammar -> Maybe a
 
 formulaParser :: forall a. FromGrammar a => Parser a
-formulaParser = fromMaybe (error "contradiction between parser rules and fromGrammar") . fromGrammar <$> formula (topLevelSpec @a)
+formulaParser =
+  fromMaybe (error "contradiction between parser rules and fromGrammar") . fromGrammar <$> formula (topLevelSpec @a)
