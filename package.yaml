@@ -21,6 +21,7 @@ dependencies:
   - utf8-string
   - SHA
   - directory
+  - math-functions
 
 library:
   source-dirs: src
@@ -39,6 +40,7 @@ library:
     - LogicTasks.Semantics.Resolve
     - LogicTasks.Printing
     - LogicTasks.Parsing
+    - LogicTasks.Util
     - LogicTasks.Syntax.IllegalCnfs
     - LogicTasks.Syntax.IllegalFormulas
     - LogicTasks.Syntax.SimplestFormula
@@ -69,6 +71,7 @@ library:
     - ParsingHelpers
     - Config
     - Formula.Types
+    - Debug
 
   ghc-options:
     - -Wall

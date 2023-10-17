@@ -4,33 +4,37 @@ module LegalCNFSpec (spec) where
 
 import Data.Set (toList)
 import Data.Either(isLeft, isRight)
-import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements)
+import Test.Hspec (Spec, describe, it, xit)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioProperty, withMaxSuccess)
 import Data.List((\\))
 
 import ParsingHelpers (fully)
-import Formula.Types (Cnf, lengthBound)
+import Formula.Types (Cnf)
 import Formula.Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (CnfConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree)
-import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..))
+import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
 import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
 import Tasks.LegalCNF.GenerateLegal (genCnf)
 import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
 
+import FormulaSpec (validBoundsCnf)
+import Debug (checkConfigWith)
+
 validBoundsLegalCNF :: Gen LegalCNFConfig
 validBoundsLegalCNF = do
-    usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
-    maxClauseLength <- choose (1, min 12 (length usedLiterals))
-    minClauseLength <- choose (1, maxClauseLength)
-    let clauses = min 12 (product (take maxClauseLength (reverse [1 .. (length usedLiterals)])))
-        minClauses = lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
-    maxClauseAmount <- choose (1, clauses)  `suchThat` \amount -> amount > 1 || maxClauseLength > 1
-    minClauseAmount <- choose (1, min minClauses maxClauseAmount)
+    ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedLiterals) <- validBoundsCnf
+
+    let
+      maxFormulas = (maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1) `div` 2 + 1
+      formulaUpperBound
+        | maxFormulas < 0 = 15 -- Int overflow
+        | otherwise = min 15 maxFormulas
+
     formulas <- choose
-      (1, min 15 ((maxClauseLength - minClauseLength + 1) ^ (maxClauseAmount - minClauseAmount + 1) `div` 2 + 1))
+      (1, formulaUpperBound)
     illegals <- choose (0, formulas)
     externalGenFormulas <- choose (0, formulas - illegals)
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals - externalGenFormulas > 0
@@ -93,6 +97,16 @@ invalidBoundsLegalCNF = do
 
 spec :: Spec
 spec = do
+    describe "validBoundsLegalCNF" $
+        it "produces a valid config" $
+          withMaxSuccess 1000 $ forAll validBoundsLegalCNF $ \conf ->
+            ioProperty $ conf `checkConfigWith` checkLegalCNFConfig
+
+    describe "invalidBoundsLegalCNF" $
+        xit "produces a valid config" $
+          forAll invalidBoundsLegalCNF $ \conf ->
+            ioProperty (not <$> conf `checkConfigWith` checkLegalCNFConfig)
+
     describe "genIllegalSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
             forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
@@ -109,12 +123,11 @@ spec = do
                 forAll
                   (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals)
                   (judgeCnfSynTree . cnfToSynTree)
-    describe "generateLegalCNFInst" $
+    describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $
             forAll validBoundsLegalCNF $ \config ->
                 forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
                   all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) (toList serialsOfWrong)
-    describe "generateLegalCNFInst" $ do
         it "all of the formulas not in the wrong serial should be Cnf" $
             forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
                 forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->

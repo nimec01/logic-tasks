@@ -20,9 +20,8 @@ import Data.List (delete)
 import Test.QuickCheck(Gen, elements)
 
 import Config (BaseConfig(..), CnfConfig(..))
-import Formula.Types (Formula, getTable)
+import Formula.Types (Formula, getTable, lengthBound)
 import Formula.Table (readEntries)
-
 
 
 prevent :: OutputMonad m => Bool -> LangM m -> LangM m
@@ -120,8 +119,13 @@ checkBaseConf BaseConfig{..}
 
     | length usedLiterals < minClauseLength =
         refuse $ indent $ translate $ do
-          german "Zu wenige Literale für diese Klausellänge."
-          english "There are not enough literals available for this clause length."
+          german "Zu wenige Literale für minimale Klausellänge."
+          english "There are not enough literals available for minimal clause length."
+
+    | length usedLiterals < maxClauseLength =
+        refuse $ indent $ translate $ do
+          german "Zu wenige Literale um maximale Klausellänge zu erreichen."
+          english "There are not enough literals available to reach the maximal clause length."
 
     | null usedLiterals =
         refuse $ indent $ translate $ do
@@ -144,9 +148,19 @@ checkCnfConf CnfConfig {..}
           german "Die untere Grenze der Klauselanzahl ist höher als die obere."
           english "The minimum amount of clauses is greater than the maximum amount."
 
-    | minClauseAmount > 2 ^ min (maxClauseLength baseConf) (length (usedLiterals baseConf)) =
+    | minClauseAmount * minClauseLength baseConf < length (usedLiterals baseConf) =
         refuse $ indent $ translate $ do
-          german "Mit diesen Einstellungen kann die gewünschte Anzahl und Länge an Klauseln nicht erfüllt werden."
-          english "There are not enough combinations available to satisfy your amount and length settings."
+          german "Nicht immer genug Platz für alle Literale in der Formel. (Mögliche Lösung: Eine der unteren Schranken erhöhen)"
+          english "No always enough space in formula for all literals. (Possible solution: raise one of the lower bounds)"
+
+    | minClauseAmount > 2 ^ length (usedLiterals baseConf) =
+        refuse $ indent $ translate $ do
+          german "Zu wenig Literale für gewünschte Anzahl an Klauseln."
+          english "There are not enough literals for the desired number of clauses."
+
+    | minClauseAmount > lengthBound (length (usedLiterals baseConf)) (maxClauseLength baseConf) =
+        refuse $ indent $ translate $ do
+          german "Zu kurze Klauseln für gewünschte Anzahl an Klauseln."
+          english "Clauses are to short for the desired number of clauses."
 
     | otherwise = checkBaseConf baseConf

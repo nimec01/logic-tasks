@@ -19,7 +19,6 @@ import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators)
 
 
 
-
 genIllegalSynTree :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen (SynTree BinOp Char)
 genIllegalSynTree
   (minClauseAmount, maxClauseAmount)

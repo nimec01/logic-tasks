@@ -19,6 +19,7 @@ import GHC.Generics (Generic)
 import Config (BaseConfig(..), CnfConfig(..), dCnfConf)
 import Formula.Types (lengthBound)
 import LogicTasks.Helpers (reject)
+import Util (checkCnfConf)
 
 
 
@@ -57,7 +58,7 @@ defaultLegalCNFConfig =
 
 
 checkLegalCNFConfig :: OutputMonad m => LegalCNFConfig -> LangM m
-checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
+checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben können Literale sein."
@@ -74,13 +75,6 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
       = reject $ do
         english "The Used Literals can not generate a Clause with maxClauseLength"
         german "Die angegebenen Literale können die maximale Klauselgröße nicht generieren."
-    | let limit beginNumber = product (take maxClauseLength (reverse [1 .. beginNumber :: Integer])),
-      let literalLength = fromIntegral (length usedLiterals),
-      fromIntegral maxClauseAmount > min 15 (limit (2 * literalLength))
-      || externalGenFormulas > 0 && fromIntegral maxClauseAmount > min 15 (limit literalLength)
-      = reject $ do
-        english "The maxClauseAmount is too big. There is the risk of duplicate clauses in the CNF."
-        german "maxClauseAmount ist zu groß. Es ist möglich, dass eine Klausel mehrfach in der CNF vorkommt."
     | fromIntegral formulas >
        (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
        `div` (2 :: Integer) + 1
@@ -96,7 +90,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
         english "The formulas used to generate special formula are not sufficient."
         german "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
     | externalGenFormulas > 0
-        && minClauseAmount > lengthBound minClauseLength (length usedLiterals) (minClauseLength, maxClauseLength)
+        && minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
       = reject $ do
         english "minClauseAmount is too large. The external generator can not generate a CNF."
         german "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
@@ -106,7 +100,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = CnfConfig {baseConf = BaseConfig{
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
         english "Can not generate String with given maxStringSize."
         german "String kann mit gegebenen maxStringSize nicht generiert werden."
-    | otherwise = pure()
+    | otherwise = checkCnfConf cnfConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
     zeroArgs = any (<0) [illegals, externalGenFormulas]

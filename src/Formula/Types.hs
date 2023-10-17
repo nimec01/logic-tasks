@@ -41,10 +41,7 @@ import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
 import Test.QuickCheck
-
-
-
-
+import Numeric.SpecFunctions as Math (choose)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))}
 
@@ -251,7 +248,7 @@ instance Arbitrary Cnf where
         cnf :: Int -> Gen Cnf
         cnf 0 = genCnf (0,0) (0,0) []
         cnf n = do
-            minLen <- choose (1,n)
+            minLen <- chooseInt (1,n)
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
@@ -263,11 +260,11 @@ instance Arbitrary Cnf where
 -- | Generates a random cnf satisfying the given bounds
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulae are drawn from the list of chars.
-
+--   Every char from the list will occur at least once in the formula.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
 genCnf (minNum,maxNum) (minLen,maxLen) lits = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    cnf <- generateClauses nLits empty num
+    cnf <- generateClauses nLits empty num `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -399,7 +396,7 @@ instance Arbitrary Dnf where
         dnf :: Int -> Gen Dnf
         dnf 0 = genDnf (0,0) (0,0) []
         dnf n = do
-            minLen <- choose (1,n)
+            minLen <- chooseInt (1,n)
             let
               lits = take n ['A'..'Z']
               maxLen = length lits
@@ -411,10 +408,11 @@ instance Arbitrary Dnf where
 -- | Generates a random dnf satisfying the given bounds
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulae are drawn from the list of chars.
+--   Every char from the list will occur at least once in the formula.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
 genDnf (minNum,maxNum) (minLen,maxLen) lits = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    dnf <- generateCons nLits empty num
+    dnf <- generateCons nLits empty num `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -561,7 +559,7 @@ genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
 genForBasic (minLength,maxLength) lits
     | null lits || minLength > length nLits || invalidLen = pure empty
     | otherwise = do
-        chosenLength <- choose (minLength, min (length nLits) maxLength)
+        chosenLength <- chooseInt (minLength, min (length nLits) maxLength)
         generateLiterals nLits empty chosenLength
   where
     nLits = nub lits
@@ -584,20 +582,22 @@ genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
 genForNF (minNum,maxNum) (minLen,maxLen) lits
     | null nLits || invalidLen || invalidNum = pure (0, [])
     | otherwise = do
-      num <- choose (minNum, min maxNum upperBound)
+      num <- chooseInt (minNum, min maxNum upperBound)
       pure (num, nLits)
   where
     nLits = nub lits
     invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    upperBound = lengthBound maxLen (length nLits) (minLen,maxLen)
+    upperBound = lengthBound (length nLits) maxLen
 
 
 
-lengthBound :: Int -> Int -> (Int, Int) -> Int
-lengthBound 1 literalLength (_,_) = 2*literalLength
-lengthBound n literalLength (minLen,maxLen)
-  | n == maxLen && n == minLen = 2^n
-  | n == minLen = 2^n * literalLength
-  | n == literalLength = 2^n + lengthBound (n-1) literalLength (minLen,maxLen)
-  | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)
+lengthBound :: Int -> Int -> Int
+lengthBound nLiterals maxLen =
+  sum [ floor (nLiterals `Math.choose` k) | k <- [1..maxLen] ]
+  -- lengthBound 1 literalLength (_,_) = 2*literalLength
+  -- lengthBound n literalLength (minLen,maxLen)
+  --   | n == maxLen && n == minLen = 2^n
+  --   | n == minLen = 2^n * literalLength
+  --   | n == literalLength = 2^n + lengthBound (n-1) literalLength (minLen,maxLen)
+  --   | otherwise = 2^n * literalLength + lengthBound (n-1) literalLength (minLen,maxLen)

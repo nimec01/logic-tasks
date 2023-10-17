@@ -7,6 +7,7 @@ import Control.Monad.Output.Generic
 import Control.Monad.Output
 import Text.Parsec
 import Text.Parsec.String (Parser)
+import Data.Maybe (isJust)
 
 showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
 showDescription gen f = do
@@ -37,3 +38,8 @@ testTask gen f partial full p = do
       putStrLn "---- Complete ----"
       completeRes <- runLangMReport (return ()) (>>) (full inst value) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
       print completeRes
+
+checkConfigWith :: (m ~ GenericReportT Language (IO ()) IO) => config -> (config -> LangM m) -> IO Bool
+checkConfigWith conf check = do
+  res <- runLangMReport (return ()) (>>) (check conf) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
+  pure $ isJust res

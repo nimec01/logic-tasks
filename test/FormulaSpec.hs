@@ -6,9 +6,10 @@ import qualified Control.Exception as Exc (evaluate)
 import Test.Hspec
 import Test.QuickCheck
 import LogicTasks.Formula
-
-
-
+import LogicTasks.Config
+import LogicTasks.Util
+import Debug (checkConfigWith)
+import Formula.Types (lengthBound)
 
 validBoundsClause :: Gen ((Int,Int),[Char])
 validBoundsClause = do
@@ -23,15 +24,27 @@ validBoundsClause = do
 validBoundsCnf :: Gen ((Int,Int),(Int,Int),[Char])
 validBoundsCnf = do
     ((minLen,maxLen),chars) <- validBoundsClause
-    let upperBound = 2 ^ min maxLen (length chars)
-    minNum <- chooseInt (1,upperBound)
-    maxNum <- chooseInt (minNum,upperBound)
-    pure ((minNum,maxNum),(minLen,maxLen),chars)
-
-
+    let lowerBound = (length chars `div` minLen) + 1
+    let upperBound = min 50 (lengthBound (length chars) maxLen)
+    minNum <- chooseInt (lowerBound, upperBound)
+    if minNum > lengthBound (length chars) minLen
+      then validBoundsCnf
+      else do
+        maxNum <- chooseInt (minNum,upperBound)
+        pure ((minNum,maxNum),(minLen,maxLen),chars)
 
 spec :: Spec
 spec = do
+  describe "genValidBoundsClause" $
+    it "should generate valid bounds" $
+      forAll validBoundsClause $ \((l,u),cs) ->
+        ioProperty $ BaseConfig l u cs `checkConfigWith` checkBaseConf
+
+  describe "genValidBoundsCnf" $
+    it "should generate valid bounds" $
+      withMaxSuccess 1000 $ forAll validBoundsCnf $ \((l1,u1),(l2,u2),cs) ->
+        ioProperty $ CnfConfig (BaseConfig l2 u2 cs) l1 u1 `checkConfigWith` checkCnfConf
+
   describe "genLiteral" $ do
     it "should throw an error when called with the empty list" $
       Exc.evaluate (genLiteral []) `shouldThrow` errorCall "Can not construct Literal from empty list."

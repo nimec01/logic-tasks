@@ -24,6 +24,7 @@ library
       LogicTasks.Semantics.Resolve
       LogicTasks.Printing
       LogicTasks.Parsing
+      LogicTasks.Util
       LogicTasks.Syntax.IllegalCnfs
       LogicTasks.Syntax.IllegalFormulas
       LogicTasks.Syntax.SimplestFormula
@@ -54,15 +55,14 @@ library
       ParsingHelpers
       Config
       Formula.Types
+      Debug
   other-modules:
       Auxiliary
-      Debug
       Formula.Printing
       Formula.Resolution
       Formula.Table
       Formula.Util
       LogicTasks.Helpers
-      LogicTasks.Util
       UniversalParser
       Util
       Paths_logic_tasks
@@ -79,6 +79,7 @@ library
     , extra
     , hspec
     , latex-svg-image >=0.2
+    , math-functions
     , minisat-solver
     , mtl
     , output-monad
@@ -118,6 +119,7 @@ test-suite src-test
     , hspec
     , latex-svg-image >=0.2
     , logic-tasks
+    , math-functions
     , minisat-solver
     , mtl
     , output-monad
