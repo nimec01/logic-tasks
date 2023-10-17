@@ -37,7 +37,7 @@ spec = do
         ]
   describe "parser @Cnf" $ do
     it "correctly recognizes all different notations" $
-      isRight $ parse (parser @Cnf) "" "A/\\B und (C or ~D) and (not E oder nicht F \\/ G)"
+      isRight $ parse (parser @Cnf) "" "A/\\B und (C or ~D) and (not E oder nicht F \\/ G)" {- german -}
   describe "parser @Dnf" $ do
     it "correctly recognizes all different notations" $
-      isRight $ parse (parser @Dnf) "" "A \\/-B oder (C and D) or (not E and nicht F /\\ ~ G)"
+      isRight $ parse (parser @Dnf) "" "A \\/-B oder (C and D) or (not E and nicht F /\\ ~ G)" {- german -}

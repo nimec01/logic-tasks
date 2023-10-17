@@ -14,6 +14,7 @@ fno
 foldl
 foldr
 fst
+gdw
 GHC
 github
 Graphviz
