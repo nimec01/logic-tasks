@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
-module Debug where
+module LogicTasks.Debug where
 
 import Test.QuickCheck
 import Control.Monad.Output.Generic

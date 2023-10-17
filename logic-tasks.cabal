@@ -25,6 +25,7 @@ library
       LogicTasks.Printing
       LogicTasks.Parsing
       LogicTasks.Util
+      LogicTasks.Debug
       LogicTasks.Syntax.IllegalCnfs
       LogicTasks.Syntax.IllegalFormulas
       LogicTasks.Syntax.SimplestFormula
@@ -55,7 +56,6 @@ library
       ParsingHelpers
       Config
       Formula.Types
-      Debug
   other-modules:
       Auxiliary
       Formula.Printing

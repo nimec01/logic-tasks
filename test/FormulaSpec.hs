@@ -8,7 +8,7 @@ import Test.QuickCheck
 import LogicTasks.Formula
 import LogicTasks.Config
 import LogicTasks.Util
-import Debug (checkConfigWith)
+import LogicTasks.Debug (checkConfigWith)
 import Formula.Types (lengthBound)
 
 validBoundsClause :: Gen ((Int,Int),[Char])
