@@ -91,7 +91,7 @@ genSynTreeWithSerial
         Tasks.LegalCNF.GenerateLegal.genCnf (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals
     | otherwise =
         cnfToSynTree <$>
-        Tasks.LegalCNF.GenerateLegal.genCnf
+        Formula.Types.genCnf
           (minClauseAmount, maxClauseAmount)
           (minClauseLength, maxClauseLength)
           usedLiterals

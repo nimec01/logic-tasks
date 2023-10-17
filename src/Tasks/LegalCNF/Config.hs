@@ -50,8 +50,8 @@ defaultLegalCNFConfig =
   , illegals = 2
   , includeFormWithJustOneClause = False
   , includeFormWithJustOneLiteralPerClause = True
-  , maxStringSize = 30
-  , minStringSize = 4
+  , maxStringSize = 35
+  , minStringSize = 12
   , allowArrowOperators = True
   }
 

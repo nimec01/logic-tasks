@@ -162,7 +162,7 @@ data BaseConfig = BaseConfig
 
 dBaseConf :: BaseConfig
 dBaseConf = BaseConfig {
-      minClauseLength = 1
+      minClauseLength = 2
     , maxClauseLength = 3
     , usedLiterals = "ABCD"
     }
@@ -179,7 +179,7 @@ dCnfConf :: CnfConfig
 dCnfConf = CnfConfig
     { baseConf = dBaseConf
     , minClauseAmount = 2
-    , maxClauseAmount = 3
+    , maxClauseAmount = 4
     }
 
 
