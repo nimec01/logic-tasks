@@ -264,7 +264,8 @@ instance Arbitrary Cnf where
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Cnf
 genCnf (minNum,maxNum) (minLen,maxLen) lits = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    cnf <- generateClauses nLits empty num `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+    cnf <- generateClauses nLits empty num
+      `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -412,7 +413,8 @@ instance Arbitrary Dnf where
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Gen Dnf
 genDnf (minNum,maxNum) (minLen,maxLen) lits = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    dnf <- generateCons nLits empty num `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+    dnf <- generateCons nLits empty num
+      `suchThat` \xs -> all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)

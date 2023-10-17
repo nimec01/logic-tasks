@@ -24,7 +24,7 @@ import ParsingHelpers
   -- with precedence
   Ors ::= Ors ∨ Ands | Ands
   Ands ::= Ands ∧ Impl | Impl
-  Impl ::= Biimpl => Impl | BiImpl
+  Impl ::= BiImpl => Impl | BiImpl
   BiImpl ::= Neg <=> BiImpl | Neg
 
   -- 'leaf' formulas
@@ -122,7 +122,7 @@ data LevelSpec = LevelSpec
   , allowNegation :: AllowNegation
   , allowAtomicProps :: Bool
   , allowImplication :: Bool
-  , allowBiimplication :: Bool
+  , allowBiImplication :: Bool
   , strictParens :: Bool -- strict parenthesis will trigger excessive nesting and thereby level changes!!!
   , allowSilentNesting :: Bool -- DANGER!!!
   , nextLevelSpec :: Maybe LevelSpec
@@ -132,19 +132,31 @@ data AllowNegation = Nowhere | LiteralsOnly | Everywhere
 
 -- parser for operations
 orParser :: Parser ()
-orParser = keyword "or" <|> keyword "oder" <|> tokenSymbol "∨" <|> tokenSymbol "\\/" <?> "Disjunction"
+orParser =
+      keyword "or" <|> keyword "oder"
+  <|> tokenSymbol "∨" <|> tokenSymbol "\\/"
+  <?> "Disjunction"
 
 andParser :: Parser ()
-andParser = keyword "and" <|> keyword "und" <|> tokenSymbol "∧" <|> tokenSymbol "/\\" <?> "Conjunction"
+andParser =
+      keyword "and" <|> keyword "und"
+  <|> tokenSymbol "∧" <|> tokenSymbol "/\\"
+  <?> "Conjunction"
 
 implicationParser :: Parser ()
 implicationParser = tokenSymbol "=>" <?> "Implication"
 
 biImplicationParser :: Parser ()
-biImplicationParser = tokenSymbol "<=>" <|> keyword "iff" <|> keyword "gdw" <?> "Biimplication"
+biImplicationParser =
+      tokenSymbol "<=>"
+  <|> keyword "iff" <|> keyword "gdw"
+  <?> "Biimplication"
 
 negationParser :: Parser ()
-negationParser = keyword "not" <|> keyword "nicht" <|> tokenSymbol "¬" <|> tokenSymbol "~" <|> tokenSymbol "-" <?> "Negation"
+negationParser =
+      keyword "not" <|> keyword "nicht"
+  <|> tokenSymbol "¬" <|> tokenSymbol "~" <|> tokenSymbol "-"
+  <?> "Negation"
 
 atomParser :: Parser Char
 atomParser = token (satisfy (`elem` ['A'..'Z'])) <?> "atomic Proposition"
@@ -164,7 +176,7 @@ formula LevelSpec{..}
       $  [ Or <$ orParser | allowOr ]
       ++ [ And <$ andParser | allowAnd ]
       ++ [ Impl <$ implicationParser | allowImplication ]
-      ++ [ BiImpl <$ biImplicationParser | allowBiimplication ]
+      ++ [ BiImpl <$ biImplicationParser | allowBiImplication ]
 
   basic :: Parser Basic
   basic = BasicNested <$> nested <|> BasicNeg <$> neg
@@ -186,7 +198,7 @@ formula LevelSpec{..}
 
   biImpl :: Parser BiImpls
   biImpl
-    | allowBiimplication = infixr1 OfNeg neg (biImplicationParser $> BiImpls)
+    | allowBiImplication = infixr1 OfNeg neg (biImplicationParser $> BiImpls)
     | otherwise = OfNeg <$> neg
 
   neg :: Parser Neg

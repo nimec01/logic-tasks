@@ -8,7 +8,9 @@ module Trees.Parsing (
   parseTreeFormulaAnswer
   ) where
 
-import Text.Parsec (ParseError, parse, (<|>))
+import qualified Control.Applicative as Alternative (optional)
+
+import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 
 import Trees.Types as Formula (PropFormula(..), BinOp(..))
@@ -32,7 +34,7 @@ instance FromGrammar (SynTree BinOp Char) where
       , allowNegation = Everywhere
       , allowAtomicProps = True
       , allowImplication = True
-      , allowBiimplication = True
+      , allowBiImplication = True
       , strictParens = True
       , allowSilentNesting = False
       , nextLevelSpec = Just spec
@@ -60,7 +62,7 @@ formulaParse :: String -> Either ParseError (SynTree BinOp Char)
 formulaParse = parse (fully formulaParser) ""
 
 instance Parse TreeFormulaAnswer where
-  parser = TreeFormulaAnswer <$> (Just <$> parser <|> pure Nothing)
+  parser = TreeFormulaAnswer <$> Alternative.optional parser
 
 {-# DEPRECATED parseTreeFormulaAnswer "use Parse instance" #-}
 parseTreeFormulaAnswer :: Parser TreeFormulaAnswer
@@ -78,7 +80,7 @@ instance FromGrammar (PropFormula Char) where
       , allowNegation = Everywhere
       , allowAtomicProps = True
       , allowImplication = True
-      , allowBiimplication = True
+      , allowBiImplication = True
       , strictParens = False
       , allowSilentNesting = False
       , nextLevelSpec = Just spec
@@ -107,7 +109,7 @@ parsePropForm :: Parser (PropFormula Char)
 parsePropForm = parser
 
 instance Parse FormulaAnswer where
-  parser = FormulaAnswer <$> (Just <$> parser <|> pure Nothing)
+  parser = FormulaAnswer <$> Alternative.optional parser
 
 {-# DEPRECATED parseFormulaAnswer "use Parse instance" #-}
 parseFormulaAnswer :: Parser FormulaAnswer

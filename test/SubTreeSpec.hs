@@ -45,50 +45,50 @@ invalidBoundsSubTree = do
 
 spec :: Spec
 spec = do
-    describe "generateSubTreeInst" $ do
-        it "parse should works well" $
-            forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
-                  let
-                    correctTrees = allNotLeafSubTrees tree
-                  in
-                    all (\tree -> parse (parser @(SynTree BinOp Char)) "" (display tree) == Right tree) $ toList correctTrees
-        it "correct formulas are stored" $
-            forAll validBoundsSubTree $ \subTreeConfig ->
-                forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
-                  let
-                    correctTrees = allNotLeafSubTrees tree
-                  in
-                    fromList (map display $ toList correctTrees)
-                      == correctFormulas
-        it "it should generate not less Syntax Sub tree number it required as excepted" $
-            forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
-                  fromIntegral (size correctFormulas) >= minSubTrees
-        it "all subformulae are the sublist of the formula" $
-            forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
-                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
-                  let
-                    correctFormulas' = toList correctFormulas
-                  in
-                    all (`isInfixOf` display tree) correctFormulas'
-        it "Converting correct subformulae Strings into formulae and parsing them again should yield the original" $
-            forAll validBoundsSubTree $ \config ->
-                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
-                  let
-                    propFormulae = map
-                      (fromRight' . parse (parser @(PropFormula Char)) "")
-                      (toList correctFormulas)
-                    inputSet = fromList (map show propFormulae)
-                  in
-                    inputSet == correctFormulas
-        xit "The above should be true even when deleting spaces in the input" $
-            forAll validBoundsSubTree $ \config ->
-                forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
-                  let
-                    propFormulae = map
-                      (fromRight' . parse (parser @(PropFormula Char)) "" . deleteSpaces)
-                      (toList correctFormulas)
-                    inputSet = fromList (map show propFormulae)
-                  in
-                    inputSet == correctFormulas
+  describe "generateSubTreeInst" $ do
+    it "parse should works well" $
+      forAll validBoundsSubTree $ \subTreeConfig ->
+        forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
+          let
+            correctTrees = allNotLeafSubTrees tree
+          in
+            all (\tree -> parse (parser @(SynTree BinOp Char)) "" (display tree) == Right tree) $ toList correctTrees
+    it "correct formulas are stored" $
+      forAll validBoundsSubTree $ \subTreeConfig ->
+        forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
+          let
+            correctTrees = allNotLeafSubTrees tree
+          in
+            fromList (map display $ toList correctTrees)
+              == correctFormulas
+    it "it should generate not less Syntax Sub tree number it required as excepted" $
+      forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
+        forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
+          fromIntegral (size correctFormulas) >= minSubTrees
+    it "all subformulae are the sublist of the formula" $
+      forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
+        forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
+          let
+            correctFormulas' = toList correctFormulas
+          in
+            all (`isInfixOf` display tree) correctFormulas'
+    it "Converting correct subformulae Strings into formulae and parsing them again should yield the original" $
+      forAll validBoundsSubTree $ \config ->
+          forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
+            let
+              propFormulae = map
+                (fromRight' . parse (parser @(PropFormula Char)) "")
+                (toList correctFormulas)
+              inputSet = fromList (map show propFormulae)
+            in
+              inputSet == correctFormulas
+    xit "The above should be true even when deleting spaces in the input" $
+      forAll validBoundsSubTree $ \config ->
+        forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
+          let
+            propFormulae = map
+              (fromRight' . parse (parser @(PropFormula Char)) "" . deleteSpaces)
+              (toList correctFormulas)
+            inputSet = fromList (map show propFormulae)
+          in
+            inputSet == correctFormulas

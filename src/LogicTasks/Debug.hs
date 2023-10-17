@@ -12,7 +12,7 @@ import Data.Maybe (isJust)
 showDescription :: (m ~ GenericReportT Language (IO ()) IO) => Gen inst -> (inst -> LangM m) -> IO (Maybe ())
 showDescription gen f = do
   inst <- generate gen
-  runLangMReport (return ()) (>>) (f inst) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
+  run (f inst)
 
 testTask ::
   (m ~ GenericReportT Language (IO ()) IO, Show a) =>
@@ -24,7 +24,7 @@ testTask ::
   IO ()
 testTask gen f partial full p = do
   inst <- generate gen
-  desc <- runLangMReport (return ()) (>>) (f inst) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
+  desc <- run (f inst)
   print desc
   str <- getLine
   case parse p "input" str of
@@ -33,13 +33,17 @@ testTask gen f partial full p = do
       putStrLn "---- Gelesen ----"
       print value
       putStrLn "---- Partial ----"
-      partialRes <- runLangMReport (return ()) (>>) (partial inst value) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
+      partialRes <- run (partial inst value)
       print partialRes
       putStrLn "---- Complete ----"
-      completeRes <- runLangMReport (return ()) (>>) (full inst value) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
+      completeRes <- run (full inst value)
       print completeRes
 
 checkConfigWith :: (m ~ GenericReportT Language (IO ()) IO) => config -> (config -> LangM m) -> IO Bool
-checkConfigWith conf check = do
-  res <- runLangMReport (return ()) (>>) (check conf) >>= \(r, x) -> (x German :: IO ()) >> return r :: IO (Maybe ())
-  pure $ isJust res
+checkConfigWith conf check = isJust <$> run (check conf)
+
+run :: (m ~ GenericReportT Language (IO ()) IO) => LangM m -> IO (Maybe ())
+run thing = do
+  (r,sayThing) <- runLangMReport (pure ()) (>>) thing
+  sayThing German
+  pure r

@@ -150,8 +150,14 @@ checkCnfConf CnfConfig {..}
 
     | minClauseAmount * minClauseLength baseConf < length (usedLiterals baseConf) =
         refuse $ indent $ translate $ do
-          german "Nicht immer genug Platz für alle Literale in der Formel. (Mögliche Lösung: Eine der unteren Schranken erhöhen)"
-          english "No always enough space in formula for all literals. (Possible solution: raise one of the lower bounds)"
+          german $ unlines
+            [ "Nicht immer genug Platz für alle Literale in der Formel."
+            , "(Mögliche Lösung: Eine der unteren Schranken erhöhen)"
+            ]
+          english $ unlines
+            [ "Not always enough space in formula for all literals."
+            , "(Possible solution: raise one of the lower bounds)"
+            ]
 
     | minClauseAmount > 2 ^ length (usedLiterals baseConf) =
         refuse $ indent $ translate $ do
