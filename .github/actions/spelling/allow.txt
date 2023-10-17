@@ -30,6 +30,7 @@ maxterms
 minterms
 MReport
 oneof
+parseable
 println
 scanl
 snd

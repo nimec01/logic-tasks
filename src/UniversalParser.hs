@@ -133,13 +133,15 @@ data AllowNegation = Nowhere | LiteralsOnly | Everywhere
 -- parser for operations
 orParser :: Parser ()
 orParser =
-      keyword "or" <|> keyword "oder"
+      keyword "or"
+  <|> keyword "oder" {- german -}
   <|> tokenSymbol "∨" <|> tokenSymbol "\\/"
   <?> "Disjunction"
 
 andParser :: Parser ()
 andParser =
-      keyword "and" <|> keyword "und"
+      keyword "and"
+  <|> keyword "und" {- german -}
   <|> tokenSymbol "∧" <|> tokenSymbol "/\\"
   <?> "Conjunction"
 
@@ -150,7 +152,7 @@ biImplicationParser :: Parser ()
 biImplicationParser =
       tokenSymbol "<=>"
   <|> keyword "iff" <|> keyword "gdw"
-  <?> "Biimplication"
+  <?> "BiImplication"
 
 negationParser :: Parser ()
 negationParser =
