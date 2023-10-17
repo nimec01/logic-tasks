@@ -17,5 +17,8 @@ Neg Neg
 # ignore lines starting with 'german' (german task descriptions and warnings)
 ^\s*german.*$
 
+# ignore lines ending in  {- german -} (german task descriptions and warnings)
+^.*\{-german-\}$
+
 # marker to ignore all code on line
 ^.*-- no-spell-check$

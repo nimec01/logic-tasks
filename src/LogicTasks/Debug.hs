@@ -30,7 +30,7 @@ testTask gen f partial full p = do
   case parse p "input" str of
     Left err -> print err
     Right value -> do
-      putStrLn "---- Gelesen ----"
+      putStrLn "---- Input ----"
       print value
       putStrLn "---- Partial ----"
       partialRes <- run (partial inst value)
