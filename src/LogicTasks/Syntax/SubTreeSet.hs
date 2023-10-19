@@ -34,11 +34,11 @@ description SubTreeInst{..} = do
       german "Geben Sie die Lösung als eine Liste der Teilformeln an."
 
     instruct $ do
-      english "Remove bracket pairs which only serve to enclose entire subformulae, and do not add any additional brackets."
-      german "Entfernen Sie dabei Klammerpaare, die eine Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
+      english "Remove bracket pairs which only serve to enclose an entire subformula you provide, and do not add any additional brackets."
+      german "Entfernen Sie dabei Klammerpaare, die eine angegebene Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
     example "[ A ∨ B ]" $ do
-      english "For example, if ¬(A ∨ B) is the given formula and one subformula is required, then the solution is:"
+      english "For example, if ¬(A ∨ B) is the given formula and one subformula is required, then a correct solution is:"
       german "Ist z.B. ¬(A ∨ B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
     pure ()
 
