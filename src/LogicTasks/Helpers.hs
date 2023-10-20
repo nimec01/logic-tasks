@@ -83,6 +83,12 @@ basicOpKey = do
   orKey
   pure()
 
+fullKey :: OutputMonad m => LangM m
+fullKey = do
+  basicOpKey
+  arrowsKey
+  pure ()
+
 keyHeading :: OutputMonad m => LangM m
 keyHeading =
   paragraph $ translate $ do
@@ -120,6 +126,22 @@ negationKey =
       german "-, ~, nicht"
       english "-, ~, not"
     pure ()
+
+arrowsKey :: OutputMonad m => LangM m
+arrowsKey = do
+  paragraph $ indent $ do
+    translate $ do
+      english "Implication:"
+      german "Implikation:"
+    code "=>"
+    pure ()
+  paragraph $ indent $ do
+    translate $ do
+      english "Bi-Implication:"
+      german "Bi-Implikation:"
+    code "<=>"
+    pure ()
+  pure ()
 
 cacheIO
   :: (MonadIO m, Show a)

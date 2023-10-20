@@ -41,6 +41,9 @@ description path SynTreeInst{..} = do
     instruct $ do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+
+    keyHeading
+    fullKey
     pure ()
 
 

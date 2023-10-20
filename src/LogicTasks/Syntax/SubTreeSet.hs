@@ -37,9 +37,12 @@ description SubTreeInst{..} = do
       english "Remove bracket pairs which only serve to enclose an entire subformula you provide, and do not add any additional brackets."
       german "Entfernen Sie dabei Klammerpaare, die eine angegebene Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
-    example "[ A ∨ B ]" $ do
-      english "For example, if ¬(A ∨ B) is the given formula and one subformula is required, then a correct solution is:"
-      german "Ist z.B. ¬(A ∨ B) die gegebene Formel und es wird eine Teilformel gesucht, dann ist die folgende Lösung korrekt:"
+    example "[ A or (B and C), B and C ]" $ do
+      english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformula are required, then a correct solution is:"
+      german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformel gesucht, dann ist die folgende Lösung korrekt:"
+
+    keyHeading
+    fullKey
     pure ()
 
 
