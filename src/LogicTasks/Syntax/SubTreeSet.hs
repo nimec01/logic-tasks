@@ -38,8 +38,8 @@ description SubTreeInst{..} = do
       german "Entfernen Sie dabei Klammerpaare, die eine angegebene Teilformel komplett umschließen, und fügen Sie keine zusätzlichen Klammern hinzu."
 
     example "[ A or (B and C), B and C ]" $ do
-      english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformula are required, then a correct solution is:"
-      german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformel gesucht, dann ist die folgende Lösung korrekt:"
+      english "For example, if ¬(A ∨ (B ∧ C)) is the given formula and two subformulae are required, then a correct solution is:"
+      german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
 
     keyHeading
     fullKey
