@@ -146,7 +146,7 @@ partialGrade ResolutionInst{..} sol = do
 
   preventWithHint (not $ null wrongLitsSteps)
     (translate $ do
-      german "Genutzte Literale kommen in FOrmel vor?"
+      german "Genutzte Literale kommen in Formel vor?"
       english "Used literals are present in formula?"
     )
     (paragraph $ do

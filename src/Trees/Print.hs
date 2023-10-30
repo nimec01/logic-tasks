@@ -12,7 +12,7 @@ transferToPicture (Binary And a b) = "[ $\\wedge $ " ++ transferToPicture a ++ t
 transferToPicture (Leaf a) = "[" ++ (a:"]")
 transferToPicture (Binary Or a b) = "[ $\\vee   $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
 transferToPicture (Not a) = "[ $\\neg $ " ++ transferToPicture a ++ "  ]"
-transferToPicture (Binary Impl a b) = "[ $\\to  $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
+transferToPicture (Binary Impl a b) = "[ $\\Rightarrow  $ " ++ transferToPicture a ++ transferToPicture b ++ "  ]"
 transferToPicture (Binary Equi a b) = "[ $\\Leftrightarrow  $ " ++ transferToPicture a ++ transferToPicture b ++"  ]"
 
 display :: SynTree BinOp Char -> String
