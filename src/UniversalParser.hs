@@ -8,7 +8,7 @@ module UniversalParser where
 import Data.Functor (($>))
 import Data.Maybe (fromMaybe)
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try)
+import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected)
 import Text.Parsec.String (Parser)
 
 import ParsingHelpers
@@ -170,15 +170,30 @@ formula LevelSpec{..}
   | otherwise = WithPrecedence <$> ors
   where
   noFixity :: Parser NoFixity
-  noFixity = try (NoFixity <$> basic <*> anyBinaryOp <*> basic) <|> OfBasic <$> basic
+  noFixity = do
+    x <- basic
+    NoFixity x <$> anyBinaryOp <*> basic <|> pure (OfBasic x)
 
   anyBinaryOp :: Parser Op
-  anyBinaryOp =
-    choice
-      $  [ Or <$ orParser | allowOr ]
+  anyBinaryOp = chooseBinary <* _noSecondOp
+    where
+    chooseBinary :: Parser Op
+    chooseBinary = choice
+      (  [ Or <$ orParser | allowOr ]
       ++ [ And <$ andParser | allowAnd ]
       ++ [ Impl <$ implicationParser | allowImplication ]
       ++ [ BiImpl <$ biImplicationParser | allowBiImplication ]
+      )
+
+    _noSecondOp :: Parser ()
+    _noSecondOp = do
+      op <- try chooseBinary
+      unexpected $ "second operator: " ++ case op of
+        Or -> "Disjunction"
+        And -> "Conjunction"
+        Impl -> "Implication"
+        BiImpl -> "Bi-Implication"
+      <|> pure ()
 
   basic :: Parser Basic
   basic = BasicNested <$> nested <|> BasicNeg <$> neg
