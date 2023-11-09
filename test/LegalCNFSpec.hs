@@ -58,7 +58,8 @@ validBoundsLegalCNF = do
           externalGenFormulas,
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
           minStringSize = minClauseAmount * ((minClauseLength - 1) * 5 + 1),
-          allowArrowOperators
+          allowArrowOperators,
+          extraText = Nothing
         }
 
 invalidBoundsLegalCNF :: Gen LegalCNFConfig
@@ -92,7 +93,8 @@ invalidBoundsLegalCNF = do
           externalGenFormulas,
           maxStringSize,
           minStringSize,
-          allowArrowOperators = False
+          allowArrowOperators = False,
+          extraText = Nothing
         }
 
 spec :: Spec

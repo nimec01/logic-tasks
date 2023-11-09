@@ -37,7 +37,8 @@ validBoundsSynTree = do
         usedLiterals,
         atLeastOccurring,
         allowArrowOperators,
-        maxConsecutiveNegations
+        maxConsecutiveNegations,
+        extraText = Nothing
       }
 
 invalidBoundsSynTree :: Gen SynTreeConfig
@@ -55,7 +56,8 @@ invalidBoundsSynTree = do
         usedLiterals,
         atLeastOccurring = fromIntegral (length usedLiterals),
         allowArrowOperators = True,
-        maxConsecutiveNegations
+        maxConsecutiveNegations,
+        extraText = Nothing
       }
 
 

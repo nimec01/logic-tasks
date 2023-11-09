@@ -2,6 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Tasks.LegalCNF.Config (
     LegalCNFConfig(..),
@@ -36,6 +37,7 @@ data LegalCNFConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
+    , extraText :: Maybe String
   } deriving (Show,Generic)
 
 
@@ -53,6 +55,7 @@ defaultLegalCNFConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
+  , extraText = Nothing
   }
 
 
@@ -114,4 +117,5 @@ data LegalCNFInst =
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]
+      , extraText :: Maybe String
     } deriving (Show,Generic)

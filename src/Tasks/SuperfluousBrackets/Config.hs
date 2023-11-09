@@ -66,4 +66,5 @@ data SuperfluousBracketsInst =
       tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
+    , extraText :: Maybe String
     } deriving (Show,Generic)

@@ -32,4 +32,5 @@ generateSuperfluousBracketsInst SuperfluousBracketsConfig {syntaxTreeConfig = Sy
       { tree
       , stringWithSuperfluousBrackets
       , simplestString = simplestDisplay tree
+      , extraText = extraText
       }

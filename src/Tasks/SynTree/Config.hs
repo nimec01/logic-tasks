@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
@@ -30,6 +31,7 @@ data SynTreeConfig =
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
+  , extraText :: Maybe String
   } deriving (Show,Generic)
 
 
@@ -44,6 +46,7 @@ defaultSynTreeConfig =
     , atLeastOccurring = 3
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
+    , extraText = Nothing
     }
 
 
@@ -97,4 +100,5 @@ data SynTreeInst =
     { tree :: SynTree BinOp Char
     , latexImage :: String
     , correct :: String
+    , extraText :: Maybe String
     } deriving (Show,Generic)

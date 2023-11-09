@@ -5,9 +5,9 @@
 module LogicTasks.Syntax.SimplestFormula where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, translate)
+import Control.Monad.Output (LangM, OutputMonad, english, german, paragraph, translate, text)
 import Data.List (nub, sort)
-import Data.Maybe (isNothing, fromJust)
+import Data.Maybe (isNothing, fromJust, fromMaybe)
 
 import LogicTasks.Helpers
 import Tasks.SuperfluousBrackets.Config (
@@ -47,6 +47,8 @@ description SuperfluousBracketsInst{..} = do
       german "Sie können dafür die Ausgangsformel in die Abgabe kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
       english "You can copy the original formula into the solution box and remove unnecessary brackets or use the following syntax:"
     basicOpKey
+
+    paragraph $ text (fromMaybe "" extraText)
     pure ()
 
 

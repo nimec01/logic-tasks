@@ -75,4 +75,5 @@ data LegalPropositionInst =
     {
       serialsOfWrong :: Set Int
     , pseudoFormulas :: [String]
+    , extraText :: Maybe String
     } deriving (Show,Generic)
