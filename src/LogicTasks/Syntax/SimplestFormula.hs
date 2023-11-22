@@ -36,6 +36,12 @@ description SuperfluousBracketsInst{..} = do
     focus "A ∧ B ∧ C"
 
     instruct $ do
+      english "Similarly brackets are not necessary for one or more consecutive negations directly in front of an atom, for example in:"
+      german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Aussage nicht nötig, z.B. bei"
+
+    focus "¬¬A"
+
+    instruct $ do
       english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
       german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
 
