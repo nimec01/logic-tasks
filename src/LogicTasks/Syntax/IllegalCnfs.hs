@@ -59,7 +59,7 @@ partialGrade :: OutputMonad m => LegalCNFInst -> [Int] -> LangM m
 partialGrade LegalCNFInst{..} sol
     | invalidIndex = reject $ do
       english "At least one index in the list does not exist."
-      german "Mindestens einer der Indices existiert nicht."
+      german "Mindestens einer der Indizes existiert nicht."
 
     | otherwise = pure()
   where

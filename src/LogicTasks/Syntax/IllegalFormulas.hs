@@ -30,7 +30,7 @@ description LegalPropositionInst{..} = do
 
     instruct $ do
       english "Enter a list containing the indices of the invalid formulas to submit your answer."
-      german "Geben Sie eine Liste der Indices aller syntaktisch falschen Formeln als Ihre Lösung an."
+      german "Geben Sie eine Liste der Indizes aller syntaktisch falschen Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
       english "For example, if only choices 2 and 3 are incorrect, then the solution is:"
@@ -59,7 +59,7 @@ partialGrade :: OutputMonad m => LegalPropositionInst -> [Int] -> LangM m
 partialGrade LegalPropositionInst{..} sol
     | invalidIndex = reject $ do
       english "At least one index in the list does not exist."
-      german "Mindestens einer der Indices existiert nicht."
+      german "Mindestens einer der Indizes existiert nicht."
 
     | otherwise = pure()
   where
