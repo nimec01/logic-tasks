@@ -54,7 +54,7 @@ description DecideInst{..} = do
     indent $ code $ show (flipAt (getTable cnf) changed)
     pure ()
   paragraph $ translate $ do
-    english  "Provide the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulae counts as row 1."
+    english  "Provide the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
     german  "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
 
   paragraph $ indent $ do
