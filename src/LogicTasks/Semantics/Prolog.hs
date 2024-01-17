@@ -157,7 +157,7 @@ completeGrade PrologInst{..} sol =
     case resolve clause1 clause2 transSol1 of
         Nothing -> refuse $ indent $ translate $ do
                      german "Mit diesem Literal kann kein Schritt durchgeführt werden!"
-                     english "This literal can not be used for a resolution step!"
+                     english "This literal cannot be used for a resolution step!"
 
         Just solClause -> if solClause == transSol2
                             then pure()
