@@ -184,7 +184,7 @@ completeGrade FillInst{..} sol = do
 
   where
     table = getTable cnf
-    tableLen = length $ readEntries $ table
+    tableLen = length $ readEntries table
     allEntries = map fromJust $ readEntries table
     correctShort = [allEntries !! i | i <- map (\x -> x-1) missing]
     boolSol = map truth sol
