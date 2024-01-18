@@ -45,7 +45,7 @@ import Numeric.SpecFunctions as Math (choose)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))}
 
-newtype TruthValue = TruthValue {truth :: Bool} deriving (Typeable, Generic)
+newtype TruthValue = TruthValue {truth :: Bool} deriving (Show, Typeable, Generic)
 
 
 

@@ -88,7 +88,7 @@ verifyStatic DecideInst{..}
           english "At least one mistake has to be specified."
           german "Es muss mindestens eine Änderung geben."
 
-    | otherwise = pure()
+    | otherwise = pure ()
 
 
 
@@ -110,6 +110,41 @@ start = []
 
 partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
+  preventWithHint (null sol)
+    (translate $ do
+      german "Lösung enthält Indizes?"
+      english "Solution contains indices?"
+    )
+    (translate $ do
+      german "Die Lösung beinhaltet mindestens einen Index."
+      english "The solution contains at least one index."
+    )
+
+  preventWithHint (solLen > tableLen)
+    (translate $ do
+      german "Lösung überschreitet nicht maximale Anzahl Werte?"
+      english "Solution does not exceed maximum possible number of values?"
+    )
+    (translate $ do
+      german $ "Lösung enthält zu viele Werte. Es " ++ gerLong ++" entfernt werden."
+      english $ "Solution contains too many values. Please remove " ++ engLong ++ " to proceed."
+    )
+
+
+  pure ()
+  where
+    tableLen = length $ readEntries $ getTable cnf
+    solLen = length sol
+    diffToTable = abs (solLen - tableLen)
+    (gerLong,engLong) = gerEng diffToTable
+    gerEng diff = if diff == 1
+        then ("muss " ++ display ++ " Wert", display ++ " value") -- no-spell-check
+        else ("müssen " ++ display ++ " Werte", display ++ " values") -- no-spell-check
+      where
+        display = show diff
+
+completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
+completeGrade DecideInst{..} sol = do
   preventWithHint (solLen > acLen)
     (translate $ do
       german "Lösung enthält nicht zu viele Indizes?"
@@ -129,20 +164,7 @@ partialGrade DecideInst{..} sol = do
       german $ "Lösung enthält zu wenige Indizes. Es " ++ ger ++ " hinzugefügt werden."
       english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
     )
-  pure ()
-  where
-    acLen = length $ nub changed
-    solLen = length $ nub sol
-    distance = abs (solLen - acLen)
-    display = show distance
-    (ger, eng) = if distance == 1
-    then ( "muss " ++ display ++ " spezifischer Wert", display ++ " unique value") -- no-spell-check
-    else ("müssen " ++ display ++ " spezifische Werte", display ++ " unique values") -- no-spell-check
 
-
-
-completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
-completeGrade DecideInst{..} sol = do
   preventWithHint (diff /= 0)
     (translate $ do
       german "Lösung ist korrekt?"
@@ -152,7 +174,16 @@ completeGrade DecideInst{..} sol = do
       german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
       english $ "Your solution contains " ++ display ++ " mistakes."
     )
+
+  pure ()
   where
     nubSol = nub sol
     diff = length $ filter (`notElem` changed) nubSol
-    display = show diff
+    acLen = length $ nub changed
+    solLen = length $ nub sol
+    distance = abs (solLen - acLen)
+    display = show distance
+    (ger, eng) = if distance == 1
+    then ( "muss " ++ display ++ " spezifischer Wert", display ++ " unique value") -- no-spell-check
+    else ("müssen " ++ display ++ " spezifische Werte", display ++ " unique values") -- no-spell-check
+

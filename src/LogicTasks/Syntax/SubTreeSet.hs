@@ -80,14 +80,8 @@ partialGrade SubTreeInst{..} fs
         english "Your solution contains at least one subformula with more logical operators than the original formula."
         german "Ihre Abgabe beinhaltet mindestens eine Teilformel mit mehr logische Operatoren als die ursprüngliche Formel."
 
-    | amount < minInputTrees =
-      reject $ do
-        english $ "Your solution does not contain enough subformulas. Add " ++ show (minInputTrees - amount) ++ "."
-        german $ "Ihre Abgabe beinhaltet nicht genügend Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
-
     | otherwise = pure()
   where
-    amount = fromIntegral $ length $ nub fs
     literals = sort $ nub $ concatMap (collectLeaves . fromJust . maybeForm) fs
     opsNum = map (numOfOpsInFormula . fromJust . maybeForm) fs
     origLits = sort $ nub $ collectLeaves tree
@@ -97,9 +91,14 @@ partialGrade SubTreeInst{..} fs
 
 completeGrade :: OutputMonad m => SubTreeInst -> [FormulaAnswer] -> LangM m
 completeGrade SubTreeInst{..} sol
+    | amount < minInputTrees =
+      reject $ do
+        english $ "Your solution does not contain enough subformulas. Add " ++ show (minInputTrees - amount) ++ "."
+        german $ "Ihre Abgabe beinhaltet nicht genügend Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
     | not partOfSolution = reject $ do
       english "Your solution is not correct."
       german "Ihre Abgabe ist keine korrekte Lösung."
     | otherwise = pure()
   where
+    amount = fromIntegral $ length $ nub sol
     partOfSolution = fromList (map show sol) `isSubsetOf` correctFormulas
