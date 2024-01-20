@@ -28,5 +28,5 @@ generateSynTreeInst SynTreeConfig {..} = do
       { tree
       , latexImage = transferToPicture tree
       , correct = display tree
-      , extraText = extraText
+      , addText = extraText
       }
