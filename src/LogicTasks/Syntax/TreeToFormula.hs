@@ -22,6 +22,8 @@ import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
+import Formula.Util (isSemanticEqual)
+import Control.Monad (when)
 import Trees.Print (transferToPicture)
 
 
@@ -36,12 +38,16 @@ description path SynTreeInst{..} = do
     image $=<< liftIO $ cacheTree latexImage path
 
     instruct $ do
-      english "Give the propositional logic formula represented by this syntax tree."
+      english "Give the propositional logic formula that is represented by this syntax tree."
       german "Geben Sie die aussagenlogische Formel an, die von diesem Syntaxbaum dargestellt wird."
 
     instruct $ do
       english "(You are allowed to add arbitrarily many additional pairs of brackets.)"
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
+
+    when extraHintsOnSemanticEquivalence $ instruct $ do
+      english "Remarks: The exact formula of the syntax tree must be specified. Other formulae that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
+      german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
     fullKey
@@ -52,7 +58,7 @@ description path SynTreeInst{..} = do
 
 
 verifyInst :: OutputMonad m => SynTreeInst -> LangM m
-verifyInst _ = pure()
+verifyInst _ = pure ()
 
 
 
@@ -71,7 +77,7 @@ partialGrade _ sol
     | isNothing $ maybeTree sol = reject $ do
       english "You did not submit a solution."
       german "Die Abgabe ist leer."
-    | otherwise = pure()
+    | otherwise = pure ()
 
 
 
@@ -79,13 +85,18 @@ completeGrade :: (OutputMonad m, MonadIO m) => FilePath -> SynTreeInst -> TreeFo
 completeGrade path inst sol
     | treeAnswer /= tree inst = refuse $ do
         instruct $ do
-          english "Your solution is not correct. The syntax tree for the entered formula looks like this:"
-          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu der eingegebenen Formel sieht so aus:"
+          english "Your solution is not correct. The syntax tree for your entered formula looks like this:"
+          german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
+        when (extraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer (tree inst)) $
+          instruct $ do
+            english "This syntax tree is semantically equivalent to the original one, but not identical."
+            german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
+
         pure ()
-    | otherwise = pure()
+    | otherwise = pure ()
   where treeAnswer = fromJust (maybeTree sol)
 
 

@@ -33,6 +33,7 @@ data SynTreeConfig =
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , extraText :: Maybe (Map Language String)
+  , extraHintsOnSemanticEquivalence :: Bool
   , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
 
@@ -49,6 +50,7 @@ defaultSynTreeConfig =
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , extraText = Nothing
+    , extraHintsOnSemanticEquivalence = True
     , minUniqueBinOperators = 0
     }
 
@@ -110,4 +112,5 @@ data SynTreeInst =
     , latexImage :: String
     , correct :: String
     , addText :: Maybe (Map Language String)
+    , extraHintsOnSemanticEquivalence :: Bool
     } deriving (Show,Generic)
