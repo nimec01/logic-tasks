@@ -16,25 +16,25 @@ import Control.Monad.Output (
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Set (difference, member, toList, union)
 import Data.Tuple (swap)
-import Test.QuickCheck (Gen)
+import Test.QuickCheck (Gen, suchThat)
 
 import Config (PrologConfig(..), PrologInst(..))
-import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite)
+import Formula.Types (Clause, Literal(..), PrologLiteral(..), PrologClause(..), literals, opposite, ClauseShape (HornClause), HornShape (Fact, Query))
 import Formula.Util (flipPol, isEmptyClause, isPositive, mkPrologClause, transformProlog)
 import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Semantics.Step (genResStepClause)
 import Util(prevent, preventWithHint)
-
-
+import Formula.Helpers (hasTheClauseShape)
 
 
 genPrologInst :: PrologConfig -> Gen PrologInst
-genPrologInst PrologConfig{..} = do
+genPrologInst PrologConfig{..} = (do
     (clause, resolveLit, literals1) <- genResStepClause minClauseLength maxClauseLength usedLiterals
     let
       termAddedClause1 = mkPrologClause $ map remap (resolveLit : literals1)
       termAddedClause2 = mkPrologClause $ map remap (opposite resolveLit : literals clause)
-    pure $ PrologInst termAddedClause1 termAddedClause2 extraText
+    pure $ PrologInst termAddedClause1 termAddedClause2 extraText)
+  `suchThat` \(PrologInst clause1 clause2 _) -> hasTheClauseShape firstClauseShape clause1 && hasTheClauseShape secondClauseShape clause2
   where
     mapping = zip usedPredicates ['A'..'Z']
     usedLiterals = map snd mapping
@@ -115,6 +115,11 @@ verifyQuiz PrologConfig{..}
         refuse $ indent $ translate $ do
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
+
+    | (firstClauseShape `elem` [HornClause Fact, HornClause Query]) && firstClauseShape == secondClauseShape =
+        refuse $ indent $ translate $ do
+          german "Mit diesen Klauselformen ist keine Resolution möglich."
+          english "No resolution is possible with these clause forms."
 
     | otherwise = pure()
 
