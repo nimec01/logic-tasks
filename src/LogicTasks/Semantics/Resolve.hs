@@ -22,9 +22,9 @@ import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
+import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (clauseKey, extra)
+import LogicTasks.Helpers (clauseKey, example, extra)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 
@@ -47,7 +47,7 @@ third3 (_,_,c) = c
 genResInst :: ResolutionConfig -> Gen ResolutionInst
 genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
   clauses <- inst
-  pure $ ResolutionInst clauses printFeedbackOnPartialGrade extraText
+  pure $ ResolutionInst clauses printFeedbackOnPartialGrade printSolution extraText
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
@@ -216,24 +216,34 @@ completeGrade ResolutionInst{..} sol = do
       pure ()
 
     case applySteps clauses steps of
-        Nothing -> refuse $ indent $ translate $ do
-                     german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
-                     english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
+        Nothing -> refuse $ indent $ do
+          translate $ do
+            german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
+            english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
+
+          displaySolution
+
+          pure ()
 
         Just solClauses -> if any isEmptyClause solClauses
-                            then pure()
-                            else refuse $ indent $ translate $ do
-                                   german "Die Leere Klausel wurde nicht korrekt abgeleitet."
-                                   english "The Empty clause was not derived correctly."
+          then pure ()
+          else refuse $ indent $ do
+            translate $ do
+              german "Die leere Klausel wurde nicht korrekt abgeleitet."
+              english "The empty clause was not derived correctly."
 
-    pure ()
+            displaySolution
+
+            pure ()
       where
-        steps =  replaceAll sol $ baseMapping clauses
+        steps = replaceAll sol $ baseMapping clauses
         checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
         noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
           fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
-
-
+        displaySolution = when showSolution $
+          example (show (showResSteps (computeResSteps clauses))) $ do
+            english "A possible solution for this task is:"
+            german "Eine mögliche Lösung für die Aufgabe ist:"
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs

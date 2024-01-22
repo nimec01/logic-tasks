@@ -19,7 +19,7 @@ import Data.Digest.Pure.SHA (sha1, showDigest)
 import Data.Maybe (fromJust, isNothing)
 import Image.LaTeX.Render (FormulaOptions(..), SVG, defaultEnv, imageForFormula)
 
-import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject)
+import LogicTasks.Helpers (cacheIO, extra, fullKey, instruct, keyHeading, reject, example)
 import Tasks.SynTree.Config (checkSynTreeConfig, SynTreeInst(..), SynTreeConfig)
 import Trees.Types (TreeFormulaAnswer(..))
 import Formula.Util (isSemanticEqual)
@@ -90,6 +90,10 @@ completeGrade path inst sol
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
 
+        when (showSolution inst) $
+          example (show (correct inst)) $ do
+            english "A possible solution for this task is:"
+            german "Eine mögliche Lösung für die Aufgabe ist:"
         when (extraHintsOnSemanticEquivalence inst && isSemanticEqual treeAnswer (tree inst)) $
           instruct $ do
             english "This syntax tree is semantically equivalent to the original one, but not identical."
