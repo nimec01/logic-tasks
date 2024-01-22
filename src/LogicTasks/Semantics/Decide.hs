@@ -127,7 +127,7 @@ partialGrade DecideInst{..} sol = do
     )
     (translate $ do
       german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
-      english $ "Solution contains more values than rows. Please remove at least " ++ engLong ++ " to proceed."
+      english $ "Solution contains more values than there are rows. Please remove at least " ++ engLong ++ " to proceed."
     )
 
 
