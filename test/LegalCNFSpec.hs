@@ -57,7 +57,7 @@ validBoundsLegalCNF = do
           includeFormWithJustOneLiteralPerClause,
           externalGenFormulas,
           maxStringSize =  maxClauseAmount * (maxClauseLength * 6 + 5),
-          minStringSize = (minClauseLength + 1) * (minClauseAmount - 1),
+          minStringSize = minClauseAmount * ((minClauseLength - 1) * 5 + 1),
           allowArrowOperators,
           extraText = Nothing
         }
