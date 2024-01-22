@@ -235,7 +235,9 @@ completeGrade ResolutionInst{..} sol = do
             displaySolution
 
             pure ()
-      where
+            
+    pure ()
+    where
         steps = replaceAll sol $ baseMapping clauses
         checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
         noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
