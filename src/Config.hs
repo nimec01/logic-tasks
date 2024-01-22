@@ -117,6 +117,7 @@ dStepInst =  StepInst
 
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
+               , showFeedbackOnPartialGrade :: Bool
                , addText    :: !(Maybe String)
                }
                deriving (Typeable, Generic)
@@ -129,6 +130,7 @@ dResInst =  ResolutionInst
               , mkClause [Literal 'C']
               , mkClause [Not 'B']
               ]
+          , showFeedbackOnPartialGrade = True
           , addText = Nothing
           }
 
@@ -287,6 +289,7 @@ dPrologConf = PrologConfig
 data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
+    , printFeedbackOnPartialGrade :: Bool
     , extraText :: Maybe String
     }
     deriving (Typeable, Generic)
@@ -295,5 +298,6 @@ dResConf :: ResolutionConfig
 dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
+    , printFeedbackOnPartialGrade = True
     , extraText = Nothing
     }

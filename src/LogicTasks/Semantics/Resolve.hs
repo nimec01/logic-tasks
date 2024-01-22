@@ -26,6 +26,7 @@ import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (clauseKey)
 import Util (checkBaseConf, prevent, preventWithHint)
+import Control.Monad (unless, when)
 
 
 
@@ -44,7 +45,9 @@ third3 (_,_,c) = c
 
 
 genResInst :: ResolutionConfig -> Gen ResolutionInst
-genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = ResolutionInst <$> inst <*> pure extraText
+genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
+  clauses <- inst
+  pure $ ResolutionInst clauses printFeedbackOnPartialGrade extraText
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
@@ -157,16 +160,7 @@ partialGrade ResolutionInst{..} sol = do
       pure ()
     )
 
-  pure ()
-  where
-    checkMapping = correctMapping sol $ baseMapping clauses
-    steps =  replaceAll sol $ baseMapping clauses
-    availLits = unions (map (fromList . literals) clauses)
-    stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
-    wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
-
-completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
-completeGrade ResolutionInst{..} sol = do
+  when showFeedbackOnPartialGrade $ do
     preventWithHint (not $ null noResolveSteps)
       (translate $ do
         german "Alle Schritte sind gültig?"
@@ -184,6 +178,42 @@ completeGrade ResolutionInst{..} sol = do
       translate $ do
         german "Letzter Schritt leitet die leere Klausel ab?"
         english "The last step derives the empty clause?"
+
+    pure ()
+
+  pure ()
+  where
+    checkMapping = correctMapping sol $ baseMapping clauses
+    steps =  replaceAll sol $ baseMapping clauses
+    availLits = unions (map (fromList . literals) clauses)
+    stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
+    wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
+    checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
+    noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
+      fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
+
+completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
+completeGrade ResolutionInst{..} sol = do
+    unless showFeedbackOnPartialGrade $ do
+      preventWithHint (not $ null noResolveSteps)
+        (translate $ do
+          german "Alle Schritte sind gültig?"
+          english "All steps are valid?"
+        )
+        (paragraph $ do
+          translate $ do
+            german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
+            english "At least one step is not a valid resolution step. "
+          itemizeM $ map (text . show) noResolveSteps
+          pure ()
+        )
+
+      prevent checkEmptyClause $
+        translate $ do
+          german "Letzter Schritt leitet die leere Klausel ab?"
+          english "The last step derives the empty clause?"
+
+      pure ()
 
     case applySteps clauses steps of
         Nothing -> refuse $ indent $ translate $ do
