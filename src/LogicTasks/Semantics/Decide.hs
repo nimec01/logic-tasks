@@ -123,7 +123,7 @@ partialGrade DecideInst{..} sol = do
   preventWithHint (solLen > tableLen)
     (translate $ do
       german "Lösung überschreitet nicht Anzahl der Zeilen?"
-      english "Solution does not exceed maximum count of rows?"
+      english "Solution does not exceed count of rows?"
     )
     (translate $ do
       german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
