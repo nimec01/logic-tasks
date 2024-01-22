@@ -126,12 +126,12 @@ partialGrade FillInst{..} sol = do
 
   preventWithHint (solLen > tableLen)
     (translate $ do
-      german "Lösung überschreitet nicht maximale Anzahl Werte?"
-      english "Solution does not exceed maximum possible number of values?"
+      german "Lösung überschreitet nicht Anzahl der Zeilen?"
+      english "Solution does not exceed maximum count of rows?"
     )
     (translate $ do
-      german $ "Lösung enthält zu viele Werte. Es " ++ gerLong ++" entfernt werden."
-      english $ "Solution contains too many values. Please remove " ++ engLong ++ " to proceed."
+      german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
+      english $ "Solution contains more values than rows. Please remove at least " ++ engLong ++ " to proceed."
     )
 
   pure ()
@@ -156,8 +156,8 @@ completeGrade FillInst{..} sol = do
       english "Solution contains enough values?"
     )
     (translate $ do
-      german $ "Lösung enthält zu wenige Werte. Es " ++ gerShort ++ " hinzugefügt werden."
-      english $ "Solution does not contain enough values. Please add " ++ engShort ++ " to proceed."
+      german "Lösung enthält zu wenige Werte."
+      english "Solution does not contain enough values."
     )
 
   preventWithHint (not (solLen == tableLen || solLen == missingLen))
@@ -195,10 +195,3 @@ completeGrade FillInst{..} sol = do
     (_,diffLong) = pairwiseCheck zippedLong
     displayMistake = show (max (length diffShort) (length diffLong))
     missingLen = length missing
-    diffToMissing = abs (solLen - missingLen)
-    (gerShort,engShort) = gerEng diffToMissing
-    gerEng diff = if diff == 1
-        then ("muss " ++ display ++ " Wert", display ++ " value") -- no-spell-check
-        else ("müssen " ++ display ++ " Werte", display ++ " values") -- no-spell-check
-      where
-        display = show diff

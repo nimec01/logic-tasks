@@ -122,12 +122,12 @@ partialGrade DecideInst{..} sol = do
 
   preventWithHint (solLen > tableLen)
     (translate $ do
-      german "Lösung überschreitet nicht maximale Anzahl Werte?"
-      english "Solution does not exceed maximum possible number of values?"
+      german "Lösung überschreitet nicht Anzahl der Zeilen?"
+      english "Solution does not exceed maximum count of rows?"
     )
     (translate $ do
-      german $ "Lösung enthält zu viele Werte. Es " ++ gerLong ++" entfernt werden."
-      english $ "Solution contains too many values. Please remove " ++ engLong ++ " to proceed."
+      german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
+      english $ "Solution contains more values than rows. Please remove at least " ++ engLong ++ " to proceed."
     )
 
 
@@ -138,8 +138,8 @@ partialGrade DecideInst{..} sol = do
     diffToTable = abs (solLen - tableLen)
     (gerLong,engLong) = gerEng diffToTable
     gerEng diff = if diff == 1
-        then ("muss " ++ display ++ " Wert", display ++ " value") -- no-spell-check
-        else ("müssen " ++ display ++ " Werte", display ++ " values") -- no-spell-check
+        then ("muss mindestens" ++ display ++ " Wert", display ++ " value") -- no-spell-check
+        else ("müssen mindestens" ++ display ++ " Werte", display ++ " values") -- no-spell-check
       where
         display = show diff
 
@@ -151,8 +151,8 @@ completeGrade DecideInst{..} sol = do
       english "Solution does not contain too many indices?"
     )
     (translate $ do
-      german $ "Lösung enthält zu viele Indizes. Es " ++ ger ++" entfernt werden."
-      english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
+      german "Lösung enthält zu viele Indizes."
+      english "Solution contains too many indices."
     )
 
   preventWithHint (acLen > solLen)
@@ -161,8 +161,8 @@ completeGrade DecideInst{..} sol = do
       english "Solution contains enough indices?"
     )
     (translate $ do
-      german $ "Lösung enthält zu wenige Indizes. Es " ++ ger ++ " hinzugefügt werden."
-      english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
+      german "Lösung enthält zu wenige Indizes."
+      english "Solution does not contain enough indices."
     )
 
   preventWithHint (diff /= 0)
@@ -183,7 +183,4 @@ completeGrade DecideInst{..} sol = do
     solLen = length $ nub sol
     distance = abs (solLen - acLen)
     display = show distance
-    (ger, eng) = if distance == 1
-    then ( "muss " ++ display ++ " spezifischer Wert", display ++ " unique value") -- no-spell-check
-    else ("müssen " ++ display ++ " spezifische Werte", display ++ " unique values") -- no-spell-check
 
