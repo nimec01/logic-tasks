@@ -38,6 +38,7 @@ data LegalCNFConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
+    , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
@@ -56,6 +57,7 @@ defaultLegalCNFConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
+  , printSolution = True
   , extraText = Nothing
   }
 
@@ -118,5 +120,6 @@ data LegalCNFInst =
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]
+      , showSolution :: Bool
       , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

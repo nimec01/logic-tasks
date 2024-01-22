@@ -53,6 +53,7 @@ validBoundsSynTree = do
         maxConsecutiveNegations,
         extraText = Nothing,
         extraHintsOnSemanticEquivalence = False,
+        printSolution = False,
         minUniqueBinOperators = 0
       }
 
@@ -74,6 +75,7 @@ invalidBoundsSynTree = do
         maxConsecutiveNegations,
         extraText = Nothing,
         extraHintsOnSemanticEquivalence = False,
+        printSolution = False,
         minUniqueBinOperators = 0
       }
 
@@ -148,7 +150,7 @@ spec = do
 
   describe "semantic equivalence of syntax trees (isSemanticEqual)" $  do
     it "a syntax tree's formula is semantically equivalent to itself" $
-      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _) ->
+      forAll (generateSynTreeInst defaultSynTreeConfig) $ \(SynTreeInst tree _ _ _ _ _) ->
         isSemanticEqual tree tree
     it "a syntax tree's formula is semantically equivalent to itself with associativity applied" $ do
       isSemanticEqual
