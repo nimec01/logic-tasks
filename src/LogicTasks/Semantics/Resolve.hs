@@ -18,14 +18,14 @@ import Control.Monad.Output (
   localise,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (genRes, resolvableWith, resolve)
+import Formula.Resolution (genRes, resolvableWith, resolve, computeResSteps, showResSteps, applySteps)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (clauseKey, extra)
+import LogicTasks.Helpers (clauseKey, extra, example)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 
@@ -202,6 +202,17 @@ completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = do
     unless showFeedbackOnPartialGrade $ do
       gradeSteps sol clauses
+
+    when (showSolution && not isCorrect) $
+      example (show (showResSteps (computeResSteps clauses))) $ do
+        english "A possible solution for this task is:"
+        german "Eine mögliche Lösung für die Aufgabe ist:"
+
+    pure ()
+  where
+    steps = replaceAll sol $ baseMapping clauses
+    applied = applySteps clauses steps
+    isCorrect = isJust applied && any isEmptyClause (fromJust applied)
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
