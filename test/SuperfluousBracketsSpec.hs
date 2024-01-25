@@ -32,6 +32,7 @@ validBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
+        , extraText = Nothing
         , printSolution = False
         }
 
@@ -43,6 +44,7 @@ invalidBoundsSuperfluousBrackets = do
         {
           syntaxTreeConfig
         , superfluousBracketPairs
+        , extraText = Nothing
         , printSolution = False
         }
 

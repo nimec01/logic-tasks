@@ -34,6 +34,7 @@ validBoundsLegalProposition = do
             , formulas
             , illegals
             , bracketFormulas
+            , extraText = Nothing
             , printSolution = False
         }
 
@@ -49,6 +50,7 @@ invalidBoundsLegalProposition = do
             , formulas
             , illegals
             , bracketFormulas
+            , extraText = Nothing
             , printSolution = False
         }
 

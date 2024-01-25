@@ -31,6 +31,7 @@ data LegalPropositionConfig =
     , formulas :: Integer
     , illegals :: Integer
     , bracketFormulas :: Integer
+    , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     } deriving (Show,Generic)
 
@@ -42,6 +43,7 @@ defaultLegalPropositionConfig =
     , formulas = 5
     , illegals = 2
     , bracketFormulas = 1
+    , extraText = Nothing
     , printSolution = False
     }
 

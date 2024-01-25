@@ -17,7 +17,7 @@ import Trees.Helpers (allNotLeafSubTrees, noSameSubTree)
 
 
 generateSubTreeInst :: SubTreeConfig -> Gen SubTreeInst
-generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {minNodes, maxNodes, maxDepth, usedLiterals, atLeastOccurring, allowArrowOperators, maxConsecutiveNegations, minUniqueBinOperators, extraText}, ..} = do
+generateSubTreeInst SubTreeConfig {syntaxTreeConfig = SynTreeConfig {..}, ..} = do
     tree <- genSynTree
         (minNodes, maxNodes)
         maxDepth

@@ -32,7 +32,6 @@ library
       LogicTasks.Syntax.SubTreeSet
       LogicTasks.Syntax.TreeToFormula
       Tasks.SynTree.Config
-      Tasks.SynTree.Quiz
       Tasks.SubTree.Config
       Tasks.SubTree.Quiz
       Tasks.LegalProposition.Config
@@ -43,6 +42,8 @@ library
       Tasks.SuperfluousBrackets.Parsing
       Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
       Tasks.SuperfluousBrackets.Quiz
+      Tasks.TreeToFormula.Config
+      Tasks.TreeToFormula.Quiz
       Tasks.LegalCNF.Config
       Tasks.LegalCNF.Quiz
       Tasks.LegalCNF.GenerateIllegal
