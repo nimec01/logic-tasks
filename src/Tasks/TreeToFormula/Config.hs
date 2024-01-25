@@ -35,13 +35,8 @@ defaultTreeToFormulaConfig = TreeToFormulaConfig
 
 
 checkTreeToFormulaConfig :: OutputMonad m => TreeToFormulaConfig -> LangM m
-checkTreeToFormulaConfig subConfig@TreeToFormulaConfig {..} =
-    checkSynTreeConfig syntaxTreeConfig *> checkAdditionalConfig subConfig
-
-
-
-checkAdditionalConfig :: OutputMonad m => TreeToFormulaConfig -> LangM m
-checkAdditionalConfig TreeToFormulaConfig {syntaxTreeConfig = SynTreeConfig {}} = pure ()
+checkTreeToFormulaConfig TreeToFormulaConfig {..} =
+    checkSynTreeConfig syntaxTreeConfig
 
 
 data TreeToFormulaInst = TreeToFormulaInst {
