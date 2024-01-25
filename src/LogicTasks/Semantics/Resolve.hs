@@ -47,7 +47,7 @@ third3 (_,_,c) = c
 genResInst :: ResolutionConfig -> Gen ResolutionInst
 genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
   clauses <- inst
-  pure $ ResolutionInst clauses printFeedbackOnPartialGrade printSolution extraText
+  pure $ ResolutionInst clauses printFeedbackImmediately printSolution extraText
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
@@ -235,7 +235,7 @@ completeGrade ResolutionInst{..} sol = do
             displaySolution
 
             pure ()
-            
+
     pure ()
     where
         steps = replaceAll sol $ baseMapping clauses

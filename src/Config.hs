@@ -323,7 +323,7 @@ dPrologConf = PrologConfig
 data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
-    , printFeedbackOnPartialGrade :: Bool
+    , printFeedbackImmediately :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -333,7 +333,7 @@ dResConf :: ResolutionConfig
 dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
-    , printFeedbackOnPartialGrade = True
+    , printFeedbackImmediately = True
     , printSolution = False
     , extraText = Nothing
     }
