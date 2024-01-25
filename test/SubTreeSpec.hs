@@ -30,6 +30,7 @@ validBoundsSubTree = do
         syntaxTreeConfig
       , allowSameSubTree
       , minSubTrees
+      , extraText = Nothing
       , printSolution = False
       }
 
@@ -43,6 +44,7 @@ invalidBoundsSubTree = do
         syntaxTreeConfig
       , allowSameSubTree
       , minSubTrees
+      , extraText = Nothing
       , printSolution = False
       }
 

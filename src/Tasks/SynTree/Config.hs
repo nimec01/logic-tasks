@@ -5,20 +5,18 @@
 
 module Tasks.SynTree.Config (
     SynTreeConfig(..),
-    SynTreeInst(..),
     checkSynTreeConfig,
     defaultSynTreeConfig,
     ) where
 
 
-import Control.Monad.Output (LangM, OutputMonad, english, german, Language)
+import Control.Monad.Output (LangM, OutputMonad, english, german)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
-import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
-import Trees.Types (SynTree, BinOp)
+import Trees.Types (BinOp)
 
 
 
@@ -32,9 +30,6 @@ data SynTreeConfig =
   , atLeastOccurring :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
-  , extraText :: Maybe (Map Language String)
-  , printSolution :: Bool
-  , extraHintsOnSemanticEquivalence :: Bool
   , minUniqueBinOperators :: Integer
   } deriving (Show,Generic)
 
@@ -50,10 +45,7 @@ defaultSynTreeConfig =
     , atLeastOccurring = 3
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
-    , extraText = Nothing
-    , extraHintsOnSemanticEquivalence = True
     , minUniqueBinOperators = 0
-    , printSolution = False
     }
 
 
@@ -105,15 +97,3 @@ checkSynTreeConfig SynTreeConfig {..}
         english "The number of unique operators cannot exceed the maximum number of operators."
         german "Die Anzahl der unterschiedlichen Operatoren kann nicht die maximale Anzahl überschreiten."
     | otherwise = pure()
-
-
-
-data SynTreeInst =
-    SynTreeInst
-    { tree :: SynTree BinOp Char
-    , latexImage :: String
-    , correct :: String
-    , addText :: Maybe (Map Language String)
-    , showSolution :: Bool
-    , extraHintsOnSemanticEquivalence :: Bool
-    } deriving (Show,Generic)

@@ -30,6 +30,7 @@ data SubTreeConfig =
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
     , minSubTrees :: Integer
+    , extraText :: Maybe (Map Language String)
     , printSolution :: Bool
     } deriving (Show,Generic)
 
@@ -41,6 +42,7 @@ defaultSubTreeConfig =
     { syntaxTreeConfig = defaultSynTreeConfig
     , allowSameSubTree = True
     , minSubTrees = 3
+    , extraText = Nothing
     , printSolution = False
     }
 
