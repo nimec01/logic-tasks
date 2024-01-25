@@ -23,6 +23,7 @@ import Formula.Types (TruthValue, availableLetter, atomics, genCnf, getTable, li
 import Util (checkTruthValueRange, isOutside, pairwiseCheck, preventWithHint, remove, tryGen, withRatio)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
+import LogicTasks.Semantics.Decide (preventIfMoreIndicesThanTableRows)
 
 
 
@@ -127,27 +128,29 @@ partialGrade FillInst{..} sol = do
       english "The solution contains at least one value."
     )
 
-  preventWithHint (solLen > tableLen)
-    (translate $ do
-      german "Lösung überschreitet nicht Anzahl der Zeilen?"
-      english "Solution does not exceed count of rows?"
-    )
-    (translate $ do
-      german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
-      english $ "Solution contains more values than there are rows. Please remove at least " ++ engLong ++ " to proceed."
-    )
+  -- preventWithHint (solLen > tableLen)
+  --   (translate $ do
+  --     german "Lösung überschreitet nicht Anzahl der Zeilen?"
+  --     english "Solution does not exceed count of rows?"
+  --   )
+  --   (translate $ do
+  --     german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
+  --     english $ "Solution contains more values than there are rows. Please remove at least " ++ engLong ++ " to proceed."
+  --   )
+
+  preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
 
   pure ()
-  where
-    tableLen = length $ readEntries $ getTable cnf
-    solLen = length sol
-    diffToTable = abs (solLen - tableLen)
-    (gerLong,engLong) = gerEng diffToTable
-    gerEng diff = if diff == 1
-        then ("muss " ++ display ++ " Wert", display ++ " value") -- no-spell-check
-        else ("müssen " ++ display ++ " Werte", display ++ " values") -- no-spell-check
-      where
-        display = show diff
+  -- where
+  --   tableLen = length $ readEntries $ getTable cnf
+  --   solLen = length sol
+  --   diffToTable = abs (solLen - tableLen)
+  --   (gerLong,engLong) = gerEng diffToTable
+  --   gerEng diff = if diff == 1
+  --       then ("muss " ++ display ++ " Wert", display ++ " value") -- no-spell-check
+  --       else ("müssen " ++ display ++ " Werte", display ++ " values") -- no-spell-check
+  --     where
+  --       display = show diff
 
 
 

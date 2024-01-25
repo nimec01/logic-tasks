@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE BlockArguments #-}
 
 module LogicTasks.Semantics.Resolve where
 
@@ -22,9 +23,9 @@ import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
 import Formula.Util (isEmptyClause, mkCnf, sat)
-import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
+import Formula.Resolution (genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
-import LogicTasks.Helpers (clauseKey, example, extra)
+import LogicTasks.Helpers (clauseKey, extra)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 
@@ -141,6 +142,32 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
+gradeSteps :: OutputMonad m => [ResStep] -> [Clause] -> LangM m
+gradeSteps sol clauses = do
+  preventWithHint (not $ null noResolveSteps)
+        (translate $ do
+          german "Alle Schritte sind gültig?"
+          english "All steps are valid?"
+        )
+        (paragraph $ do
+          translate $ do
+            german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
+            english "At least one step is not a valid resolution step. "
+          itemizeM $ map (text . show) noResolveSteps
+          pure ()
+        )
+
+  prevent checkEmptyClause $
+    translate $ do
+      german "Letzter Schritt leitet die leere Klausel ab?"
+      english "The last step derives the empty clause?"
+
+  pure ()
+    where
+      noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
+            fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
+      steps = replaceAll sol $ baseMapping clauses
+      checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
 
 
 partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
@@ -161,25 +188,7 @@ partialGrade ResolutionInst{..} sol = do
     )
 
   when showFeedbackOnPartialGrade $ do
-    preventWithHint (not $ null noResolveSteps)
-      (translate $ do
-        german "Alle Schritte sind gültig?"
-        english "All steps are valid?"
-      )
-      (paragraph $ do
-        translate $ do
-          german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-          english "At least one step is not a valid resolution step. "
-        itemizeM $ map (text . show) noResolveSteps
-        pure ()
-      )
-
-    prevent checkEmptyClause $
-      translate $ do
-        german "Letzter Schritt leitet die leere Klausel ab?"
-        english "The last step derives the empty clause?"
-
-    pure ()
+    gradeSteps sol clauses
 
   pure ()
   where
@@ -188,64 +197,11 @@ partialGrade ResolutionInst{..} sol = do
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
-    checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
-    noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
-      fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
 
 completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
 completeGrade ResolutionInst{..} sol = do
     unless showFeedbackOnPartialGrade $ do
-      preventWithHint (not $ null noResolveSteps)
-        (translate $ do
-          german "Alle Schritte sind gültig?"
-          english "All steps are valid?"
-        )
-        (paragraph $ do
-          translate $ do
-            german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-            english "At least one step is not a valid resolution step. "
-          itemizeM $ map (text . show) noResolveSteps
-          pure ()
-        )
-
-      prevent checkEmptyClause $
-        translate $ do
-          german "Letzter Schritt leitet die leere Klausel ab?"
-          english "The last step derives the empty clause?"
-
-      pure ()
-
-    case applySteps clauses steps of
-        Nothing -> refuse $ indent $ do
-          translate $ do
-            german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
-            english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
-
-          displaySolution
-
-          pure ()
-
-        Just solClauses -> if any isEmptyClause solClauses
-          then pure ()
-          else refuse $ indent $ do
-            translate $ do
-              german "Die leere Klausel wurde nicht korrekt abgeleitet."
-              english "The empty clause was not derived correctly."
-
-            displaySolution
-
-            pure ()
-
-    pure ()
-    where
-        steps = replaceAll sol $ baseMapping clauses
-        checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
-        noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
-          fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
-        displaySolution = when showSolution $
-          example (show (showResSteps (computeResSteps clauses))) $ do
-            english "A possible solution for this task is:"
-            german "Eine mögliche Lösung für die Aufgabe ist:"
+      gradeSteps sol clauses
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs

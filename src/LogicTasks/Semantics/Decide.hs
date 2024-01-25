@@ -19,7 +19,7 @@ import Test.QuickCheck (Gen)
 import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
 import Formula.Util (isEmptyCnf, hasEmptyClause)
 import Formula.Table (flipAt, readEntries)
-import Formula.Types (atomics, availableLetter, genCnf, getTable, literals)
+import Formula.Types (atomics, availableLetter, genCnf, getTable, literals, Table)
 import Util (checkCnfConf, isOutside, preventWithHint, remove)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
@@ -107,7 +107,29 @@ verifyQuiz DecideConfig{..}
 start :: [Int]
 start = []
 
-
+preventIfMoreIndicesThanTableRows :: OutputMonad m => Int -> Table -> LangM m
+preventIfMoreIndicesThanTableRows solLen table = preventWithHint (solLen > tableLen)
+    (translate $ do
+      german "Lösung überschreitet nicht Anzahl der Zeilen?"
+      english "Solution does not exceed count of rows?"
+    )
+    (translate $ do
+      german $ "Lösung enthält mehr Werte als es Zeilen gibt. " ++ gerHint
+      english $ "Solution contains more values than there are rows. " ++ engHint
+    )
+  where
+    tableLen = length $ readEntries table
+    diffToTable = abs (solLen - tableLen)
+    (gerLong,engLong) = gerEng diffToTable
+    (gerHint,engHint) = (
+      "Es " ++ gerLong ++" entfernt werden.",
+      "Please remove at least " ++ engLong ++ " to proceed."
+      )
+    gerEng diff = if diff == 1
+        then ("muss mindestens " ++ display ++ " Wert", display ++ " value") -- no-spell-check
+        else ("müssen mindestens " ++ display ++ " Werte", display ++ " values") -- no-spell-check
+      where
+        display = show diff
 
 partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
@@ -121,28 +143,10 @@ partialGrade DecideInst{..} sol = do
       english "The solution contains at least one index."
     )
 
-  preventWithHint (solLen > tableLen)
-    (translate $ do
-      german "Lösung überschreitet nicht Anzahl der Zeilen?"
-      english "Solution does not exceed count of rows?"
-    )
-    (translate $ do
-      german $ "Lösung enthält mehr Werte als es Zeilen gibt. Es " ++ gerLong ++" entfernt werden."
-      english $ "Solution contains more values than there are rows. Please remove at least " ++ engLong ++ " to proceed."
-    )
-
+  preventIfMoreIndicesThanTableRows (length sol) (getTable cnf)
 
   pure ()
-  where
-    tableLen = length $ readEntries $ getTable cnf
-    solLen = length sol
-    diffToTable = abs (solLen - tableLen)
-    (gerLong,engLong) = gerEng diffToTable
-    gerEng diff = if diff == 1
-        then ("muss mindestens" ++ display ++ " Wert", display ++ " value") -- no-spell-check
-        else ("müssen mindestens" ++ display ++ " Werte", display ++ " values") -- no-spell-check
-      where
-        display = show diff
+
 
 completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
 completeGrade DecideInst{..} sol = do
