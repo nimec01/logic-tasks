@@ -19,10 +19,10 @@ import Test.QuickCheck (Gen)
 import Config (BaseConfig(..), CnfConfig(..), DecideConfig(..), DecideInst(..))
 import Formula.Util (isEmptyCnf, hasEmptyClause)
 import Formula.Table (flipAt, readEntries)
-import Formula.Types (atomics, availableLetter, genCnf, getTable, literals)
-import Util (checkCnfConf, isOutside, preventWithHint, remove)
+import Formula.Types (atomics, availableLetter, genCnf, getTable, literals, Table)
+import Util (checkCnfConf, isOutside, preventWithHint, remove, printWithHint)
 import LogicTasks.Helpers (example, extra)
-import Control.Monad (when)
+import Control.Monad (when, unless)
 
 
 
@@ -89,7 +89,7 @@ verifyStatic DecideInst{..}
           english "At least one mistake has to be specified."
           german "Es muss mindestens eine Änderung geben."
 
-    | otherwise = pure()
+    | otherwise = pure ()
 
 
 
@@ -107,58 +107,92 @@ verifyQuiz DecideConfig{..}
 start :: [Int]
 start = []
 
-
+preventIfSolutionExceedsTableSize :: OutputMonad m => Int -> Table -> LangM m
+preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > tableLen)
+    (translate $ do
+      german "Lösung überschreitet nicht Anzahl der Zeilen?"
+      english "Solution does not exceed count of rows?"
+    )
+    (translate $ do
+      german $ "Ihre Lösung enthält mehr Werte als es Zeilen gibt. " ++ gerHint
+      english $ "Your solution contains more values than there are rows. " ++ engHint
+    )
+  where
+    tableLen = length $ readEntries table
+    diffToTable = abs (solLen - tableLen)
+    (gerLong,engLong) = gerEng diffToTable
+    (gerHint,engHint) = (
+      "Es " ++ gerLong ++" entfernt werden.",
+      "Please remove at least " ++ engLong ++ " to proceed."
+      )
+    gerEng diff = if diff == 1
+        then ("muss mindestens " ++ display ++ " Wert", display ++ " value") -- no-spell-check
+        else ("müssen mindestens " ++ display ++ " Werte", display ++ " values") -- no-spell-check
+      where
+        display = show diff
 
 partialGrade :: OutputMonad m =>  DecideInst -> [Int] -> LangM m
 partialGrade DecideInst{..} sol = do
-  preventWithHint (solLen > acLen)
+  preventWithHint (null sol)
     (translate $ do
-      german "Lösung enthält nicht zu viele Indizes?"
-      english "Solution does not contain too many indices?"
+      german "Lösung enthält Indizes?"
+      english "Solution contains indices?"
     )
     (translate $ do
-      german $ "Lösung enthält zu viele Indizes. Es " ++ ger ++" entfernt werden."
-      english $ "Solution contains too many indices. Please remove " ++ eng ++ " to proceed."
+      german "Die Lösung muss mindestens einen Index enthalten."
+      english "The solution must contain at least one index."
     )
 
-  preventWithHint (acLen > solLen)
-    (translate $ do
-      german "Lösung enthält genügend Indizes?"
-      english "Solution contains enough indices?"
-    )
-    (translate $ do
-      german $ "Lösung enthält zu wenige Indizes. Es " ++ ger ++ " hinzugefügt werden."
-      english $ "Solution does not contain enough indices. Please add " ++ eng ++ " to proceed."
-    )
+  preventIfSolutionExceedsTableSize (length sol) (getTable cnf)
+
   pure ()
-  where
-    acLen = length $ nub changed
-    solLen = length $ nub sol
-    distance = abs (solLen - acLen)
-    display = show distance
-    (ger, eng) = if distance == 1
-    then ( "muss " ++ display ++ " spezifischer Wert", display ++ " unique value") -- no-spell-check
-    else ("müssen " ++ display ++ " spezifische Werte", display ++ " unique values") -- no-spell-check
-
 
 
 completeGrade :: OutputMonad m => DecideInst -> [Int] -> LangM m
-completeGrade DecideInst{..} sol = do
-  preventWithHint (diff /= 0)
+completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
+  printWithHint (solLen > acLen)
     (translate $ do
-      german "Lösung ist korrekt?"
-      english "Solution is correct?"
+      german "Lösung enthält nicht zu viele unterschiedliche Indizes?"
+      english "Solution does not contain too many unique indices?"
     )
-    (do
-      translate $ do
-        german $ "Die Lösung beinhaltet " ++ display ++ " Fehler."
-        english $ "Your solution contains " ++ display ++ " mistakes."
-      when showSolution $ example (show changed) $ do
-        english "A possible solution for this task is:"
-        german "Eine mögliche Lösung für die Aufgabe ist:"
-      pure ()
+    (translate $ do
+      german "Lösung enthält zu viele unterschiedliche Indizes."
+      english "Solution contains too many unique indices."
     )
+
+  unless (solLen > acLen) $
+    printWithHint (acLen > solLen)
+      (translate $ do
+        german "Lösung enthält genügend unterschiedliche Indizes?"
+        english "Solution contains enough unique indices?"
+      )
+      (translate $ do
+        german "Lösung enthält zu wenige unterschiedliche Indizes."
+        english "Solution does not contain enough unique indices."
+      )
+
+  printWithHint (diff /= 0)
+    (translate $ do
+      german "Indizes in der Lösung sind korrekt?"
+      english "Indices in the solution are correct?"
+    )
+    (translate $ do
+      german $ "In der Menge der unterschiedlichen Indizes " ++ ger ++ " falsch."
+      english $ "The set of unique indices contains " ++ eng
+    )
+
+
+  when (incorrect && showSolution) $ example (show changed) $ do
+      english "A possible solution for this task is:"
+      german "Eine mögliche Lösung für die Aufgabe ist:"
+
+  pure ()
   where
     nubSol = nub sol
     diff = length $ filter (`notElem` changed) nubSol
-    display = show diff
+    acLen = length $ nub changed
+    solLen = length $ nub sol
+    incorrect = solLen > acLen || acLen > solLen || diff /= 0
+    (ger, eng) = if diff == 1
+      then ("ist 1 Index", "1 wrong index")
+      else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices")

@@ -131,6 +131,7 @@ dStepInst =  StepInst
 
 data ResolutionInst = ResolutionInst {
                  clauses :: ![Clause]
+               , printFeedbackImmediately :: Bool
                , showSolution :: Bool
                , addText    :: Maybe (Map Language String)
                }
@@ -144,6 +145,7 @@ dResInst =  ResolutionInst
               , mkClause [Literal 'C']
               , mkClause [Not 'B']
               ]
+          , printFeedbackImmediately = True
           , showSolution = False
           , addText = Nothing
           }
@@ -321,6 +323,7 @@ dPrologConf = PrologConfig
 data ResolutionConfig = ResolutionConfig {
       baseConf :: BaseConfig
     , minSteps :: Int
+    , printFeedbackImmediately :: Bool
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     }
@@ -330,6 +333,7 @@ dResConf :: ResolutionConfig
 dResConf = ResolutionConfig
     { baseConf = dBaseConf
     , minSteps = 2
+    , printFeedbackImmediately = True
     , printSolution = False
     , extraText = Nothing
     }

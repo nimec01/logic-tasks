@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# language RecordWildCards #-}
+{-# LANGUAGE BlockArguments #-}
 
 module LogicTasks.Semantics.Resolve where
 
@@ -15,9 +16,10 @@ import Control.Monad.Output (
   translate,
   translations,
   localise,
+  yesNo,
   )
 import Data.List (sort)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust)
 import Test.QuickCheck (Gen)
 
 import Config (ResolutionConfig(..), ResolutionInst(..), BaseConfig(..))
@@ -25,8 +27,9 @@ import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve, showResSteps, computeResSteps)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey)
-import Util (checkBaseConf, prevent, preventWithHint)
-import Control.Monad (when)
+import Util (checkBaseConf, prevent, preventWithHint, printWithHint)
+import Control.Monad (unless, when)
+import Data.Foldable.Extra (notNull)
 
 
 
@@ -47,7 +50,12 @@ third3 (_,_,c) = c
 genResInst :: ResolutionConfig -> Gen ResolutionInst
 genResInst ResolutionConfig{ baseConf = BaseConfig{..}, ..} = do
   clauses <- inst
-  pure $ ResolutionInst clauses printSolution extraText
+  pure $ ResolutionInst {
+    clauses = clauses,
+    printFeedbackImmediately = printFeedbackImmediately,
+    showSolution = printSolution,
+    addText = extraText
+  }
   where
     inst = genRes (minClauseLength, maxClauseLength) minSteps usedLiterals
 
@@ -149,6 +157,35 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
+-- Returns (True, ...) when the steps are correct
+gradeSteps :: OutputMonad m => [ResStep] -> [Clause] -> (Bool, LangM m)
+gradeSteps sol clauses = (not incorrect, do
+    printWithHint (notNull noResolveSteps)
+        (translate $ do
+          german "Alle Schritte sind gültig?"
+          english "All steps are valid?"
+        )
+        (paragraph $ do
+          translate $ do
+            german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
+            english "At least one step is not a valid resolution step. "
+          itemizeM $ map (text . show) noResolveSteps
+          pure ()
+        )
+
+    yesNo (not checkEmptyClause) $
+      translate $ do
+        german "Letzter Schritt leitet die leere Klausel ab?"
+        english "The last step derives the empty clause?"
+
+    pure ()
+  )
+    where
+      noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
+            fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
+      steps = replaceAll sol $ baseMapping clauses
+      checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
+      incorrect = notNull noResolveSteps || checkEmptyClause
 
 
 partialGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
@@ -168,64 +205,38 @@ partialGrade ResolutionInst{..} sol = do
       pure ()
     )
 
-  preventWithHint (not $ null noResolveSteps)
-    (translate $ do
-      german "Alle Schritte sind gültig?"
-      english "All steps are valid?"
-    )
-    (paragraph $ do
-      translate $ do
-        german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
-        english "At least one step is not a valid resolution step. "
-      itemizeM $ map (text . show) noResolveSteps
-      pure ()
-    )
+  when printFeedbackImmediately $ do
+    (if fst stepsGraded then id else refuse) $ snd stepsGraded
 
-  prevent checkEmptyClause $
-    translate $ do
-      german "Letzter Schritt leitet die leere Klausel ab?"
-      english "The last step derives the empty clause?"
   pure ()
   where
     checkMapping = correctMapping sol $ baseMapping clauses
     steps =  replaceAll sol $ baseMapping clauses
-    checkEmptyClause = null steps || not (isEmptyClause $ third3 $ last steps)
     availLits = unions (map (fromList . literals) clauses)
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
-    noResolveSteps = filter (\(c1,c2,r) -> maybe True (\x ->
-      fromJust (resolve c1 c2 x) /= r) (resolvableWith c1 c2)) steps
-
-
+    stepsGraded = gradeSteps sol clauses
 
 completeGrade :: OutputMonad m => ResolutionInst -> [ResStep] -> LangM m
-completeGrade ResolutionInst{..} sol =
-    case applySteps clauses steps of
-        Nothing -> refuse $ indent $ do
-          translate $ do
-            german "In mindestens einem Schritt werden Klauseln resolviert, die nicht in der Formel sind oder noch nicht abgeleitet wurden."
-            english "In at least one step clauses are used, that are not part of the original formula and are not derived from previous steps."
+completeGrade ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
+    unless printFeedbackImmediately $ do
+      snd stepsGraded
 
-          displaySolution
+    yesNo isCorrect $ translate $ do
+      german "Lösung ist korrekt?"
+      english "Solution is correct?"
 
-          pure ()
+    when (showSolution && not isCorrect) $
+      example (show (showResSteps (computeResSteps clauses))) $ do
+        english "A possible solution for this task is:"
+        german "Eine mögliche Lösung für die Aufgabe ist:"
 
-        Just solClauses -> if any isEmptyClause solClauses
-          then pure ()
-          else refuse $ indent $ do
-            translate $ do
-              german "Die leere Klausel wurde nicht korrekt abgeleitet."
-              english "The empty clause was not derived correctly."
-
-            displaySolution
-
-            pure ()
-      where
-        steps = replaceAll sol $ baseMapping clauses
-        displaySolution = when showSolution $
-          example (show (showResSteps (computeResSteps clauses))) $ do
-            english "A possible solution for this task is:"
-            german "Eine mögliche Lösung für die Aufgabe ist:"
+    pure ()
+  where
+    steps = replaceAll sol $ baseMapping clauses
+    applied = applySteps clauses steps
+    stepsGraded = gradeSteps sol clauses
+    isCorrect = isJust applied && any isEmptyClause (fromJust applied) && fst stepsGraded
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
