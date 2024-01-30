@@ -122,7 +122,7 @@ preventIfSolutionExceedsTableSize solLen table = preventWithHint (solLen > table
     diffToTable = abs (solLen - tableLen)
     (gerLong,engLong) = gerEng diffToTable
     (gerHint,engHint) = (
-      "Es " ++ gerLong ++" entfernt werden.",
+      "Es " ++ gerLong ++" entfernt werden.", {- german -}
       "Please remove at least " ++ engLong ++ " to proceed."
       )
     gerEng diff = if diff == 1
@@ -195,4 +195,4 @@ completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
     incorrect = solLen > acLen || acLen > solLen || diff /= 0
     (ger, eng) = if diff == 1
       then ("ist 1 Index", "1 wrong index")
-      else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices")
+      else ("sind " ++ show diff ++ " Indizes", show diff ++ " wrong indices") -- no-spell-check
