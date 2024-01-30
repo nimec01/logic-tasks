@@ -189,7 +189,8 @@ convertSteps xs = map mapFn new
                           in Res (Right l, Right r, (c, Just i))
 
 pretty' :: ResStep -> Bool -> String
-pretty' (Res (a,b,(c,d))) isLast = "(" ++ showEither a ++ ", " ++ showEither b ++ ", " ++ showClauseAsSet c ++ showNum ++ ")"
+pretty' (Res (a,b,(c,d))) isLast =
+  "(" ++ showEither a ++ ", " ++ showEither b ++ ", " ++ showClauseAsSet c ++ showNum ++ ")"
   where showEither (Left x) = show x
         showEither (Right y) = show y
         showNum = if isJust d && not isLast then " = " ++ show (fromJust d) else ""
