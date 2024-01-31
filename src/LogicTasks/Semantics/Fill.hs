@@ -137,7 +137,7 @@ partialGrade FillInst{..} sol = do
 
 completeGrade :: OutputMonad m => FillInst -> [TruthValue] -> LangM m
 completeGrade FillInst{..} sol = do
-  preventWithHint (notNull diff || solLen /= length missing)
+  preventWithHint (notNull diff)
     (translate $ do
       german "Lösung ist korrekt?"
       english "Solution is correct?"
@@ -158,7 +158,6 @@ completeGrade FillInst{..} sol = do
     allEntries = map fromJust $ readEntries table
     correctShort = [allEntries !! i | i <- map (\x -> x-1) missing]
     boolSol = map truth sol
-    solLen = length boolSol
     zippedShort = zip3 boolSol correctShort [1..]
     (_,diff) = pairwiseCheck zippedShort
     displayMistake = show $ length diff
