@@ -24,6 +24,7 @@ import Util (checkCnfConf, tryGen)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 import Data.Maybe (fromJust)
+import Data.List (nubOrd)
 
 
 
