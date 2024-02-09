@@ -37,7 +37,7 @@ genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     rest <- vectorOf (amountOfOptions - 1) generator
     let
       cnfs = first : rest
-    corrIndex <- elements [1..length cnfs -1]
+    corrIndex <- elements [1..length cnfs]
     pure $ PickInst cnfs corrIndex printSolution extraText
   where
     getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
