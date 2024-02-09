@@ -34,7 +34,7 @@ genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     let
       cnfLits = atomics first
       generator = tryGen (getCnf $ map letter cnfLits) 100 (\cnf -> atomics cnf == cnfLits && xorSat first cnf)
-    rest <- vectorOf (amountOfOptions - 1) generator
+    rest <- tryGen (vectorOf (amountOfOptions - 1) generator) 100 (\cnfs -> nubOrd cnfs == cnfs)
     let
       cnfs = first : rest
     corrIndex <- elements [1..length cnfs]
