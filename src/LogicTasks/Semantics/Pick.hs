@@ -17,14 +17,14 @@ import Control.Monad.Output (
 import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
-import Formula.Util (mkCnf, xorSat)
+import Formula.Util (mkCnf, xorSat, isSemanticEqual)
 import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
 import LogicTasks.Helpers (example, extra)
 import Control.Monad (when)
 import Data.Maybe (fromJust)
-import Data.List.Extra (nubOrd)
+import Data.List (nubBy)
 
 
 
@@ -35,7 +35,7 @@ genPickInst PickConfig{ cnfConf = CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
     let
       cnfLits = atomics first
       generator = tryGen (getCnf $ map letter cnfLits) 100 (\cnf -> atomics cnf == cnfLits && xorSat first cnf)
-    rest <- tryGen (vectorOf (amountOfOptions - 1) generator) 100 (\cnfs -> nubOrd cnfs == cnfs)
+    rest <- tryGen (vectorOf (amountOfOptions - 1) generator) 100 (\cnfs -> length (nubBy isSemanticEqual cnfs) == length cnfs)
     let
       cnfs = first : rest
     corrIndex <- elements [1..length cnfs]
