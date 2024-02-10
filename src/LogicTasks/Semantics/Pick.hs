@@ -18,7 +18,7 @@ import Test.QuickCheck (Gen, elements, vectorOf)
 
 import Config (BaseConfig(..), CnfConfig(..), Number(..), PickConfig(..), PickInst(..))
 import Formula.Util (mkCnf, isSemanticEqual)
-import Formula.Types (atomics, availableLetter, genCnf, getTable, letter, literals)
+import Formula.Types (availableLetter, genCnf, getTable, literals)
 import Formula.Printing (showIndexedList)
 import Util (checkCnfConf, tryGen)
 import LogicTasks.Helpers (example, extra)
