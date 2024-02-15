@@ -187,8 +187,8 @@ gradeSteps steps appliedIsNothing = do
       )
       (paragraph $ do
         translate $ do
-          german "Mindestens ein Schritt beinhaltet Klauseln, die weder in der Formel vorhanden sind, noch zuvor abgeleitet wurden."
-          english "At least one step contains clauses that are neither present in the formula nor were previously derived."
+          german "Mindestens ein Schritt beinhaltet eine Klausel, die weder in der Formel vorhanden ist, noch zuvor abgeleitet wurde."
+          english "At least one step contains a clause that is neither present in the formula nor was previously derived."
       )
 
     pure ()
