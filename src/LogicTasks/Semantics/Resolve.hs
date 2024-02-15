@@ -259,13 +259,13 @@ correctMapping [] _ = pure()
 correctMapping ((j, Res (c1,c2,(c3,i))): rest) mapping = do
   prevent checkIndices $
     translate $ do
-      german $ show j ++ ". Schritt verwendet existierende Indizes?"
-      english $ "Step " ++ show j ++ " uses valid indices?"
+      german $ show j ++ ". Schritt verwendet nur existierende Indizes?"
+      english $ "Step " ++ show j ++ " uses only valid indices?"
 
   prevent (alreadyUsed i) $
     translate $ do
       german $ show j ++ ". Schritt vergibt keinen Index wiederholt?"
-      english $ "Step " ++ show j ++ " does not assign an index twice?"
+      english $ "Step " ++ show j ++ " does not assign an index repeatedly?"
 
   correctMapping rest newMapping
   pure ()
