@@ -1,0 +1,136 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           logic-tasks
+version:        0.1.0.0
+build-type:     Simple
+
+library
+  exposed-modules:
+      LogicTasks.Formula
+      LogicTasks.Table
+      LogicTasks.Resolution
+      LogicTasks.Config
+      LogicTasks.Semantics.Fill
+      LogicTasks.Semantics.Pick
+      LogicTasks.Semantics.Decide
+      LogicTasks.Semantics.Max
+      LogicTasks.Semantics.Min
+      LogicTasks.Semantics.Step
+      LogicTasks.Semantics.Prolog
+      LogicTasks.Semantics.Resolve
+      LogicTasks.Printing
+      LogicTasks.Parsing
+      LogicTasks.Util
+      LogicTasks.Debug
+      LogicTasks.Syntax.IllegalCnfs
+      LogicTasks.Syntax.IllegalFormulas
+      LogicTasks.Syntax.SimplestFormula
+      LogicTasks.Syntax.SubTreeSet
+      LogicTasks.Syntax.TreeToFormula
+      Tasks.SynTree.Config
+      Tasks.SubTree.Config
+      Tasks.SubTree.Quiz
+      Tasks.LegalProposition.Config
+      Tasks.LegalProposition.PrintIllegal
+      Tasks.LegalProposition.PrintBracket
+      Tasks.LegalProposition.Quiz
+      Tasks.SuperfluousBrackets.Config
+      Tasks.SuperfluousBrackets.Parsing
+      Tasks.SuperfluousBrackets.PrintSuperfluousBrackets
+      Tasks.SuperfluousBrackets.Quiz
+      Tasks.TreeToFormula.Config
+      Tasks.TreeToFormula.Quiz
+      Tasks.LegalCNF.Config
+      Tasks.LegalCNF.Quiz
+      Tasks.LegalCNF.GenerateIllegal
+      Tasks.LegalCNF.GenerateLegal
+      Trees.Types
+      Trees.Parsing
+      Trees.Print
+      Trees.Helpers
+      Trees.Generate
+      Formula.Parsing
+      Formula.Helpers
+      ParsingHelpers
+      Config
+      Formula.Types
+      Formula.Resolution
+  other-modules:
+      Auxiliary
+      Formula.Printing
+      Formula.Table
+      Formula.Util
+      LogicTasks.Helpers
+      UniversalParser
+      Util
+      Paths_logic_tasks
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -fdefer-typed-holes
+  build-depends:
+      QuickCheck >=2.14
+    , SHA
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , extra
+    , hspec
+    , latex-svg-image >=0.2
+    , math-functions
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
+    , random
+    , text
+    , utf8-string
+    , wl-pprint-text
+  default-language: Haskell2010
+
+test-suite src-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      FormulaSpec
+      LegalCNFSpec
+      LegalPropositionSpec
+      ParsingSpec
+      PrologSpec
+      ResolutionSpec
+      SubTreeSpec
+      SuperfluousBracketsSpec
+      SynTreeSpec
+      TableSpec
+      TestHelpers
+      Paths_logic_tasks
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -Wunused-imports -Wmissing-signatures -Wunused-matches -Widentities -Wunused-top-binds -Werror
+  build-depends:
+      QuickCheck >=2.14
+    , SHA
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , directory
+    , extra
+    , hspec
+    , latex-svg-image >=0.2
+    , logic-tasks
+    , math-functions
+    , minisat-solver
+    , mtl
+    , output-monad
+    , parsec
+    , pretty-simple
+    , random
+    , text
+    , utf8-string
+    , wl-pprint-text
+  default-language: Haskell2010
