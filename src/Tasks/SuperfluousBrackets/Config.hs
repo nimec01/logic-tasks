@@ -72,7 +72,7 @@ data SuperfluousBracketsInst =
       tree :: SynTree BinOp Char
     , stringWithSuperfluousBrackets :: String
     , simplestString :: String
-    , arrowOperatorsAllowed :: Bool
+    , showArrowOperators :: Bool
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

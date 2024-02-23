@@ -52,7 +52,7 @@ description path TreeToFormulaInst{..} = do
 
     keyHeading
     basicOpKey
-    when arrowOperatorsAllowed arrowsKey
+    when showArrowOperators arrowsKey
 
     extra addText
     pure ()
