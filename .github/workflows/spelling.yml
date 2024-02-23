@@ -59,6 +59,7 @@ jobs:
           extra_dictionaries:
             cspell:haskell/dict/haskell.txt
             cspell:filetypes/filetypes.txt
+            cspell:software-terms/dict/softwareTerms.txt
 
   comment:
     name: Report
