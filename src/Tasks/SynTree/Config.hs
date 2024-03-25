@@ -18,7 +18,7 @@ import LogicTasks.Helpers (reject)
 import Trees.Helpers (maxNodesForDepth)
 import Trees.Types (BinOp)
 
-
+import Data.List.Extra (nubOrd)
 
 
 data SynTreeConfig =
@@ -57,6 +57,9 @@ checkSynTreeConfig SynTreeConfig {..}
     | not (all isLetter availableAtoms) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben dürfen Literale sein."
+    | length availableAtoms /= length (nubOrd availableAtoms) = reject $ do
+        english "No letter should be given as possible literal twice."
+        german "Kein Buchstaben darf mehrmals als mögliches Literal genannt sein."
     | fromIntegral (length availableAtoms) < minAmountOfUniqueAtoms = reject $ do
         english "You have provided too few literals."
         german "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
