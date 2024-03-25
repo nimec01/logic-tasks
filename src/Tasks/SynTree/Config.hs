@@ -27,8 +27,8 @@ data SynTreeConfig =
   , maxNodes :: Integer
   , minDepth :: Integer
   , maxDepth :: Integer
-  , usedLiterals :: String
-  , atLeastOccurring :: Integer
+  , availableAtoms :: String
+  , minAmountOfUniqueAtoms :: Integer
   , allowArrowOperators :: Bool
   , maxConsecutiveNegations :: Integer
   , minUniqueBinOperators :: Integer
@@ -43,8 +43,8 @@ defaultSynTreeConfig =
     , minNodes = 6
     , minDepth = 3
     , maxDepth = 6
-    , usedLiterals = "ABCDE"
-    , atLeastOccurring = 3
+    , availableAtoms = "ABCDE"
+    , minAmountOfUniqueAtoms = 3
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
     , minUniqueBinOperators = 0
@@ -54,10 +54,10 @@ defaultSynTreeConfig =
 
 checkSynTreeConfig :: OutputMonad m => SynTreeConfig -> LangM m
 checkSynTreeConfig SynTreeConfig {..}
-    | not (all isLetter usedLiterals) = reject $ do
+    | not (all isLetter availableAtoms) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben dürfen Literale sein."
-    | fromIntegral (length usedLiterals) < atLeastOccurring = reject $ do
+    | fromIntegral (length availableAtoms) < minAmountOfUniqueAtoms = reject $ do
         english "You have provided too few literals."
         german "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
     | maxConsecutiveNegations < 0 = reject $ do
@@ -69,10 +69,10 @@ checkSynTreeConfig SynTreeConfig {..}
     | maxConsecutiveNegations >= maxDepth = reject $ do
         english "The maximum number of consecutive negations cannot reach or exceed the maximum depth."
         german "Die maximale Anzahl aufeinanderfolgender Negationen kann die maximale Tiefe nicht erreichen oder überschreiten."
-    | atLeastOccurring < 1 = reject $ do
+    | minAmountOfUniqueAtoms < 1 = reject $ do
         english "At least one literal occurs in each formula."
         german "Formel ohne Literale existiert nicht."
-    | minNodes < atLeastOccurring * 2 - 1 = reject $ do
+    | minNodes < minAmountOfUniqueAtoms * 2 - 1 = reject $ do
         english "Your minimum number of nodes does not permit enough leaves for all desired literals."
         german "Minimale Anzahl der Knoten ist zu niedrig um alle Literale zu verwenden."
     | minDepth < 1 = reject $ do
