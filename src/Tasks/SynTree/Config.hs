@@ -47,7 +47,7 @@ defaultSynTreeConfig =
     , minAmountOfUniqueAtoms = 3
     , allowArrowOperators = False
     , maxConsecutiveNegations = 2
-    , minUniqueBinOperators = 0
+    , minUniqueBinOperators = 1
     }
 
 
@@ -59,7 +59,10 @@ checkSynTreeConfig SynTreeConfig {..}
         german "Nur Buchstaben dürfen Literale sein."
     | length availableAtoms /= length (nubOrd availableAtoms) = reject $ do
         english "No letter should be given as possible literal twice."
-        german "Kein Buchstaben darf mehrmals als mögliches Literal genannt sein."
+        german "Kein Buchstabe darf mehrmals als mögliches Literal genannt sein."
+    | minUniqueBinOperators == 0 && minAmountOfUniqueAtoms > 1 = reject $ do
+        english "Without binary operators there cannot be more than one leaf node."
+        german "Ohne binäre Operatoren kann es nicht mehr als einen Blattknoten geben."
     | fromIntegral (length availableAtoms) < minAmountOfUniqueAtoms = reject $ do
         english "You have provided too few literals."
         german "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
