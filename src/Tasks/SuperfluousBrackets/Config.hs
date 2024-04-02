@@ -56,9 +56,9 @@ checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig 
     | minUniqueBinOperators < 1 = reject $ do
         english "There should be a positive number of (unique) operators."
         german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
-    | minNodes < 8 = reject $ do
-        english "Minimal number of nodes must be at least 8."
-        german "Minimale Anzahl Knoten muss mindestens 8 sein."
+    | minNodes < 2 * minUniqueBinOperators + 3 = reject $ do
+        english "Minimal number of nodes must larger, given the desired number of unique operators."
+        german "Minimale Anzahl Knoten muss größer sein, angesichts der angestrebten Anzahl unterschiedlicher Operatoren."
     | superfluousBracketPairs > minNodes `div` 2 = reject $ do
         english "The number of superfluous brackets is excessive, given your node numbers."
         german "Die Anzahl zusätzlicher Klammern ist zu hoch für die Menge an Blättern."
