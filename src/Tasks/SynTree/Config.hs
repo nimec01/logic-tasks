@@ -40,7 +40,7 @@ defaultSynTreeConfig :: SynTreeConfig
 defaultSynTreeConfig =
     SynTreeConfig
     { maxNodes = 10
-    , minNodes = 6
+    , minNodes = 7
     , minDepth = 3
     , maxDepth = 6
     , availableAtoms = "ABCDE"
