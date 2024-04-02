@@ -53,6 +53,9 @@ checkSuperfluousBracketsConfig config@SuperfluousBracketsConfig {..} =
 
 checkAdditionalConfig :: OutputMonad m => SuperfluousBracketsConfig -> LangM m
 checkAdditionalConfig SuperfluousBracketsConfig {syntaxTreeConfig=SynTreeConfig {..}, superfluousBracketPairs}
+    | minUniqueBinOperators < 1 = reject $ do
+        english "There should be a positive number of (unique) operators."
+        german "Es sollte eine positive Anzahl an (unterschiedlichen) Operatoren geben."
     | minNodes < 8 = reject $ do
         english "Minimal number of nodes must be at least 8."
         german "Minimale Anzahl Knoten muss mindestens 8 sein."
