@@ -15,7 +15,7 @@ import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
-import Trees.Helpers (maxNodesForDepth, maxDepthForNodes)
+import Trees.Helpers (maxNodesForDepth, maxDepthForNodes, minDepthForNodes)
 import Trees.Types (BinOp)
 
 import Data.List.Extra (nubOrd)
