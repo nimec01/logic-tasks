@@ -113,7 +113,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | not allowArrowOperators && minUniqueBinOperators > 2 = reject $ do
         english "This number of unique operators cannot be reached with allowArrowOperators = False ."
         german "Die angegebene Anzahl der unterschiedlichen Operatoren kann mit allowArrowOperators = False nicht erreicht werden."
-    | minDepth < minDepthForNodes (2 * minUniqueBinOperators) = reject $ do
+    | minDepth < minDepthForNodes (2 * minUniqueBinOperators + 1) = reject $ do
         english "The minimal depth is incompatible with the minimal amount of unique operators."
         german "Die minimale Tiefe ist mit der minimalen Anzahl an unterschiedlichen Operatoren inkompatibel."
     | otherwise = pure()
