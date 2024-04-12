@@ -92,7 +92,7 @@ partialGrade inst (Delayed ans) =
           ]
         english $ unlines
           [ "Unable to read solution."
-          , "Please make sure that the order of symbols adheres to the rules for well-formed formulas, especially if there are enough parentheses."
+          , "Please make sure that the order of symbols adheres to the rules for well-formed formulas, especially that there are enough parentheses."
           ]
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
