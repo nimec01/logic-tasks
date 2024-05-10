@@ -1,12 +1,14 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Formula.Parsing.Delayed (Delayed, delayed, withDelayed, parseDelayedAndThen) where
+module Formula.Parsing.Delayed (Delayed, delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn) where
 
-import Text.Parsec
+import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
 import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
 
-import Control.Monad.Output (LangM, english, german, OutputMonad)
+import Control.Monad.Output (LangM, english, german, OutputMonad, Language)
+import Control.Monad.State (State)
+import Data.Map (Map)
 
 import LogicTasks.Helpers (reject)
 
@@ -29,15 +31,26 @@ withDelayed grade p d =
       german $ show err
     Right x -> grade x
 
-parseDelayedAndThen :: (OutputMonad m, Parse a) => Parser () -> (a -> LangM m) -> Delayed a -> LangM m
-parseDelayedAndThen fallBackParser whatToDo delayedAnswer =
-  case parseDelayed (fully parser) delayedAnswer of
-    Right res -> whatToDo res
-    Left err -> reject $ case parseDelayedRaw (fully fallBackParser) delayedAnswer of
-      Left _ -> do
-        german $ show err
-        english $ show err
-      Right () -> do
+parseDelayedAndThen ::
+  (OutputMonad m, Parse a)
+  => (Maybe ParseError -> ParseError -> State (Map Language String) ())
+  -> Parser ()
+  -> (a -> LangM m)
+  -> Delayed a
+  -> LangM m
+parseDelayedAndThen messaging fallBackParser whatToDo delayedAnswer =
+  either
+  (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
+  whatToDo
+  (parseDelayed (fully parser) delayedAnswer)
+
+complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
+complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
+  case maybeHereError of
+      Just _ -> do
+        german $ show latentError
+        english $ show latentError
+      Nothing -> do
         german $  unlines
           [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
           , "Bitte prüfen Sie, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit der Eingaben genügt." {- german -}

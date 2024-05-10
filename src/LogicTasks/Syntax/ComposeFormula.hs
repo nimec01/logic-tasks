@@ -26,7 +26,7 @@ import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Formula.Parsing (Parse(parser))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
 import UniversalParser (logicToken)
 import Text.Parsec (many, (<|>))
 import Data.Functor (void)
@@ -112,7 +112,7 @@ start = []
 
 
 partialGrade :: OutputMonad m => ComposeFormulaInst -> Delayed [TreeFormulaAnswer] -> LangM m
-partialGrade = parseDelayedAndThen (void $ many (logicToken <|> listToken)) . partialGrade'
+partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many (logicToken <|> listToken)) . partialGrade'
   where listToken = tokenSymbol "[" <|> tokenSymbol "," <|> tokenSymbol "]"
 
 partialGrade' :: OutputMonad m => ComposeFormulaInst -> [TreeFormulaAnswer] -> LangM m
