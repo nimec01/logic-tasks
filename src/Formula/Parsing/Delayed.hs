@@ -45,6 +45,6 @@ parseDelayedAndThen fallBackParser whatToDo delayedAnswer =
           ]
         english $ unlines
           [ "Unable to read solution."
-          , "Please make sure that the arrangement of symbols adheres to the rules for well-formedness of inputs."
+          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed inputs."
           , "In particular, you should use enough parentheses."
           ]
