@@ -27,11 +27,9 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayed, parseDelayedRaw)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseFormulaDelayedAndThen)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
-import UniversalParser (tokenSequence)
-import ParsingHelpers (fully)
 
 
 description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -77,22 +75,7 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade inst ans =
-  case parseDelayed (fully $ parser @TreeFormulaAnswer) ans of
-    Right f -> partialGrade' inst f
-    Left err -> reject $ case parseDelayedRaw (fully tokenSequence) ans of
-      Left _ -> do
-        german $ show err
-        english $ show err
-      Right () -> do
-        german $  unlines
-          [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
-          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben." {- german -}
-          ]
-        english $ unlines
-          [ "Unable to read solution."
-          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed formulas, especially that there are enough parentheses."
-          ]
+partialGrade = parseFormulaDelayedAndThen . partialGrade'
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol

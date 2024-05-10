@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Formula.Parsing.Delayed (Delayed, delayed, parseDelayed, parseDelayedRaw, withDelayed) where
+module Formula.Parsing.Delayed (Delayed, delayed, withDelayed, parseFormulaDelayedAndThen) where
 
 import Text.Parsec
 import Text.Parsec.String (Parser)
+import Formula.Parsing (Parse(..))
+import UniversalParser (tokenSequence)
 import ParsingHelpers (fully)
 
 import Control.Monad.Output (LangM, english, german, OutputMonad)
@@ -27,3 +29,21 @@ withDelayed grade p d =
       english $ show err
       german $ show err
     Right x -> grade x
+
+parseFormulaDelayedAndThen :: (OutputMonad m, Parse a) => (a -> LangM m) -> Delayed a -> LangM m
+parseFormulaDelayedAndThen whatToDo delayedAnswer =
+  case parseDelayed (fully parser) delayedAnswer of
+    Right res -> whatToDo res
+    Left err -> reject $ case parseDelayedRaw (fully tokenSequence) delayedAnswer of
+      Left _ -> do
+        german $ show err
+        english $ show err
+      Right () -> do
+        german $  unlines
+          [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
+          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben." {- german -}
+          ]
+        english $ unlines
+          [ "Unable to read solution."
+          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed formulas, especially that there are enough parentheses."
+          ]
