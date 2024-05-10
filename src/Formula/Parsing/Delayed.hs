@@ -41,9 +41,11 @@ parseFormulaDelayedAndThen whatToDo delayedAnswer =
       Right () -> do
         german $  unlines
           [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
-          , "Bitte vergewissern Sie sich, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt, und Sie insbesondere genügend Klammern benutzt haben." {- german -}
+          , "Bitte prüfen Sie, ob die Anordnung der Symbole den Regeln zur Wohlaufgebautheit von Formeln genügt." {- german -}
+          , "Insbesondere sollten Sie genügend Klammern benutzen." {- german -}
           ]
         english $ unlines
           [ "Unable to read solution."
-          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed formulas, especially that there are enough parentheses."
+          , "Please make sure that the arrangement of symbols adheres to the rules for well-formed formulas."
+          , "In particular, you should use enough parentheses."
           ]
