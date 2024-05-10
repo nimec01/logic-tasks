@@ -8,7 +8,7 @@ module UniversalParser where
 import Data.Functor (($>), void)
 import Data.Maybe (fromMaybe)
 
-import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, many, notFollowedBy, string)
+import Text.Parsec (satisfy, (<|>), (<?>), choice, try, unexpected, lookAhead, char, notFollowedBy, string)
 import Text.Parsec.String (Parser)
 
 import ParsingHelpers
@@ -171,9 +171,9 @@ negationParser =
 atomParser :: Parser Char
 atomParser = token (satisfy (`elem` ['A'..'Z'])) <?> "atomic Proposition"
 
--- parser for token sequences
-tokenSequence :: Parser ()
-tokenSequence = void $ many $
+-- parser for individual tokens
+logicToken :: Parser ()
+logicToken =
       orParser
   <|> andParser
   <|> implicationParser

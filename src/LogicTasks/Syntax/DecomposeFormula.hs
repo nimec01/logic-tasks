@@ -22,7 +22,10 @@ import Data.Containers.ListUtils (nubOrd)
 import Control.Monad.Cont (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Formula.Parsing (Parse(parser))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseFormulaDelayedAndThen)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen)
+import UniversalParser (logicToken)
+import Text.Parsec (many)
+import Data.Functor (void)
 
 
 
@@ -80,7 +83,7 @@ start = TreeFormulaAnswer Nothing
 
 
 partialGrade :: OutputMonad m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade = parseFormulaDelayedAndThen . partialGrade'
+partialGrade = parseDelayedAndThen (void $ many $ logicToken) . partialGrade'
 
 partialGrade' :: OutputMonad m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' DecomposeFormulaInst{..} sol = do

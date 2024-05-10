@@ -1,7 +1,6 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeApplications #-}
 
 module LogicTasks.Syntax.TreeToFormula where
 
@@ -27,9 +26,12 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseFormulaDelayedAndThen)
+import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
+import UniversalParser (logicToken)
+import Text.Parsec (many)
+import Data.Functor (void)
 
 
 description :: (OutputMonad m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
@@ -75,7 +77,7 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade = parseFormulaDelayedAndThen . partialGrade'
+partialGrade = parseDelayedAndThen (void $ many $ logicToken) . partialGrade'
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol
