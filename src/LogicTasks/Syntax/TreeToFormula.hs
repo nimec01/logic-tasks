@@ -77,7 +77,7 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputMonad m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade = parseDelayedAndThen (void $ many $ logicToken) . partialGrade'
+partialGrade = parseDelayedAndThen (void $ many logicToken) . partialGrade'
 
 partialGrade' :: OutputMonad m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol

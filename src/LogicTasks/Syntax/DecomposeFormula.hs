@@ -83,7 +83,7 @@ start = TreeFormulaAnswer Nothing
 
 
 partialGrade :: OutputMonad m => DecomposeFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade = parseDelayedAndThen (void $ many $ logicToken) . partialGrade'
+partialGrade = parseDelayedAndThen (void $ many logicToken) . partialGrade'
 
 partialGrade' :: OutputMonad m => DecomposeFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' DecomposeFormulaInst{..} sol = do
