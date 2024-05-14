@@ -3,6 +3,8 @@ resolver: lts-20.26
 
 packages:
   - .
+  - examples
+
 allow-newer: true
 extra-deps:
   - minisat-solver-0.1
