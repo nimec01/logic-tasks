@@ -30,7 +30,7 @@ library
       Paths_logic_tasks_examples
   hs-source-dirs:
       src
-  ghc-options: -Wall -Widentities -fno-warn-unused-do-bind -Werror -Wwarn=incomplete-uni-patterns -Wwarn=x-partial -Wwarn=unrecognised-warning-flags -fdefer-typed-holes
+  ghc-options: -Wall -Widentities -Wwarn=incomplete-uni-patterns -Wwarn=x-partial -fno-warn-unused-do-bind -fdefer-typed-holes -Werror -Wwarn=unrecognised-warning-flags
   build-depends:
       base >=4.7 && <5
     , hspec
