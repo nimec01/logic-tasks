@@ -9,7 +9,7 @@ import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
 
--- Gewicht 0.34
+-- Weight 0.34
 task06 :: FillConfig
 task06 = FillConfig
   { cnfConf = CnfConfig
@@ -27,7 +27,7 @@ task06 = FillConfig
   , printSolution = True
   }
 
--- Gewicht 0.25
+-- Weight 0.25
 task20 :: FillConfig
 task20 = FillConfig
   { cnfConf = CnfConfig

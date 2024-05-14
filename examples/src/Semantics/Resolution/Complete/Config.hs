@@ -8,7 +8,7 @@ import Test.Hspec
 import Util.VerifyConfig
 import LogicTasks.Util (checkBaseConf)
 
--- Gewicht 0.5
+-- Weight 0.5
 task15 :: ResolutionConfig
 task15 = ResolutionConfig
     { baseConf = BaseConfig
@@ -22,7 +22,7 @@ task15 = ResolutionConfig
     , extraText = Nothing
     }
 
--- Gewicht 0.5
+-- Weight 0.5
 task16 :: ResolutionConfig
 task16 =  ResolutionConfig
   { baseConf = BaseConfig

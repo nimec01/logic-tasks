@@ -32,7 +32,7 @@ task02 = SuperfluousBracketsConfig
   }
 
 
--- Gewicht 0.33
+-- Weight 0.33
 task05 :: SuperfluousBracketsConfig
 task05 = SuperfluousBracketsConfig
   { syntaxTreeConfig = SynTreeConfig

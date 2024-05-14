@@ -10,7 +10,7 @@ import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
 
--- Gewicht 0.34
+-- Weight 0.34
 task09 :: DecideConfig
 task09 = DecideConfig
   { cnfConf = CnfConfig
@@ -27,7 +27,7 @@ task09 = DecideConfig
   , printSolution = True
   }
 
--- Gewicht 0.4
+-- Weight 0.4
 task11 :: DecideConfig
 task11 = DecideConfig
   { cnfConf = CnfConfig
@@ -42,7 +42,7 @@ task11 = DecideConfig
   , percentageOfChanged = 40
   , extraText = Just $ translations $ do
       german "Sie haben nur 2 Versuche, die Aufgabe zu lösen."
-      english "You have 2 attempts to solve this taks"
+      english "You have 2 attempts to solve this task."
   , printSolution = True
   }
 

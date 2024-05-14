@@ -16,4 +16,4 @@ noChecker :: forall a. Typeable a => a -> Spec
 noChecker _ = itIsValid $ pendingWith $ "no checker for " ++ show (typeRep @a)
 
 itIsValid :: Example a => a -> SpecWith (Arg a)
-itIsValid = it "is a valid configuartaion"
+itIsValid = it "is a valid configurtaion"

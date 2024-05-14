@@ -29,7 +29,7 @@ task03 = TreeToFormulaConfig
   , printSolution = True
   }
 
--- Gewicht 0.33
+-- Weight 0.33
 task04 :: TreeToFormulaConfig
 task04 =  TreeToFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -48,7 +48,7 @@ task04 =  TreeToFormulaConfig
   , printSolution = True
   }
 
--- Gewicht 0.4
+-- Weight 0.4
 task10 :: TreeToFormulaConfig
 task10 = task04
 

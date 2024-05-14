@@ -9,7 +9,7 @@ import Tasks.SynTree.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
--- Gewicht 0.33
+-- Weight 0.33
 task01 :: LegalPropositionConfig
 task01 = LegalPropositionConfig
   { syntaxTreeConfig = SynTreeConfig
@@ -30,7 +30,7 @@ task01 = LegalPropositionConfig
   , printSolution = True
   }
 
--- Gewicht 0.25
+-- Weight 0.25
 task17 :: LegalPropositionConfig
 task17 = LegalPropositionConfig
   { syntaxTreeConfig = SynTreeConfig

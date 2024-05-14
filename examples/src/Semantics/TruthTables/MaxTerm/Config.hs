@@ -9,8 +9,8 @@ import Test.Hspec
 import LogicTasks.Util (checkCnfConf)
 import Util.VerifyConfig
 
--- Gewicht 0.33
--- Aufgabentyp: Max
+-- Weight 0.33
+-- Type: Max
 unused01 :: MinMaxConfig
 unused01 = MinMaxConfig
   { cnfConf = CnfConfig
@@ -27,8 +27,8 @@ unused01 = MinMaxConfig
   , printSolution = True
   }
 
--- Gewicht 0.34
--- Aufgabentyp: Max
+-- Weight 0.34
+-- Type: Max
 unused02 :: MinMaxConfig
 unused02 = MinMaxConfig
   { cnfConf = CnfConfig

@@ -10,7 +10,7 @@ import Tasks.LegalCNF.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
--- Gewicht 0.33
+-- Weight 0.33
 task07 :: LegalCNFConfig
 task07 = LegalCNFConfig
   { cnfConfig = CnfConfig
@@ -31,7 +31,7 @@ task07 = LegalCNFConfig
   , printSolution = True
   }
 
--- Gewicht 0.25
+-- Weight 0.25
 task18 :: LegalCNFConfig
 task18 = LegalCNFConfig
   { cnfConfig = CnfConfig

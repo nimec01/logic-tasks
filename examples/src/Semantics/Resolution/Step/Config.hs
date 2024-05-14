@@ -8,7 +8,7 @@ import LogicTasks.Util (checkBaseConf)
 import Test.Hspec
 import Util.VerifyConfig
 
--- Gewicht 0.2
+-- Weight 0.2
 task12 :: StepConfig
 task12 =
   StepConfig
@@ -21,12 +21,11 @@ task12 =
     , printSolution = True
     }
 
--- Gewicht 0.25
--- 10 Versuche
+-- Weight 0.25
 task13 :: StepConfig
 task13 = task12
 
--- Gewicht 0.25
+-- Weight 0.25
 task14 :: StepConfig
 task14 =
   StepConfig
