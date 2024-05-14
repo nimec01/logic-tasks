@@ -69,7 +69,7 @@ data ClauseShape = AnyClause | HornClause HornShape deriving (Show, Eq)
 data HornShape = AnyHornClause | Fact | Procedure | Query deriving (Show, Eq)
 
 anyClause, anyHornClause, factClause, procedureClause, queryClause :: ClauseShape
-anyClause = anyClause
+anyClause = AnyClause
 anyHornClause = HornClause AnyHornClause
 factClause = HornClause Fact
 procedureClause = HornClause Procedure
