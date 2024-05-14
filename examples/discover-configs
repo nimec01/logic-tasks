@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 configs=$(find src -path "**/Config.hs")
 
 (echo "{-# LINE 1 \"$1\" #-}"
