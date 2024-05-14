@@ -10,6 +10,7 @@ import Trees.Parsing (formulaParse)
 import Tasks.SuperfluousBrackets.Parsing (superfluousBracketsExcParser)
 
 import Text.Parsec (parse)
+import Formula.Types (ResStep)
 
 spec :: Spec
 spec = do
@@ -41,3 +42,7 @@ spec = do
   describe "parser @Dnf" $ do
     it "correctly recognizes all different notations" $
       isRight $ parse (parser @Dnf) "" "A \\/-B oder (C and D) or (not E and nicht F /\\ ~ G)" {- german -}
+
+  describe "parser @ResStep" $ do
+    it "can handle extra whitespace in resolved clause" $
+      isRight $ parse (parser @ResStep) "" "(1, 2, {   A   ,    nicht    B   } = 5)" {- german -}

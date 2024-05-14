@@ -50,7 +50,7 @@ instance Parse ResStep where
 
     indexParse = tokenSymbol "=" >> lexeme parseNum
 
-    resClause = mkClause <$> braces (parser `sepBy` char ',')
+    resClause = mkClause <$> braces (parser `sepBy` tokenSymbol ",")
 
     parseEither x y = lexeme ((Left <$> try x) <|> (Right <$> y))
 
