@@ -136,7 +136,7 @@ completeGrade' path DecomposeFormulaInst{..} sol
     image $=<< liftIO $ cacheTree (transferToPicture solTree) path
 
     when showSolution $ do
-      example (show swappedTree) $ do
+      example (display swappedTree) $ do
         english "The solution for this task is:"
         german "Die Lösung für die Aufgabe ist:"
 

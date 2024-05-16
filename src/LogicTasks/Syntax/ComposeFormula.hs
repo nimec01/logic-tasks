@@ -169,7 +169,7 @@ completeGrade' path ComposeFormulaInst{..} sol
       image $=<< liftIO $ cacheTree (transferToPicture synTree) path
 
     when showSolution $
-      example (show [display lrTree, display rlTree]) $ do
+      example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
         english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
 
