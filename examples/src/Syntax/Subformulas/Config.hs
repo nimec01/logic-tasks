@@ -25,7 +25,7 @@ medium = SubTreeConfig
   , allowSameSubTree = False
   , minSubTrees = 3
   , extraText = Nothing
-  , printSolution = False
+  , printSolution = True
   }
 
 spec :: Spec
