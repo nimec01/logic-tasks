@@ -104,7 +104,7 @@ completeGrade' path inst sol
             german "Dieser Syntaxbaum ist semantisch äquivalent zum ursprünglich gegebenen, aber nicht identisch."
 
         when (showSolution inst) $
-          example (show (correct inst)) $ do
+          example (correct inst) $ do
             english "A possible solution for this task is:"
             german "Eine mögliche Lösung für die Aufgabe ist:"
 
