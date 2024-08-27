@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module LogicTasks.Debug where
 
@@ -21,8 +22,7 @@ import Formula.Parsing.Delayed.Internal (Delayed(..))
 import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
 
-instance Show (Delayed a) where
-  show (Delayed x) = x
+deriving instance Show (Delayed a)
 
 instance Parse (Delayed a) where
   parser = delayed <$> fully (many anyChar)
