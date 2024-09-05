@@ -199,7 +199,7 @@ completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
     nubSol = nubOrd sol
     diff = length $ filter (`notElem` changed) nubSol
     acLen = length $ nubOrd changed
-    solLen = length $ nubSol
+    solLen = length nubSol
     incorrect = solLen > acLen || acLen > solLen || diff /= 0
     (ger, eng) = if diff == 1
       then ("ist 1 Index", "1 wrong index")
