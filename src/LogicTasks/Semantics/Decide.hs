@@ -14,7 +14,7 @@ import Control.OutputCapable.Blocks (
   german,
   translate,
   )
-import Data.List (nub)
+import Data.List.Extra (nubOrd)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
@@ -196,10 +196,10 @@ completeGrade DecideInst{..} sol = (if incorrect then refuse else id) $ do
 
   pure ()
   where
-    nubSol = nub sol
+    nubSol = nubOrd sol
     diff = length $ filter (`notElem` changed) nubSol
-    acLen = length $ nub changed
-    solLen = length $ nub sol
+    acLen = length $ nubOrd changed
+    solLen = length $ nubSol
     incorrect = solLen > acLen || acLen > solLen || diff /= 0
     (ger, eng) = if diff == 1
       then ("ist 1 Index", "1 wrong index")
