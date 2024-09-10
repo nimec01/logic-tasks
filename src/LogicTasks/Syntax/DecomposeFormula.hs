@@ -28,7 +28,7 @@ import Trees.Helpers (collectLeaves, collectUniqueBinOpsInSynTree, swapKids)
 import Data.Containers.ListUtils (nubOrd)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Formula.Parsing (Parse(parser))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
+import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
 import UniversalParser (logicToken)
 import Text.Parsec (many)
 import Data.Functor (void)
@@ -125,7 +125,7 @@ completeGrade
   -> DecomposeFormulaInst
   -> Delayed TreeFormulaAnswer
   -> LangM m
-completeGrade path inst = completeGrade' path inst `withDelayed` parser
+completeGrade path inst = (completeGrade' path inst `withDelayed` parser) displayParseError
 
 completeGrade'
   :: (OutputCapable m, MonadIO m)

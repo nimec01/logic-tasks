@@ -3,8 +3,8 @@ module Formula.Parsing.Delayed (
   Delayed,
   delayed,
   withDelayed,
+  displayParseError,
   parseDelayedAndThen,
-  parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
   ) where
@@ -30,13 +30,22 @@ parseDelayed = parseDelayedRaw
 parseDelayedRaw :: Parser b -> Delayed a -> Either ParseError b
 parseDelayedRaw p (Delayed str) = parse p "(answer string)" str
 
-withDelayed :: OutputCapable m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
-withDelayed whatToDo p delayedAnswer =
+withDelayed ::
+  OutputCapable m
+  => (a -> LangM m)
+  -> Parser a
+  -> (ParseError -> State (Map Language String) ())
+  -> Delayed a
+  -> LangM m
+withDelayed whatToDo p displayError delayedAnswer =
   case parseDelayed (fully p) delayedAnswer of
-    Left err -> reject $ do
-      english $ show err
-      german $ show err
+    Left err -> reject (displayError err)
     Right x -> whatToDo x
+
+displayParseError :: ParseError -> State (Map Language String) ()
+displayParseError err = do
+  english $ show err
+  german $ show err
 
 parseDelayedAndThen ::
   (OutputCapable m, Parse a)
@@ -48,7 +57,7 @@ parseDelayedAndThen ::
 parseDelayedAndThen = parseDelayedWithAndThen parser
 
 parseDelayedWithAndThen ::
-  (OutputCapable m, Parse a)
+  OutputCapable m
   => Parser a
   -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
   -> Parser ()
@@ -56,10 +65,10 @@ parseDelayedWithAndThen ::
   -> Delayed a
   -> LangM m
 parseDelayedWithAndThen p messaging fallBackParser whatToDo delayedAnswer =
-  either
-  (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
-  whatToDo
-  (parseDelayed (fully p) delayedAnswer)
+  (whatToDo `withDelayed` p)
+  (messaging (either Just (const Nothing) $
+              parseDelayedRaw (fully fallBackParser) delayedAnswer))
+  delayedAnswer
 
 complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
@@ -79,9 +88,9 @@ complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
           , "In particular, you should use enough parentheses."
           ]
 
-complainAboutWrongNotation :: Maybe a -> ParseError -> State (Map Language String) ()
-complainAboutWrongNotation _ _ = do
-  german $  unlines
+complainAboutWrongNotation :: State (Map Language String) ()
+complainAboutWrongNotation = do
+  german $ unlines
     [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
     , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden." {- german -}
     ]
@@ -89,4 +98,3 @@ complainAboutWrongNotation _ _ = do
     [ "Unable to read submission."
     , "Please make sure to use the required notation."
     ]
-

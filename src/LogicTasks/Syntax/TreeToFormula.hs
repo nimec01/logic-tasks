@@ -26,7 +26,7 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-import Formula.Parsing.Delayed (Delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
+import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
 import UniversalParser (logicToken)
@@ -92,7 +92,7 @@ completeGrade
   -> TreeToFormulaInst
   -> Delayed TreeFormulaAnswer
   -> LangM m
-completeGrade path inst = completeGrade' path inst `withDelayed` parser
+completeGrade path inst = (completeGrade' path inst `withDelayed` parser) displayParseError
 
 completeGrade'
   :: (OutputCapable m, MonadIO m)
