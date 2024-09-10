@@ -1,5 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Formula.Parsing.Delayed (Delayed, delayed, withDelayed, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn) where
+module Formula.Parsing.Delayed (
+  Delayed,
+  delayed,
+  withDelayed,
+  parseDelayedAndThen,
+  parseDelayedWithAndThen,
+  complainAboutMissingParenthesesIfNotFailingOn,
+  complainAboutWrongNotation
+  ) where
 
 import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
@@ -37,11 +45,21 @@ parseDelayedAndThen ::
   -> (a -> LangM m)
   -> Delayed a
   -> LangM m
-parseDelayedAndThen messaging fallBackParser whatToDo delayedAnswer =
+parseDelayedAndThen = parseDelayedWithAndThen parser
+
+parseDelayedWithAndThen ::
+  (OutputCapable m, Parse a)
+  => Parser a
+  -> (Maybe ParseError -> ParseError -> State (Map Language String) ())
+  -> Parser ()
+  -> (a -> LangM m)
+  -> Delayed a
+  -> LangM m
+parseDelayedWithAndThen p messaging fallBackParser whatToDo delayedAnswer =
   either
   (reject . messaging (either Just (const Nothing) $ parseDelayedRaw (fully fallBackParser) delayedAnswer))
   whatToDo
-  (parseDelayed (fully parser) delayedAnswer)
+  (parseDelayed (fully p) delayedAnswer)
 
 complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
@@ -60,3 +78,15 @@ complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
           , "Please make sure that the arrangement of symbols adheres to the rules for well-formed inputs."
           , "In particular, you should use enough parentheses."
           ]
+
+complainAboutWrongNotation :: Maybe a -> ParseError -> State (Map Language String) ()
+complainAboutWrongNotation _ _ = do
+  german $  unlines
+    [ "Ihre Abgabe konnte nicht gelesen werden." {- german -}
+    , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden." {- german -}
+    ]
+  english $ unlines
+    [ "Unable to read solution."
+    , "Please make sure to use the required notation."
+    ]
+
