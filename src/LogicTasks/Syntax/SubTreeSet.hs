@@ -26,7 +26,7 @@ import Control.Monad (when, unless)
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.Foldable (for_)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError)
+import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
 
 
@@ -116,7 +116,7 @@ completeGrade
   -> SubTreeInst
   -> Delayed [FormulaAnswer]
   -> LangM m
-completeGrade path inst = (completeGrade' path inst `withDelayed` parser) displayParseError
+completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
   :: (OutputCapable m, MonadIO m)

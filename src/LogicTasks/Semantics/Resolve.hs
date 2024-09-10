@@ -34,7 +34,7 @@ import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
 import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, complainAboutWrongNotation)
+import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
 import Formula.Helpers (showCnfAsSet)
 
@@ -254,7 +254,7 @@ partialGrade' ResolutionInst{..} sol = do
     stepsGraded = gradeSteps steps (isNothing applied)
 
 completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
-completeGrade inst = (completeGrade' inst `withDelayed` resStepsParser clauseParser) displayParseError
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` resStepsParser clauseParser
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 

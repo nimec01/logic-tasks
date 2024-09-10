@@ -25,7 +25,7 @@ import Formula.Resolution (resolvable, resolve)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
 import Util (checkBaseConf, prevent, preventWithHint, tryGen)
 import Control.Monad (when, unless)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, complainAboutWrongNotation)
+import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (clauseFormulaParser, stepAnswerParser, clauseSetParser)
 import Formula.Helpers (showClauseAsSet)
 
@@ -165,7 +165,7 @@ partialGrade' StepInst{..} sol = do
      extraLiterals = toList (solLits `difference` availLits)
 
 completeGrade :: OutputCapable m => StepInst -> Delayed StepAnswer -> LangM m
-completeGrade inst = (completeGrade' inst `withDelayed` stepAnswerParser clauseParser) displayParseError
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` stepAnswerParser clauseParser
   where clauseParser | usesSetNotation inst = clauseSetParser
                      | otherwise      = clauseFormulaParser
 

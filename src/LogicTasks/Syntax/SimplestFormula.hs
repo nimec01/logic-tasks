@@ -26,7 +26,7 @@ import Tasks.SuperfluousBrackets.Config (
 import Trees.Helpers
 import Trees.Types
 import Control.Monad (when)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError)
+import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
 
@@ -124,7 +124,7 @@ partialGrade' SuperfluousBracketsInst{..} f
     correctOpsNum = numOfOps tree
 
 completeGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
-completeGrade inst = (completeGrade' inst `withDelayed` parser) displayParseError
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
 completeGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 completeGrade' inst sol

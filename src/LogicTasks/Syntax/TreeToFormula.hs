@@ -26,7 +26,7 @@ import Formula.Util (isSemanticEqual)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
 import Tasks.TreeToFormula.Config (TreeToFormulaInst(..))
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, parseDelayedAndThen, complainAboutMissingParenthesesIfNotFailingOn)
+import Formula.Parsing.Delayed (Delayed, withDelayedSucceeding, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
 import UniversalParser (logicToken)
@@ -77,7 +77,7 @@ start :: TreeFormulaAnswer
 start = TreeFormulaAnswer Nothing
 
 partialGrade :: OutputCapable m => TreeToFormulaInst -> Delayed TreeFormulaAnswer -> LangM m
-partialGrade = parseDelayedAndThen complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
+partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
 
 partialGrade' :: OutputCapable m => TreeToFormulaInst -> TreeFormulaAnswer -> LangM m
 partialGrade' _ sol
@@ -92,7 +92,7 @@ completeGrade
   -> TreeToFormulaInst
   -> Delayed TreeFormulaAnswer
   -> LangM m
-completeGrade path inst = (completeGrade' path inst `withDelayed` parser) displayParseError
+completeGrade path inst = completeGrade' path inst `withDelayedSucceeding` parser
 
 completeGrade'
   :: (OutputCapable m, MonadIO m)

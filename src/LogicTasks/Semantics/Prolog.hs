@@ -27,7 +27,7 @@ import Util(prevent, preventWithHint)
 import Control.Monad (when)
 import LogicTasks.Helpers (example, extra)
 import Formula.Helpers (hasTheClauseShape)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError)
+import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
 
 genPrologInst :: PrologConfig -> Gen PrologInst
@@ -160,7 +160,7 @@ partialGrade' PrologInst{..} sol = do
      extraLiterals = toList $ solLits `difference` availLits
 
 completeGrade :: OutputCapable m => PrologInst -> Delayed (PrologLiteral, PrologClause) -> LangM m
-completeGrade inst = (completeGrade' inst `withDelayed` parser) displayParseError
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
 completeGrade' :: OutputCapable m => PrologInst -> (PrologLiteral, PrologClause) -> LangM m
 completeGrade' PrologInst{..} sol =

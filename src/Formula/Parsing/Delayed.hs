@@ -4,14 +4,14 @@ module Formula.Parsing.Delayed (
   delayed,
   withDelayed,
   displayParseError,
-  parseDelayedAndThen,
+  withDelayedSucceeding,
+  parseDelayedWithAndThen,
   complainAboutMissingParenthesesIfNotFailingOn,
   complainAboutWrongNotation
   ) where
 
 import Text.Parsec (ParseError, parse)
 import Text.Parsec.String (Parser)
-import Formula.Parsing (Parse(..))
 import ParsingHelpers (fully)
 
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
@@ -47,15 +47,6 @@ displayParseError err = do
   english $ show err
   german $ show err
 
-parseDelayedAndThen ::
-  (OutputCapable m, Parse a)
-  => (Maybe ParseError -> ParseError -> State (Map Language String) ())
-  -> Parser ()
-  -> (a -> LangM m)
-  -> Delayed a
-  -> LangM m
-parseDelayedAndThen = parseDelayedWithAndThen parser
-
 parseDelayedWithAndThen ::
   OutputCapable m
   => Parser a
@@ -69,6 +60,17 @@ parseDelayedWithAndThen p messaging fallBackParser whatToDo delayedAnswer =
   (messaging (either Just (const Nothing) $
               parseDelayedRaw (fully fallBackParser) delayedAnswer))
   delayedAnswer
+
+withDelayedSucceeding ::
+  OutputCapable m
+  => (a -> LangM m)
+  -> Parser a
+  -> Delayed a
+  -> LangM m
+withDelayedSucceeding whatToDo p delayedAnswer =
+  case parseDelayed (fully p) delayedAnswer of
+    Left err -> error $ "It should be impossible here, and yet the following ParseError was encountered: " ++ show err
+    Right x -> whatToDo x
 
 complainAboutMissingParenthesesIfNotFailingOn :: Maybe a -> ParseError -> State (Map Language String) ()
 complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =

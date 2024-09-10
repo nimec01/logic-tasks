@@ -26,7 +26,7 @@ import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getCla
 import LogicTasks.Helpers (formulaKey, example, extra)
 import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio, checkCnfConf)
 import Control.Monad (when)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError)
+import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
 
 
@@ -208,7 +208,7 @@ completeMinMax showSolution correct solution =
     (_,diff) = pairwiseCheck (zip3 (readEntries solTable) (readEntries $ getTable correct) [1..])
 
 completeGrade :: OutputCapable m => MaxInst -> Delayed Cnf -> LangM m
-completeGrade inst = (completeGrade' inst `withDelayed` parser) displayParseError
+completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
 
 completeGrade' :: OutputCapable m => MaxInst -> Cnf -> LangM m
 completeGrade' MaxInst{..} = completeMinMax showSolution cnf
