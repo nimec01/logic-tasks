@@ -31,12 +31,12 @@ parseDelayedRaw :: Parser b -> Delayed a -> Either ParseError b
 parseDelayedRaw p (Delayed str) = parse p "(answer string)" str
 
 withDelayed :: OutputCapable m => (a -> LangM m) -> Parser a -> Delayed a -> LangM m
-withDelayed grade p d =
-  case parseDelayed (fully p) d of
+withDelayed whatToDo p delayedAnswer =
+  case parseDelayed (fully p) delayedAnswer of
     Left err -> reject $ do
       english $ show err
       german $ show err
-    Right x -> grade x
+    Right x -> whatToDo x
 
 parseDelayedAndThen ::
   (OutputCapable m, Parse a)
@@ -74,7 +74,7 @@ complainAboutMissingParenthesesIfNotFailingOn maybeHereError latentError =
           , "Insbesondere sollten Sie genügend Klammern benutzen." {- german -}
           ]
         english $ unlines
-          [ "Unable to read solution."
+          [ "Unable to read submission."
           , "Please make sure that the arrangement of symbols adheres to the rules for well-formed inputs."
           , "In particular, you should use enough parentheses."
           ]
@@ -86,7 +86,7 @@ complainAboutWrongNotation _ _ = do
     , "Bitte stellen Sie sicher, dass Sie die geforderte Notation verwenden." {- german -}
     ]
   english $ unlines
-    [ "Unable to read solution."
+    [ "Unable to read submission."
     , "Please make sure to use the required notation."
     ]
 
