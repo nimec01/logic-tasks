@@ -34,7 +34,7 @@ import Text.Parsec (many)
 import Data.Functor (void)
 import Formula.Types (Formula(atomics))
 import Data.List ((\\), intercalate)
-import Data.Foldable.Extra (notNull)
+import Data.List.Extra (notNull)
 
 
 description :: (OutputCapable m, MonadIO m) => FilePath -> TreeToFormulaInst -> LangM m
