@@ -113,5 +113,6 @@ completeGrade path inst sol = refuseIfWrong $ do
     wrongSolution = sort (nub sol) /= sort serialsOfRight
     refuseIfWrong = if wrongSolution then refuse else id
     pseudoIndexed = zip ([1..] :: [Int]) (pseudoFormulas inst)
-    serialsOfRight = map fst $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
-    correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) $ filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+    correctEntries = filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+    serialsOfRight = map fst correctEntries
+    correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) correctEntries
