@@ -36,15 +36,15 @@ description LegalPropositionInst{..} = do
     focus $ unlines $ indexed $ map fst pseudoFormulas
 
     instruct $ do
-      english "Some of these are syntactically incorrect. Which of these formulas have a valid format?"
+      english "Some of these are syntactically wrong. Which of these formulas are correctly formed?"
       german "Einige davon enthalten syntaktische Fehler. Geben Sie an, welche Formeln korrekt geformt sind."
 
     instruct $ do
-      english "Enter a list containing the indices of the valid formulas to submit your answer."
+      english "Enter a list containing the indices of the syntactically correct formulas to submit your answer."
       german "Geben Sie eine Liste der Indizes aller syntaktisch korrekten Formeln als Ihre Lösung an."
 
     example "[2,3]" $ do
-      english "For example, if only choices 2 and 3 are correct, then the solution is:"
+      english "For example, if only choices 2 and 3 are correctly formed, then the solution is:"
       german "Sind beispielsweise nur Auswahlmöglichkeiten 2 und 3 richtig geformt, dann ist diese Lösung korrekt:"
 
     extra addText
