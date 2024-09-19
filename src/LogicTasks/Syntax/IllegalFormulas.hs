@@ -6,16 +6,19 @@ module LogicTasks.Syntax.IllegalFormulas where
 
 
 import Control.OutputCapable.Blocks (
-  GenericOutputCapable (refuse, code, image),
+  GenericOutputCapable (code, image),
   LangM,
   OutputCapable,
   ($=<<),
   english,
   german,
+  Rated,
+  multipleChoice,
+  ArticleToUse (DefiniteArticle),
+  translations,
   )
 import Data.List (nub, sort)
-
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject)
+import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject, reRefuse)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
@@ -23,6 +26,8 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import LogicTasks.Syntax.TreeToFormula (cacheTree)
 import Data.Foldable (for_)
 import Data.Maybe (isJust, fromJust)
+import qualified Data.Map as Map (fromAscList)
+import Control.Applicative (Alternative)
 
 
 
@@ -52,7 +57,7 @@ description LegalPropositionInst{..} = do
 
 
 verifyInst :: OutputCapable m => LegalPropositionInst -> LangM m
-verifyInst _ = pure()
+verifyInst _ = pure ()
 
 
 
@@ -72,7 +77,7 @@ partialGrade LegalPropositionInst{..} sol
       english "At least one index in the list does not exist."
       german "Mindestens einer der Indizes existiert nicht."
 
-    | otherwise = pure()
+    | otherwise = pure ()
   where
     nubSol = nub sol
     invalidIndex = any (`notElem` [1..length pseudoFormulas]) nubSol
@@ -80,39 +85,36 @@ partialGrade LegalPropositionInst{..} sol
 
 
 completeGrade
-  :: (OutputCapable m, MonadIO m)
+  :: (OutputCapable m, MonadIO m, Alternative m)
   => FilePath
   -> LegalPropositionInst
   -> [Int]
-  -> LangM m
-completeGrade path inst sol = refuseIfWrong $ do
-  when wrongSolution $ do
-     instruct $ do
-        english "Your solution is incorrect."
-        german "Ihre Lösung ist falsch."
+  -> Rated m
+completeGrade path LegalPropositionInst{..} sol = reRefuse
+    (multipleChoice DefiniteArticle what solutionDisplay solution sol)
+    $ when (showSolution && wrongSolution) $ do
+      instruct $ do
+          english "The following syntax trees represent the well-formed formulas:"
+          german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-  when (showSolution inst) $ do
-    when wrongSolution $
-      example (show serialsOfRight) $ do
-          english "A possible solution for this task is:"
-          german "Eine mögliche Lösung für die Aufgabe ist:"
+      for_ correctTrees $ \(i,pf,t) -> do
+        code $ show i ++ ". " ++ pf
+        image $=<< liftIO $ cacheTree (transferToPicture t) path
+        pure ()
 
-    instruct $ do
-        english "The following syntax trees represent the well-formed formulas:"
-        german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
-
-    for_ correctTrees $ \(i,pf,t) -> do
-      code $ show i ++ ". " ++ pf
-      image $=<< liftIO $ cacheTree (transferToPicture t) path
       pure ()
 
-    pure ()
 
-  pure ()
-  where
-    wrongSolution = sort (nub sol) /= sort serialsOfRight
-    refuseIfWrong = if wrongSolution then refuse else id
-    pseudoIndexed = zip ([1..] :: [Int]) (pseudoFormulas inst)
-    correctEntries = filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
-    serialsOfRight = map fst correctEntries
-    correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) correctEntries
+    where
+      wrongSolution = sort (nub sol) /= sort serialsOfRight
+      pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
+      correctEntries = filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+      serialsOfRight = map fst correctEntries
+      correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) correctEntries
+      what = translations $ do
+        german "Indizes"
+        english "indices"
+      solutionDisplay | showSolution = Just $ show serialsOfRight
+                      | otherwise = Nothing
+      solution = Map.fromAscList $ map (\(i,(_,mt)) -> (i, isJust mt)) pseudoIndexed
+
