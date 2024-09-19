@@ -14,8 +14,6 @@ import Control.OutputCapable.Blocks (
   ArticleToUse (DefiniteArticle),
   translations,
   )
-import Data.List (nub)
-import Data.Set (toList)
 import Data.Map as Map (fromAscList)
 import LogicTasks.Helpers
 import Tasks.LegalCNF.Config(LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
@@ -72,18 +70,15 @@ partialGrade LegalCNFInst{..} sol
 
     | otherwise = pure ()
   where
-    nubSol = nub sol
-    invalidIndex = any (`notElem` [1..length formulaStrings]) nubSol
+    invalidIndex = any (`notElem` [1..length formulaStrings]) sol
 
 
 completeGrade :: OutputCapable m => LegalCNFInst -> [Int] -> Rated m
-completeGrade LegalCNFInst{..} = multipleChoice DefiniteArticle what solutionDisplay solution
+completeGrade LegalCNFInst{..} = multipleChoice DefiniteArticle what solutionDisplay (Map.fromAscList solution)
   where
     what = translations $ do
       german "Indizes"
       english "indices"
-    indices = [1..length formulaStrings]
-    serialsOfRight = filter (`notElem` toList serialsOfWrong) indices
-    solutionDisplay | showSolution = Just $ show serialsOfRight
+    solutionDisplay | showSolution = Just $ show [ i | (i, True) <- solution ]
                     | otherwise = Nothing
-    solution = Map.fromAscList $ map (\i -> (i, i `elem` serialsOfRight)) indices
+    solution = map (\i -> (i, i `notElem` serialsOfWrong)) [1..length formulaStrings]

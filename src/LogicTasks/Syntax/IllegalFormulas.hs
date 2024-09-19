@@ -17,7 +17,8 @@ import Control.OutputCapable.Blocks (
   ArticleToUse (DefiniteArticle),
   translations,
   )
-import Data.List (nub, sort)
+import Data.List.Extra (nubSort)
+import Data.Bifunctor (second)
 import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject, reRefuse)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
@@ -79,8 +80,7 @@ partialGrade LegalPropositionInst{..} sol
 
     | otherwise = pure ()
   where
-    nubSol = nub sol
-    invalidIndex = any (`notElem` [1..length pseudoFormulas]) nubSol
+    invalidIndex = any (`notElem` [1..length pseudoFormulas]) sol
 
 
 
@@ -97,24 +97,22 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
           english "The following syntax trees represent the well-formed formulas:"
           german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-      for_ correctTrees $ \(i,pf,t) -> do
+      for_ correctEntries $ \(i,(pf,t)) -> do
         code $ show i ++ ". " ++ pf
-        image $=<< liftIO $ cacheTree (transferToPicture t) path
+        image $=<< liftIO $ cacheTree (transferToPicture (fromJust t)) path
         pure ()
 
       pure ()
 
 
     where
-      wrongSolution = sort (nub sol) /= sort serialsOfRight
+      wrongSolution = nubSort sol /= serialsOfRight
       pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
-      correctEntries = filter (\(_,(_,mt)) -> isJust mt) pseudoIndexed
+      correctEntries = filter (isJust . snd . snd) pseudoIndexed
       serialsOfRight = map fst correctEntries
-      correctTrees = map (\(i,(pf,t)) -> (i,pf,fromJust t)) correctEntries
       what = translations $ do
         german "Indizes"
         english "indices"
       solutionDisplay | showSolution = Just $ show serialsOfRight
                       | otherwise = Nothing
-      solution = Map.fromAscList $ map (\(i,(_,mt)) -> (i, isJust mt)) pseudoIndexed
-
+      solution = Map.fromAscList $ map (second (isJust . snd)) pseudoIndexed
