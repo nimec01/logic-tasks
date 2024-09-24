@@ -286,20 +286,26 @@ instance Parse PrologLiteral where
   parser = (lexeme litParse <?> "Literal")
            <|> fail "Could not parse a literal."
     where
-      litParse = do
-        pol <- lexeme $ optionMaybe $ string "not("
+      litParse = notNeg <|> operatorNeg <|> posLit
+
+      notNeg = do
+        tokenSymbol "not"
+        between (tokenSymbol "(") (tokenSymbol ")") (atomParse False)
+
+      operatorNeg = do
+        tokenSymbol "¬" <|> tokenSymbol "~" <|> tokenSymbol "-"
+        atomParse False
+
+      posLit = atomParse True
+
+      atomParse pol = do
         ident <- strParse
         lexeme $ char '('
         facts <- lexeme $ sepBy (lexeme strParse) (lexeme $ char ',')
         lexeme $ char ')'
-        case pol of Nothing -> pure (PrologLiteral True ident facts)
-                    Just _  -> do char ')'
-                                  pure (PrologLiteral False ident facts)
+        pure $ PrologLiteral pol ident facts
         where
           strParse = many1 $ satisfy $ flip elem ['A'..'z']
-
-
-
 
 instance Parse PrologClause where
  parser = (lexeme (emptyParse <|> clauseParse) <?> "Clause")
