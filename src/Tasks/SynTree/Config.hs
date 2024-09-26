@@ -130,7 +130,7 @@ checkSynTreeConfig SynTreeConfig {..}
     | negOpFrequency < 0 = reject $ do
         english "The operator frequency for negations must be non-negative."
         german "Die Frequenz für den Negationsoperator muss nicht-negativ sein."
-    | negOpFrequency == 0 && maxConsecutiveNegations /= 0 || maxConsecutiveNegations == 0 && negOpFrequency /= 0 = reject $ do
+    | (negOpFrequency == 0) /= (maxConsecutiveNegations == 0) = reject $ do
         english "The maximum number of consecutive negations does not comply with the frequency of the negation operator."
         german "Maximale Anzahl an aufeinanderfolgenden Negationen passt nicht zur Frequenz des Negationsoperators."
     | otherwise = pure()

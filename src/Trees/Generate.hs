@@ -42,7 +42,7 @@ genSynTree SynTreeConfig{..} = do
     usedList <- randomList availableAtoms (take (fromIntegral minAmountOfUniqueAtoms) availableAtoms) $
            fromIntegral $ length $ collectLeaves sample
     return (relabelShape sample usedList)
-  where hasNegations = maxConsecutiveNegations /= 0
+  where hasNegations = negOpFrequency > 0
         checkMinAmountOfUniqueAtoms synTree =
           fromIntegral (length (collectLeaves synTree)) >= minAmountOfUniqueAtoms
         checkMinUniqueOps synTree = numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
