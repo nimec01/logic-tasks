@@ -49,8 +49,8 @@ medium = DecomposeFormulaConfig
     , binOpFrequencies = Map.fromList
       [ (And, 1)
       , (Or, 1)
-      , (Impl, 0)
-      , (BackImpl, 0)
+      , (Impl, 1)
+      , (BackImpl, 1)
       , (Equi, 1)
       ]
     , negOpFrequency = 1

@@ -54,7 +54,7 @@ task17 = LegalPropositionConfig
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
-      , (BackImpl, 1)
+      , (BackImpl, 0)
       , (Equi, 1)
       ]
     , negOpFrequency = 1
