@@ -16,10 +16,12 @@ import Control.OutputCapable.Blocks (
   multipleChoice,
   ArticleToUse (DefiniteArticle),
   translations,
+  reRefuse,
+  multipleChoiceSyntax,
   )
 import Data.List.Extra (nubSort)
 import Data.Bifunctor (second)
-import LogicTasks.Helpers (example, extra, focus, indexed, instruct, reject, reRefuse)
+import LogicTasks.Helpers (example, extra, focus, indexed, instruct)
 import Tasks.LegalProposition.Config (LegalPropositionInst(..), LegalPropositionConfig(..), checkLegalPropositionConfig)
 import Control.Monad (when)
 import Trees.Print (transferToPicture)
@@ -73,14 +75,7 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalPropositionInst -> [Int] -> LangM m
-partialGrade LegalPropositionInst{..} sol
-    | invalidIndex = reject $ do
-      english "At least one index in the list does not exist."
-      german "Mindestens einer der Indizes existiert nicht."
-
-    | otherwise = pure ()
-  where
-    invalidIndex = any (`notElem` [1..length pseudoFormulas]) sol
+partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length pseudoFormulas]
 
 
 
