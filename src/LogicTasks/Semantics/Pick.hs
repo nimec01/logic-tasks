@@ -27,7 +27,7 @@ import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (extra)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromJust, fromMaybe)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
 import Trees.Formula ()
@@ -167,7 +167,7 @@ completeGrade PickInst{..} (Number index) = singleChoice
   what
   displaySolution
   correct
-  (fromMaybe 0 index)
+  (fromJust index)
     where
       what = translations $ do
         german "Index"
