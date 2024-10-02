@@ -16,7 +16,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey, cacheIO)
+import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
@@ -32,7 +32,7 @@ import Text.Parsec (many, (<|>))
 import Data.Functor (void)
 import ParsingHelpers (tokenSymbol)
 import Control.Applicative (Applicative(liftA2))
-import qualified Data.Map as Map (fromAscList, empty)
+import qualified Data.Map as Map (fromAscList)
 import Data.Traversable (for)
 
 
