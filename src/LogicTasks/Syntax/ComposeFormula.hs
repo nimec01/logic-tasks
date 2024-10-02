@@ -31,7 +31,6 @@ import UniversalParser (logicToken)
 import Text.Parsec (many, (<|>))
 import Data.Functor (void)
 import ParsingHelpers (tokenSymbol)
-import Control.Applicative (liftA2)
 import qualified Data.Map as Map (fromAscList)
 import Data.Traversable (for)
 
