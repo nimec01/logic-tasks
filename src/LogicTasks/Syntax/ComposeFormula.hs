@@ -16,7 +16,7 @@ import Control.OutputCapable.Blocks (
   )
 import Data.Maybe (fromJust, isNothing)
 
-import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey)
+import LogicTasks.Helpers (extra, instruct, keyHeading, reject, example, basicOpKey, arrowsKey, cacheIO)
 import Trees.Types (TreeFormulaAnswer(..), SynTree (Binary), showOperator)
 import Control.Monad (when)
 import Trees.Print (transferToPicture, display)
@@ -31,7 +31,9 @@ import UniversalParser (logicToken)
 import Text.Parsec (many, (<|>))
 import Data.Functor (void)
 import ParsingHelpers (tokenSymbol)
-
+import Control.Applicative (Applicative(liftA2))
+import qualified Data.Map as Map (fromAscList, empty)
+import Data.Traversable (for)
 
 
 
@@ -45,21 +47,27 @@ description path ComposeFormulaInst{..} = do
       german $ showOperator operator
       german $ " gehängt. Einmal " ++ derDie ++" eine " ++ gTreeOrFormula ++" links und " ++ derDie ++" andere " ++ gTreeOrFormula ++" rechts, und einmal genau andersherum."
 
-    instruct $ do
-      english $ "This is the first " ++ eTreeOrFormula ++ ":"
-      german $ "Dies ist " ++ derDie ++ " erste " ++ gTreeOrFormula ++ ":"
+    case liftA2 (,) leftTreeImage rightTreeImage of
+      Nothing -> do
+        instruct $ do
+          english $ "This is the first " ++ eTreeOrFormula ++ ":"
+          german $ "Dies ist " ++ derDie ++ " erste " ++ gTreeOrFormula ++ ":"
 
-    case leftTreeImage of
-      Nothing -> paragraph $ code $ display leftTree
-      Just image' -> image $=<< liftIO $ cacheTree image' path
+        case leftTreeImage of
+          Nothing -> paragraph $ code $ display leftTree
+          Just image' -> image $=<< liftIO $ cacheTree image' path
 
-    instruct $ do
-      english $ "This is the second " ++ eTreeOrFormula ++ ":"
-      german $ "Dies ist " ++ derDie ++ " zweite " ++ gTreeOrFormula ++ ":"
+        instruct $ do
+          english $ "This is the second " ++ eTreeOrFormula ++ ":"
+          german $ "Dies ist " ++ derDie ++ " zweite " ++ gTreeOrFormula ++ ":"
 
-    case rightTreeImage of
-      Nothing -> paragraph $ code $ display rightTree
-      Just image' -> image $=<< liftIO $ cacheTree image' path
+        case rightTreeImage of
+          Nothing -> paragraph $ code $ display rightTree
+          Just image' -> image $=<< liftIO $ cacheTree image' path
+        pure ()
+
+      Just (leftImage, rightImage) -> do
+        images show id $=<< for (Map.fromAscList (zip [1::Int ..] [leftImage, rightImage])) $ \t -> liftIO $ cacheTree t path
 
     instruct $ do
       english "Build the corresponding formulas for the two resulting trees and put them into a list. "
