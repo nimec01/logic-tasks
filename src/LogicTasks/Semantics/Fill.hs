@@ -152,8 +152,8 @@ partialGrade FillInst{..} sol = do
       english "Your submission has the correct length?"
     )
     (translate $ do
-      german $ "Ihre Abgabe muss genau "  ++ show missingLen ++ " Lücken enthalten."
-      english $ "Your submission must contain exactly " ++ show missingLen ++ " gaps."
+      german $ "Ihre Abgabe muss genau " ++ show missingLen ++ " Einträge enthalten."
+      english $ "Your submission must contain exactly " ++ show missingLen ++ " entries."
     )
 
   pure ()
@@ -174,7 +174,7 @@ completeGrade FillInst{..} sol = reRefuse
     solution
     submission)
   $ when (notNull diff && not showSolution) $ translate $ do
-    german $ "Ihre Abgabe beinhaltet " ++ displayMistake ++ " Fehler."
+    german $ "Ihre Abgabe enthält " ++ displayMistake ++ " Fehler."
     english $ "Your submission contains " ++ displayMistake ++ " mistakes."
 
   where
@@ -184,7 +184,7 @@ completeGrade FillInst{..} sol = reRefuse
     displayMistake = show $ length diff
     what = translations $ do
       german "Wahrheitswerte"
-      english "entries"
+      english "truth values"
     solutionDisplay | showSolution = Just $ show missingValues
                     | otherwise = Nothing
     solution = Map.fromAscList $ zip [1 :: Int ..] missingValues
