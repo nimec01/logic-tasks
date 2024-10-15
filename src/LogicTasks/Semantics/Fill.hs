@@ -13,6 +13,13 @@ import Control.OutputCapable.Blocks (
   english,
   german,
   translate,
+  extendedMultipleChoice,
+  MinimumThreshold (MinimumThreshold),
+  Punishment (Punishment),
+  TargetedCorrect (TargetedCorrect),
+  ArticleToUse (DefiniteArticle),
+  translations,
+  Rated, reRefuse,
   )
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck(Gen, suchThat)
@@ -21,12 +28,15 @@ import Config ( FillConfig(..), FillInst(..), FormulaInst (..), FormulaConfig (.
 import Formula.Table (gapsAt, readEntries)
 import Formula.Types (TruthValue, availableLetter, atomics, getTable, literals, truth)
 import Util (isOutside, pairwiseCheck, preventWithHint, remove, withRatio, tryGen, checkTruthValueRangeAndFormulaConf)
-import Control.Monad (when)
-import LogicTasks.Helpers (example, extra)
-import Data.Foldable.Extra (notNull)
+import LogicTasks.Helpers (extra)
 import Trees.Generate (genSynTree)
 import Trees.Formula ()
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
+import qualified Data.Map as Map (fromAscList)
+import GHC.Real ((%))
+import Control.Applicative (Alternative)
+import Control.Monad (when)
+import Data.Foldable.Extra (notNull)
 
 
 genFillInst :: FillConfig -> Gen FillInst
@@ -138,12 +148,12 @@ partialGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
 partialGrade FillInst{..} sol = do
   preventWithHint (solLen /= missingLen)
     (translate $ do
-      german "Lösung hat korrekte Länge?"
-      english "Solution has correct length?"
+      german "Ihre Abgabe hat die korrekte Länge?"
+      english "Your submission has the correct length?"
     )
     (translate $ do
-      german $ "Die Lösung muss genau "  ++ show missingLen ++ " Lücken enthalten."
-      english $ "The solution must contain exactly " ++ show missingLen ++ " gaps."
+      german $ "Ihre Abgabe muss genau "  ++ show missingLen ++ " Lücken enthalten."
+      english $ "Your submission must contain exactly " ++ show missingLen ++ " gaps."
     )
 
   pure ()
@@ -152,26 +162,30 @@ partialGrade FillInst{..} sol = do
       solLen = length boolSol
       missingLen = length missing
 
-completeGrade :: OutputCapable m => FillInst -> [TruthValue] -> LangM m
-completeGrade FillInst{..} sol = do
-  preventWithHint (notNull diff)
-    (translate $ do
-      german "Lösung ist korrekt?"
-      english "Solution is correct?"
-    )
-    (do
-      translate $ do
-        german $ "Die Lösung beinhaltet " ++ displayMistake ++ " Fehler."
-        english $ "Your solution contains " ++ displayMistake ++ " mistakes."
-      when showSolution $ example (show missingValues) $ do
-        english "The solution for this task is:"
-        german "Die Lösung für die Aufgabe ist:"
-      pure ()
-    )
+completeGrade :: (OutputCapable m, Alternative m, Monad m) => FillInst -> [TruthValue] -> Rated m
+completeGrade FillInst{..} sol = reRefuse
+  (extendedMultipleChoice
+    (MinimumThreshold (1 % 2))
+    (Punishment 0)
+    (TargetedCorrect (length solution))
+    DefiniteArticle
+    what
+    solutionDisplay
+    solution
+    submission)
+  $ when (notNull diff && not showSolution) $ translate $ do
+    german $ "Ihre Abgabe beinhaltet " ++ displayMistake ++ " Fehler."
+    english $ "Your submission contains " ++ displayMistake ++ " mistakes."
 
-  pure ()
   where
     boolSol = map truth sol
     zippedShort = zip3 boolSol missingValues [1..]
     (_,diff) = pairwiseCheck zippedShort
     displayMistake = show $ length diff
+    what = translations $ do
+      german "Wahrheitswerte"
+      english "entries"
+    solutionDisplay | showSolution = Just $ show missingValues
+                    | otherwise = Nothing
+    solution = Map.fromAscList $ zip [1 :: Int ..] missingValues
+    submission = Map.fromAscList $ zip [1 :: Int ..] boolSol
