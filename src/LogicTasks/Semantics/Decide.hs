@@ -24,7 +24,7 @@ import Control.OutputCapable.Blocks (
   TargetedCorrect (TargetedCorrect),
   multipleChoiceSyntax,
   )
-import Data.List.Extra (nubSort, nubOrd)
+import Data.List.Extra (nubSort)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
@@ -141,7 +141,7 @@ start :: [Int]
 start = []
 
 partialGrade :: OutputCapable m =>  DecideInst -> [Int] -> LangM m
-partialGrade DecideInst{..} sol = multipleChoiceSyntax False [1..tableLen] $ nubOrd sol
+partialGrade DecideInst{..} = multipleChoiceSyntax False [1..tableLen]
     where
       table = getTable formula
       tableLen = length $ readEntries table
