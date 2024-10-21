@@ -273,10 +273,10 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) lits useAllLiterals = do
+genCnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
     cnf <- generateClauses nLits empty num
-      `suchThat` \xs -> not useAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+      `suchThat` \xs -> not enforceUsingAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -419,10 +419,10 @@ instance Arbitrary Dnf where
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) lits useAllLiterals = do
+genDnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
     dnf <- generateCons nLits empty num
-      `suchThat` \xs -> not useAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+      `suchThat` \xs -> not enforceUsingAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
