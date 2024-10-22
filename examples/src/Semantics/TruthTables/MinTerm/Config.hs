@@ -3,10 +3,10 @@ module Semantics.TruthTables.MinTerm.Config where
 import LogicTasks.Config (
   BaseConfig(..),
   MinMaxConfig (..),
-  CnfConfig (..),
+  NormalFormConfig (..),
   )
 import Test.Hspec
-import LogicTasks.Util (checkCnfConf)
+import LogicTasks.Util (checkNormalFormConfig)
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 
@@ -14,7 +14,7 @@ import Control.OutputCapable.Blocks (Language(German))
 -- Type: Min
 unused03 :: MinMaxConfig
 unused03 = MinMaxConfig
-  { cnfConf = CnfConfig
+  { cnfConf = NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3
@@ -31,4 +31,4 @@ unused03 = MinMaxConfig
 
 spec :: Spec
 spec = do
-  describe "unused03" $ verifyConfig German (cnfConf unused03) checkCnfConf
+  describe "unused03" $ verifyConfig German (cnfConf unused03) checkNormalFormConfig

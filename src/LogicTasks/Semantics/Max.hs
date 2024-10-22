@@ -20,12 +20,12 @@ import Data.List ((\\))
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen)
 
-import Config (BaseConfig(..), CnfConfig(..),  MaxInst(..), MinMaxConfig(..))
+import Config (BaseConfig(..), NormalFormConfig(..),  MaxInst(..), MinMaxConfig(..))
 import Formula.Util (hasEmptyClause, isEmptyCnf, mkClause, mkCnf)
 import Formula.Table (readEntries)
 import Formula.Types (Cnf, Formula, Literal(..), amount, atomics, genCnf, getClauses, getTable)
 import LogicTasks.Helpers (formulaKey, example, extra)
-import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio, checkCnfConf)
+import Util (checkTruthValueRange, pairwiseCheck, prevent, preventWithHint, tryGen, withRatio, checkNormalFormConfig)
 import Control.Monad (when)
 import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
@@ -33,7 +33,7 @@ import Formula.Parsing (Parse(..))
 
 
 genMaxInst :: MinMaxConfig -> Gen MaxInst
-genMaxInst MinMaxConfig {cnfConf = CnfConfig {baseConf = BaseConfig{..},..},..} = do
+genMaxInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
     cnf <- cnfInRange
     pure $ MaxInst {
       cnf
@@ -96,7 +96,7 @@ verifyStatic MaxInst{..}
 verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
   checkTruthValueRange (low,high)
-  checkCnfConf cnfConf
+  checkNormalFormConfig cnfConf
   pure ()
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries

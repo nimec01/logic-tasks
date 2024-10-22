@@ -4,11 +4,11 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Tasks.LegalCNF.Config (
-    LegalCNFConfig(..),
-    LegalCNFInst(..),
-    checkLegalCNFConfig,
-    defaultLegalCNFConfig
+module Tasks.LegalNormalForm.Config (
+    LegalNormalFormConfig(..),
+    LegalNormalFormInst(..),
+    checkLegalNormalFormConfig,
+    defaultLegalNormalFormConfig,
     ) where
 
 
@@ -18,18 +18,18 @@ import Data.Set (Set)
 import Data.Map (Map)
 import GHC.Generics (Generic)
 
-import Config (BaseConfig(..), CnfConfig(..), dCnfConf)
+import Config (BaseConfig(..), NormalFormConfig(..), dNormalFormConf)
 import Formula.Types (lengthBound)
 import LogicTasks.Helpers (reject)
-import Util (checkCnfConf)
+import Util (checkNormalFormConfig)
 
 
 
 
-data LegalCNFConfig =
-  LegalCNFConfig
+data LegalNormalFormConfig =
+  LegalNormalFormConfig
   {
-      cnfConfig :: CnfConfig
+      normalFormConfig :: NormalFormConfig
     , formulas :: Int
     , illegals :: Int
     , includeFormWithJustOneClause :: Bool
@@ -43,11 +43,11 @@ data LegalCNFConfig =
 
 
 
-defaultLegalCNFConfig :: LegalCNFConfig
-defaultLegalCNFConfig =
-  LegalCNFConfig
+defaultLegalNormalFormConfig :: LegalNormalFormConfig
+defaultLegalNormalFormConfig =
+  LegalNormalFormConfig
   {
-    cnfConfig = dCnfConf
+    normalFormConfig = dNormalFormConf
   , formulas = 4
   , illegals = 2
   , includeFormWithJustOneClause = False
@@ -60,9 +60,8 @@ defaultLegalCNFConfig =
   }
 
 
-
-checkLegalCNFConfig :: OutputCapable m => LegalCNFConfig -> LangM m
-checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = BaseConfig{..}, ..}, ..}
+checkLegalNormalFormConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
+checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@NormalFormConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
         english "Only letters are allowed as literals."
         german "Nur Buchstaben können Literale sein."
@@ -83,7 +82,7 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
        (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
        `div` (2 :: Integer) + 1
       = reject $ do
-        english "Amount of Formulas is too big and bears the risk of generating similar CNFs."
+        english "Amount of Formulas is too big and bears the risk of generating similar formal forms."
         german "Menge an Formeln ist zu groß. Eine Formeln könnte mehrfach generiert werden."
     | maxClauseLength == 1 && maxClauseAmount == 1 = reject $ do
         english "Atomic propositions have no illegal forms"
@@ -95,24 +94,22 @@ checkLegalCNFConfig LegalCNFConfig{cnfConfig = cnfConf@CnfConfig {baseConf = Bas
         german "Die Formeln zur Generierung der Spezialformel reichen nicht aus."
     | minClauseAmount > lengthBound (length usedLiterals) maxClauseLength
       = reject $ do
-        english "minClauseAmount is too large. The generator cannot generate a CNF."
-        german "minClauseAmount ist zu groß. Es kann keine passende Cnf geriert werden."
+        english "minClauseAmount is too large. The generator cannot generate a normal form."
+        german "minClauseAmount ist zu groß. Es kann keine passende Normalform geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1) = reject $ do
         english "Cannot generate string with given minStringSize."
         german "String kann mit gegebenen minStringSize nicht generiert werden."
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
         english "Cannot generate string with given maxStringSize."
         german "String kann mit gegebenen maxStringSize nicht generiert werden."
-    | otherwise = checkCnfConf cnfConf
+    | otherwise = checkNormalFormConfig cnfConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
     boundsError = any (\(a,b) -> b < a)
       [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
 
-
-
-data LegalCNFInst =
-    LegalCNFInst
+data LegalNormalFormInst =
+    LegalNormalFormInst
     {
         serialsOfWrong :: Set Int
       , formulaStrings :: [String]

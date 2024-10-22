@@ -27,6 +27,7 @@ library
       LogicTasks.Util
       LogicTasks.Debug
       LogicTasks.Syntax.IllegalCnfs
+      LogicTasks.Syntax.IllegalDnfs
       LogicTasks.Syntax.IllegalFormulas
       LogicTasks.Syntax.SimplestFormula
       LogicTasks.Syntax.SubTreeSet
@@ -47,9 +48,9 @@ library
       Tasks.SuperfluousBrackets.Quiz
       Tasks.TreeToFormula.Config
       Tasks.TreeToFormula.Quiz
-      Tasks.LegalCNF.Config
-      Tasks.LegalCNF.Quiz
-      Tasks.LegalCNF.GenerateIllegal
+      Tasks.LegalNormalForm.Config
+      Tasks.LegalNormalForm.Quiz
+      Tasks.LegalNormalForm.GenerateIllegal
       Tasks.ComposeFormula.Config
       Tasks.ComposeFormula.Quiz
       Tasks.DecomposeFormula.Config
@@ -112,7 +113,7 @@ test-suite src-test
       DecomposeFormulaSpec
       FillSpec
       FormulaSpec
-      LegalCNFSpec
+      LegalNormalFormSpec
       LegalPropositionSpec
       ParsingSpec
       PickSpec

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
 
-module LegalCNFSpec (spec) where
+module LegalNormalFormSpec (spec) where
 
 import Data.Set (toList)
 import Data.Either(isLeft, isRight)
@@ -9,22 +9,22 @@ import Test.QuickCheck (Gen, choose, forAll, suchThat, sublistOf, elements, ioPr
 import Data.List((\\))
 
 import ParsingHelpers (fully)
-import Formula.Types (Cnf, genCnf)
+import Formula.Types (Cnf, genCnf, genDnf, Dnf)
 import Formula.Parsing (parser)
 import Text.ParserCombinators.Parsec (ParseError, parse)
-import Config (CnfConfig(..), BaseConfig(..))
+import Config (NormalFormConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
-import Trees.Helpers (cnfToSynTree)
-import Tasks.LegalCNF.Config (LegalCNFConfig(..), LegalCNFInst(..), checkLegalCNFConfig)
-import Tasks.LegalCNF.GenerateIllegal (genIllegalSynTree, )
-import Tasks.LegalCNF.Quiz (generateLegalCNFInst)
+import Trees.Helpers (cnfToSynTree, dnfToSynTree)
+import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
+import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree, )
+import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst, generateLegalDNFInst)
 import Control.OutputCapable.Blocks (Language(German))
 import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 
 import FormulaSpec (validBoundsCnf)
 
-validBoundsLegalCNF :: Gen LegalCNFConfig
-validBoundsLegalCNF = do
+validBoundsLegalNormalForm :: Gen LegalNormalFormConfig
+validBoundsLegalNormalForm = do
     ((minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),usedLiterals) <- validBoundsCnf
 
     let
@@ -39,9 +39,9 @@ validBoundsLegalCNF = do
     let includeFormWithJustOneClause = minClauseAmount == 1 && formulas - illegals > 0
         includeFormWithJustOneLiteralPerClause = minClauseLength == 1 && formulas - illegals > 1
     allowArrowOperators <- elements [True, False]
-    return $ LegalCNFConfig
+    return $ LegalNormalFormConfig
         {
-          cnfConfig = CnfConfig{
+          normalFormConfig = NormalFormConfig{
             minClauseAmount,
             maxClauseAmount,
             baseConf = BaseConfig{
@@ -61,7 +61,7 @@ validBoundsLegalCNF = do
           extraText = Nothing
         }
 
-invalidBoundsLegalCNF :: Gen LegalCNFConfig
+invalidBoundsLegalCNF :: Gen LegalNormalFormConfig
 invalidBoundsLegalCNF = do
     usedLiterals <- sublistOf ['A' .. 'Z'] `suchThat` \literals -> not (null literals) && (10>=length literals)
     maxClauseLength <- choose (1, 2 * length usedLiterals)
@@ -73,9 +73,9 @@ invalidBoundsLegalCNF = do
     illegals <- choose (-5, -1)
     minStringSize <- choose (minClauseLength * (2 + minClauseAmount), 300)
     maxStringSize <- choose (1, minStringSize)
-    return $ LegalCNFConfig
+    return $ LegalNormalFormConfig
         {
-          cnfConfig = CnfConfig{
+          normalFormConfig = NormalFormConfig{
             minClauseAmount,
             maxClauseAmount,
             baseConf = BaseConfig{
@@ -100,41 +100,70 @@ timeout = 30000000 -- 30 seconds
 
 spec :: Spec
 spec = do
-    describe "validBoundsLegalCNF" $
+    describe "validBoundsLegalNormalForm" $
         it "produces a valid config" $
-          withMaxSuccess 1000 $ forAll validBoundsLegalCNF $ \conf ->
-            ioProperty $ checkConfigWith German conf checkLegalCNFConfig
+          withMaxSuccess 1000 $ forAll validBoundsLegalNormalForm $ \conf ->
+            ioProperty $ checkConfigWith German conf checkLegalNormalFormConfig
 
     describe "invalidBoundsLegalCNF" $
         xit "produces a valid config" $
           forAll invalidBoundsLegalCNF $ \conf ->
-            ioProperty (not <$> checkConfigWith German conf checkLegalCNFConfig)
+            ioProperty (not <$> checkConfigWith German conf checkLegalNormalFormConfig)
 
-    describe "genIllegalSynTree" $
+    describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
-            forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
                 forAll
-                  (genIllegalSynTree
+                  (genIllegalCnfSynTree
                     (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
                      usedLiterals
                      allowArrowOperators
                   )
                   (not . judgeCnfSynTree)
+    describe "genIllegalDnfSynTree" $
+        it "the syntax Tree are not DNF syntax tree" $
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}, ..} ->
+                forAll
+                  (genIllegalDnfSynTree
+                    (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength)
+                     usedLiterals
+                     allowArrowOperators
+                  )
+                  (not . judgeDnfSynTree)
     describe "judgeCnfSynTree" $
         it "is reasonably implemented" $
-            forAll validBoundsLegalCNF $ \LegalCNFConfig {cnfConfig = CnfConfig{baseConf = BaseConfig{..}, ..}} ->
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
                 forAll
                   (genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
                   (judgeCnfSynTree . cnfToSynTree)
+    describe "judgeDnfSynTree" $
+        it "is reasonably implemented" $
+            forAll validBoundsLegalNormalForm $
+              \LegalNormalFormConfig {normalFormConfig = NormalFormConfig{baseConf = BaseConfig{..}, ..}} ->
+                forAll
+                  (genDnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals False)
+                  (judgeDnfSynTree . dnfToSynTree)
     describe "generateLegalCNFInst" $ do
         it "all of the formulas in the wrong serial should not be Cnf" $
-            within timeout $ forAll validBoundsLegalCNF $ \config ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
+            within timeout $ forAll validBoundsLegalNormalForm $ \config ->
+                forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   all (\x -> isLeft (cnfParse (formulaStrings !! (x - 1)))) (toList serialsOfWrong)
         it "all of the formulas not in the wrong serial should be Cnf" $
-            within timeout $ forAll validBoundsLegalCNF $ \config@LegalCNFConfig{..} ->
-                forAll (generateLegalCNFInst config) $ \LegalCNFInst{..} ->
+            within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
+                forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   all (\x -> isRight (cnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
+    describe "generateLegalDNFInst" $ do
+        it "all of the formulas in the wrong serial should not be Dnf" $
+            within timeout $ forAll validBoundsLegalNormalForm $ \config ->
+                forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
+                  all (\x -> isLeft (dnfParse (formulaStrings !! (x - 1)))) (toList serialsOfWrong)
+        it "all of the formulas not in the wrong serial should be Dnf" $
+            within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
+                forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
+                  all (\x -> isRight (dnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b
@@ -143,11 +172,24 @@ judgeCnfSynTree (Not a) = judgeLeaf a
 judgeCnfSynTree (Leaf _) = True
 judgeCnfSynTree _ = False
 
+judgeDnfSynTree :: SynTree BinOp a -> Bool
+judgeDnfSynTree (Binary Or a b) = judgeDnfSynTree a && judgeDnfSynTree b
+judgeDnfSynTree (Binary And a b) =  judgeDnfAnd a && judgeDnfAnd b
+judgeDnfSynTree (Not a) = judgeLeaf a
+judgeDnfSynTree (Leaf _) = True
+judgeDnfSynTree _ = False
+
 judgeCnfOr :: SynTree BinOp a -> Bool
 judgeCnfOr (Binary Or a b) =  judgeCnfOr a && judgeCnfOr b
 judgeCnfOr (Not a) = judgeLeaf a
 judgeCnfOr (Leaf _) = True
 judgeCnfOr _ = False
+
+judgeDnfAnd :: SynTree BinOp a -> Bool
+judgeDnfAnd (Binary And a b) =  judgeDnfAnd a && judgeDnfAnd b
+judgeDnfAnd (Not a) = judgeLeaf a
+judgeDnfAnd (Leaf _) = True
+judgeDnfAnd _ = False
 
 judgeLeaf :: SynTree o a -> Bool
 judgeLeaf (Leaf _) = True
@@ -155,3 +197,6 @@ judgeLeaf _ = False
 
 cnfParse :: String -> Either ParseError Cnf
 cnfParse = parse (fully parser) ""
+
+dnfParse :: String -> Either ParseError Dnf
+dnfParse = parse (fully parser) ""
