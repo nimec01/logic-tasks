@@ -16,7 +16,6 @@ import Control.OutputCapable.Blocks (
   singleChoiceSyntax,
   singleChoice,
   ArticleToUse (DefiniteArticle),
-  Rated,
   translations,
   )
 
