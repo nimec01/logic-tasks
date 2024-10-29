@@ -161,7 +161,7 @@ partialGrade _ (Number Nothing) = refuse $ indent $
           english "You did not give an index."
 partialGrade PickInst{formulas} (Number (Just index)) = singleChoiceSyntax True [1..length formulas] index
 
-completeGrade :: OutputCapable m => PickInst -> Number -> Rated m
+completeGrade :: OutputCapable m => PickInst -> Number -> LangM m
 completeGrade PickInst{..} (Number index) = singleChoice
   DefiniteArticle
   what
