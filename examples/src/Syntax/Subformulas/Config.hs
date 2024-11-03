@@ -11,6 +11,10 @@ import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 import qualified Data.Map as Map (fromList)
+import Data.Map (Map)
+
+listToFM :: Ord k => [(k, a)] -> Map k a
+listToFM = Map.fromList
 
 medium :: SubTreeConfig
 medium = SubTreeConfig
@@ -21,7 +25,7 @@ medium = SubTreeConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)

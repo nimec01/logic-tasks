@@ -12,6 +12,10 @@ import Test.Hspec
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 import qualified Data.Map as Map (fromList)
+import Data.Map (Map)
+
+listToFM :: Ord k => [(k, a)] -> Map k a
+listToFM = Map.fromList
 
 
 small :: ComposeFormulaConfig
@@ -23,7 +27,7 @@ small = ComposeFormulaConfig
     , maxDepth = 4
     , availableAtoms = "ABCD"
     , minAmountOfUniqueAtoms = 4
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 0)
@@ -50,7 +54,7 @@ medium = ComposeFormulaConfig
     , maxDepth = 6
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)

@@ -12,6 +12,10 @@ import Tasks.TreeToFormula.Config (
 import Util.VerifyConfig
 import Control.OutputCapable.Blocks (Language(German))
 import qualified Data.Map as Map (fromList)
+import Data.Map (Map)
+
+listToFM :: Ord k => [(k, a)] -> Map k a
+listToFM = Map.fromList
 
 -- Weight 0.34
 task03 :: TreeToFormulaConfig
@@ -23,7 +27,7 @@ task03 = TreeToFormulaConfig
     , maxDepth = 5
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 0)
@@ -50,7 +54,7 @@ task04 =  TreeToFormulaConfig
     , maxDepth = 9
     , availableAtoms = "ABCDEFG"
     , minAmountOfUniqueAtoms = 7
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 0)

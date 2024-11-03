@@ -11,6 +11,10 @@ import Control.OutputCapable.Blocks (english, german, translations, Language (Ge
 import Test.Hspec
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
+import Data.Map (Map)
+
+listToFM :: Ord k => [(k, a)] -> Map k a
+listToFM = Map.fromList
 
 -- Weight 0.33
 task02 :: SuperfluousBracketsConfig
@@ -22,7 +26,7 @@ task02 = SuperfluousBracketsConfig
     , maxDepth = 5
     , availableAtoms = "ABCDE"
     , minAmountOfUniqueAtoms = 5
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 0)
@@ -52,7 +56,7 @@ task05 = SuperfluousBracketsConfig
     , maxDepth = 6
     , availableAtoms = "ABCDEF"
     , minAmountOfUniqueAtoms = 6
-    , binOpFrequencies = Map.fromList
+    , binOpFrequencies = listToFM
       [ (And, 1)
       , (Or, 1)
       , (Impl, 1)
