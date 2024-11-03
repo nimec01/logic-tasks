@@ -9,15 +9,16 @@ import Tasks.SynTree.Config (
   )
 import Trees.Types (BinOp(..))
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German,English))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
-medium :: SubTreeConfig
-medium = SubTreeConfig
+-- 2024: Weight 0.3
+task04 :: SubTreeConfig
+task04 = SubTreeConfig
   { syntaxTreeConfig = SynTreeConfig
     { minNodes = 10
     , maxNodes = 14
@@ -38,11 +39,11 @@ medium = SubTreeConfig
     }
   , allowSameSubTree = False
   , minSubTrees = 3
-  , extraText = Nothing
+  , extraText =  Just (listToFM [(English,"It does not matter in which order the formulas appear in the list."),(German,"Es spielt keine Rolle, in welcher Reihenfolge die Formeln in der Liste stehen.")])
   , printSolution = True
-  , offerUnicodeInput = False
+  , offerUnicodeInput = True
   }
 
 spec :: Spec
 spec = do
-  describe "medium" $ verifyConfig German medium checkSubTreeConfig
+  describe "task04" $ verifyConfig German task04 checkSubTreeConfig

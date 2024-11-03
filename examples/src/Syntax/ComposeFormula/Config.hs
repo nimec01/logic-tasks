@@ -45,8 +45,9 @@ small = ComposeFormulaConfig
   , offerUnicodeInput = False
   }
 
-medium :: ComposeFormulaConfig
-medium = ComposeFormulaConfig
+-- 2024: Weight 0.33
+task03 :: ComposeFormulaConfig
+task03 = ComposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
     { minNodes = 10
     , maxNodes = 14
@@ -66,13 +67,13 @@ medium = ComposeFormulaConfig
     , minUniqueBinOperators = 2
     }
   , treeDisplayModes = (TreeDisplay, TreeDisplay)
-  , extraHintsOnAssociativity = True
+  , extraHintsOnAssociativity = False
   , extraText = Nothing
   , printSolution = True
-  , offerUnicodeInput = False
+  , offerUnicodeInput = True
   }
 
 spec :: Spec
 spec = do
   describe "small" $ verifyConfig German small checkComposeFormulaConfig
-  describe "medium" $ verifyConfig German medium checkComposeFormulaConfig
+  describe "task03" $ verifyConfig German task03 checkComposeFormulaConfig

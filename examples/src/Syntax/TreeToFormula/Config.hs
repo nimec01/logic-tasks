@@ -17,9 +17,9 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- Weight 0.34
-task03 :: TreeToFormulaConfig
-task03 = TreeToFormulaConfig
+-- 2024: Weight 0.34
+task02 :: TreeToFormulaConfig
+task02 = TreeToFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
     { minNodes = 10
     , maxNodes = 12
@@ -41,7 +41,7 @@ task03 = TreeToFormulaConfig
   , extraHintsOnSemanticEquivalence = True
   , extraText = Nothing
   , printSolution = True
-  , offerUnicodeInput = False
+  , offerUnicodeInput = True
   }
 
 -- Weight 0.33
@@ -77,5 +77,5 @@ task10 = task04
 
 spec :: Spec
 spec = do
-  describe "task03" $ verifyConfig German task03 checkTreeToFormulaConfig
+  describe "task02" $ verifyConfig German task02 checkTreeToFormulaConfig
   describe "task04" $ verifyConfig German task04 checkTreeToFormulaConfig

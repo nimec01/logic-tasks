@@ -16,7 +16,7 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- Weight 0.33
+-- 2024: Weight 0.33
 task01 :: LegalPropositionConfig
 task01 = LegalPropositionConfig
   { syntaxTreeConfig = SynTreeConfig
