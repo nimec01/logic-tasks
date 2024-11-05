@@ -28,9 +28,12 @@ import Tasks.SuperfluousBrackets.Config (
 import Trees.Helpers
 import Trees.Types
 import Control.Monad (when)
-import Formula.Parsing.Delayed (Delayed, withDelayed, displayParseError, withDelayedSucceeding)
+import Formula.Parsing.Delayed (Delayed, parseDelayedWithAndThen, complainAboutMissingParenthesesIfNotFailingOn, withDelayedSucceeding)
 import Formula.Parsing (Parse(..))
 import Trees.Parsing()
+import UniversalParser (logicToken)
+import Text.Parsec (many)
+import Data.Functor (void)
 
 
 
@@ -98,7 +101,7 @@ start = FormulaAnswer Nothing
 
 
 partialGrade :: OutputCapable m => SuperfluousBracketsInst -> Delayed FormulaAnswer -> LangM m
-partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError
+partialGrade = parseDelayedWithAndThen parser complainAboutMissingParenthesesIfNotFailingOn (void $ many logicToken) . partialGrade'
 
 partialGrade' :: OutputCapable m => SuperfluousBracketsInst -> FormulaAnswer -> LangM m
 partialGrade' SuperfluousBracketsInst{..} f
