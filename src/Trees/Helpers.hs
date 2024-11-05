@@ -33,9 +33,9 @@ module Trees.Helpers
 
 import Control.Monad (void)
 import Control.Monad.State (get, put, runState, evalState)
-import Data.Set(fromList, Set, toList)
+import Data.Set (fromList, Set)
 import Data.List.Extra (nubBy, nubOrd)
-import qualified Data.Foldable as Foldable (toList)
+import Data.Foldable (toList)
 import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import qualified Formula.Types as SetFormulaDnf (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
@@ -50,7 +50,7 @@ numberAllBinaryNodes = flip evalState 1 . go
       next = do {current <- get; put (current + 1); return current}
 
 collectLeaves :: Foldable t => t c -> [c]
-collectLeaves = Foldable.toList
+collectLeaves = toList
 
 relabelShape :: SynTree o () -> [c] -> SynTree o c
 relabelShape shape contents =

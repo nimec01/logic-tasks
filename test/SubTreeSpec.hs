@@ -6,7 +6,7 @@ import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Text.Parsec (parse)
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
-import Data.Set (fromList, size, toList)
+import Data.Set (size)
 import qualified Data.Set (map)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
@@ -54,7 +54,7 @@ spec = do
           let
             correctTrees = allNotLeafSubTrees tree
           in
-            all (\tree -> parse (parser @(SynTree BinOp Char)) "" (display tree) == Right tree) $ toList correctTrees
+            all (\tree -> parse (parser @(SynTree BinOp Char)) "" (display tree) == Right tree) correctTrees
     it "correct formulas are stored" $
       forAll validBoundsSubTree $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
@@ -71,18 +71,17 @@ spec = do
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
             correctFormulas = Data.Set.map display correctTrees
-            correctFormulas' = toList correctFormulas
           in
-            all (`isInfixOf` display tree) correctFormulas'
+            all (`isInfixOf` display tree) correctFormulas
     it "Converting correct subformulas Strings into formulas and parsing them again should yield the original" $
       forAll validBoundsSubTree $ \config ->
           forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
             let
               correctFormulas = Data.Set.map display correctTrees
-              propFormulas = map
+              propFormulas = Data.Set.map
                 (fromRight' . parse (parser @(PropFormula Char)) "")
-                (toList correctFormulas)
-              inputSet = fromList (map show propFormulas)
+                correctFormulas
+              inputSet = Data.Set.map show propFormulas
             in
               inputSet == correctFormulas
     xit "The above should be true even when deleting spaces in the input" $
@@ -90,9 +89,9 @@ spec = do
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
             correctFormulas = Data.Set.map display correctTrees
-            propFormulas = map
+            propFormulas = Data.Set.map
               (fromRight' . parse (parser @(PropFormula Char)) "" . deleteSpaces)
-              (toList correctFormulas)
-            inputSet = fromList (map show propFormulas)
+              correctFormulas
+            inputSet = Data.Set.map show propFormulas
           in
             inputSet == correctFormulas

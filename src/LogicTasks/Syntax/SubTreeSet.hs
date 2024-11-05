@@ -24,7 +24,6 @@ import Control.OutputCapable.Blocks (
   reRefuse,
   )
 import Data.List (intercalate, nub, sort)
-import Data.Set (toList)
 import qualified Data.Set (map)
 import qualified Data.Map as Map (fromSet, insert, filter)
 import Data.Maybe (isNothing, fromJust)
@@ -177,7 +176,7 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
       english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
       german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
 
-    for_ (toList correctTrees) $ \x -> do
+    for_ correctTrees $ \x -> do
       code (display x)
       image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()

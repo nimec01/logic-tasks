@@ -79,7 +79,7 @@ data PropFormula c
     | Neg (PropFormula c)
     | Brackets (PropFormula c)
     | Assoc BinOp (PropFormula c) (PropFormula c)
-  deriving (Data, Eq, Foldable)
+  deriving (Data, Eq, Ord, Foldable)
 
 
 
