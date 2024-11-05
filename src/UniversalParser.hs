@@ -142,7 +142,7 @@ orParser :: Parser ()
 orParser =
       keyword "or"
   <|> keyword "oder" {- german -}
-  <|> tokenSymbol "∨" <|> tokenSymbol "\\/"
+  <|> tokenSymbol "∨" <|> tokenSymbol "v" <|> tokenSymbol "\\/"
   <?> "Disjunction"
 
 andParser :: Parser ()
