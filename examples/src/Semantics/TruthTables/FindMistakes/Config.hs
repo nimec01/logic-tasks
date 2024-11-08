@@ -50,7 +50,7 @@ task11 = DecideConfig
   , percentageOfChanged = 40
   , percentTrueEntries = Nothing
   , extraText = Just (listToFM
-                       [(German, "Sie haben nur 2 Versuche, die Aufgabe zu lösen."),
+                       [(German, "Sie haben nur 2 Versuche, die Aufgabe zu lösen."), {- german -}
                         (English, "You have only 2 attempts to solve this task.")
                        ])
   , printSolution = True
