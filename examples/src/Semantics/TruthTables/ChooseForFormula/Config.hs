@@ -13,15 +13,16 @@ import Util.VerifyConfig
 -- Weight 0.33
 task08 :: PickConfig
 task08 = PickConfig
-  { formulaConfig = FormulaCnf $ NormalFormConfig
-    { baseConf = BaseConfig
-      { minClauseLength = 3
-      , maxClauseLength = 3
-      , usedLiterals = "ABCD"
-      }
-    , minClauseAmount = 2
-    , maxClauseAmount = 2
-    }
+  { formulaConfig =
+      FormulaCnf (NormalFormConfig
+                  { baseConf = BaseConfig
+                    { minClauseLength = 3
+                    , maxClauseLength = 3
+                    , usedLiterals = "ABCD"
+                    }
+                  , minClauseAmount = 2
+                  , maxClauseAmount = 2
+                  })
   , amountOfOptions = 3
   , percentTrueEntries = Nothing
   , extraText = Nothing
@@ -31,15 +32,16 @@ task08 = PickConfig
 -- Weight 0.25
 task19 :: PickConfig
 task19 = PickConfig
-  { formulaConfig = FormulaCnf $ NormalFormConfig
-    { baseConf = BaseConfig
-        { minClauseLength = 3
-        , maxClauseLength = 3
-        , usedLiterals = "ABCDE"
-        }
-    , minClauseAmount = 4
-    , maxClauseAmount = 4
-    }
+  { formulaConfig =
+      FormulaCnf (NormalFormConfig
+                   { baseConf = BaseConfig
+                     { minClauseLength = 3
+                     , maxClauseLength = 3
+                     , usedLiterals = "ABCDE"
+                     }
+                   , minClauseAmount = 4
+                   , maxClauseAmount = 4
+                   })
   , amountOfOptions = 4
   , percentTrueEntries = Nothing
   , extraText = Nothing
