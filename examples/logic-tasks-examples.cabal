@@ -20,8 +20,8 @@ library
       Semantics.TruthTables.MinTerm.Config
       Syntax.ComposeFormula.Config
       Syntax.DecomposeFormula.Config
-      Syntax.InvalidCnfs.Config
       Syntax.InvalidFormulas.Config
+      Syntax.InvalidNormalForms.Config
       Syntax.RemoveBrackets.Config
       Syntax.Subformulas.Config
       Syntax.TreeToFormula.Config
