@@ -9,9 +9,9 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 
--- Weight 0.34
-task06 :: FillConfig
-task06 = FillConfig
+-- 2024: Weight 0.3
+task07 :: FillConfig
+task07 = FillConfig
   { formulaConfig =
       FormulaCnf (NormalFormConfig
                   { baseConf = BaseConfig
@@ -49,5 +49,5 @@ task20 = FillConfig
 
 spec :: Spec
 spec = do
-  describe "task06" $ verifyFormulaConfig (formulaConfig task06)
+  describe "task07" $ verifyFormulaConfig (formulaConfig task07)
   describe "task20" $ verifyFormulaConfig (formulaConfig task20)

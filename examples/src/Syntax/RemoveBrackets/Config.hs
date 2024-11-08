@@ -16,9 +16,9 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- Weight 0.33
-task02 :: SuperfluousBracketsConfig
-task02 = SuperfluousBracketsConfig
+-- 2024: Weight 0.3
+task06 :: SuperfluousBracketsConfig
+task06 = SuperfluousBracketsConfig
   { syntaxTreeConfig = SynTreeConfig
     { minNodes = 10
     , maxNodes = 12
@@ -43,7 +43,7 @@ task02 = SuperfluousBracketsConfig
                         (English,"Hint: You need to remove ALL unnecessary pairs of brackets. Not just the ones that are not needed due to associativity.")
                        ])
   , printSolution = True
-  , offerUnicodeInput = False
+  , offerUnicodeInput = True
   }
 
 
@@ -79,5 +79,5 @@ task05 = SuperfluousBracketsConfig
 
 spec :: Spec
 spec = do
-  describe "task02" $ verifyConfig German task02 checkSuperfluousBracketsConfig
+  describe "task06" $ verifyConfig German task06 checkSuperfluousBracketsConfig
   describe "task05" $ verifyConfig German task05 checkSuperfluousBracketsConfig

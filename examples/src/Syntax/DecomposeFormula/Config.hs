@@ -41,8 +41,9 @@ small = DecomposeFormulaConfig
   , offerUnicodeInput = False
   }
 
-medium :: DecomposeFormulaConfig
-medium = DecomposeFormulaConfig
+-- 2024: Weight 0.3
+task05 :: DecomposeFormulaConfig
+task05 = DecomposeFormulaConfig
   { syntaxTreeConfig = SynTreeConfig
     { minNodes = 10
     , maxNodes = 14
@@ -64,10 +65,10 @@ medium = DecomposeFormulaConfig
   , extraHintsOnAssociativity = True
   , extraText = Nothing
   , printSolution = True
-  , offerUnicodeInput = False
+  , offerUnicodeInput = True
   }
 
 spec :: Spec
 spec = do
   describe "small" $ verifyConfig German small checkDecomposeFormulaConfig
-  describe "medium" $ verifyConfig German medium checkDecomposeFormulaConfig
+  describe "task05" $ verifyConfig German task05 checkDecomposeFormulaConfig
