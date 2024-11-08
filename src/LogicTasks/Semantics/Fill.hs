@@ -183,8 +183,8 @@ completeGrade FillInst{..} sol = reRefuse
     (_,diff) = pairwiseCheck zippedShort
     displayMistake = show $ length diff
     what = translations $ do
-      german "Wahrheitswerte"
-      english "truth values"
+      german "Wahr-Werte"
+      english "True values"
     solutionDisplay | showSolution = Just $ show missingValues
                     | otherwise = Nothing
     solution = Map.fromAscList $ zip [1 :: Int ..] missingValues
