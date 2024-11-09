@@ -60,7 +60,7 @@ description SuperfluousBracketsInst{..} = do
 
     instruct $ do
       english "Remove all unnecessary pairs of brackets in the given formula. Give your answer as a propositional logic formula."
-      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer Aussagenlogischen Formel an."
+      german "Entfernen Sie alle unnötigen Klammer-Paare in der gegebenen Formel. Geben Sie die Lösung in Form einer aussagenlogischen Formel an."
 
     paragraph $ indent $ do
       translate $ do

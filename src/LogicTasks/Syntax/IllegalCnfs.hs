@@ -35,11 +35,11 @@ descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
 
     instruct $ do
       english $ "Which of these formulas are given in " ++ localise English what ++ "?"
-      german $ "Welche dieser Formeln sind in " ++ localise German what ++ " angegeben?"
+      german $ "Welche dieser Formeln liegen in " ++ localise German what ++ " vor?"
 
     when inputHelp $ do
       instruct $ do
-        english $  "Enter a list containing the indices of the formulas in " ++ localise English what ++ " to submit your answer."
+        english $  "Enter a list containing the indices of the formulas given in " ++ localise English what ++ " to submit your answer."
         german $ "Geben Sie eine Liste der Indizes aller in " ++ localise German what ++ " vorliegender Formeln als Ihre Lösung an."
 
       example "[2,3]" $ do
