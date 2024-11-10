@@ -54,7 +54,7 @@ description path TreeToFormulaInst{..} = do
       german "(Dabei dürfen Sie beliebig viele zusätzliche Klammerpaare hinzufügen.)"
 
     when addExtraHintsOnSemanticEquivalence $ instruct $ do
-      english "Remarks: The exact formula of the syntax tree must be specified. Other formulas that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
+      english "Remarks: The exact formula of the syntax tree must be given. Other formulas that are semantically equivalent to this formula are incorrect solutions! You are also not allowed to use associativity in this task in order to save brackets."
       german "Hinweise: Es muss die exakte Formel des Syntaxbaums angegeben werden. Andere, selbst zu dieser Formel semantisch äquivalente Formeln sind keine korrekte Lösung! Auch dürfen Sie bei dieser Aufgabe nicht Assoziativität verwenden, um Klammern einzusparen."
 
     keyHeading
@@ -88,7 +88,7 @@ partialGrade' inst sol
           english "You did not submit a solution."
           german "Die Abgabe ist leer."
         | notNull atomicsDiff = reject $ do
-          english $ "Your solution contains unknown atomic formulas: " ++ diffDisplay
+          english $ "Your submission contains unknown atomic formulas: " ++ diffDisplay
           german $ "Die Abgabe enthält unbekannte atomare Formeln: " ++ diffDisplay
         | otherwise = pure ()
   where treeAtomics = atomics $ tree inst
@@ -113,7 +113,7 @@ completeGrade'
 completeGrade' path inst sol
     | treeAnswer /= correctTree = refuse $ do
         instruct $ do
-          english "Your solution is not correct. The syntax tree for your entered formula looks like this:"
+          english "Your submission is not correct. The syntax tree for your submitted formula looks like this:"
           german "Ihre Abgabe ist nicht die korrekte Lösung. Der Syntaxbaum zu Ihrer eingegebenen Formel sieht so aus:"
 
         image $=<< liftIO $ cacheTree (transferToPicture treeAnswer) path
@@ -126,7 +126,7 @@ completeGrade' path inst sol
         when (showSolution inst) $
           example (correct inst) $ do
             english "A possible solution for this task is:"
-            german "Eine mögliche Lösung für die Aufgabe ist:"
+            german "Eine mögliche Lösung für diese Aufgabe ist:"
 
         pure ()
     | otherwise = pure ()
