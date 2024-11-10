@@ -137,7 +137,7 @@ partialGrade' :: OutputCapable m => ComposeFormulaInst -> [TreeFormulaAnswer] ->
 partialGrade' ComposeFormulaInst{..} sol
   | length (nubOrd sol) /= 2 =
     reject $ do
-      english "Your submission does not contain the right amount of unique formulas. There need to be exactly two unique formulas."
+      english "Your submission does not contain the right amount of unique formulas. There need to be exactly two different formulas."
       german  "Sie haben nicht die richtige Anzahl an einzigartigen Formeln eingegeben. Es werden genau zwei unterschiedliche Formeln erwartet."
   | any (isNothing . maybeTree) sol =
     reject $ do
@@ -149,15 +149,15 @@ partialGrade' ComposeFormulaInst{..} sol
       german "Mindestens eine Ihrer Formeln beinhaltet nicht den vorgegebenen Operator."
   | any (`notElem` correctLits) literals =
     reject $ do
-      english "Your solution contains unknown literals."
+      english "Your submission contains unknown literals."
       german "Ihre Abgabe beinhaltet unbekannte Literale."
   | any (`notElem` literals) correctLits =
     reject $ do
-      english "Your solution does not contain all literals present in the original syntax trees/formulas."
+      english "Your submission does not contain all literals present in the original syntax trees/formulas."
       german "Ihre Abgabe beinhaltet nicht alle Literale aus den ursprünglichen Syntaxbäumen/Formeln."
   | usedOperators > correctOperators =
     reject $ do
-      english "Your solution contains too many different operators."
+      english "Your submission contains too many different operators."
       german "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
 
   | otherwise = pure ()
@@ -180,7 +180,7 @@ completeGrade' :: (OutputCapable m, MonadIO m) =>
 completeGrade' path ComposeFormulaInst{..} sol
   | lrTree `notElem` parsedSol || rlTree `notElem` parsedSol = refuse $ do
     instruct $ do
-      english "Your solution is not correct. The syntax trees for your entered formulas look like this:"
+      english "Your submission is not correct. The syntax trees for your entered formulas look like this:"
       german "Ihre Abgabe ist nicht die korrekte Lösung. Die Syntaxbäume zu Ihren eingegebenen Formeln sehen so aus:"
 
     for_ parsedSol $ \synTree ->
@@ -189,7 +189,7 @@ completeGrade' path ComposeFormulaInst{..} sol
     when showSolution $
       example (concat ["[", display lrTree, ",", display rlTree, "]"]) $ do
         english "A possible solution for this task is:"
-        german "Eine mögliche Lösung für die Aufgabe ist:"
+        german "Eine mögliche Lösung für diese Aufgabe ist:"
 
     pure ()
   | otherwise = pure ()
