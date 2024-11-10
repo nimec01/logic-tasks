@@ -55,12 +55,12 @@ description withListInput SubTreeInst{..} = do
     focus (display tree)
 
     instruct $ do
-      english $ "Find " ++ show minInputTrees ++ " non-atomic subformulas that are contained in it."
-      german $ "Finden Sie " ++ show minInputTrees ++ " nicht-atomare Teilformeln, die in dieser Formel enthalten sind."
+      english $ "Give " ++ show minInputTrees ++ " non-atomic subformulas that are contained in this formula."
+      german $ "Geben Sie " ++ show minInputTrees ++ " nicht-atomare Teilformeln an, die in dieser Formel enthalten sind."
 
     instruct $ do
       english "Submit your solution as a list of subformulas."
-      german "Geben Sie die Lösung als eine Liste der Teilformeln an."
+      german "Reichen Sie Ihre Lösung als eine Liste von Teilformeln ein."
 
     instruct $ do
       english "Remove bracket pairs which only serve to enclose an entire subformula you provide, and do not add any additional brackets."
@@ -115,18 +115,18 @@ partialGrade' :: OutputCapable m => SubTreeInst -> [FormulaAnswer] -> LangM m
 partialGrade' SubTreeInst{..} fs
     | any (isNothing . maybeForm) fs =
       reject $ do
-        english "At least one of your answers is not a valid formula."
-        german "Mindestens eine der Antworten ist keine gültige Formel."
+        english "At least one of your answers is not a well-formed formula."
+        german "Mindestens eine Ihrer Antworten ist keine wohlaufgebaute Formel."
 
     | any (`notElem` origLits) literals =
       reject $ do
-        english "At least one subformula contains unknown literals."
-        german "Ihre Abgabe beinhaltet mindestens eine Teilformel mit unbekannten Literalen."
+        english "At least one formula in your submission contains unknown literals."
+        german "Ihre Abgabe beinhaltet mindestens eine Formel mit unbekannten Literalen."
 
     | any (> origOpsNum) opsNum =
       reject $ do
-        english "Your solution contains at least one subformula with more logical operators than the original formula."
-        german "Ihre Abgabe beinhaltet mindestens eine Teilformel mit mehr logische Operatoren als die ursprüngliche Formel."
+        english "Your submission contains at least one formula with more logical operators than the original formula."
+        german "Ihre Abgabe beinhaltet mindestens eine Formel mit mehr logische Operatoren als die ursprüngliche Formel."
 
     | amount < minInputTrees =
       reject $ do
@@ -135,7 +135,7 @@ partialGrade' SubTreeInst{..} fs
 
     | amount > minInputTrees =
       reject $ do
-        english "Your solution contains too many formulas."
+        english "Your submission contains too many formulas."
         german "Ihre Abgabe enthält zu viele Formeln."
 
     | otherwise = pure ()
@@ -174,7 +174,7 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
   $ when showSolution $ indent $ do
     instruct $ do
       english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
-      german ("Eine mögliche Lösung für die Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
+      german ("Eine mögliche Lösung für diese Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
 
     for_ correctTrees $ \x -> do
       code (display x)
