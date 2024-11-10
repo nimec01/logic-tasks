@@ -63,17 +63,17 @@ defaultSynTreeConfig =
 checkSynTreeConfig :: OutputCapable m => SynTreeConfig -> LangM m
 checkSynTreeConfig SynTreeConfig {..}
     | not (all isLetter availableAtoms) = reject $ do
-        english "Only letters are allowed as literals."
-        german "Nur Buchstaben dürfen Literale sein."
+        english "Only letters are allowed as atomic formulas."
+        german "Nur Buchstaben dürfen atomare Formeln sein."
     | length availableAtoms /= length (nubOrd availableAtoms) = reject $ do
-        english "No letter should be given as possible literal twice."
-        german "Kein Buchstabe darf mehrmals als mögliches Literal genannt sein."
+        english "No letter should be given as possible atomic formula twice."
+        german "Kein Buchstabe darf mehrmals als mögliche atomare Formel genannt sein."
     | minUniqueBinOperators == 0 && minAmountOfUniqueAtoms > 1 = reject $ do
         english "Without binary operators there cannot be more than one leaf node."
         german "Ohne binäre Operatoren kann es nicht mehr als einen Blattknoten geben."
     | fromIntegral (length availableAtoms) < minAmountOfUniqueAtoms = reject $ do
-        english "You have provided too few literals."
-        german "Anzahl Literale ist zu niedrig für gegebene Einstellungen."
+        english "You have provided too few atomic formulas."
+        german "Anzahl atomarer Formeln ist zu niedrig für gegebene Einstellungen."
     | maxConsecutiveNegations < 0 = reject $ do
         english "Maximal number of consecutive negations must not be negative"
         german "Maximale Anzahl aufeinander folgender Negationen kann nicht negativ sein."
@@ -84,11 +84,11 @@ checkSynTreeConfig SynTreeConfig {..}
         english "The maximum number of consecutive negations cannot reach or exceed the maximum depth."
         german "Die maximale Anzahl aufeinanderfolgender Negationen kann die maximale Tiefe nicht erreichen oder überschreiten."
     | minAmountOfUniqueAtoms < 1 = reject $ do
-        english "At least one literal occurs in each formula."
-        german "Formel ohne Literale existiert nicht."
+        english "At least one atomic formula occurs in each formula."
+        german "Formel ohne atomare Formeln existiert nicht."
     | minNodes < minAmountOfUniqueAtoms * 2 - 1 = reject $ do
-        english "Your minimum number of nodes does not permit enough leaves for all desired literals."
-        german "Minimale Anzahl der Knoten ist zu niedrig um alle Literale zu verwenden."
+        english "Your minimum number of nodes does not permit enough leaves for all desired atomic formulas."
+        german "Minimale Anzahl der Knoten ist zu niedrig um alle atomaren Formeln zu verwenden."
     | minNodes <= 2 * minUniqueBinOperators = reject $ do
         english "The minimal number of nodes is incompatible with the minimal number of unique operators"
         german "Die minimale Anzahl der Knoten erlaubt nicht die minimale Anzahl an unterschiedlichen Operatoren"

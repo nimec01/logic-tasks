@@ -149,12 +149,12 @@ partialGrade' ComposeFormulaInst{..} sol
       german "Mindestens eine Ihrer Formeln beinhaltet nicht den vorgegebenen Operator."
   | any (`notElem` correctLits) literals =
     reject $ do
-      english "Your submission contains unknown literals."
-      german "Ihre Abgabe beinhaltet unbekannte Literale."
+      english "Your submission contains unknown atomic formulas."
+      german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
   | any (`notElem` literals) correctLits =
     reject $ do
-      english "Your submission does not contain all literals present in the original syntax trees/formulas."
-      german "Ihre Abgabe beinhaltet nicht alle Literale aus den ursprünglichen Syntaxbäumen/Formeln."
+      english "Your submission does not contain all atomic formulas present in the original syntax trees/formulas."
+      german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus den ursprünglichen Syntaxbäumen/Formeln."
   | usedOperators > correctOperators =
     reject $ do
       english "Your submission contains too many different operators."

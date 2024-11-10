@@ -47,14 +47,14 @@ description SuperfluousBracketsInst{..} = do
     focus stringWithSuperfluousBrackets
 
     instruct $ do
-      english "Since ∧ and ∨ are associative, it is not necessary to use brackets when combining three or more atoms with the same operator, for example in:"
-      german "Aufgrund der Assoziativität von ∧ und ∨ müssen Formeln mit drei oder mehr atomaren Aussagen und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
+      english "Since ∧ and ∨ are associative, it is not necessary to use brackets in subformulas with three or more atomic formulas and the same logical operators, for example in:"
+      german "Aufgrund der Assoziativität von ∧ und ∨ muss in Teilformeln mit drei oder mehr atomaren Formeln und den gleichen logischen Operatoren nicht geklammert werden, z.B. bei:"
 
     focus "A ∧ B ∧ C"
 
     instruct $ do
-      english "Similarly brackets are not necessary for one or more consecutive negations directly in front of an atom, for example in:"
-      german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Aussage nicht nötig, z.B. bei"
+      english "Similarly, brackets are not necessary for one or more consecutive negations directly in front of an atomic formula, for example in:"
+      german "Genauso sind Klammern bei einer oder mehreren Negationen direkt vor einer atomaren Formel nicht nötig, z.B. bei"
 
     focus "¬¬A"
 
@@ -64,14 +64,14 @@ description SuperfluousBracketsInst{..} = do
 
     paragraph $ indent $ do
       translate $ do
-        english "For example, if (A ∨ B) is the given formula, then the solution is:"
+        english "For example, if (A ∨ B) is the given formula, then the following solution is correct:"
         german "Ist z.B. (A ∨ B) die gegebene Formel, dann ist die folgende Lösung korrekt:"
       translatedCode $ flip localise $ translations exampleCode
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die Ausgangsformel in die Abgabe kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
-      english "You can copy the original formula into the solution box and remove unnecessary brackets or use the following syntax:"
+      german "Sie können dafür die ürsprüngliche Formel in das Abgabefeld kopieren und unnötige Klammern entfernen, oder die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the submission field and remove unnecessary brackets, or use the following syntax:"
     basicOpKey unicodeAllowed
     when showArrowOperators arrowsKey
 
@@ -112,22 +112,22 @@ partialGrade' SuperfluousBracketsInst{..} f
 
     | any (`notElem` correctLits) literals =
       reject $ do
-        english "Your solution contains unknown literals."
-        german "Ihre Abgabe beinhaltet unbekannte Literale."
+        english "Your submission contains unknown atomic formulas."
+        german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
 
     | any (`notElem` literals) correctLits =
       reject $ do
-        english "Your solution does not contain all literals present in the original formula."
-        german "Ihre Abgabe beinhaltet nicht alle Literale aus der ursprünglichen Formel."
+        english "Your submission does not contain all atomic formulas present in the original formula."
+        german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
 
     | opsNum > correctOpsNum =
       reject $ do
-        english "Your solution contains more logical operators than the original formula."
+        english "Your submission contains more logical operators than the original formula."
         german "Ihre Abgabe beinhaltet mehr logische Operatoren als die ursprüngliche Formel."
 
     | opsNum < correctOpsNum =
       reject $ do
-        english "Your solution contains less logical operators than the original formula."
+        english "Your submission contains less logical operators than the original formula."
         german "Ihre Abgabe beinhaltet weniger logische Operatoren als die ursprüngliche Formel."
 
     | otherwise = pure()
@@ -151,7 +151,7 @@ completeGrade' inst sol
       when (showSolution inst) $ do
         example (simplestString inst) $ do
           english "The solution for this task is:"
-          german "Die Lösung für die Aufgabe ist:"
+          german "Die Lösung für diese Aufgabe ist:"
 
       pure ()
     | otherwise = pure()

@@ -171,7 +171,7 @@ negationParser =
   <?> "Negation"
 
 atomParser :: Parser Char
-atomParser = token (satisfy (`elem` ['A'..'Z'])) <?> "atomic Proposition"
+atomParser = token (satisfy (`elem` ['A'..'Z'])) <?> "atomic formula"
 
 -- parser for individual tokens
 logicToken :: Parser ()
@@ -273,7 +273,7 @@ formula LevelSpec{..}
   atom :: Parser Atom
   atom
     | allowAtomicProps = Atom <$> atomParser
-    | otherwise = fail "no atomic propositions allowed at this level"
+    | otherwise = fail "no atomic formulas allowed at this level"
 
   nested :: Parser Nested
   nested

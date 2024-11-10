@@ -63,8 +63,8 @@ defaultLegalNormalFormConfig =
 checkLegalNormalFormConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
 checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@NormalFormConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedLiterals) = reject $ do
-        english "Only letters are allowed as literals."
-        german "Nur Buchstaben können Literale sein."
+        english "Only letters are allowed as atomic formulas."
+        german "Nur Buchstaben können atomare Formeln sein."
     | negArgs = reject $ do
         english "These parameters need to be greater than zero: minClauseAmount, minClauseLength, minStringSize, formulas."
         german "Diese Parameter müssen größer als null sein: minClauseAmount, minClauseLength, minStringSize, formulas."
@@ -76,8 +76,8 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
         german "Mindestens eine Obergrenze ist niedriger als die zugehörige Untergrenze."
     | maxClauseLength > length usedLiterals
       = reject $ do
-        english "The used literals cannot generate a clause with maxClauseLength."
-        german "Die angegebenen Literale können die maximale Klauselgröße nicht generieren."
+        english "The used atomic formulas cannot generate a clause with maxClauseLength."
+        german "Die angegebenen atomaren Formeln können die maximale Klauselgröße nicht generieren."
     | fromIntegral formulas >
        (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
        `div` (2 :: Integer) + 1
@@ -85,8 +85,8 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
         english "Amount of Formulas is too big and bears the risk of generating similar formal forms."
         german "Menge an Formeln ist zu groß. Eine Formeln könnte mehrfach generiert werden."
     | maxClauseLength == 1 && maxClauseAmount == 1 = reject $ do
-        english "Atomic propositions have no illegal forms"
-        german "Atomare Aussagen können nicht syntaktisch falsch sein."
+        english "Atomic formulas have no illegal forms"
+        german "Atomare Formeln können nicht syntaktisch falsch sein."
     | formulas - illegals <
         (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
       = reject $ do

@@ -104,12 +104,12 @@ partialGrade' DecomposeFormulaInst{..} sol = do
     german "Die Abgabe ist leer."
 
   when (any (`notElem` origLiterals) solLiterals) $ reject $ do
-    english "Your submission contains unknown literals."
-    german "Ihre Abgabe beinhaltet unbekannte Literale."
+    english "Your submission contains unknown atomic formulas."
+    german "Ihre Abgabe beinhaltet unbekannte atomare Formeln."
 
   unless (length origLiterals == length solLiterals) $ reject $ do
-    english "Your submission does not contain all literals present in the original formula."
-    german "Ihre Abgabe beinhaltet nicht alle Literale aus der ursprünglichen Formel."
+    english "Your submission does not contain all atomic formulas present in the original formula."
+    german "Ihre Abgabe beinhaltet nicht alle atomaren Formeln aus der ursprünglichen Formel."
 
   unless (length origOperators == length solOperators) $ reject $ do
     english "Your submission does not contain the right amount of different operators."

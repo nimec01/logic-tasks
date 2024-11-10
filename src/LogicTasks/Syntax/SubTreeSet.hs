@@ -120,8 +120,8 @@ partialGrade' SubTreeInst{..} fs
 
     | any (`notElem` origLits) literals =
       reject $ do
-        english "At least one formula in your submission contains unknown literals."
-        german "Ihre Abgabe beinhaltet mindestens eine Formel mit unbekannten Literalen."
+        english "At least one formula in your submission contains unknown atomic formulas."
+        german "Ihre Abgabe beinhaltet mindestens eine Formel mit unbekannten atomaren Formeln."
 
     | any (> origOpsNum) opsNum =
       reject $ do
