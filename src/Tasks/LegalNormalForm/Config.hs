@@ -82,10 +82,10 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
        (fromIntegral (maxClauseLength-minClauseLength+1)^(fromIntegral (maxClauseAmount-minClauseAmount+1) :: Integer))
        `div` (2 :: Integer) + 1
       = reject $ do
-        english "Amount of Formulas is too big and bears the risk of generating similar formal forms."
-        german "Menge an Formeln ist zu groß. Eine Formeln könnte mehrfach generiert werden."
+        english "Amount of formulas is too big and bears the risk of generating similar normal forms."
+        german "Anzahl an Formeln ist zu groß. Eine Formel könnte mehrfach generiert werden."
     | maxClauseLength == 1 && maxClauseAmount == 1 = reject $ do
-        english "Atomic formulas have no illegal forms"
+        english "Atomic formulas have no illegal forms."
         german "Atomare Formeln können nicht syntaktisch falsch sein."
     | formulas - illegals <
         (if includeFormWithJustOneClause then 1 else 0) + (if includeFormWithJustOneLiteralPerClause then 1 else 0)
@@ -98,10 +98,10 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
         german "minClauseAmount ist zu groß. Es kann keine passende Normalform geriert werden."
     | minStringSize < max 1 minClauseAmount * ((minClauseLength - 1) * 4 + 1) = reject $ do
         english "Cannot generate string with given minStringSize."
-        german "String kann mit gegebenen minStringSize nicht generiert werden."
+        german "String kann mit gegebenem minStringSize nicht generiert werden."
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
         english "Cannot generate string with given maxStringSize."
-        german "String kann mit gegebenen maxStringSize nicht generiert werden."
+        german "String kann mit gegebenem maxStringSize nicht generiert werden."
     | otherwise = checkNormalFormConfig cnfConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]

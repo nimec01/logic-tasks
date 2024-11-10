@@ -43,7 +43,7 @@ descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
         german $ "Geben Sie eine Liste der Indizes aller in " ++ localise German what ++ " vorliegender Formeln als Ihre Lösung an."
 
       example "[2,3]" $ do
-        english $ "For example, if only choices 2 and 3 are given in " ++ localise English what ++ ", then the solution is:"
+        english $ "For example, if only choices 2 and 3 are given in " ++ localise English what ++ ", then the correct solution is:"
         german $ "Liegen beispielsweise nur Auswahlmöglichkeiten 2 und 3 in " ++ localise German what ++ " vor, dann ist diese Lösung korrekt:"
       pure ()
 

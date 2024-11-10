@@ -92,8 +92,8 @@ description inputHelp FillInst{..} = do
 
   when inputHelp $ paragraph $ indent $ do
     translate $ do
-      german "Ein Lösungsversuch im Fall von vier Lücken könnte beispielsweise so aussehen:"
-      english "A valid solution for four blanks could look like this:"
+      german "Ein Lösungsversuch im Fall von vier Lücken könnte so aussehen:"
+      english "A solution attempt for four blanks could look like this:"
     code "[0,1,1,1]"
     pure ()
 
@@ -128,7 +128,7 @@ verifyQuiz FillConfig{..}
     | isOutside 1 100 percentageOfGaps =
         refuse $ indent $ translate$ do
           german "Der prozentuale Anteil an Lücken muss zwischen 1 und 100 liegen."
-          english "The percentile of gaps has to be set between 1 and 100."
+          english "The percentage of gaps has to be set between 1 and 100."
 
     | not $ usesAllAtoms formulaConfig =
         refuse $ indent $ translate $ do
