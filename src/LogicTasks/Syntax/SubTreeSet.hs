@@ -130,8 +130,8 @@ partialGrade' SubTreeInst{..} fs
 
     | amount < minInputTrees =
       reject $ do
-        english $ "Your solution does not contain enough subformulas. Add " ++ show (minInputTrees - amount) ++ "."
-        german $ "Ihre Abgabe beinhaltet nicht genügend Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
+        english $ "Your submission does not contain enough different subformulas. Add " ++ show (minInputTrees - amount) ++ "."
+        german $ "Ihre Abgabe beinhaltet nicht genügend verschiedene Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
 
     | amount > minInputTrees =
       reject $ do
