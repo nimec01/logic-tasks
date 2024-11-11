@@ -78,18 +78,18 @@ description DecideInst{..} = do
     pure ()
   paragraph $ do
     translate $ do
-      english "Find all faulty entries in the last column of the following truth table."
+      english "Find all faulty truth values in the last column of the following truth table."
       german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzten Spalte der folgenden Wahrheitstafel."
     indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
   paragraph $ translate $ do
-    english  "Provide the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
+    english  "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
     german  "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
 
   paragraph $ indent $ do
     translate $ do
-      english "A valid solution could look like this: "
-      german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
+      english "A solution attempt could look like this: "
+      german "Ein Lösungsversuch könnte so aussehen: "
     code "[1,4,5]"
     pure ()
   extra addText
@@ -123,7 +123,7 @@ verifyQuiz :: OutputCapable m => DecideConfig -> LangM m
 verifyQuiz DecideConfig{..}
     | isOutside 1 100 percentageOfChanged =
         refuse $ indent $ translate $ do
-          english "The percentile of mistakes has to be set between 1 and 100."
+          english "The percentage of mistakes has to be set between 1 and 100."
           german "Der prozentuale Anteil an Fehlern muss zwischen 1 und 100 liegen."
 
     | not $ usesAllAtoms formulaConfig =

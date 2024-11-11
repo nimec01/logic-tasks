@@ -71,13 +71,13 @@ description PickInst{..} = do
     paragraph $ do
       translate $ do
         german "Welche der folgenden Wahrheitstafeln passt zu der Formel? Geben Sie die richtige Tafel durch ihre Nummer an."
-        english "Which of these truth tables represents the formula? Specify the correct table by giving its number."
+        english "Which of the following truth tables represents the formula? Specify the correct table by giving its number."
       indent $ code $ showIndexedList 120 5 $ map getTable formulas
       pure ()
     paragraph $ indent $ do
       translate $ do
-        german "Ein Lösungsversuch könnte beispielsweise so aussehen: "
-        english "A valid solution could look like this: "
+        german "Ein Lösungsversuch könnte so aussehen: "
+        english "A solution attempt could look like this: "
       code "1"
       pure ()
     extra addText
@@ -95,7 +95,7 @@ verifyStatic PickInst{..}
 
     | any isEmptyFormula formulas =
         refuse $ indent $ translate $ do
-          german "Mindestens eine Formel ist für diese Aufgabe nicht geeignet."
+          german "Mindestens eine der Formeln ist für diese Aufgabe nicht geeignet."
           english "At least one given formula is not suitable for this task."
 
     | length formulas < correct || correct <= 0 =
@@ -134,7 +134,7 @@ verifyQuiz PickConfig{..}
     | rangeH - rangeL < 30 =
         refuse $ indent $ translate $ do
           german "Die Beschränkung der Wahr-Einträge sollte eine Reichweite von 30 nicht unterschreiten."
-          english "The given restriction on true entries should not fall below a range of 30."
+          english "The given restriction on True entries should not fall below a range of 30."
 
     | otherwise = checkTruthValueRangeAndFormulaConf range formulaConfig
   where
