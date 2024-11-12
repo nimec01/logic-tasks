@@ -2,6 +2,9 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Formula.Parsing (
   module Formula.Parsing.Type,
+  allSymbolParser,
+  formulaSymbolParser,
+  formulaListSymbolParser,
   clauseSetParser,
   clauseFormulaParser,
   resStepsParser,
@@ -13,11 +16,10 @@ module Formula.Parsing (
 
 import Config
 import Formula.Util
-import ParsingHelpers (lexeme, tokenSymbol)
+import ParsingHelpers (caseInsensitive, lexeme, tokenSymbol)
 import Formula.Types
 
 import Control.Monad (void)
-import Data.Char (toLower)
 import Data.Map (fromList)
 import Text.ParserCombinators.Parsec (
   Parser,
@@ -27,13 +29,12 @@ import Text.ParserCombinators.Parsec (
   between,
   char,
   digit,
-  getInput,
+  many,
   many1,
   notFollowedBy,
   optionMaybe,
   satisfy,
   sepBy,
-  setInput,
   spaces,
   string,
   try,
@@ -102,6 +103,11 @@ instance (Parse a, Parse b) => Parse (a,b) where
     b <- parser
     pure (a,b)
 
+
+instance Parse a => Parse (Maybe a) where
+  parser = (tokenSymbol "Nothing" >> pure Nothing) <|> (Just <$> lexeme parser)
+
+
 instance Parse Number where
   parser = (lexeme numParse <?> "Number") <|> fail "Could not parse a number"
     where numParse = do
@@ -132,8 +138,6 @@ instance Parse TruthValue where
   parser = lexeme truthParse <?> "Truth Value"
 
     where truthParse = do
-            s <- getInput
-            setInput (map toLower s)
             t <- try
              (    parseTrue
               <|> parseFalse
@@ -150,7 +154,8 @@ instance Parse TruthValue where
               where
                 parseTrue = do
                   string "1" <|> try (single "w") <|> try (single "t")
-                    <|> string "wahr" <|> string "true" -- no-spell-check
+                    <|> caseInsensitive "wahr" -- no-spell-check
+                    <|> caseInsensitive "true"
                   pure $ TruthValue True
                 parseFalse = do
                   string "0" <|> try (single "f") <|> eitherDeEn
@@ -158,11 +163,12 @@ instance Parse TruthValue where
 
                 single :: String -> Parser String
                 single s = do
-                    res <- string s
+                    res <- caseInsensitive s
                     notFollowedBy alphaNum
                     return res
 
-                eitherDeEn = string "fals" >> (try (string "e") <|> string "ch") -- no-spell-check
+                eitherDeEn = caseInsensitive "fals" >> -- no-spell-check
+                  (try (caseInsensitive "e") <|> caseInsensitive "ch")
 
 
 
@@ -337,6 +343,23 @@ prologClauseFormulaParser = (lexeme (emptyClauseParser <|> clauseParse) <?> "Cla
        case braces of Nothing -> pure ' '
                       Just _ -> char ')'
        pure $ mkPrologClause ts
+
+
+listSymbolParser :: Parser ()
+listSymbolParser = tokenSymbol "[" <|> tokenSymbol "," <|> tokenSymbol "]"
+
+maybeSymbolParser :: Parser ()
+maybeSymbolParser = tokenSymbol "Nothing"
+
+formulaSymbolParser :: Parser ()
+formulaSymbolParser = void $ many logicToken
+
+formulaListSymbolParser :: Parser ()
+formulaListSymbolParser = void $ many $ logicToken <|> listSymbolParser
+
+allSymbolParser :: Parser ()
+allSymbolParser = void $ many $ try maybeSymbolParser <|> logicToken <|> listSymbolParser
+
 
 instance Parse PrologClause where
  parser = prologClauseFormulaParser
