@@ -6,8 +6,11 @@ import LogicTasks.Config (
   NormalFormConfig(..),
   FormulaConfig(..)
   )
-import Control.OutputCapable.Blocks (Language (..))
 import Test.Hspec
+import Tasks.SynTree.Config (
+  SynTreeConfig(..)
+  )
+import Trees.Types (BinOp(..))
 import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
@@ -34,29 +37,35 @@ task10 = DecideConfig
   , extraText = Nothing
   }
 
--- Weight 0.4
-task11 :: DecideConfig
-task11 = DecideConfig
+-- 2024: Weight 0.3
+task12 :: DecideConfig
+task12 = DecideConfig
   { formulaConfig =
-      FormulaCnf (NormalFormConfig
-                   { baseConf = BaseConfig
-                     { minClauseLength = 2
-                     , maxClauseLength = 3
-                     , usedLiterals = "ABCD"
-                     }
-                   , minClauseAmount = 4
-                   , maxClauseAmount = 4
-                   })
-  , percentageOfChanged = 40
-  , percentTrueEntries = Nothing
-  , extraText = Just (listToFM
-                       [(German, "Sie haben nur 2 Versuche, die Aufgabe zu lösen."), {- german -}
-                        (English, "You have only 2 attempts to solve this task.")
-                       ])
+      FormulaArbitrary (SynTreeConfig
+                        { minNodes = 10
+                        , maxNodes = 14
+                        , minDepth = 4
+                        , maxDepth = 6
+                        , availableAtoms = "ABCD"
+                        , minAmountOfUniqueAtoms = 4
+                        , binOpFrequencies = listToFM
+                          [ (And, 1)
+                          , (Or, 1)
+                          , (Impl, 1)
+                          , (BackImpl, 0)
+                          , (Equi, 1)
+                          ]
+                        , negOpFrequency = 1
+                        , maxConsecutiveNegations = 2
+                        , minUniqueBinOperators = 4
+                        })
+  , percentageOfChanged = 30
+  , percentTrueEntries = Just (30,70)
   , printSolution = True
+  , extraText = Nothing
   }
 
 spec :: Spec
 spec = do
   describe "task10" $ verifyFormulaConfig (formulaConfig task10)
-  describe "task11" $ verifyFormulaConfig (formulaConfig task11)
+  describe "task12" $ verifyFormulaConfig (formulaConfig task12)
