@@ -29,9 +29,9 @@ task08 = PickConfig
   , printSolution = True
   }
 
--- Weight 0.25
-task19 :: PickConfig
-task19 = PickConfig
+-- 2024: Weight 0.3
+task11 :: PickConfig
+task11 = PickConfig
   { formulaConfig =
       FormulaCnf (NormalFormConfig
                    { baseConf = BaseConfig
@@ -43,12 +43,12 @@ task19 = PickConfig
                    , maxClauseAmount = 4
                    })
   , amountOfOptions = 4
-  , percentTrueEntries = Nothing
-  , extraText = Nothing
+  , percentTrueEntries = Just (30,70)
   , printSolution = True
+  , extraText = Nothing
   }
 
 spec :: Spec
 spec = do
   describe "task08" $ verifyFormulaConfig (formulaConfig task08)
-  describe "task19" $ verifyFormulaConfig (formulaConfig task19)
+  describe "task11" $ verifyFormulaConfig (formulaConfig task11)

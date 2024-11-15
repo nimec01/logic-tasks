@@ -15,9 +15,9 @@ import Data.Map (Map)
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
 
--- Weight 0.34
-task09 :: DecideConfig
-task09 = DecideConfig
+-- 2024: Weight 0.3
+task10 :: DecideConfig
+task10 = DecideConfig
   { formulaConfig =
       FormulaCnf (NormalFormConfig
                    { baseConf = BaseConfig
@@ -29,9 +29,9 @@ task09 = DecideConfig
                    , maxClauseAmount = 3
                    })
   , percentageOfChanged = 40
-  , percentTrueEntries = Nothing
-  , extraText = Nothing
+  , percentTrueEntries = Just (30,70)
   , printSolution = True
+  , extraText = Nothing
   }
 
 -- Weight 0.4
@@ -58,5 +58,5 @@ task11 = DecideConfig
 
 spec :: Spec
 spec = do
-  describe "task09" $ verifyFormulaConfig (formulaConfig task09)
+  describe "task10" $ verifyFormulaConfig (formulaConfig task10)
   describe "task11" $ verifyFormulaConfig (formulaConfig task11)
