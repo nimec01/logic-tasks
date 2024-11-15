@@ -243,7 +243,7 @@ completeGradeThreeChoices DecideInst{..} sol = reRefuse
 
       what = translations $ do
         german "Antworten"
-        english "Answers"
+        english "answers"
 
       solutionDisplay
         | showSolution = Just $ show changed
