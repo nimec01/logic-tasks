@@ -54,7 +54,7 @@ data Choice
 
 instance Show Choice where
   show Correct  = "Richtig"       -- no-spell-check
-  show Wrong    = "Falsch"        -- no-spell-check
+  show Wrong    = "Fehlerhaft"    -- no-spell-check
   show NoAnswer = "Keine Antwort" -- no-spell-check
 
 
