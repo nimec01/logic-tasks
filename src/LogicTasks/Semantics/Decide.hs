@@ -10,6 +10,7 @@ module LogicTasks.Semantics.Decide where
 import Control.OutputCapable.Blocks (
   GenericOutputCapable (..),
   LangM,
+  Language,
   OutputCapable,
   english,
   german,
@@ -24,7 +25,8 @@ import Control.OutputCapable.Blocks (
   TargetedCorrect (TargetedCorrect),
   multipleChoiceSyntax,
   )
-import Data.List.Extra (nubSort)
+import Data.List.Extra ((\\), intercalate, nubSort)
+import Data.Map (Map, fromList)
 import Test.QuickCheck (Gen, suchThat)
 
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
@@ -41,6 +43,19 @@ import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
 
+
+
+data Choice
+  = Correct
+  | Wrong
+  | NoAnswer
+  deriving (Ord,Eq,Enum,Bounded)
+
+
+instance Show Choice where
+  show Correct  = "Richtig"       -- no-spell-check
+  show Wrong    = "Falsch"        -- no-spell-check
+  show NoAnswer = "Keine Antwort" -- no-spell-check
 
 
 genDecideInst :: DecideConfig -> Gen DecideInst
@@ -68,8 +83,8 @@ genDecideInst DecideConfig{..} = do
 
 
 
-description :: OutputCapable m => DecideInst -> LangM m
-description DecideInst{..} = do
+description :: OutputCapable m => Bool -> DecideInst -> LangM m
+description withDropdowns DecideInst{..} = do
   paragraph $ do
     translate $ do
       english "Consider the following formula:"
@@ -82,16 +97,31 @@ description DecideInst{..} = do
       german "Finden Sie alle fehlerhaften Wahrheitswerte in der letzten Spalte der folgenden Wahrheitstafel."
     indent $ code $ show (flipAt (getTable formula) changed)
     pure ()
-  paragraph $ translate $ do
-    english  "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
-    german  "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
+  if withDropdowns
+    then do
+      paragraph $ do
+        translate $ do
+          english "For this, consider the repeated truth table below. "
+          english "Next to each row a selection menu with these three options (in German) is given:"
+          german "Betrachten Sie dazu die folgende erneute Darstellung der Wahrheitstafel. "
+          german "Neben jeder Zeile befindet sich ein Auswahlmenü mit diesen drei Optionen:"
+        code $ intercalate ", " $ map show [Correct,Wrong,NoAnswer]
+        translate $ do
+          english "Choose the appropriate option for each row."
+          german "Wählen Sie für jede Zeile die passende Option aus."
+        pure ()
+    else do
+      paragraph $ translate $ do
+        english "Give the solution as a list of indices of the faulty rows. The row with 0 for all atomic formulas counts as row 1."
+        german "Geben Sie die Lösung als eine Liste der Indizes der fehlerhaften Zeilen an. Dabei zählt die Zeile mit 0 für alle atomaren Formeln als Zeile 1."
 
-  paragraph $ indent $ do
-    translate $ do
-      english "A solution attempt could look like this: "
-      german "Ein Lösungsversuch könnte so aussehen: "
-    code "[1,4,5]"
-    pure ()
+      paragraph $ indent $ do
+        translate $ do
+          english "A solution attempt could look like this: "
+          german "Ein Lösungsversuch könnte so aussehen: "
+        code "[1,4,5]"
+        pure ()
+      pure ()
   extra addText
   pure ()
 
@@ -149,11 +179,9 @@ partialGrade DecideInst{..} = multipleChoiceSyntax False [1..tableLen]
 
 completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> [Int] -> Rated m
 completeGrade DecideInst{..} sol = reRefuse
-  (extendedMultipleChoice
-    (MinimumThreshold (1 % 2))
-    (Punishment (1 % fromIntegral tableLen))
-    (TargetedCorrect (length changed))
-    DefiniteArticle
+  (withExtendedMultipleChoice
+    (fromIntegral tableLen)
+    (length changed)
     what
     solutionDisplay
     solution
@@ -175,3 +203,65 @@ completeGrade DecideInst{..} sol = reRefuse
     tableLen = length $ readEntries $ getTable formula
     solution = Map.fromAscList $ map (,True) changed
     submission = Map.fromAscList $ map (,True) nubSol
+
+
+completeGradeThreeChoices
+  :: (OutputCapable m,Alternative m, Monad m)
+  => DecideInst
+  -> [Choice]
+  -> Rated m
+completeGradeThreeChoices DecideInst{..} sol = reRefuse
+  (withExtendedMultipleChoice
+    (fromIntegral tableLen)
+    tableLen
+    what
+    solutionDisplay
+    (fromList $ answerListWrong ++ answerListCorrect)
+    solMap
+    )
+    $ when (showSolution && not (all correctOption indexed && tableLen == length indexed)) $ indent $ do
+      translate $ do
+        english "All of the above table rows given in the above list contain a wrong entry. "
+        english "Every other row of the table contains a correct entry. "
+        english "Please compare with the correct version of the table:"
+        german "Die obige Liste enthält alle Zeilen der obigen Tafel, welche einen falschen Eintrag enthalten. "
+        german "Alle anderen Zeilen der Tafel enthalten einen korrekten Eintrag. "
+        german "Vergleichen Sie mit der richtigen Tafel für diese Formel:"
+      code $ show table
+      pure ()
+    where
+      indexed = filter ((/=NoAnswer) . snd) $ zip [1..] sol
+      solMap = fromList $ map (,True) indexed
+      table = getTable formula
+      tableLen = length $ readEntries table
+      restOf = [1..tableLen] \\ changed
+      answerListWrong = map ((,True) . (,Wrong)) changed ++ map ((,False) . (,Wrong)) restOf
+      answerListCorrect = map ((,False) . (,Correct)) changed ++ map ((,True) . (,Correct)) restOf
+      correctOption (i,c) = case c of
+        Correct -> i `elem` restOf
+        _   -> i `elem` changed
+
+      what = translations $ do
+        german "Antworten"
+        english "Answers"
+
+      solutionDisplay
+        | showSolution = Just $ show changed
+        | otherwise    = Nothing
+
+
+withExtendedMultipleChoice
+  :: (Ord a, OutputCapable m)
+  => Integer
+  -> Int
+  -> Map Language String
+  -> Maybe String
+  -> Map a Bool
+  -> Map a Bool
+  -> Rated m
+withExtendedMultipleChoice options changed =
+  extendedMultipleChoice
+    (MinimumThreshold (1 % 2))
+    (Punishment (1 % options))
+    (TargetedCorrect changed)
+    DefiniteArticle
