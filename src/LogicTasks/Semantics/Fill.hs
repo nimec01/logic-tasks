@@ -48,8 +48,8 @@ genFillInst FillConfig{..} = do
         InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t
       (FormulaCnf cnfCfg) ->
         tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ withRatio percentTrueEntries'
-      (FormulaDnf cnfCfg) ->
-        tryGen (InstDnf <$> genDnf' cnfCfg) 100 $ withRatio percentTrueEntries'
+      (FormulaDnf dnfCfg) ->
+        tryGen (InstDnf <$> genDnf' dnfCfg) 100 $ withRatio percentTrueEntries'
 
     let
       entries = readEntries $ getTable formula

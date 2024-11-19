@@ -194,7 +194,7 @@ checkTruthValueRangeAndFormulaConf range formulaConf = do
   checkTruthValueRange range
   case formulaConf of
     (FormulaCnf cnfCfg) -> checkNormalFormConfig cnfCfg
-    (FormulaDnf cnfCfg) -> checkNormalFormConfig cnfCfg
+    (FormulaDnf dnfCfg) -> checkNormalFormConfig dnfCfg
     (FormulaArbitrary syntaxTreeConfig) -> checkSynTreeConfig syntaxTreeConfig
   pure ()
 

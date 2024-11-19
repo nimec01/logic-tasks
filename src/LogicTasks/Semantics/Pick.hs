@@ -46,8 +46,8 @@ genPickInst PickConfig{..} = do
           InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
         (FormulaCnf cnfCfg) ->
           InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
-        (FormulaDnf cnfCfg) ->
-          InstDnf <$> genDnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+        (FormulaDnf dnfCfg) ->
+          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
 
   correct <- elements [1..amountOfOptions]
 
@@ -146,8 +146,8 @@ verifyQuiz PickConfig{..}
       = amountOfOptions > 4*2^ length (availableAtoms syntaxTreeConfig)
     doesOvershootOptions (FormulaCnf cnfCfg)
       = amountOfOptions > 4*2^ length (usedLiterals (baseConf cnfCfg))
-    doesOvershootOptions (FormulaDnf cnfCfg)
-      = amountOfOptions > 4*2^ length (usedLiterals (baseConf cnfCfg))
+    doesOvershootOptions (FormulaDnf dnfCfg)
+      = amountOfOptions > 4*2^ length (usedLiterals (baseConf dnfCfg))
 
 
 

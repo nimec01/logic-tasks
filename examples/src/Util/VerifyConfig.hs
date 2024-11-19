@@ -17,7 +17,7 @@ verifyConfig lang config checker = itIsValid $ checkConfigWith lang config check
 
 verifyFormulaConfig :: FormulaConfig -> Spec
 verifyFormulaConfig (FormulaCnf cnfCfg) = verifyConfig German cnfCfg checkNormalFormConfig
-verifyFormulaConfig (FormulaDnf cnfCfg) = verifyConfig German cnfCfg checkNormalFormConfig
+verifyFormulaConfig (FormulaDnf dnfCfg) = verifyConfig German dnfCfg checkNormalFormConfig
 verifyFormulaConfig (FormulaArbitrary syntaxTreeConfig) = verifyConfig German syntaxTreeConfig checkSynTreeConfig
 
 noChecker :: forall a. Typeable a => a -> Spec

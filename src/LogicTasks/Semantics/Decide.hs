@@ -67,8 +67,8 @@ genDecideInst DecideConfig{..} = do
         InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` withRatio percentTrueEntries'
       (FormulaCnf cnfCfg) ->
         InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
-      (FormulaDnf cnfCfg) ->
-        InstDnf <$> genDnf' cnfCfg `suchThat` withRatio percentTrueEntries'
+      (FormulaDnf dnfCfg) ->
+        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
 
     let
       tableLen = length $ readEntries $ getTable formula
