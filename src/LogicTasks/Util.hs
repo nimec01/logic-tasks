@@ -13,7 +13,7 @@ import Util
 import Test.QuickCheck (Gen)
 import Formula.Types (Cnf, genCnf, genDnf, Dnf)
 import Config (NormalFormConfig (..), BaseConfig(..), FormulaInst (..), FormulaConfig (..))
-import Trees.Print (display)
+import Trees.Print (simplestDisplay)
 import Tasks.SynTree.Config (SynTreeConfig(minAmountOfUniqueAtoms, availableAtoms))
 import Formula.Util (isEmptyCnf, hasEmptyClause, isEmptyDnf, hasEmptyCon)
 
@@ -28,7 +28,7 @@ genDnf' (NormalFormConfig{baseConf = BaseConfig{..}, ..})
 displayFormula :: FormulaInst -> String
 displayFormula (InstCnf c) = show c
 displayFormula (InstDnf d) = show d
-displayFormula (InstArbitrary t) = display t
+displayFormula (InstArbitrary t) = simplestDisplay t
 
 usesAllAtoms :: FormulaConfig -> Bool
 usesAllAtoms (FormulaArbitrary syntaxTreeConfig)
