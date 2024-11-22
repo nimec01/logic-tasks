@@ -89,15 +89,15 @@ description oneInput ResolutionInst{..} = do
       english "Provide the solution as a list of triples with this structure: (first clause, second clause, resolvent)."
     else do
       german "Geben Sie die Lösung als eine Auflistung von Schritten an. "
-      german "Füllen Sie für jeden Schritt die zugehörigen drei Eingabefelder mit den zwei verwendeten Klauseln sowie der daraus entstehenden Resolventen. "
+      german "Füllen Sie für jeden Schritt die zugehörigen drei Eingabefelder mit den zwei verwendeten Klauseln sowie der daraus entstehenden Resolvente. "
       german "Schritte können nicht partiell ausgefüllt werden. Wenn Sie einen Schritt hinzufügen, MUSS dieser vollständig sein. "
       german "Bei Nichtbeachtung wird Ihre Abgabe aus Syntaxgründen abgelehnt. "
-      german "Es ist aber erlaubt Schritte komplett auszulassen, z. B. wenn Sie weniger Schritte benötigen, als im Eingabeformular angegeben."
+      german "Es ist aber erlaubt, Schritte komplett wegzulassen, z.B. wenn Sie weniger Schritte benötigen als im Eingabeformular angegeben."
       english "Provide the solution as a sequence of steps. "
-      english "Fill in the three input fields for each step with the two used clauses and the resulting resolvent. "
-      english "Steps can not be partially filled in. Each added step MUST be complete. "
-      english "Submissions containing partially filled in steps will be rejected as syntactically wrong. "
-      english "You are allowed to entirely skip steps, e.g. if your solution has fewer steps overall than the amount of step inputs."
+      english "Fill the three input fields for each step with the two used clauses and the resulting resolvent. "
+      english "Steps cannot be filled in partially. Each added step MUST be complete. "
+      english "Submissions containing partially filled steps will be rejected as syntactically wrong. "
+      english "You are allowed to entirely leave out steps, e.g., if your solution needs fewer steps overall than provided in the input form."
   keyHeading
   negationKey unicodeAllowed
   unless usesSetNotation (orKey unicodeAllowed)
@@ -129,7 +129,7 @@ description oneInput ResolutionInst{..} = do
       english "Newly resolved clauses can be associated with a number by attaching '= NUMBER' behind them."
     else do
       german "Neu resolvierte Klauseln erhalten automatisch die Nummer rechts neben ihrem Eingabefeld."
-      english "Newly resolved clauses are automatically assigned the number directly right of their input field."
+      english "Newly resolved clauses are automatically assigned the number directly to the right of their input field."
   when usesSetNotation $ paragraph $ indent $ do
     translate $ do
       german "Nutzen Sie zur Angabe der Klauseln die Mengennotation! Ein Lösungsversuch könnte beispielsweise so aussehen: "
