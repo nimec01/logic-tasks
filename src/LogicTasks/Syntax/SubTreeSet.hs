@@ -70,8 +70,8 @@ description withListInput SubTreeInst{..} = do
       pure ()
 
     paragraph $ translate $ do
-      german "Sie können dafür die Ausgangsformel mehrfach in die Abgabe kopieren und anpassen, oder die folgenden Schreibweisen nutzen:"
-      english "You can copy the original formula into the solution box several times and adapt it or use the following syntax:"
+      german "Sie können dafür die ürsprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the submission several times and remove parts, or start from scratch and use the following syntax:"
 
     keyHeading
     basicOpKey unicodeAllowed
