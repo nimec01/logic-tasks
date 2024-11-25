@@ -20,7 +20,7 @@ import Control.OutputCapable.Blocks (
   yesNo,
   recoverFrom,
   )
-import Data.List (sort)
+import Data.List (intercalate, sort)
 import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Test.QuickCheck (Gen)
 
@@ -29,11 +29,11 @@ import Formula.Util (isEmptyClause, mkCnf, sat)
 import Formula.Resolution (applySteps, genRes, resolvableWith, resolve)
 import Formula.Types (Clause, ResStep(..), literals)
 import LogicTasks.Helpers (example, extra, keyHeading, negationKey, orKey)
+import LogicTasks.Semantics.Step (showClause)
 import Util (checkBaseConf, prevent, preventWithHint)
 import Control.Monad (unless, when)
 import Control.Applicative (Alternative)
 import Data.Foldable.Extra (notNull)
-import Text.PrettyPrint.Leijen.Text (Pretty(pretty))
 import Formula.Parsing.Delayed (Delayed, withDelayed, complainAboutWrongNotation, withDelayedSucceeding)
 import Formula.Parsing (resStepsParser, clauseSetParser, clauseFormulaParser)
 import Formula.Helpers (showCnfAsSet)
@@ -75,13 +75,13 @@ description :: OutputCapable m => Bool -> ResolutionInst -> LangM m
 description oneInput ResolutionInst{..} = do
   paragraph $ do
     translate $ do
-      german "Betrachten Sie die folgende Formel in KNF:"
-      english "Consider the following formula in cnf:"
+      german $ "Betrachten Sie die folgende " ++ gerSet ++ "Formel in KNF:"
+      english $ "Consider the following " ++ engSet ++ "formula in cnf:"
     indent $ code $ show' clauses
     pure ()
   paragraph $ translate $ do
-    german "Führen Sie das Resolutionsverfahren an dieser Formel durch, um die leere Klausel abzuleiten."
-    english "Use the resolution technique on this formula to derive the empty clause."
+    german "Führen Sie das Resolutionsverfahren an ihr durch, um die leere Klausel abzuleiten."
+    english "Use the resolution technique on it to derive the empty clause."
 
   paragraph $ translate $ if oneInput
     then do
@@ -120,8 +120,8 @@ description oneInput ResolutionInst{..} = do
     english "You can optionally replace clauses with numbers."
 
   paragraph $ translate $ do
-    german "Klauseln aus der Formel sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
-    english "Clauses in the starting formula are already numbered by their order. first clause = 1, second clause = 2, ...)."
+    german "Bestehende Klauseln sind bereits ihrer Reihenfolge nach nummeriert. (erste Klausel = 1, zweite Klausel = 2, ...)."
+    english "Existing Clauses are already numbered by their order. first clause = 1, second clause = 2, ...)."
 
   paragraph $ translate $ if oneInput
     then do
@@ -150,6 +150,13 @@ description oneInput ResolutionInst{..} = do
       show' = if usesSetNotation
         then showCnfAsSet . mkCnf
         else show . mkCnf
+
+      (gerSet,engSet)
+        | usesSetNotation =
+          ( "Mengenschreibweise einer " -- no-spell-check
+          , "set notation of a "
+          )
+        | otherwise = ( "", "")
 
       setExample
         | unicodeAllowed && oneInput = do
@@ -252,6 +259,11 @@ verifyQuiz ResolutionConfig{..}
           german "Diese minimale Schrittzahl kann mit den gegebenen Literalen nicht durchgeführt werden."
           english "This amount of steps is impossible with the given amount of literals."
 
+    | printFeedbackImmediately && printSolution =
+        refuse $ indent $ translate $ do
+          german "Wenn sofortiges Feedback eingeschaltet ist, kann nicht abschließend die Lösung angezeigt werden."
+          english "If instant feedback is turned on, then the correct solution cannot be given."
+
     | otherwise = checkBaseConf baseConf
 
 
@@ -259,8 +271,8 @@ verifyQuiz ResolutionConfig{..}
 start :: [ResStep]
 start = []
 
-gradeSteps :: OutputCapable m => [(Clause,Clause,Clause)] -> Bool -> LangM m
-gradeSteps steps appliedIsNothing = do
+gradeSteps :: OutputCapable m => Bool -> [(Clause,Clause,Clause)] -> Bool -> LangM m
+gradeSteps setNotation steps appliedIsNothing = do
     preventWithHint (notNull noResolveSteps)
         (translate $ do
           german "Alle Schritte sind gültig?"
@@ -270,7 +282,7 @@ gradeSteps steps appliedIsNothing = do
           translate $ do
             german "Mindestens ein Schritt ist kein gültiger Resolutionsschritt. "
             english "At least one step is not a valid resolution step. "
-          itemizeM $ map (text . show) noResolveSteps
+          itemizeM $ map (text . tripShow setNotation) noResolveSteps
           pure ()
         )
 
@@ -314,7 +326,7 @@ partialGrade' ResolutionInst{..} sol = do
       translate $ do
         german "Mindestens ein Schritt beinhaltet Literale, die in der Formel nicht vorkommen. "
         english "At least one step contains literals not found in the original formula. "
-      itemizeM $ map (text . show) wrongLitsSteps
+      itemizeM $ map (text . tripShow usesSetNotation) wrongLitsSteps
       pure ()
     )
 
@@ -329,7 +341,7 @@ partialGrade' ResolutionInst{..} sol = do
     stepLits (c1,c2,r) = toList $ unions $ map (fromList . literals) [c1,c2,r]
     wrongLitsSteps = filter (not . all (`member` availLits) . stepLits) steps
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps steps (isNothing applied)
+    stepsGraded = gradeSteps usesSetNotation steps (isNothing applied)
 
 completeGrade :: (OutputCapable m, Alternative m) => ResolutionInst -> Delayed [ResStep] -> LangM m
 completeGrade inst = completeGrade' inst `withDelayedSucceeding` resStepsParser clauseParser
@@ -346,16 +358,20 @@ completeGrade' ResolutionInst{..} sol = (if isCorrect then id else refuse) $ do
       english "Solution is correct?"
 
     when (showSolution && not isCorrect) $
-      example (show (pretty solution)) $ do
+      example solutionDisplay $ do
         english "A possible solution for this task is:"
         german "Eine mögliche Lösung für die Aufgabe ist:"
 
     pure ()
   where
     steps = replaceAll sol $ baseMapping clauses
+    solClauses = replaceAll solution $ baseMapping clauses
     applied = applySteps clauses steps
-    stepsGraded = gradeSteps steps (isNothing applied)
+    stepsGraded = gradeSteps usesSetNotation steps (isNothing applied)
     isCorrect = any isEmptyClause (fromMaybe [] applied)
+    solutionDisplay =
+      '[' : intercalate ", " (map (tripShow usesSetNotation) solClauses) ++ "]"
+
 
 baseMapping :: [Clause] -> [(Int,Clause)]
 baseMapping xs = zip [1..] $ sort xs
@@ -399,3 +415,10 @@ replaceAll (Res (c1,c2,(c3,i)) : rest) mapping = (replaceNum c1, replaceNum c2, 
     replaceNum (Left c) = c
     replaceNum (Right n) = case lookup n mapping of Nothing  -> error "no mapping"
                                                     (Just c) -> c
+
+
+tripShow :: Bool -> (Clause,Clause,Clause) -> String
+tripShow setNotation (c1,c2,c3) =
+    '(' : show' c1 ++ ", " ++ show' c2 ++ ", " ++ show' c3 ++ ")"
+  where
+    show' = showClause setNotation
