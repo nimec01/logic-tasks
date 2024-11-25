@@ -87,11 +87,11 @@ instance Eq c => Eq (PropFormula c) where
   Neg f1          == Neg f2          = f1 == f2
   Brackets f1     == Brackets f2     = f1 == f2
   Assoc op1 f1 f2 == Assoc op2 f3 f4 =
-    case (op1 == op2, op1 `elem` [Impl,BackImpl]) of
-      (True, False) -> f1 == f3 && f2 == f4 ||
-                       f1 == f4 && f2 == f3
-      (True, True ) -> f1 == f3 && f2 == f4
-      (False, _   ) -> False
+    op1 == op2 &&
+    if op1 `elem` [Impl,BackImpl]
+      then f1 == f3 && f2 == f4
+      else f1 == f3 && f2 == f4 ||
+           f1 == f4 && f2 == f3
   _               == _               = False
 
 
