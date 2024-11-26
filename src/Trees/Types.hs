@@ -79,20 +79,7 @@ data PropFormula c
     | Neg (PropFormula c)
     | Brackets (PropFormula c)
     | Assoc BinOp (PropFormula c) (PropFormula c)
-  deriving (Data, Ord, Foldable)
-
-
-instance Eq c => Eq (PropFormula c) where
-  Atomic c1       == Atomic c2       = c1 == c2
-  Neg f1          == Neg f2          = f1 == f2
-  Brackets f1     == Brackets f2     = f1 == f2
-  Assoc op1 f1 f2 == Assoc op2 f3 f4 =
-    op1 == op2 &&
-    if op1 `elem` [Impl,BackImpl]
-      then f1 == f3 && f2 == f4
-      else f1 == f3 && f2 == f4 ||
-           f1 == f4 && f2 == f3
-  _               == _               = False
+  deriving (Data, Eq, Ord, Foldable)
 
 
 instance Show (PropFormula Char) where
