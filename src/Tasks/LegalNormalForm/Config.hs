@@ -7,6 +7,9 @@
 module Tasks.LegalNormalForm.Config (
     LegalNormalFormConfig(..),
     LegalNormalFormInst(..),
+    TreeInfo(..),
+    ErrorReason(..),
+    treeIsErroneous,
     checkLegalNormalFormConfig,
     defaultLegalNormalFormConfig,
     ) where
@@ -14,7 +17,6 @@ module Tasks.LegalNormalForm.Config (
 
 import Control.OutputCapable.Blocks (LangM, Language, OutputCapable, english, german)
 import Data.Char (isLetter)
-import Data.Set (Set)
 import Data.Map (Map)
 import GHC.Generics (Generic)
 
@@ -108,11 +110,20 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
     boundsError = any (\(a,b) -> b < a)
       [(minClauseAmount,maxClauseAmount),(minClauseLength,maxClauseLength),(minStringSize,maxStringSize)]
 
+data TreeInfo = Correct | CorrectSingleClause | CorrectAtomicClauses | Erroneous ErrorReason
+  deriving (Show, Generic)
+
+data ErrorReason = IllegalNegation | IllegalOperator | OnClauseLevel ErrorReason
+  deriving (Show, Generic)
+
+treeIsErroneous :: TreeInfo -> Bool
+treeIsErroneous (Erroneous _) = True
+treeIsErroneous _ = False
+
 data LegalNormalFormInst =
     LegalNormalFormInst
     {
-        serialsOfWrong :: Set Int
-      , formulaStrings :: [String]
+      formulas :: [(Int, TreeInfo, String)]
       , showSolution :: Bool
       , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

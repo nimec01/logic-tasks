@@ -20,7 +20,8 @@ import Control.OutputCapable.Blocks (
 import Control.Monad (when)
 import Data.Map as Map (Map,fromAscList)
 import LogicTasks.Helpers
-import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
+import Tasks.LegalNormalForm.Config(LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig, treeIsErroneous)
+import Data.Tuple.Extra (thd3)
 
 
 
@@ -31,7 +32,7 @@ descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
       english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
 
-    focus $ unlines $ indexed formulaStrings
+    focus $ unlines $ indexed $ map thd3 formulas
 
     instruct $ do
       english $ "Which of these formulas are given in " ++ localise English what ++ "?"
@@ -73,7 +74,7 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> LangM m
-partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulaStrings]
+partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulas]
 
 
 completeGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> Rated m
@@ -84,4 +85,4 @@ completeGrade LegalNormalFormInst{..} = multipleChoice DefiniteArticle what solu
       english "indices"
     solutionDisplay | showSolution = Just $ show [ i | (i, True) <- solution ]
                     | otherwise = Nothing
-    solution = map (\i -> (i, i `notElem` serialsOfWrong)) [1..length formulaStrings]
+    solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulas
