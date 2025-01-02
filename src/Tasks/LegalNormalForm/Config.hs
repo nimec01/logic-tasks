@@ -39,7 +39,7 @@ data LegalNormalFormConfig =
     , maxStringSize :: Int
     , minStringSize :: Int
     , allowArrowOperators :: Bool
-    , printSolution :: Bool
+    , printSolution :: Maybe Bool
     , extraText :: Maybe (Map Language String)
   } deriving (Show,Generic)
 
@@ -57,7 +57,7 @@ defaultLegalNormalFormConfig =
   , maxStringSize = 35
   , minStringSize = 12
   , allowArrowOperators = True
-  , printSolution = False
+  , printSolution = Nothing
   , extraText = Nothing
   }
 
@@ -124,6 +124,6 @@ data LegalNormalFormInst =
     LegalNormalFormInst
     {
       formulas :: [(Int, TreeInfo, String)]
-      , showSolution :: Bool
+      , showSolution :: Maybe Bool
       , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)
