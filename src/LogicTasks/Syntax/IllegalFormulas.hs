@@ -88,7 +88,7 @@ partialGrade :: OutputCapable m => LegalPropositionInst -> [Int] -> LangM m
 partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length formulaInfos]
 
 
-
+-- jscpd:ignore-start
 completeGrade
   :: (OutputCapable m, MonadIO m, Alternative m)
   => FilePath
@@ -162,4 +162,4 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
       simpleSolutionDisplay
         | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
         | otherwise = Nothing
-
+-- jscpd:ignore-end
