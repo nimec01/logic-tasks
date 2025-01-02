@@ -6,6 +6,8 @@
 module Tasks.LegalProposition.Config (
     LegalPropositionConfig (..),
     LegalPropositionInst (..),
+    PropFormulaInfo(..),
+    PropErrorReason(..),
     checkLegalPropositionConfig,
     defaultLegalPropositionConfig,
     ) where
@@ -80,12 +82,21 @@ checkAdditionalConfig config@LegalPropositionConfig {syntaxTreeConfig = SynTreeC
     | otherwise = pure()
     where availableOperators = Map.filter (> 0) binOpFrequencies
 
+data PropFormulaInfo = Correct (SynTree BinOp Char) | Erroneous PropErrorReason
+  deriving (Show, Generic)
 
+data PropErrorReason
+  = IllegalParentheses
+  | IllegalOperator
+  | IllegalOperand
+  | MissingOperator
+  | MissingOperand
+  deriving (Show, Generic)
 
 data LegalPropositionInst =
     LegalPropositionInst
     {
-      pseudoFormulas :: [(String, Maybe (SynTree BinOp Char))]
+      formulaInfos :: [(Int, PropFormulaInfo, String)]
     , showSolution :: Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)

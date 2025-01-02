@@ -31,6 +31,7 @@ import Data.Foldable (for_)
 import Data.Maybe (isJust, fromJust)
 import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
+import Data.Tuple.Extra (thd3, snd3)
 
 
 
@@ -41,7 +42,7 @@ description inputHelp LegalPropositionInst{..} = do
       english "Consider the following propositional (pseudo) formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen (Pseudo-)Formeln:"
 
-    focus $ unlines $ indexed $ map fst pseudoFormulas
+    focus $ unlines $ indexed $ map thd3 formulaInfos
 
     instruct $ do
       english "Some of these are syntactically wrong. Which of these formulas are correctly formed?"
@@ -77,7 +78,7 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalPropositionInst -> [Int] -> LangM m
-partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length pseudoFormulas]
+partialGrade LegalPropositionInst{..} = multipleChoiceSyntax False [1..length formulaInfos]
 
 
 
@@ -87,29 +88,30 @@ completeGrade
   -> LegalPropositionInst
   -> [Int]
   -> Rated m
-completeGrade path LegalPropositionInst{..} sol = reRefuse
-    (multipleChoice DefiniteArticle what solutionDisplay solution sol)
-    $ when (showSolution && wrongSolution) $ do
-      instruct $ do
-          english "The following syntax trees represent the well-formed formulas:"
-          german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
+completeGrade path LegalPropositionInst{..} sol = pure 0
+-- completeGrade path LegalPropositionInst{..} sol = reRefuse
+--     (multipleChoice DefiniteArticle what solutionDisplay solution sol)
+--     $ when (showSolution && wrongSolution) $ do
+--       instruct $ do
+--           english "The following syntax trees represent the well-formed formulas:"
+--           german "Die folgenden Syntaxbäume entsprechen den wohlgeformten Formeln:"
 
-      for_ correctEntries $ \(i,(pf,t)) -> do
-        code $ show i ++ ". " ++ pf
-        image $=<< liftIO $ cacheTree (transferToPicture (fromJust t)) path
-        pure ()
+--       for_ correctEntries $ \(i,(pf,t)) -> do
+--         code $ show i ++ ". " ++ pf
+--         image $=<< liftIO $ cacheTree (transferToPicture (fromJust t)) path
+--         pure ()
 
-      pure ()
+--       pure ()
 
 
-    where
-      wrongSolution = nubSort sol /= serialsOfRight
-      pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
-      correctEntries = filter (isJust . snd . snd) pseudoIndexed
-      serialsOfRight = map fst correctEntries
-      what = translations $ do
-        german "Indizes"
-        english "indices"
-      solutionDisplay | showSolution = Just $ show serialsOfRight
-                      | otherwise = Nothing
-      solution = Map.fromAscList $ map (second (isJust . snd)) pseudoIndexed
+--     where
+--       wrongSolution = nubSort sol /= serialsOfRight
+--       pseudoIndexed = zip ([1..] :: [Int]) pseudoFormulas
+--       correctEntries = filter (isJust . snd . snd) pseudoIndexed
+--       serialsOfRight = map fst correctEntries
+--       what = translations $ do
+--         german "Indizes"
+--         english "indices"
+--       solutionDisplay | showSolution = Just $ show serialsOfRight
+--                       | otherwise = Nothing
+--       solution = Map.fromAscList $ map (second (isJust . snd)) pseudoIndexed
