@@ -1,6 +1,7 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TupleSections #-}
 module LogicTasks.Syntax.IllegalCnfs where
 
 
@@ -34,6 +35,7 @@ import Data.Tuple.Extra (thd3)
 import Control.Applicative (Alternative)
 import Data.Foldable (for_)
 import Data.Maybe (fromMaybe, isJust)
+import Data.List.Extra (nubSort)
 
 
 
@@ -97,7 +99,7 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
     simpleSolutionDisplay
     (Map.fromAscList solution)
     sol)
-  $ when detailedSolution $ indent $ do
+  $ when (hasWrongSolution && detailedSolution) $ indent $ do
 
     instruct $ do
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
@@ -148,6 +150,7 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
       german "Indizes"
       english "indices"
     solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulas
+    hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
     simpleSolutionDisplay
       | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]
       | otherwise = Nothing
