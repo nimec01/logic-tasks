@@ -125,7 +125,8 @@ genWithOneIllegalClause
   allowArrowOperators = do
         clauseList <- toList . getC <$>
           genF (ands, ands) (minClauseLength, maxClauseLength) usedLiterals False
-        (illegalTree', errorReason) <- illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
+        (illegalTree', errorReason) <-
+          illegalTree genS getL charOpC charOpF (minClauseLength, maxClauseLength) usedLiterals allowArrowOperators
         let illLength = length (collectLeaves illegalTree')
             (first, second) = span (\x -> illLength >= size (getL x)) clauseList
             headTrees = map cToS first
