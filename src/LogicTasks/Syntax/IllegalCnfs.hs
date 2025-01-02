@@ -46,7 +46,7 @@ descriptionTemplate what inputHelp LegalNormalFormInst{..} = do
       english "Consider the following propositional logic formulas:"
       german "Betrachten Sie die folgenden aussagenlogischen Formeln:"
 
-    focus $ unlines $ indexed $ map thd3 formulas
+    focus $ unlines $ indexed $ map thd3 formulaInfos
 
     instruct $ do
       english $ "Which of these formulas are given in " ++ localise English what ++ "?"
@@ -88,7 +88,7 @@ start = []
 
 
 partialGrade :: OutputCapable m => LegalNormalFormInst -> [Int] -> LangM m
-partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulas]
+partialGrade LegalNormalFormInst{..} = multipleChoiceSyntax False [1..length formulaInfos]
 
 
 completeGrade :: (OutputCapable m, Alternative m, Monad m) => LegalNormalFormInst -> [Int] -> Rated m
@@ -105,7 +105,7 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
       german "Die Lösung dieser Aufgabe sieht wie folgt aus:"
       english "The solution for this task looks like this:"
 
-    for_ formulas $ \(i,info, formula) -> do
+    for_ formulaInfos $ \(i,info, formula) -> do
 
       code (show i ++ ". " ++ formula)
 
@@ -149,7 +149,7 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
     what = translations $ do
       german "Indizes"
       english "indices"
-    solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulas
+    solution = map (\(i,info,_) -> (i, not (treeIsErroneous info))) formulaInfos
     hasWrongSolution = filter snd solution /= nubSort (map (,True) sol)
     simpleSolutionDisplay
       | isJust showSolution && not detailedSolution = Just $ show [ i | (i,True) <- solution]

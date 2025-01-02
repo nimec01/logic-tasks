@@ -53,7 +53,7 @@ generateLegalNormalFormInst gen toSynTree genIllegal config@LegalNormalFormConfi
       `suchThat` (listNoDuplicate . map ((simplestDisplay . fmap (const '_')) . fst))
   return $
     LegalNormalFormInst
-      { formulas = zipWith (curry (\(i,(sd,info)) -> (i, info, simplestDisplay sd))) [1..] treeList ,
+      { formulaInfos = zipWith (curry (\(i,(sd,info)) -> (i, info, simplestDisplay sd))) [1..] treeList ,
         showSolution = printSolution,
         addText = extraText
       }

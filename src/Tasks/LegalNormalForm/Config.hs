@@ -123,7 +123,7 @@ treeIsErroneous _ = False
 data LegalNormalFormInst =
     LegalNormalFormInst
     {
-      formulas :: [(Int, TreeInfo, String)]
+      formulaInfos :: [(Int, TreeInfo, String)]
       , showSolution :: Maybe Bool
       , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)
