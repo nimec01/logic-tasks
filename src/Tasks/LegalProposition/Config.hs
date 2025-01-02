@@ -8,6 +8,7 @@ module Tasks.LegalProposition.Config (
     LegalPropositionInst (..),
     PropFormulaInfo(..),
     PropErrorReason(..),
+    propFormulaIsErroneous,
     checkLegalPropositionConfig,
     defaultLegalPropositionConfig,
     ) where
@@ -35,7 +36,7 @@ data LegalPropositionConfig =
     , illegals :: Integer
     , bracketFormulas :: Integer
     , extraText :: Maybe (Map Language String)
-    , printSolution :: Bool
+    , printSolution :: Maybe Bool
     } deriving (Show,Generic)
 
 defaultLegalPropositionConfig :: LegalPropositionConfig
@@ -47,7 +48,7 @@ defaultLegalPropositionConfig =
     , illegals = 2
     , bracketFormulas = 1
     , extraText = Nothing
-    , printSolution = False
+    , printSolution = Nothing
     }
 
 checkLegalPropositionConfig :: OutputCapable m => LegalPropositionConfig -> LangM m
@@ -93,10 +94,14 @@ data PropErrorReason
   | MissingOperand
   deriving (Show, Generic)
 
+propFormulaIsErroneous :: PropFormulaInfo -> Bool
+propFormulaIsErroneous (Erroneous _) = True
+propFormulaIsErroneous _ = False
+
 data LegalPropositionInst =
     LegalPropositionInst
     {
       formulaInfos :: [(Int, PropFormulaInfo, String)]
-    , showSolution :: Bool
+    , showSolution :: Maybe Bool
     , addText :: Maybe (Map Language String)
     } deriving (Show,Generic)
