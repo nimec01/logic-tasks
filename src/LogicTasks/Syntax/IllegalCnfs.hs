@@ -115,30 +115,30 @@ completeGrade LegalNormalFormInst{..} sol = reRefuse
           english "is given in correct shape."
         CorrectSingleClause -> do
           german "liegt in korrekter Form vor. "
-          german "Es handelt sich hierbei um eine einzige Klausel. "
-          english "is given in correct shape."
+          german "Es handelt sich hierbei um eine einzige Klausel."
+          english "is given in correct shape. "
           english "The formula consists of one clause."
         CorrectAtomicClauses -> do
           german "liegt in korrekter Form vor. "
-          german "Die Klauseln verfügen hier nur über ein einzelnes Literal. "
-          english "is given in correct shape."
+          german "Die Klauseln verfügen hier nur über ein einzelnes Literal."
+          english "is given in correct shape. "
           english "The clauses consist of a single literal."
         Erroneous err -> do
-          german "liegt nicht in korrekter Form vor."
-          english "is not given in correct shape."
+          german "liegt nicht in korrekter Form vor. "
+          english "is not given in correct shape. "
           case err of
             OnClauseLevel IllegalNegation -> do
-              german " Auf Klausel-Ebene findet eine illegale Negation statt."
-              english " There exists an illegal negation on clause level."
+              german "Auf Klausel-Ebene findet eine illegale Negation statt."
+              english "There exists an illegal negation on clause level."
             OnClauseLevel IllegalOperator -> do
-              german " Auf Klausel-Ebene existiert ein illegaler Operator."
-              english " There exists an illegal operator on clause level."
+              german "Auf Klausel-Ebene existiert ein illegaler Operator."
+              english "There exists an illegal operator on clause level."
             IllegalNegation -> do
-              german " Auf äußerster Ebene findet eine illegale Negation statt."
-              english " There exists an illegal negation on the outermost level."
+              german "Auf äußerster Ebene findet eine illegale Negation statt."
+              english "There exists an illegal negation on the outermost level."
             IllegalOperator -> do
-              german " Auf äußerster Ebene existiert ein illegaler Operator."
-              english " There exists an illegal operator on the outermost level."
+              german "Auf äußerster Ebene existiert ein illegaler Operator."
+              english "There exists an illegal operator on the outermost level."
             _ -> pure ()
 
       pure ()

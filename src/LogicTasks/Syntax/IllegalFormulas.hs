@@ -130,7 +130,7 @@ completeGrade path LegalPropositionInst{..} sol = reRefuse
             case err of
               IllegalParentheses -> do
                 german "Die Anzahl an öffnenden und schließenden Klammern stimmt nicht überein."
-                english "The amount of opening and closing brackets does not match."
+                english "The amount of opening and closing parentheses does not match."
               IllegalOperator -> do
                 german "Es werden zwei Teilformen falsch miteinander verknüpft."
                 english "Two subformulas are combined incorrectly."
