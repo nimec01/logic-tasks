@@ -1,5 +1,5 @@
 ---
-resolver: lts-20.26
+resolver: nightly-2024-03-20
 
 packages:
   - .
@@ -13,3 +13,8 @@ extra-deps:
     commit: f14dca13e3fa06858ee6299333764b9b89d820c9
     subdirs:
       - output-blocks
+  - git: https://github.com/fmidue/flex-tasks.git
+    commit: b50ab20b157f3009835da0206e4bfe8872de6f81
+    subdirs:
+      - flex-tasks
+      - flex-tasks-processing
