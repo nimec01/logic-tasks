@@ -136,8 +136,8 @@ partialGrade' ComposeFormulaInst{..} sol
       german  "Sie haben nicht die richtige Anzahl an einzigartigen Formeln eingegeben. Es werden genau zwei unterschiedliche Formeln erwartet."
   | any (isNothing . maybeTree) sol =
     reject $ do
-      english "At least one input does not represent a syntax tree."
-      german "Mindestens eine der Eingaben entspricht nicht einem Syntaxbaum."
+      english "At least one of your inputs does not represent a syntax tree."
+      german "Mindestens eine Ihrer Eingaben entspricht nicht einem Syntaxbaum."
   | not (all containsOperator parsedSol) =
     reject $ do
       english "At least one of your formulas does not contain the given operator."
@@ -156,9 +156,9 @@ partialGrade' ComposeFormulaInst{..} sol
       german "Ihre Abgabe beinhaltet zu viele unterschiedliche Operatoren."
   | any (\s -> s == leftTree || s == rightTree) parsedSol =
     reject $ do
-      english $ "At least one input corresponds to one of the " ++ eTreesOrFormulas ++ " already given. "
+      english $ "At least one of your inputs corresponds to one of the " ++ eTreesOrFormulas ++ " already given. "
       english "Read the task again more carefully."
-      german $ "Mindestens eine der Eingaben entspricht " ++ einerEinem ++ " der bereits gegebenen " ++ gTreesOrFormulas ++ ". "
+      german $ "Mindestens eine Ihrer Eingaben entspricht " ++ einerEinem ++ " der bereits gegebenen " ++ gTreesOrFormulas ++ ". "
       german "Lesen Sie die Aufgabenstellung noch einmal genauer."
 
 
