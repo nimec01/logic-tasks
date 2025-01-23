@@ -61,7 +61,7 @@ instance Show Choice where
 genDecideInst :: DecideConfig -> Gen DecideInst
 genDecideInst DecideConfig{..} = do
     let percentTrueEntries' = fromMaybe (0, 100) percentTrueEntries
-
+    -- jscpd:ignore-start
     formula <- case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
         InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` \t -> withRatio percentTrueEntries' t && not (hasUnusedAtoms t)
@@ -69,6 +69,7 @@ genDecideInst DecideConfig{..} = do
         InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->
         InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+    -- jscpd:ignore-end
 
     let
       tableLen = length $ readEntries $ getTable formula
