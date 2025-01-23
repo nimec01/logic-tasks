@@ -36,7 +36,7 @@ import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf)
 import LogicTasks.Helpers (extra)
 import Control.Monad (when)
 import Trees.Generate (genSynTree)
-import Trees.Formula ()
+import Trees.Formula (hasUnusedAtoms)
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 import qualified Data.Map as Map (fromAscList)
@@ -64,7 +64,7 @@ genDecideInst DecideConfig{..} = do
 
     formula <- case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` withRatio percentTrueEntries'
+        InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` \t -> withRatio percentTrueEntries' t && not (hasUnusedAtoms t)
       (FormulaCnf cnfCfg) ->
         InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->
