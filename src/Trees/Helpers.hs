@@ -30,7 +30,7 @@ module Trees.Helpers
     swapKids,
     collectUniqueBinOpsInSynTree,
     mirrorTree,
-    replaceSubFormula
+    synTreeDependsOnAllAtomics,
     ) where
 
 import Control.Monad (void)
@@ -42,6 +42,7 @@ import qualified Formula.Types as SetFormula hiding (Dnf(..), Con(..))
 import qualified Formula.Types as SetFormulaDnf (Dnf(..), Con(..))
 import Trees.Types (SynTree(..), BinOp(..), PropFormula(..))
 import Auxiliary (listNoDuplicate)
+import Formula.Util (isSemanticEqual)
 
 numberAllBinaryNodes :: SynTree o c -> SynTree (o, Integer) c
 numberAllBinaryNodes = flip evalState 1 . go
@@ -195,8 +196,7 @@ mirrorTree (Binary b l r) = Binary b (mirrorTree r) (mirrorTree l)
 mirrorTree (Not x) = Not $ mirrorTree x
 mirrorTree x = x
 
-replaceSubFormula :: (Eq o, Eq a) => SynTree o a -> SynTree o a -> SynTree o a -> SynTree o a
-replaceSubFormula old new tree | old == tree = new
-replaceSubFormula old new (Binary o l r) = Binary o (replaceSubFormula old new l) (replaceSubFormula old new r)
-replaceSubFormula old new (Not c) = Not $ replaceSubFormula old new c
-replaceSubFormula _ _ leaf = leaf
+
+synTreeDependsOnAllAtomics :: SynTree BinOp Char -> Bool
+synTreeDependsOnAllAtomics t = not $ any (\c -> isSemanticEqual t (t >>= \a -> if a == c then Not (Leaf a) else Leaf a)) atoms
+  where atoms = nubOrd $ collectLeaves t
