@@ -98,7 +98,7 @@ instance Ord Literal where
    compare l1 l2 = compare (letter l1) (letter l2)
 
 
--- | '¬' deNeges a negative sign
+-- | '¬' denotes a negative sign
 instance Show Literal where
    show (Pos x) = [x]
    show (Neg x) = ['¬', x]
