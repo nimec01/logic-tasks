@@ -58,7 +58,7 @@ newtype TruthValue = TruthValue {truth :: Bool}
 
 class Formula a where
     literals :: a -> [Literal]
-    atomics :: a -> [Literal]
+    atomics :: a -> [Char]
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
 
@@ -113,13 +113,13 @@ instance Read Literal where
 instance Formula Literal where
    literals lit = [lit]
 
-   atomics (Neg x) = [Pos x]
-   atomics lit = [lit]
+   atomics (Pos x) = [x]
+   atomics (Neg x) = [x]
 
    amount _ = 1
 
    evaluate xs (Neg y) = not <$> evaluate xs (Pos y)
-   evaluate xs z = lookup z xs
+   evaluate xs (Pos c) = lookup c xs
 
 instance ToSAT Literal where
   convert (Pos c) = Sat.Var c
@@ -204,7 +204,7 @@ genClause (minLength,maxLength) lits = do
 
 
 -- | A shorthand representing an allocation.
-type Allocation = [(Literal, Bool)]
+type Allocation = [(Char, Bool)]
 
 
 --------------------------------------------------------------
@@ -278,7 +278,7 @@ genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
 genCnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
     cnf <- generateClauses nLits empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Pos) nLits
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nLits
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
@@ -424,7 +424,7 @@ genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
 genDnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
     (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
     dnf <- generateCons nLits empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Pos) nLits
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nLits
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
@@ -439,7 +439,7 @@ genDnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
 
 -- | A datatype representing a truth table
 data Table = Table
-    { getLiterals :: [Literal]
+    { getAtomics :: [Char]
     , getEntries :: [Maybe Bool]
     } deriving (Ord,Typeable,Generic)
 
@@ -457,18 +457,18 @@ instance Show Table where
                      ]
       where
         hLine = map (\c -> if c /= '|' then '-' else c) header
-        lits = getLiterals t
+        atoms = getAtomics t
 
         formatLine :: Show a => [a] -> Maybe Bool -> String
         formatLine [] _ = []
         formatLine x y =
             foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "-" (show . fromEnum) y) x ++ "\n"
 
-        header = concat [show x ++ " | " | x <- lits] ++ [availableLetter $ getLiterals t]
+        header = concat [x : " | " | x <- atoms] ++ [availableLetter atoms]
         rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
 
-            unformattedRows = zip (transpose $ comb (length lits) 1) $ getEntries t
+            unformattedRows = zip (transpose $ comb (length atoms) 1) $ getEntries t
               where
                 comb :: Int -> Int -> [[Int]]
                 comb 0 _ = []
@@ -492,31 +492,31 @@ instance Arbitrary Table where
             pure (getTable (cnf :: Cnf))
 
 
--- | Returns all possible allocations for the list of literals.
-possibleAllocations :: [Literal] -> [Allocation]
-possibleAllocations lits = transpose (allCombinations lits 1)
+-- | Returns all possible allocations for the list of atomics.
+possibleAllocations :: [Char] -> [Allocation]
+possibleAllocations atoms = transpose (allCombinations atoms 1)
   where
-    allCombinations :: [Literal] -> Int ->  [Allocation]
+    allCombinations :: [Char] -> Int ->  [Allocation]
     allCombinations [] _ = []
     allCombinations (x:xs) n =
       concat (replicate n $ pairs False ++ pairs True) : allCombinations xs (n*2)
       where
         num = 2^ length xs
-        pairs :: a -> [(Literal,a)]
+        pairs :: a -> [(Char,a)]
         pairs a = replicate num (x,a)
 
 
 
 -- | Constructs a truth table for the given formula
 getTable :: Formula a => a -> Table
-getTable f = Table lits values
+getTable f = Table atoms values
   where
-    lits = atomics f
-    values = map (`evaluate` f) $ possibleAllocations lits
+    atoms = atomics f
+    values = map (`evaluate` f) $ possibleAllocations atoms
 
 
-availableLetter :: [Literal] -> Char
-availableLetter xs = head $ (['F'..'Z'] ++ "*") \\ map letter xs
+availableLetter :: [Char] -> Char
+availableLetter xs = head $ (['F'..'Z'] ++ "*") \\ xs
 
 
 -------------------------------------------------------------------
