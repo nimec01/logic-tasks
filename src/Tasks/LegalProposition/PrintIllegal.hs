@@ -13,7 +13,8 @@ import Trees.Types (BinOp(..), SynTree(..), allBinaryOperators, showOperator, sh
 import Data.List.Extra (replace)
 import Tasks.LegalProposition.Config (PropErrorReason (..))
 import Data.Bifunctor (Bifunctor(second, bimap))
-import Data.Maybe (fromJust, catMaybes)
+import Data.Maybe (fromJust)
+import Control.Applicative ((<|>))
 
 
 
@@ -54,7 +55,7 @@ allocateBugToSubtree notFirstLayer a b usedAtoms usedOperator = do
     ifUseBug <- elements [True, False]
     (left, er1) <- ifUseIllegal ifUseBug True a usedAtoms
     (right, er2) <- ifUseIllegal (not ifUseBug) True b usedAtoms
-    let errorReason = head $ catMaybes [er1,er2]
+    let errorReason = fromJust (er1 <|> er2)
     if notFirstLayer
     then return ("(" ++ left ++ " " ++ showOperator usedOperator ++ " " ++ right ++ ")", errorReason)
     else return (left ++ " " ++ showOperator usedOperator ++ " " ++ right, errorReason)
