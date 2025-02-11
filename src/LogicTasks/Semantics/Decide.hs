@@ -32,11 +32,10 @@ import Test.QuickCheck (Gen, suchThat)
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals)
-import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf)
+import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Helpers (extra)
 import Control.Monad (when)
 import Trees.Generate (genSynTree)
-import Trees.Formula ()
 import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 import qualified Data.Map as Map (fromAscList)
@@ -61,14 +60,15 @@ instance Show Choice where
 genDecideInst :: DecideConfig -> Gen DecideInst
 genDecideInst DecideConfig{..} = do
     let percentTrueEntries' = fromMaybe (0, 100) percentTrueEntries
-
-    formula <- case formulaConfig of
+    -- jscpd:ignore-start
+    formula <- flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
         InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` withRatio percentTrueEntries'
       (FormulaCnf cnfCfg) ->
         InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->
         InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
+    -- jscpd:ignore-end
 
     let
       tableLen = length $ readEntries $ getTable formula
