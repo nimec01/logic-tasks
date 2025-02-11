@@ -32,7 +32,7 @@ import Test.QuickCheck (Gen, suchThat)
 import Config (DecideConfig(..), DecideInst(..), FormulaConfig (..), FormulaInst (..))
 import Formula.Table (flipAt, readEntries)
 import Formula.Types (atomics, availableLetter, getTable, literals)
-import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf)
+import Util (isOutside, remove, withRatio, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Helpers (extra)
 import Control.Monad (when)
 import Trees.Generate (genSynTree)
@@ -41,8 +41,6 @@ import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyF
 import qualified Data.Map as Map (fromAscList)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
-import Trees.Helpers (synTreeDependsOnAllAtomics)
-import Formula.Util (cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
 
 
 
@@ -63,13 +61,13 @@ genDecideInst :: DecideConfig -> Gen DecideInst
 genDecideInst DecideConfig{..} = do
     let percentTrueEntries' = fromMaybe (0, 100) percentTrueEntries
     -- jscpd:ignore-start
-    formula <- case formulaConfig of
+    formula <- flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` \t -> withRatio percentTrueEntries' t && synTreeDependsOnAllAtomics t
+        InstArbitrary <$> genSynTree syntaxTreeConfig  `suchThat` withRatio percentTrueEntries'
       (FormulaCnf cnfCfg) ->
-        InstCnf <$> genCnf' cnfCfg `suchThat` \cnf -> withRatio percentTrueEntries' cnf && cnfDependsOnAllAtomics cnf
+        InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->
-        InstDnf <$> genDnf' dnfCfg `suchThat` \dnf -> withRatio percentTrueEntries' dnf && dnfDependsOnAllAtomics dnf
+        InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
     -- jscpd:ignore-end
 
     let

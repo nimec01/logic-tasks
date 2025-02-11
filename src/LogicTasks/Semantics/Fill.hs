@@ -45,20 +45,19 @@ import GHC.Real ((%))
 import Control.Applicative (Alternative)
 import Control.Monad (when)
 import Data.Foldable.Extra (notNull)
-import Trees.Helpers (synTreeDependsOnAllAtomics)
 
 
 genFillInst :: FillConfig -> Gen FillInst
 genFillInst FillConfig{..} = do
     let percentTrueEntries' = fromMaybe (0,100) percentTrueEntries
 
-    formula <- case formulaConfig of
+    formula <- flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
       (FormulaArbitrary syntaxTreeConfig) ->
-        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t && synTreeDependsOnAllAtomics t
+        InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
       (FormulaCnf cnfCfg) ->
-        tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ \f -> withRatio percentTrueEntries' f && formulaDependsOnAllAtoms f
+        tryGen (InstCnf <$> genCnf' cnfCfg) 100 $ withRatio percentTrueEntries'
       (FormulaDnf dnfCfg) ->
-        tryGen (InstDnf <$> genDnf' dnfCfg) 100 $ \f -> withRatio percentTrueEntries' f && formulaDependsOnAllAtoms f
+        tryGen (InstDnf <$> genDnf' dnfCfg) 100 $ withRatio percentTrueEntries'
 
     let
       entries = readEntries $ getTable formula

@@ -23,16 +23,15 @@ import Control.OutputCapable.Blocks (
 import Test.QuickCheck (Gen, suchThat, elements)
 
 import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), NormalFormConfig(..))
-import Formula.Util (isSemanticEqual, cnfDependsOnAllAtomics, dnfDependsOnAllAtomics)
+import Formula.Util (isSemanticEqual)
 import Formula.Types (availableLetter, getTable, literals)
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (extra)
 import Data.Maybe (fromJust, fromMaybe)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf)
+import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
-import Trees.Helpers (synTreeDependsOnAllAtomics)
 
 
 genPickInst :: PickConfig -> Gen PickInst
@@ -41,13 +40,13 @@ genPickInst PickConfig{..} = do
   formulas <- vectorOfUniqueBy
     amountOfOptions
     isSemanticEqual
-    $ case formulaConfig of
+    $ flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
-          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` \t -> withRatio percentTrueEntries' t && synTreeDependsOnAllAtomics t
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat`withRatio percentTrueEntries'
         (FormulaCnf cnfCfg) ->
-          InstCnf <$> genCnf' cnfCfg `suchThat` \cnf -> withRatio percentTrueEntries' cnf && cnfDependsOnAllAtomics cnf
+          InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
         (FormulaDnf dnfCfg) ->
-          InstDnf <$> genDnf' dnfCfg `suchThat` \dnf -> withRatio percentTrueEntries' dnf && dnfDependsOnAllAtomics dnf
+          InstDnf <$> genDnf' dnfCfg `suchThat` withRatio percentTrueEntries'
 
   correct <- elements [1..amountOfOptions]
 
