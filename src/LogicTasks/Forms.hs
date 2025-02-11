@@ -15,7 +15,7 @@ import FlexTask.FormUtil (
   addCss,
   addNameAndCssClass,
   )
-import FlexTask.YesodConfig             (Rendered)
+import FlexTask.YesodConfig             (Rendered, Widget)
 import Yesod (
   cassius,
   fvInput,
@@ -26,7 +26,7 @@ import Yesod (
 
 
 
-tableForm :: Int -> Int -> [Text] -> [Text] -> Rendered
+tableForm :: Int -> Int -> [Text] -> [Text] -> Rendered Widget
 tableForm emptyColumns rows staticStart staticEnd =
   addCss css $ reader $ \extra -> do
     let headerList = replicate emptyColumns headerName
