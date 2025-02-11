@@ -51,8 +51,8 @@ description withListInput SubTreeInst{..} = do
     focus (display tree)
 
     instruct $ do
-      english $ "Give " ++ show minInputTrees ++ " non-atomic subformulas that are contained in this formula."
-      german $ "Geben Sie " ++ show minInputTrees ++ " nicht-atomare Teilformeln an, die in dieser Formel enthalten sind."
+      english $ "Give " ++ show inputTreeAmount ++ " non-atomic subformulas that are contained in this formula."
+      german $ "Geben Sie " ++ show inputTreeAmount ++ " nicht-atomare Teilformeln an, die in dieser Formel enthalten sind."
 
     instruct $ do
       english "Submit your solution as a list of subformulas."
@@ -68,6 +68,10 @@ description withListInput SubTreeInst{..} = do
         german "Ist z.B. ¬(A ∨ (B ∧ C)) die gegebene Formel und es werden zwei Teilformeln gesucht, dann ist die folgende Lösung korrekt:"
       translatedCode $ flip localise $ translations exampleCode
       pure ()
+
+    paragraph $ translate $ do
+      german "Sie können dafür die ürsprüngliche Formel mehrfach in die Abgabe kopieren und Teile entfernen, oder leer startend die folgenden Schreibweisen nutzen:"
+      english "You can copy the original formula into the submission several times and remove parts, or start from scratch and use the following syntax:"
 
     keyHeading
     basicOpKey unicodeAllowed
@@ -123,12 +127,14 @@ partialGrade' SubTreeInst{..} fs
         english "Your submission contains at least one formula with more logical operators than the original formula."
         german "Ihre Abgabe beinhaltet mindestens eine Formel mit mehr logische Operatoren als die ursprüngliche Formel."
 
-    | amount < minInputTrees =
+    | amount < inputTreeAmount =
       reject $ do
-        english $ "Your submission does not contain enough different subformulas. Add " ++ show (minInputTrees - amount) ++ "."
-        german $ "Ihre Abgabe beinhaltet nicht genügend verschiedene Teilformeln. Fügen Sie " ++ show (minInputTrees - amount) ++ " hinzu."
+        english "Your submission does not contain enough different subformulas. "
+        english $ "Add " ++ show (inputTreeAmount - amount) ++ "."
+        german "Ihre Abgabe beinhaltet nicht genügend verschiedene Teilformeln. "
+        german $ "Fügen Sie " ++ show (inputTreeAmount - amount) ++ " hinzu."
 
-    | amount > minInputTrees =
+    | amount > inputTreeAmount =
       reject $ do
         english "Your submission contains too many formulas."
         german "Ihre Abgabe enthält zu viele Formeln."
@@ -158,9 +164,9 @@ completeGrade'
   -> Rated m
 completeGrade' path SubTreeInst{..} sol = reRefuse
   (extendedMultipleChoice
-    (MinimumThreshold (1 % minInputTrees))
+    (MinimumThreshold (1 % inputTreeAmount))
     (Punishment 0)
-    (TargetedCorrect (fromIntegral minInputTrees))
+    (TargetedCorrect (fromIntegral inputTreeAmount))
     IndefiniteArticle
     what
     Nothing
@@ -168,11 +174,16 @@ completeGrade' path SubTreeInst{..} sol = reRefuse
     submission)
   $ when showSolution $ indent $ do
     instruct $ do
-      english ("A possible solution for this task contains " ++ show minInputTrees ++ " of the following subformulas:")
-      german ("Eine mögliche Lösung für diese Aufgabe beinhaltet " ++ show minInputTrees ++ " der folgenden Teilformeln:")
+      english ("A possible solution for this task contains " ++ show inputTreeAmount ++ " of the following subformulas:")
+      german ("Eine mögliche Lösung für diese Aufgabe beinhaltet " ++ show inputTreeAmount ++ " der folgenden Teilformeln:")
 
     for_ correctTrees $ \x -> do
       code (display x)
+
+      instruct $ do
+        german "mit zugehörigem Teil-Syntaxbaum:"
+        english "with associated partial syntax tree:"
+
       image $=<< liftIO $ cacheTree (transferToPicture x) path
       pure ()
 
