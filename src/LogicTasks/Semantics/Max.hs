@@ -42,7 +42,7 @@ genMaxInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},.
     , unicodeAllowed = offerUnicodeInput
     }
   where
-    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedLiterals True
+    getCnf = genCnf (minClauseAmount, maxClauseAmount) (minClauseLength, maxClauseLength) usedAtoms True
     cnfInRange = tryGen getCnf 100 $ withRatio $ fromMaybe (0,100) percentTrueEntries
 
 
@@ -190,10 +190,10 @@ partialGrade :: OutputCapable m => MaxInst -> Delayed Cnf -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError
 
 partialGrade' :: OutputCapable m => MaxInst -> Cnf -> LangM m
-partialGrade' MaxInst{..} sol = partialMinMax corAtoms cnf sol allMaxTerms True
+partialGrade' MaxInst{..} sol = partialMinMax correctAtoms cnf sol allMaxTerms True
   where
-    corAtoms = atomics cnf
-    allMaxTerms = not $ all (\c -> amount c == length corAtoms) $ getClauses sol
+    correctAtoms = atomics cnf
+    allMaxTerms = not $ all (\c -> amount c == length correctAtoms) $ getClauses sol
 
 
 
