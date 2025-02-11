@@ -39,11 +39,6 @@ isPositive :: Literal -> Bool
 isPositive (Neg _) = False
 isPositive _ = True
 
--- | Return the used char in an atom. Can be removed after #248 was merged.
-atomicChar :: Literal -> Char
-atomicChar (Literal c) = c
-atomicChar _ = error "this should not happen"
-
 ---------------------------------------------------------------------------------------------------
 
 -- | Builds a clause containing the given literals.
@@ -101,16 +96,16 @@ hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 replaceLiteral :: Char -> Literal -> Literal
-replaceLiteral c l@(Literal a)
-  | a == c = Not c
+replaceLiteral c l@(Pos a)
+  | a == c = Neg c
   | otherwise = l
-replaceLiteral c l@(Not a)
-  | a == c = Literal c
+replaceLiteral c l@(Neg a)
+  | a == c = Pos c
   | otherwise = l
 
 cnfDependsOnAllAtomics :: Cnf -> Bool
 cnfDependsOnAllAtomics cnf = not $ any (\c -> isSemanticEqual cnf (replaceAtomInCnf c cnf) ) atoms
-  where atoms = map atomicChar $ atomics cnf
+  where atoms = atomics cnf
 
         replaceAtomInCnf c (Cnf clauses) = Cnf $ Set.map (replaceAtomInClause c) clauses
 
@@ -119,7 +114,7 @@ cnfDependsOnAllAtomics cnf = not $ any (\c -> isSemanticEqual cnf (replaceAtomIn
 
 dnfDependsOnAllAtomics :: Dnf -> Bool
 dnfDependsOnAllAtomics dnf = not $ any (\c -> isSemanticEqual dnf (replaceAtomInDnf c dnf) ) atoms
-  where atoms = map atomicChar $ atomics dnf
+  where atoms = atomics dnf
 
         replaceAtomInDnf c (Dnf cons) = Dnf $ Set.map (replaceAtomInCon c) cons
 
