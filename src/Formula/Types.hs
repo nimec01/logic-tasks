@@ -46,7 +46,7 @@ import Data.List(intercalate, delete, nub, transpose, (\\))
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
-import Test.QuickCheck
+import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
@@ -82,8 +82,8 @@ queryClause = HornClause Query
 
 -- | A datatype representing a literal
 data Literal
-    = Pos { letter :: Char} -- ^ positive sign
-    | Neg { letter :: Char} -- ^ negative sign
+    = Positive { letter :: Char} -- ^ positive sign
+    | Negative { letter :: Char} -- ^ negative sign
     deriving
       ( Eq -- ^ derived
       , Typeable -- ^ derived
@@ -93,37 +93,37 @@ data Literal
 
 -- | order literals alphabetically first, then prefer a positive sign
 instance Ord Literal where
-   compare (Neg x) (Pos y) = if x == y then LT else compare x y
-   compare (Pos x) (Neg y) = if x == y then GT else compare x y
+   compare (Negative x) (Positive y) = if x == y then LT else compare x y
+   compare (Positive x) (Negative y) = if x == y then GT else compare x y
    compare l1 l2 = compare (letter l1) (letter l2)
 
 
 -- | '¬' denotes a negative sign
 instance Show Literal where
-   show (Pos x) = [x]
-   show (Neg x) = ['¬', x]
+   show (Positive x) = [x]
+   show (Negative x) = ['¬', x]
 
 
 instance Read Literal where
-   readsPrec _ ('¬':x:rest) = [(Neg x, rest) | x `elem` ['A' .. 'Z']]
-   readsPrec _ (x:rest) = [(Pos x, rest) | x `elem` ['A' .. 'Z']]
+   readsPrec _ ('¬':x:rest) = [(Negative x, rest) | x `elem` ['A' .. 'Z']]
+   readsPrec _ (x:rest) = [(Positive x, rest) | x `elem` ['A' .. 'Z']]
    readsPrec _ _ = []
 
 
 instance Formula Literal where
    literals lit = [lit]
 
-   atomics (Pos x) = [x]
-   atomics (Neg x) = [x]
+   atomics (Positive x) = [x]
+   atomics (Negative x) = [x]
 
    amount _ = 1
 
-   evaluate xs (Neg y) = not <$> evaluate xs (Pos y)
-   evaluate xs (Pos c) = lookup c xs
+   evaluate xs (Negative y) = not <$> evaluate xs (Positive y)
+   evaluate xs (Positive c) = lookup c xs
 
 instance ToSAT Literal where
-  convert (Pos c) = Sat.Var c
-  convert (Neg c) = Sat.Not (Sat.Var c)
+  convert (Positive c) = Sat.Var c
+  convert (Negative c) = Sat.Not (Sat.Var c)
 
 instance Arbitrary Literal where
    arbitrary = genLiteral ['A'..'Z']
@@ -135,13 +135,13 @@ genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Cannot construct literal from empty list."
 genLiteral lits = do
    rChar <- elements lits
-   elements [Pos rChar, Neg rChar]
+   elements [Positive rChar, Negative rChar]
 
 
 -- | Reverses the sign of the literal
 opposite :: Literal -> Literal
-opposite (Pos l) = Neg l
-opposite (Neg l) = Pos l
+opposite (Positive l) = Negative l
+opposite (Negative l) = Positive l
 
 
 ------------------------------------------------------------

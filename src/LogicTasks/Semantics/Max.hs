@@ -64,7 +64,7 @@ description MaxInst{..} = do
   -- jscpd:ignore-start
   paragraph $ indent $ do
     translate $ do
-      let formulaStr = show $ mkCnf [mkClause [Pos 'A', Neg 'B'], mkClause [Neg 'C', Neg 'D']]
+      let formulaStr = show $ mkCnf [mkClause [Positive 'A', Negative 'B'], mkClause [Negative 'C', Negative 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
     translatedCode $ flip localise $ translations exampleCode
@@ -104,7 +104,7 @@ verifyQuiz MinMaxConfig{..} = do
 
 
 start :: Cnf
-start = mkCnf [mkClause [Pos 'A']]
+start = mkCnf [mkClause [Positive 'A']]
 
 
 

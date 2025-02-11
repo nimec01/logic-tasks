@@ -36,7 +36,7 @@ import Formula.Types
 
 -- | Is the input a positive literal?
 isPositive :: Literal -> Bool
-isPositive (Neg _) = False
+isPositive (Negative _) = False
 isPositive _ = True
 
 ---------------------------------------------------------------------------------------------------
@@ -96,11 +96,11 @@ hasEmptyCon (Dnf set) = Con Set.empty `Set.member` set
 ---------------------------------------------------------------------------------------------------
 
 replaceLiteral :: Char -> Literal -> Literal
-replaceLiteral c l@(Pos a)
-  | a == c = Neg c
+replaceLiteral c l@(Positive a)
+  | a == c = Negative c
   | otherwise = l
-replaceLiteral c l@(Neg a)
-  | a == c = Pos c
+replaceLiteral c l@(Negative a)
+  | a == c = Positive c
   | otherwise = l
 
 cnfDependsOnAllAtomics :: Cnf -> Bool

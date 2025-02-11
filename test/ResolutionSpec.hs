@@ -15,19 +15,19 @@ import Control.OutputCapable.Blocks.Generic (evalLangM)
 import FillSpec (validBoundsBase)
 
 justA :: Clause
-justA = Clause (Data.Set.fromList [Pos 'A'])
+justA = Clause (Data.Set.fromList [Positive 'A'])
 
 notAnotB :: Clause
-notAnotB = Clause (Data.Set.fromList [Neg 'A', Neg 'B'])
+notAnotB = Clause (Data.Set.fromList [Negative 'A', Negative 'B'])
 
 notAjustB :: Clause
-notAjustB = Clause (Data.Set.fromList [Neg 'A', Pos 'B'])
+notAjustB = Clause (Data.Set.fromList [Negative 'A', Positive 'B'])
 
 notB :: Clause
-notB = Clause (Data.Set.fromList [Neg 'B'])
+notB = Clause (Data.Set.fromList [Negative 'B'])
 
 justB :: Clause
-justB = Clause (Data.Set.fromList [Pos 'B'])
+justB = Clause (Data.Set.fromList [Positive 'B'])
 
 emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
@@ -54,7 +54,7 @@ spec = do
     it "should return a Just value if there are no clauses" $
       isJust $ applySteps [] []
     it "should return the original list of clauses if there are no steps to apply" $ do
-      let clauses = [Clause (Data.Set.fromList [Pos 'A'])]
+      let clauses = [Clause (Data.Set.fromList [Positive 'A'])]
       fromJust (applySteps clauses []) == clauses
     it "should return the correct list of clauses if the steps are able to be applied" $ do
       let clauses = [justA, notAnotB, notAjustB]

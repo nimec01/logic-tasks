@@ -1,16 +1,15 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Trees.Formula where
-import Formula.Types (Formula(..))
+import Formula.Types (Formula(..), Literal(..))
 import Trees.Types (SynTree(..), BinOp(..))
-import qualified Formula.Types as F (Literal(..))
 import Data.List (find)
 import Data.List.Extra (nubSort)
 import Trees.Helpers (collectLeaves, treeNodes)
 
 instance Formula (SynTree BinOp Char) where
-  literals (Leaf x) = [F.Pos x]
-  literals (Not (Leaf x)) = [F.Neg x]
+  literals (Leaf x) = [Positive x]
+  literals (Not (Leaf x)) = [Negative x]
   literals (Not x) = literals x
   literals (Binary _ l r) = nubSort $ literals l ++ literals r
 

@@ -150,8 +150,8 @@ conToSynTree :: SetFormulaDnf.Con -> SynTree BinOp Char
 conToSynTree = foldr1 (Binary And) . map literalToSynTree . toList . SetFormulaDnf.literalSet
 
 literalToSynTree :: SetFormula.Literal -> SynTree o Char
-literalToSynTree (SetFormula.Pos a) = Leaf a
-literalToSynTree (SetFormula.Neg a) = Not (Leaf a)
+literalToSynTree (SetFormula.Positive a) = Leaf a
+literalToSynTree (SetFormula.Negative a) = Not (Leaf a)
 
 
 numOfOps :: SynTree o c -> Integer
