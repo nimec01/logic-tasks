@@ -115,20 +115,20 @@ genSynTreeWithSerial
         second Erroneous <$> genIllegal
           (minClauseAmount, maxClauseAmount)
           (minClauseLength, maxClauseLength)
-          usedLiterals
+          usedAtoms
           allowArrowOperators
     | serial `elem` serialsOfJustOneClause =
         (,CorrectSingleClause) . toSynTree
-          <$> gen (1, 1) (minClauseLength, maxClauseLength) usedLiterals False
+          <$> gen (1, 1) (minClauseLength, maxClauseLength) usedAtoms False
     | serial `elem` serialsOfJustOneLiteralPerClause =
         (,CorrectAtomicClauses) . toSynTree
-          <$> gen (minClauseAmount, maxClauseAmount) (1, 1) usedLiterals False
+          <$> gen (minClauseAmount, maxClauseAmount) (1, 1) usedAtoms False
     | otherwise =
         (,Correct) . toSynTree
           <$> gen
             (minClauseAmount, maxClauseAmount)
             (minClauseLength, maxClauseLength)
-            usedLiterals
+            usedAtoms
             False
 
 checkSize :: Int -> Int -> SynTree BinOp Char -> Bool
