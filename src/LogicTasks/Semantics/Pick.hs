@@ -42,7 +42,7 @@ genPickInst PickConfig{..} = do
     isSemanticEqual
     $ flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
-          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat`withRatio percentTrueEntries'
+          InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
         (FormulaCnf cnfCfg) ->
           InstCnf <$> genCnf' cnfCfg `suchThat` withRatio percentTrueEntries'
         (FormulaDnf dnfCfg) ->
