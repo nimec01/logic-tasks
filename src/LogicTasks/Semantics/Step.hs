@@ -240,13 +240,13 @@ genResStepClause minClauseLength maxClauseLength usedAtoms = do
     rChar <- elements usedAtoms
     resolveLit <- elements [Positive rChar, Negative rChar]
     let
-      restLits = delete rChar usedAtoms
+      restAtoms = delete rChar usedAtoms
     minLen1 <- elements [minClauseLength-1..maxClauseLength-1]
     minLen2 <- elements [minClauseLength-1..maxClauseLength-1]
-    clause1 <- genClause (minLen1,maxClauseLength-1) restLits
+    clause1 <- genClause (minLen1,maxClauseLength-1) restAtoms
     let
       lits1 = literals clause1
-    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restLits) 100
+    clause2 <- tryGen (genClause (minLen2,maxClauseLength-1) restAtoms) 100
         (all (\lit -> opposite lit `notElem` lits1) .  literals)
     pure (clause2, resolveLit, lits1)
 

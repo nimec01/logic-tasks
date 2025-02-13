@@ -57,8 +57,8 @@ spec = do
     it "should return the empty Clause when called with the empty list" $
       property $ \bounds -> forAll (genClause bounds []) isEmptyClause
     it "should return the empty Clause when called with invalid boundaries" $
-      property $ \lower upper lits -> lower <= 0 || upper < lower || lower > length lits
-                   ==> forAll (genClause (lower,upper) lits) isEmptyClause
+      property $ \lower upper atoms -> lower <= 0 || upper < lower || lower > length atoms
+                   ==> forAll (genClause (lower,upper) atoms) isEmptyClause
     it "should generate a random clause of the correct length if given valid parameters" $
       forAll validBoundsClause $ \((lower,upper),chars) -> forAll (genClause (lower,upper) chars) $ \clause ->
         let numOfLiterals = length (literals clause) in numOfLiterals >= lower && numOfLiterals <= upper

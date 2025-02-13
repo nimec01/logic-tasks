@@ -84,8 +84,8 @@ applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
 
 
 genRes :: (Int,Int) -> Int -> [Char] -> Gen ([Clause], [ResStep])
-genRes (minLen,maxLen) steps lits = do
-    (clauses,rSteps) <- buildClauses lits (empty, []) 0
+genRes (minLen,maxLen) steps atoms = do
+    (clauses,rSteps) <- buildClauses atoms (empty, []) 0
     shuffled <- shuffle (Set.toList clauses)
     pure (map Clause shuffled, rSteps)
   where
@@ -110,9 +110,9 @@ genRes (minLen,maxLen) steps lits = do
                   underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
                 chosenClause <- setElements (if Set.null underMin then underMax else underMin)
                 let
-                  chooseableLits = filter (\lit ->
-                    Positive lit `Set.notMember` chosenClause && Negative lit `Set.notMember` chosenClause) xs
-                if null chooseableLits
+                  chooseableAtoms = filter (\atom ->
+                    Positive atom `Set.notMember` chosenClause && Negative atom `Set.notMember` chosenClause) xs
+                if null chooseableAtoms
                     then buildClauses xs (ys,rs) (runs+1)
                     else do
                       let clauseSize = Set.size chosenClause
@@ -122,7 +122,7 @@ genRes (minLen,maxLen) steps lits = do
                               if clauseSize == maxLen
                                 then return 2
                                 else choose (1,2)
-                      chosenChar <- elements chooseableLits
+                      chosenChar <- elements chooseableAtoms
                       if choice == 1
                         then checkValidAndInsert (Positive chosenChar) chosenClause rs clauseSize 0
                         else do
