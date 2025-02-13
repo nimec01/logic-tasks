@@ -64,7 +64,7 @@ description MaxInst{..} = do
   -- jscpd:ignore-start
   paragraph $ indent $ do
     translate $ do
-      let formulaStr = show $ mkCnf [mkClause [Literal 'A', Not 'B'], mkClause [Not 'C', Not 'D']]
+      let formulaStr = show $ mkCnf [mkClause [Positive 'A', Negative 'B'], mkClause [Negative 'C', Negative 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
     translatedCode $ flip localise $ translations exampleCode
@@ -104,11 +104,11 @@ verifyQuiz MinMaxConfig{..} = do
 
 
 start :: Cnf
-start = mkCnf [mkClause [Literal 'A']]
+start = mkCnf [mkClause [Positive 'A']]
 
 
 
-partialMinMax :: (OutputCapable m, Formula f) => [Literal] -> f -> f -> Bool -> Bool -> LangM m
+partialMinMax :: (OutputCapable m, Formula f) => [Char] -> f -> f -> Bool -> Bool -> LangM m
 partialMinMax correctAtoms correct solution allValidTerms isMaxTermTask = do
   preventWithHint (not $ null extraAtoms)
     (translate $ do
@@ -175,9 +175,9 @@ partialMinMax correctAtoms correct solution allValidTerms isMaxTermTask = do
     )
   pure ()
  where
-    atoms = atomics solution
-    extraAtoms = atoms \\ correctAtoms
-    missing = correctAtoms \\ atoms
+    solAtoms = atomics solution
+    extraAtoms = solAtoms \\ correctAtoms
+    missing = correctAtoms \\ solAtoms
     table = getTable correct
     corrLen = length $ filter (== Just False) (readEntries table)
     solLen = amount solution

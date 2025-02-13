@@ -183,8 +183,8 @@ instance FromGrammar Literal where
     , nextLevelSpec = Nothing
     }
 
-  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (OfAtom (Atom x)))))) = Just $ Literal x
-  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (NegAtom (Atom x)))))) = Just $ Not x
+  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (OfAtom (Atom x)))))) = Just $ Positive x
+  fromGrammar (WithPrecedence (NoArrows (NoOrs (NoAnds (NegAtom (Atom x)))))) = Just $ Negative x
   fromGrammar _ = Nothing
 
 clauseSetParser :: Parser Clause
@@ -218,8 +218,8 @@ instance FromGrammar Clause where
   fromGrammar (WithPrecedence (NoArrows f)) =  mkClause <$> foldlOrs phi (Just []) f
     where
       phi :: Maybe [Literal] -> Ands -> Maybe [Literal]
-      phi xs (NoAnds (OfAtom (Atom x))) = (Literal x :) <$> xs
-      phi xs (NoAnds ((NegAtom (Atom x)))) = (Not x :) <$> xs
+      phi xs (NoAnds (OfAtom (Atom x))) = (Positive x :) <$> xs
+      phi xs (NoAnds ((NegAtom (Atom x)))) = (Negative x :) <$> xs
       phi _ (NoAnds (Neg{})) = Nothing
       phi _ (NoAnds (OfNested{})) = Nothing
       phi _ Ands{} = Nothing
@@ -243,8 +243,8 @@ instance FromGrammar Con where
   fromGrammar (WithPrecedence (NoArrows (OfAnds f))) = mkCon <$> foldlAnds phi (Just []) f
     where
       phi :: Maybe [Literal] -> Neg -> Maybe [Literal]
-      phi xs (OfAtom (Atom x)) = (Literal x :) <$> xs
-      phi xs (NegAtom (Atom x)) = (Not x :) <$> xs
+      phi xs (OfAtom (Atom x)) = (Positive x :) <$> xs
+      phi xs (NegAtom (Atom x)) = (Negative x :) <$> xs
       phi _ Neg{} = Nothing
       phi _ OfNested{} = Nothing
   fromGrammar _ = Nothing
@@ -264,8 +264,8 @@ instance FromGrammar Cnf where
       go (WithPrecedence TopLevelBackImpl) = Nothing
       phi :: Maybe [Clause] -> Neg -> Maybe [Clause]
       phi xs (OfNested (Nested f)) = (:) <$> fromGrammar f  <*> xs
-      phi xs (OfAtom (Atom x)) = (mkClause [Literal x] :) <$> xs
-      phi xs (NegAtom (Atom x)) = (mkClause [Not x] :) <$> xs
+      phi xs (OfAtom (Atom x)) = (mkClause [Positive x] :) <$> xs
+      phi xs (NegAtom (Atom x)) = (mkClause [Negative x] :) <$> xs
       phi _ Neg{} = Nothing
 
 instance Parse Dnf
@@ -280,8 +280,8 @@ instance FromGrammar Dnf where
     where
       phi :: Maybe [Con] -> Ands -> Maybe [Con]
       phi xs (NoAnds (OfNested (Nested x))) = (:) <$> fromGrammar x <*> xs
-      phi xs (NoAnds (OfAtom (Atom x))) = (mkCon [Literal x] :) <$> xs
-      phi xs (NoAnds (NegAtom (Atom x))) = (mkCon [Not x] :) <$> xs
+      phi xs (NoAnds (OfAtom (Atom x))) = (mkCon [Positive x] :) <$> xs
+      phi xs (NoAnds (NegAtom (Atom x))) = (mkCon [Negative x] :) <$> xs
       phi _ (NoAnds Neg{}) = Nothing
       phi _ (Ands{}) = Nothing
 
