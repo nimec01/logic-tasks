@@ -133,8 +133,8 @@ instance Arbitrary Literal where
 --   throws an error if called with the empty list.
 genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Cannot construct literal from empty list."
-genLiteral lits = do
-   rChar <- elements lits
+genLiteral atoms = do
+   rChar <- elements atoms
    elements [Positive rChar, Negative rChar]
 
 
@@ -177,9 +177,9 @@ instance Formula Clause where
 
    amount (Clause set) = Set.size set
 
-   evaluate xs ys = or <$> sequence lits
+   evaluate xs ys = or <$> sequence litResults
      where
-       lits = map (evaluate xs) (literals ys)
+       litResults = map (evaluate xs) (literals ys)
 
 instance ToSAT Clause where
   convert (Clause set)
@@ -197,8 +197,8 @@ instance Arbitrary Clause where
 -- | Generates a random clause. The length of the generated clause lies in the given length bounds.
 --   The used atomic formulas are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
-genClause (minLength,maxLength) lits = do
-    genLits <- genForBasic (minLength,maxLength) lits
+genClause (minLength,maxLength) atoms = do
+    genLits <- genForBasic (minLength,maxLength) atoms
     pure (Clause genLits)
 
 
@@ -264,9 +264,9 @@ instance Arbitrary Cnf where
         cnf n = do
             minLen <- chooseInt (1,n)
             let
-              lits = take n ['A'..'Z']
-              maxLen = length lits
-            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits True
+              atoms = take n ['A'..'Z']
+              maxLen = length atoms
+            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) atoms True
 
 
 
@@ -275,18 +275,18 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
-    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    cnf <- generateClauses nLits empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nLits
+genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+    (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
+    cnf <- generateClauses nAtoms empty num
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
-    generateClauses usedLits set num
+    generateClauses usedAtoms set num
         | Set.size set == num = pure set
         | otherwise = do
-            clause <- genClause (minLen,maxLen) usedLits
-            generateClauses usedLits (Set.insert clause set) num
+            clause <- genClause (minLen,maxLen) usedAtoms
+            generateClauses usedAtoms (Set.insert clause set) num
 
 
 
@@ -327,9 +327,9 @@ instance Formula Con where
 
    amount (Con set) = Set.size set
 
-   evaluate xs ys = and <$> sequence lits
+   evaluate xs ys = and <$> sequence litResults
      where
-       lits = map (evaluate xs) (literals ys)
+       litResults = map (evaluate xs) (literals ys)
 
 instance ToSAT Con where
   convert (Con set)
@@ -347,8 +347,8 @@ instance Arbitrary Con where
 -- | Generates a random conjunction. The length of the generated conjunction lies in the given length bounds.
 --   The used atomic formulas are drawn from the list of chars.
 genCon :: (Int,Int) -> [Char] -> Gen Con
-genCon (minLength,maxLength) lits = do
-    genLits <- genForBasic (minLength,maxLength) lits
+genCon (minLength,maxLength) atoms = do
+    genLits <- genForBasic (minLength,maxLength) atoms
     pure (Con genLits)
 
 
@@ -410,9 +410,9 @@ instance Arbitrary Dnf where
         dnf n = do
             minLen <- chooseInt (1,n)
             let
-              lits = take n ['A'..'Z']
-              maxLen = length lits
-            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits True
+              atoms = take n ['A'..'Z']
+              maxLen = length atoms
+            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) atoms True
 
 
 
@@ -421,18 +421,18 @@ instance Arbitrary Dnf where
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
-    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    dnf <- generateCons nLits empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nLits
+genDnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+    (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
+    dnf <- generateCons nAtoms empty num
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
-    generateCons usedLits set num
+    generateCons usedAtoms set num
         | Set.size set == num = pure set
         | otherwise = do
-            con <- genCon (minLen,maxLen) usedLits
-            generateCons usedLits (Set.insert con set) num
+            con <- genCon (minLen,maxLen) usedAtoms
+            generateCons usedAtoms (Set.insert con set) num
 
 
 ------------------------------------------------------------
@@ -572,39 +572,39 @@ terms (PrologClause set) = Set.toList set
 -- Helpers to reduce duplicate code
 
 genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
-genForBasic (minLength,maxLength) lits
-    | null lits || minLength > length nLits || invalidLen = pure empty
+genForBasic (minLength,maxLength) atoms
+    | null atoms || minLength > length nAtoms || invalidLen = pure empty
     | otherwise = do
-        chosenLength <- chooseInt (minLength, min (length nLits) maxLength)
-        generateLiterals nLits empty chosenLength
+        chosenLength <- chooseInt (minLength, min (length nAtoms) maxLength)
+        generateLiterals nAtoms empty chosenLength
   where
-    nLits = nub lits
+    nAtoms = nub atoms
     invalidLen = minLength > maxLength || minLength <= 0
 
     generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
-    generateLiterals usedLits xs n
+    generateLiterals usedAtoms xs n
         | Set.size xs == n = pure xs
         | otherwise = do
-            literal <- genLiteral usedLits
+            literal <- genLiteral usedAtoms
             let
-              restLits = delete (letter literal) usedLits
+              restAtoms = delete (letter literal) usedAtoms
               newSet = Set.insert literal xs
-            generateLiterals restLits newSet n
+            generateLiterals restAtoms newSet n
 
 
 
 
 genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
-genForNF (minNum,maxNum) (minLen,maxLen) lits
-    | null nLits || invalidLen || invalidNum = pure (0, [])
+genForNF (minNum,maxNum) (minLen,maxLen) atoms
+    | null nAtoms || invalidLen || invalidNum = pure (0, [])
     | otherwise = do
       num <- chooseInt (minNum, min maxNum upperBound)
-      pure (num, nLits)
+      pure (num, nAtoms)
   where
-    nLits = nub lits
-    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
+    nAtoms = nub atoms
+    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nAtoms
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    upperBound = lengthBound (length nLits) maxLen
+    upperBound = lengthBound (length nAtoms) maxLen
 
 
 

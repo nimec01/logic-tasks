@@ -102,10 +102,10 @@ partialGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError
 
 partialGrade' :: OutputCapable m => MinInst -> Dnf -> LangM m
-partialGrade' MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms False
+partialGrade' MinInst{..} sol = Max.partialMinMax correctAtoms dnf sol allMinTerms False
   where
-    corLits = atomics dnf
-    allMinTerms = not $ all (\c -> amount c == length corLits) $ getConjunctions sol
+    correctAtoms = atomics dnf
+    allMinTerms = not $ all (\c -> amount c == length correctAtoms) $ getConjunctions sol
 
 
 completeGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m
