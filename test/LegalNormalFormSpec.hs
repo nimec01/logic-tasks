@@ -15,13 +15,18 @@ import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (NormalFormConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
-import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig)
+import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig, defaultLegalNormalFormConfig)
 import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree, )
 import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst, generateLegalDNFInst)
-import Control.OutputCapable.Blocks (Language(German))
+import Control.OutputCapable.Blocks (Language(German), LangM, Rated)
 import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 
 import FormulaSpec (validBoundsCnf)
+import Data.Maybe (isJust)
+import Control.Monad.Identity (Identity(runIdentity))
+import Control.OutputCapable.Blocks.Generic (evalLangM)
+import qualified LogicTasks.Syntax.IllegalCnfs as IllegalCnfs (description, verifyInst, partialGrade, completeGrade)
+import qualified LogicTasks.Syntax.IllegalDnfs as IllegalDnfs (description, verifyInst, partialGrade, completeGrade)
 
 validBoundsLegalNormalForm :: Gen LegalNormalFormConfig
 validBoundsLegalNormalForm = do
@@ -100,6 +105,10 @@ timeout = 30000000 -- 30 seconds
 
 spec :: Spec
 spec = do
+    describe "config" $ do
+      it "default config should pass config check" $
+        isJust $ runIdentity $ evalLangM (checkLegalNormalFormConfig defaultLegalNormalFormConfig :: LangM Maybe)
+
     describe "validBoundsLegalNormalForm" $
         it "produces a valid config" $
           withMaxSuccess 1000 $ forAll validBoundsLegalNormalForm $ \conf ->
@@ -109,6 +118,16 @@ spec = do
         xit "produces a valid config" $
           forAll invalidBoundsLegalCNF $ \conf ->
             ioProperty (not <$> checkConfigWith German conf checkLegalNormalFormConfig)
+
+    describe "description" $ do
+      it "should not reject - CNF" $
+        within timeout $ forAll validBoundsLegalNormalForm $ \config ->
+          forAll (generateLegalCNFInst config) $ \inst ->
+            isJust $ runIdentity $ evalLangM (IllegalCnfs.description False inst :: LangM Maybe)
+      it "should not reject - DNF" $
+        within timeout $ forAll validBoundsLegalNormalForm $ \config ->
+          forAll (generateLegalDNFInst config) $ \inst ->
+            isJust $ runIdentity $ evalLangM (IllegalDnfs.description False inst :: LangM Maybe)
 
     describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
@@ -155,6 +174,15 @@ spec = do
             within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
                 forAll (generateLegalCNFInst config) $ \LegalNormalFormInst{..} ->
                   all (\x -> isRight (cnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
+        it "should pass verifyInst" $
+            within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
+                forAll (generateLegalCNFInst config) $ \inst ->
+                  isJust $ runIdentity $ evalLangM (IllegalCnfs.verifyInst inst :: LangM Maybe)
+        it "should pass grading with correct answer" $
+          within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
+            forAll (generateLegalCNFInst config) $ \inst@LegalNormalFormInst{..} ->
+              isJust (runIdentity (evalLangM (IllegalCnfs.partialGrade inst ([1..formulas] \\ toList serialsOfWrong) :: LangM Maybe))) &&
+              isJust (runIdentity (evalLangM (IllegalCnfs.completeGrade inst ([1..formulas] \\ toList serialsOfWrong) :: Rated Maybe)))
     describe "generateLegalDNFInst" $ do
         it "all of the formulas in the wrong serial should not be Dnf" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config ->
@@ -164,6 +192,15 @@ spec = do
             within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
                 forAll (generateLegalDNFInst config) $ \LegalNormalFormInst{..} ->
                   all (\x -> isRight (dnfParse (formulaStrings !! (x - 1)))) ([1..formulas] \\ toList serialsOfWrong)
+        it "should pass verifyInst" $
+            within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
+                forAll (generateLegalDNFInst config) $ \inst ->
+                  isJust $ runIdentity $ evalLangM (IllegalDnfs.verifyInst inst :: LangM Maybe)
+        it "should pass grading with correct answer" $
+          within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
+            forAll (generateLegalDNFInst config) $ \inst@LegalNormalFormInst{..} ->
+              isJust (runIdentity (evalLangM (IllegalDnfs.partialGrade inst ([1..formulas] \\ toList serialsOfWrong) :: LangM Maybe))) &&
+              isJust (runIdentity (evalLangM (IllegalDnfs.completeGrade inst ([1..formulas] \\ toList serialsOfWrong) :: Rated Maybe)))
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b
