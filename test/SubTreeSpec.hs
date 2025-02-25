@@ -6,7 +6,7 @@ import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
 import Text.Parsec (parse)
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
-import Data.Set (size)
+import Data.Set (size, toList)
 import qualified Data.Set (map)
 
 import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeConfig, defaultSubTreeConfig)
@@ -16,13 +16,14 @@ import Tasks.SynTree.Config (SynTreeConfig(..),)
 import TestHelpers (deleteSpaces)
 import Trees.Print (display)
 import Trees.Parsing ()
-import Trees.Types (SynTree, BinOp, PropFormula)
+import Trees.Types (SynTree, BinOp, PropFormula, FormulaAnswer (FormulaAnswer))
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Parsing (Parse(parser))
 import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
+import LogicTasks.Syntax.SubTreeSet (description, verifyInst, partialGrade')
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
@@ -47,6 +48,11 @@ spec = do
       it "validBoundsSubTree should generate a valid config" $
         forAll validBoundsSubTree $ \subTreeConfig ->
           isJust $ runIdentity $ evalLangM (checkSubTreeConfig subTreeConfig :: LangM Maybe)
+  describe "description" $ do
+      it "should not reject" $
+       forAll validBoundsSubTree $ \config ->
+        forAll (generateSubTreeInst config) $ \inst ->
+            isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
   describe "generateSubTreeInst" $ do
     it "parse should works well" $
       forAll validBoundsSubTree $ \subTreeConfig ->
@@ -95,3 +101,14 @@ spec = do
             inputSet = Data.Set.map show propFormulas
           in
             inputSet == correctFormulas
+    it "should pass verifyInst" $
+      forAll validBoundsSubTree $ \subTreeConfig ->
+        forAll (generateSubTreeInst subTreeConfig) $ \inst ->
+          isJust $ runIdentity $ evalLangM (verifyInst inst :: LangM Maybe)
+    it "should pass grading" $
+      forAll validBoundsSubTree $ \subTreeConfig ->
+        forAll (generateSubTreeInst subTreeConfig) $ \inst@SubTreeInst{..} ->
+          isJust (runIdentity (evalLangM (partialGrade' inst (take (fromIntegral inputTreeAmount)
+            $ map (FormulaAnswer . Just . fromRight' . parse parser "Input" . show) $ toList correctTrees) :: LangM Maybe)))
+          -- MonadIO issue
+          --  && isJust (runIdentity (evalLangM (completeGrade inst (changed inst) :: Rated Maybe)))
