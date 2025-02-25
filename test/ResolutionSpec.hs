@@ -10,9 +10,8 @@ import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(
 import Test.QuickCheck (Gen, choose, suchThat, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
 import FillSpec (validBoundsBase)
+import TestHelpers (doesNotRefuse)
 
 justA :: Clause
 justA = Clause (Data.Set.fromList [Positive 'A'])
@@ -73,15 +72,15 @@ spec = do
       isNothing $ applySteps clauses steps
   describe "config" $ do
     it "default config should pass config check" $
-      isJust $ runIdentity $ evalLangM (verifyQuiz dResConf :: LangM Maybe)
+      doesNotRefuse (verifyQuiz dResConf :: LangM Maybe)
     it "validBoundsResolution should generate a valid config" $
       forAll validBoundsResolution $ \resConfig ->
-        isJust $ runIdentity $ evalLangM (verifyQuiz resConfig :: LangM Maybe)
+        doesNotRefuse (verifyQuiz resConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsResolution $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
-          isJust $ runIdentity $ evalLangM (description False resInst :: LangM Maybe)
+          doesNotRefuse (description False resInst :: LangM Maybe)
   describe "genResInst" $ do
     it "should required at least minSteps amount of steps" $
       forAll validBoundsResolution $ \resConfig ->
@@ -90,10 +89,10 @@ spec = do
     it "should pass verifyStatic" $
       forAll validBoundsResolution $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
-          isJust (runIdentity $ evalLangM (verifyStatic resInst :: LangM Maybe))
+          doesNotRefuse (verifyStatic resInst :: LangM Maybe)
     it "should generate the correct solution" $
       forAll validBoundsResolution $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
-          isJust (runIdentity $ evalLangM (partialGrade' resInst (solution resInst) :: LangM Maybe)) &&
-          isJust (runIdentity $ evalLangM (completeGrade' resInst (solution resInst) :: LangM Maybe))
+          doesNotRefuse (partialGrade' resInst (solution resInst) :: LangM Maybe) &&
+          doesNotRefuse (completeGrade' resInst (solution resInst) :: LangM Maybe)
 

@@ -5,9 +5,7 @@ import Control.OutputCapable.Blocks (LangM)
 import Test.Hspec (Spec, describe, it)
 import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
-import Data.Maybe (isJust, fromMaybe)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
+import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
@@ -17,6 +15,7 @@ import Util (withRatio)
 import Formula.Types(atomics)
 import FillSpec (validBoundsCnf)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
+import TestHelpers (doesNotRefuse)
 
 validBoundsPick :: Gen PickConfig
 validBoundsPick = do
@@ -51,15 +50,15 @@ spec :: Spec
 spec = do
   describe "config" $ do
     it "default config should pass config check" $
-      isJust $ runIdentity $ evalLangM (verifyQuiz dPickConf :: LangM Maybe)
+      doesNotRefuse (verifyQuiz dPickConf :: LangM Maybe)
     it "validBoundsPick should generate a valid config" $
       forAll validBoundsPick $ \pickConfig ->
-        isJust $ runIdentity $ evalLangM (verifyQuiz pickConfig :: LangM Maybe)
+        doesNotRefuse (verifyQuiz pickConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \inst ->
-          isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
+          doesNotRefuse (description False inst :: LangM Maybe)
   describe "genPickInst" $ do
     it "generated formulas should not be semantically equivalent" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
@@ -76,7 +75,7 @@ spec = do
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsPick $ \pickConfig -> do
         forAll (genPickInst pickConfig) $ \pickInst ->
-          isJust $ runIdentity $ evalLangM (verifyStatic pickInst :: LangM Maybe)
+          doesNotRefuse (verifyStatic pickInst :: LangM Maybe)
     it "should respect percentTrueEntries" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
@@ -84,6 +83,6 @@ spec = do
     it "the generated solution should pass grading" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \inst ->
-          isJust (runIdentity (evalLangM (partialGrade inst (Number $ Just $ correct inst)  :: LangM Maybe))) &&
-          isJust (runIdentity (evalLangM (completeGrade inst (Number $ Just $ correct inst)  :: LangM Maybe)))
+          doesNotRefuse (partialGrade inst (Number $ Just $ correct inst)  :: LangM Maybe) &&
+          doesNotRefuse (completeGrade inst (Number $ Just $ correct inst)  :: LangM Maybe)
 

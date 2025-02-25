@@ -21,11 +21,9 @@ import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
-import TestHelpers (deleteBrackets, deleteSpaces)
+import TestHelpers (deleteBrackets, deleteSpaces, doesNotRefuse)
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust,isNothing)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
+import Data.Maybe (isNothing)
 import Tasks.LegalProposition.Helpers (formulaAmount)
 import LogicTasks.Syntax.IllegalFormulas (description, partialGrade, verifyInst)
 
@@ -53,15 +51,15 @@ spec :: Spec
 spec = do
     describe "config" $ do
       it "default config should pass config check" $
-        isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig defaultLegalPropositionConfig :: LangM Maybe)
+        doesNotRefuse (checkLegalPropositionConfig defaultLegalPropositionConfig :: LangM Maybe)
       it "validBoundsLegalProposition should generate a valid config" $
         forAll validBoundsLegalProposition $ \legalPropConfig ->
-          isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
+          doesNotRefuse (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
     describe "description" $ do
       it "should not reject" $
         within timeout $ forAll validBoundsLegalProposition $ \config ->
           forAll (generateLegalPropositionInst config) $ \inst ->
-            isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
+            doesNotRefuse (description False inst :: LangM Maybe)
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
             within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
@@ -106,10 +104,10 @@ spec = do
         it "the generateLegalPropositionInst should pass verifyStatic" $
             within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \inst ->
-                   isJust (runIdentity (evalLangM (verifyInst inst :: LangM Maybe)))
+                   doesNotRefuse (verifyInst inst :: LangM Maybe)
         it "the generateLegalPropositionInst should pass grading" $
             within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \inst ->
-                   isJust (runIdentity (evalLangM (partialGrade inst [index | (index,(_, Just _)) <- zip [1..] $ pseudoFormulas inst] :: LangM Maybe)))
+                   doesNotRefuse (partialGrade inst [index | (index,(_, Just _)) <- zip [1..] $ pseudoFormulas inst] :: LangM Maybe)
                   -- MonadIO problem as well
-                  --  && isJust (runIdentity (evalLangM (completeGrade inst (changed inst) :: Rated Maybe)))
+                  --  && doesNotRefuse (completeGrade inst (changed inst) :: Rated Maybe)

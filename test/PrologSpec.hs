@@ -6,9 +6,7 @@ import Config (dPrologConf, PrologInst (..), PrologConfig (..))
 import Formula.Helpers (hasTheClauseShape)
 import Test.QuickCheck
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
+import TestHelpers (doesNotRefuse)
 
 
 
@@ -54,25 +52,25 @@ spec :: Spec
 spec = do
   describe "config" $ do
     it "default config should pass config check" $
-      isJust $ runIdentity $ evalLangM (verifyQuiz dPrologConf :: LangM Maybe)
+      doesNotRefuse (verifyQuiz dPrologConf :: LangM Maybe)
     it "validBoundsProlog should generate a valid config" $
       -- forAll validBoundsProlog $ \prologConfig ->
-        isJust $ runIdentity $ evalLangM (verifyQuiz dPrologConf :: LangM Maybe)
+        doesNotRefuse (verifyQuiz dPrologConf :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
       -- forAll validBoundsProlog $ \prologConfig@PrologConfig{..} ->
         forAll (genPrologInst dPrologConf) $ \inst ->
-          isJust $ runIdentity $ evalLangM (description inst :: LangM Maybe)
+          doesNotRefuse (description inst :: LangM Maybe)
   describe "genPrologInst" $ do
     it "should pass verifyStatic" $
       -- forAll validBoundsProlog $ \prologConfig@PrologConfig{..} -> do
         forAll (genPrologInst dPrologConf) $ \inst ->
-          isJust $ runIdentity $ evalLangM (verifyStatic inst :: LangM Maybe)
+          doesNotRefuse (verifyStatic inst :: LangM Maybe)
     it "should pass grading with correct answer" $
       -- forAll validBoundsProlog $ \prologConfig@PrologConfig{..} -> do
         forAll (genPrologInst dPrologConf) $ \inst ->
-          isJust (runIdentity (evalLangM (partialGrade' inst (solution inst) :: LangM Maybe))) &&
-          isJust (runIdentity (evalLangM (completeGrade' inst (solution inst) :: LangM Maybe)))
+          doesNotRefuse (partialGrade' inst (solution inst) :: LangM Maybe) &&
+          doesNotRefuse (completeGrade' inst (solution inst) :: LangM Maybe)
     it "should only generate PrologInst with horn clauses by default" $
       forAll (genPrologInst dPrologConf) $ \PrologInst {..} ->
         hasTheClauseShape (firstClauseShape dPrologConf) literals1

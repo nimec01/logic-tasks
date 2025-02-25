@@ -17,14 +17,13 @@ import Config (
   dNormalFormConf
  )
 import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
-import Data.Maybe (isJust, fromMaybe)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
+import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable, lengthBound, TruthValue (TruthValue))
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio, checkBaseConf, checkNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
+import TestHelpers (doesNotRefuse)
 -- jscpd:ignore-end
 
 validBoundsBase :: Gen BaseConfig
@@ -80,27 +79,27 @@ spec :: Spec
 spec = do
   describe "BaseConfig" $ do
     it "default base config should pass config check" $
-      isJust $ runIdentity $ evalLangM (checkBaseConf dBaseConf :: LangM Maybe)
+      doesNotRefuse (checkBaseConf dBaseConf :: LangM Maybe)
     it "validBoundsBase should generate a valid config" $
       forAll validBoundsBase $ \baseConfig ->
-        isJust $ runIdentity $ evalLangM (checkBaseConf baseConfig :: LangM Maybe)
+        doesNotRefuse (checkBaseConf baseConfig :: LangM Maybe)
   describe "NormalFormConfig" $ do
     it "default cnf config should pass config check" $
-      isJust $ runIdentity $ evalLangM (checkNormalFormConfig dNormalFormConf :: LangM Maybe)
+      doesNotRefuse (checkNormalFormConfig dNormalFormConf :: LangM Maybe)
     it "validBoundsCnf should generate a valid config" $
       forAll validBoundsCnf $ \normalFormConfig ->
-        isJust $ runIdentity $ evalLangM (checkNormalFormConfig normalFormConfig :: LangM Maybe)
+        doesNotRefuse (checkNormalFormConfig normalFormConfig :: LangM Maybe)
   describe "config" $ do
     it "default config should pass config check" $
-      isJust $ runIdentity $ evalLangM (verifyQuiz dFillConf :: LangM Maybe)
+      doesNotRefuse (verifyQuiz dFillConf :: LangM Maybe)
     it "validBoundsFill should generate a valid config" $
       forAll validBoundsFill $ \fillConfig ->
-        isJust $ runIdentity $ evalLangM (verifyQuiz fillConfig :: LangM Maybe)
+        doesNotRefuse (verifyQuiz fillConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsFill $ \fillConfig@FillConfig{..} -> do
         forAll (genFillInst fillConfig) $ \inst ->
-          isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
+          doesNotRefuse (description False inst :: LangM Maybe)
   describe "genFillInst" $ do
     it "should generate an instance with the right amount of gaps" $
       forAll validBoundsFill $ \fillConfig@FillConfig{..} -> do
@@ -119,10 +118,10 @@ spec = do
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsFill $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
-          isJust $ runIdentity $ evalLangM (verifyStatic fillInst :: LangM Maybe)
+          doesNotRefuse (verifyStatic fillInst :: LangM Maybe)
     it "the generated solution should pass grading" $
       forAll validBoundsFill $ \fillConfig -> do
         forAll (genFillInst fillConfig) $ \fillInst ->
-          isJust (runIdentity (evalLangM (partialGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe))) &&
-          isJust (runIdentity (evalLangM (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: Rated Maybe)))
+          doesNotRefuse (partialGrade fillInst (map TruthValue (missingValues fillInst))  :: LangM Maybe) &&
+          doesNotRefuse (completeGrade fillInst (map TruthValue (missingValues fillInst))  :: Rated Maybe)
 

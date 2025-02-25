@@ -8,15 +8,14 @@ import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
-import Data.Maybe (isJust, fromMaybe)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
+import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Types (Table(getEntries), getTable)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Util (withRatio)
 import FillSpec (validBoundsCnf)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
+import TestHelpers (doesNotRefuse)
 -- jscpd:ignore-end
 
 validBoundsDecide :: Gen DecideConfig
@@ -47,25 +46,25 @@ spec :: Spec
 spec = do
   describe "config" $ do
     it "default config should pass config check" $
-      isJust $ runIdentity $ evalLangM (verifyQuiz dDecideConf :: LangM Maybe)
+      doesNotRefuse (verifyQuiz dDecideConf :: LangM Maybe)
     it "validBoundsDecide should generate a valid config" $
       forAll validBoundsDecide $ \decideConfig ->
-        isJust $ runIdentity $ evalLangM (verifyQuiz decideConfig :: LangM Maybe)
+        doesNotRefuse (verifyQuiz decideConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \inst ->
-          isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
+          doesNotRefuse (description False inst :: LangM Maybe)
   describe "genDecideInst" $ do
     it "should pass verifyStatic" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \inst ->
-          isJust $ runIdentity $ evalLangM (verifyStatic inst :: LangM Maybe)
+          doesNotRefuse (verifyStatic inst :: LangM Maybe)
     it "should pass grading with correct answer" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \inst ->
-          isJust (runIdentity (evalLangM (partialGrade inst (changed inst) :: LangM Maybe))) &&
-          isJust (runIdentity (evalLangM (completeGrade inst (changed inst) :: Rated Maybe)))
+          doesNotRefuse (partialGrade inst (changed inst) :: LangM Maybe) &&
+          doesNotRefuse (completeGrade inst (changed inst) :: Rated Maybe)
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
@@ -79,7 +78,7 @@ spec = do
     it "the generated instance should pass verifyStatic" $
       forAll validBoundsDecide $ \decideConfig -> do
         forAll (genDecideInst decideConfig) $ \decideInst ->
-          isJust $ runIdentity $ evalLangM (verifyStatic decideInst :: LangM Maybe)
+          doesNotRefuse (verifyStatic decideInst :: LangM Maybe)
     it "should respect percentTrueEntries" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->

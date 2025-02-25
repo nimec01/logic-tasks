@@ -9,7 +9,7 @@ import Test.Hspec (Spec, describe, it, xit)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
 import Data.List.Extra (nubOrd, isInfixOf)
 
-import TestHelpers (deleteSpaces)
+import TestHelpers (deleteSpaces, doesNotRefuse)
 import Trees.Print (display)
 import Trees.Parsing (formulaParse)
 import Tasks.SynTree.Config (
@@ -30,9 +30,6 @@ import Trees.Types (SynTree(..), BinOp(..))
 import LogicTasks.Formula (ToSAT(convert), isSemanticEqual)
 import Trees.Generate (genSynTree)
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Data.Map (Map)
 import qualified Data.Map as Map (fromList, filter)
 
@@ -87,10 +84,10 @@ spec :: Spec
 spec = do
   describe "config" $ do
     it "default config should pass config check" $
-      isJust $ runIdentity $ evalLangM (checkSynTreeConfig defaultSynTreeConfig :: LangM Maybe)
+      doesNotRefuse (checkSynTreeConfig defaultSynTreeConfig :: LangM Maybe)
     it "validBoundsSynTree should generate a valid config" $
       forAll validBoundsSynTree $ \synTreeConfig ->
-        isJust $ runIdentity $ evalLangM (checkSynTreeConfig synTreeConfig :: LangM Maybe)
+        doesNotRefuse (checkSynTreeConfig synTreeConfig :: LangM Maybe)
   describe "feedback" $
     it "rejects nonsense" $
       forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->

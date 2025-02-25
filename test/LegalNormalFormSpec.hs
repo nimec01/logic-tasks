@@ -22,11 +22,9 @@ import Control.OutputCapable.Blocks (Language(German), LangM, Rated)
 import Control.OutputCapable.Blocks.Debug(checkConfigWith)
 
 import FormulaSpec (validBoundsCnf)
-import Data.Maybe (isJust)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
 import qualified LogicTasks.Syntax.IllegalCnfs as IllegalCnfs (description, verifyInst, partialGrade, completeGrade)
 import qualified LogicTasks.Syntax.IllegalDnfs as IllegalDnfs (description, verifyInst, partialGrade, completeGrade)
+import TestHelpers (doesNotRefuse)
 
 validBoundsLegalNormalForm :: Gen LegalNormalFormConfig
 validBoundsLegalNormalForm = do
@@ -107,7 +105,7 @@ spec :: Spec
 spec = do
     describe "config" $ do
       it "default config should pass config check" $
-        isJust $ runIdentity $ evalLangM (checkLegalNormalFormConfig defaultLegalNormalFormConfig :: LangM Maybe)
+        doesNotRefuse (checkLegalNormalFormConfig defaultLegalNormalFormConfig :: LangM Maybe)
 
     describe "validBoundsLegalNormalForm" $
         it "produces a valid config" $
@@ -123,11 +121,11 @@ spec = do
       it "should not reject - CNF" $
         within timeout $ forAll validBoundsLegalNormalForm $ \config ->
           forAll (generateLegalCNFInst config) $ \inst ->
-            isJust $ runIdentity $ evalLangM (IllegalCnfs.description False inst :: LangM Maybe)
+            doesNotRefuse (IllegalCnfs.description False inst :: LangM Maybe)
       it "should not reject - DNF" $
         within timeout $ forAll validBoundsLegalNormalForm $ \config ->
           forAll (generateLegalDNFInst config) $ \inst ->
-            isJust $ runIdentity $ evalLangM (IllegalDnfs.description False inst :: LangM Maybe)
+            doesNotRefuse (IllegalDnfs.description False inst :: LangM Maybe)
 
     describe "genIllegalCnfSynTree" $
         it "the syntax Tree are not CNF syntax tree" $
@@ -177,12 +175,12 @@ spec = do
         it "should pass verifyInst" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
                 forAll (generateLegalCNFInst config) $ \inst ->
-                  isJust $ runIdentity $ evalLangM (IllegalCnfs.verifyInst inst :: LangM Maybe)
+                  doesNotRefuse (IllegalCnfs.verifyInst inst :: LangM Maybe)
         it "should pass grading with correct answer" $
           within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
             forAll (generateLegalCNFInst config) $ \inst@LegalNormalFormInst{..} ->
-              isJust (runIdentity (evalLangM (IllegalCnfs.partialGrade inst ([1..formulas] \\ toList serialsOfWrong) :: LangM Maybe))) &&
-              isJust (runIdentity (evalLangM (IllegalCnfs.completeGrade inst ([1..formulas] \\ toList serialsOfWrong) :: Rated Maybe)))
+              doesNotRefuse (IllegalCnfs.partialGrade inst ([1..formulas] \\ toList serialsOfWrong) :: LangM Maybe) &&
+              doesNotRefuse (IllegalCnfs.completeGrade inst ([1..formulas] \\ toList serialsOfWrong) :: Rated Maybe)
     describe "generateLegalDNFInst" $ do
         it "all of the formulas in the wrong serial should not be Dnf" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config ->
@@ -195,12 +193,12 @@ spec = do
         it "should pass verifyInst" $
             within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
                 forAll (generateLegalDNFInst config) $ \inst ->
-                  isJust $ runIdentity $ evalLangM (IllegalDnfs.verifyInst inst :: LangM Maybe)
+                  doesNotRefuse (IllegalDnfs.verifyInst inst :: LangM Maybe)
         it "should pass grading with correct answer" $
           within timeout $ forAll validBoundsLegalNormalForm $ \config@LegalNormalFormConfig{..} ->
             forAll (generateLegalDNFInst config) $ \inst@LegalNormalFormInst{..} ->
-              isJust (runIdentity (evalLangM (IllegalDnfs.partialGrade inst ([1..formulas] \\ toList serialsOfWrong) :: LangM Maybe))) &&
-              isJust (runIdentity (evalLangM (IllegalDnfs.completeGrade inst ([1..formulas] \\ toList serialsOfWrong) :: Rated Maybe)))
+              doesNotRefuse (IllegalDnfs.partialGrade inst ([1..formulas] \\ toList serialsOfWrong) :: LangM Maybe) &&
+              doesNotRefuse (IllegalDnfs.completeGrade inst ([1..formulas] \\ toList serialsOfWrong) :: Rated Maybe)
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b

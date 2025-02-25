@@ -24,13 +24,10 @@ import Tasks.SuperfluousBrackets.PrintSuperfluousBrackets (
   sameAssociativeOperatorAdjacentSerial
   )
 import Trees.Parsing(formulaParse)
-import TestHelpers (deleteBrackets)
+import TestHelpers (deleteBrackets, doesNotRefuse)
 import Trees.Generate (genSynTree)
 import Formula.Parsing (Parse(parser))
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
 import LogicTasks.Syntax.SimplestFormula (description, partialGrade', completeGrade')
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
@@ -50,15 +47,15 @@ spec :: Spec
 spec = do
     describe "config" $ do
       it "default config should pass config check" $
-        isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig :: LangM Maybe)
+        doesNotRefuse (checkSuperfluousBracketsConfig defaultSuperfluousBracketsConfig :: LangM Maybe)
       it "validBoundsSuperfluousBrackets should generate a valid config" $
         forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
-          isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig superfluousBracketsConfig :: LangM Maybe)
+          doesNotRefuse (checkSuperfluousBracketsConfig superfluousBracketsConfig :: LangM Maybe)
     describe "description" $ do
       it "should not reject" $
        forAll validBoundsSuperfluousBrackets $ \config ->
           forAll (generateSuperfluousBracketsInst config) $ \inst ->
-            isJust $ runIdentity $ evalLangM (description inst :: LangM Maybe)
+            doesNotRefuse (description inst :: LangM Maybe)
     describe "sameAssociativeOperatorAdjacent" $ do
         it "should return false if there are no two \\/s or two /\\s as neighbors" $
             not $ sameAssociativeOperatorAdjacent (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c'))))
@@ -119,6 +116,6 @@ spec = do
         it "should pass grading" $
           forAll validBoundsSuperfluousBrackets $ \config ->
               forAll (generateSuperfluousBracketsInst config) $ \inst ->
-                isJust (runIdentity (evalLangM (partialGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe))) &&
-                 isJust (runIdentity (evalLangM (completeGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe)))
+                doesNotRefuse (partialGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe) &&
+                 doesNotRefuse (completeGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe)
 
