@@ -5,9 +5,9 @@ module DecideSpec where
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..))
-import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic)
+import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
@@ -51,7 +51,21 @@ spec = do
     it "validBoundsDecide should generate a valid config" $
       forAll validBoundsDecide $ \decideConfig ->
         isJust $ runIdentity $ evalLangM (verifyQuiz decideConfig :: LangM Maybe)
+  describe "description" $ do
+    it "should not reject" $
+      forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
+        forAll (genDecideInst decideConfig) $ \inst ->
+          isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
   describe "genDecideInst" $ do
+    it "should pass verifyStatic" $
+      forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
+        forAll (genDecideInst decideConfig) $ \inst ->
+          isJust $ runIdentity $ evalLangM (verifyStatic inst :: LangM Maybe)
+    it "should pass grading with correct answer" $
+      forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
+        forAll (genDecideInst decideConfig) $ \inst ->
+          isJust (runIdentity (evalLangM (partialGrade inst (changed inst) :: LangM Maybe))) &&
+          isJust (runIdentity (evalLangM (completeGrade inst (changed inst) :: Rated Maybe)))
     it "should generate an instance with the right amount of changed entries" $
       forAll validBoundsDecide $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \DecideInst{..} ->
