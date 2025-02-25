@@ -27,6 +27,7 @@ import Data.Maybe (isJust,isNothing)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.LegalProposition.Helpers (formulaAmount)
+import LogicTasks.Syntax.IllegalFormulas (description, partialGrade, verifyInst)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -56,6 +57,11 @@ spec = do
       it "validBoundsLegalProposition should generate a valid config" $
         forAll validBoundsLegalProposition $ \legalPropConfig ->
           isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
+    describe "description" $ do
+      it "should not reject" $
+        within timeout $ forAll validBoundsLegalProposition $ \config ->
+          forAll (generateLegalPropositionInst config) $ \inst ->
+            isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
             within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
@@ -97,3 +103,13 @@ spec = do
                     all
                     (\x -> isRight (formulaParse (fst (pseudoFormulas !! (x - 1)))))
                     ([1 .. fromIntegral formulas] \\ serialsOfWrong)
+        it "the generateLegalPropositionInst should pass verifyStatic" $
+            within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
+                forAll (generateLegalPropositionInst config) $ \inst ->
+                   isJust (runIdentity (evalLangM (verifyInst inst :: LangM Maybe)))
+        it "the generateLegalPropositionInst should pass grading" $
+            within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
+                forAll (generateLegalPropositionInst config) $ \inst ->
+                   isJust (runIdentity (evalLangM (partialGrade inst [index | (index,(_, Just _)) <- zip [1..] $ pseudoFormulas inst] :: LangM Maybe)))
+                  -- MonadIO problem as well
+                  --  && isJust (runIdentity (evalLangM (completeGrade inst (changed inst) :: Rated Maybe)))
