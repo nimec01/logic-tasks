@@ -31,6 +31,7 @@ import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
+import LogicTasks.Syntax.SimplestFormula (description, partialGrade', completeGrade')
 
 validBoundsSuperfluousBrackets :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBrackets = do
@@ -53,6 +54,11 @@ spec = do
       it "validBoundsSuperfluousBrackets should generate a valid config" $
         forAll validBoundsSuperfluousBrackets $ \superfluousBracketsConfig ->
           isJust $ runIdentity $ evalLangM (checkSuperfluousBracketsConfig superfluousBracketsConfig :: LangM Maybe)
+    describe "description" $ do
+      it "should not reject" $
+       forAll validBoundsSuperfluousBrackets $ \config ->
+          forAll (generateSuperfluousBracketsInst config) $ \inst ->
+            isJust $ runIdentity $ evalLangM (description inst :: LangM Maybe)
     describe "sameAssociativeOperatorAdjacent" $ do
         it "should return false if there are no two \\/s or two /\\s as neighbors" $
             not $ sameAssociativeOperatorAdjacent (Binary Or (Leaf 'a') (Not (Binary Or (Leaf 'a') (Leaf 'c'))))
@@ -110,3 +116,9 @@ spec = do
                 forAll (generateSuperfluousBracketsInst config) $ \SuperfluousBracketsInst{..} ->
                   fromIntegral (length stringWithSuperfluousBrackets - length simplestString)
                     == superfluousBracketPairs * 2
+        it "should pass grading" $
+          forAll validBoundsSuperfluousBrackets $ \config ->
+              forAll (generateSuperfluousBracketsInst config) $ \inst ->
+                isJust (runIdentity (evalLangM (partialGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe))) &&
+                 isJust (runIdentity (evalLangM (completeGrade' inst (fromRight' $ parse parser "Input" $ simplestString inst) :: LangM Maybe)))
+
