@@ -3,8 +3,8 @@
 module PickSpec where
 import Control.OutputCapable.Blocks (LangM)
 import Test.Hspec (Spec, describe, it)
-import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..))
-import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic)
+import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Number (Number))
+import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
@@ -55,6 +55,11 @@ spec = do
     it "validBoundsPick should generate a valid config" $
       forAll validBoundsPick $ \pickConfig ->
         isJust $ runIdentity $ evalLangM (verifyQuiz pickConfig :: LangM Maybe)
+  describe "description" $ do
+    it "should not reject" $
+      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+        forAll (genPickInst pickConfig) $ \inst ->
+          isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
   describe "genPickInst" $ do
     it "generated formulas should not be semantically equivalent" $
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
@@ -76,3 +81,9 @@ spec = do
       forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           all (withRatio (fromMaybe (0, 100) percentTrueEntries)) formulas
+    it "the generated solution should pass grading" $
+      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+        forAll (genPickInst pickConfig) $ \inst ->
+          isJust (runIdentity (evalLangM (partialGrade inst (Number $ Just $ correct inst)  :: LangM Maybe))) &&
+          isJust (runIdentity (evalLangM (completeGrade inst (Number $ Just $ correct inst)  :: LangM Maybe)))
+
