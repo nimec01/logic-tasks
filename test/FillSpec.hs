@@ -16,7 +16,7 @@ import Config (
   NormalFormConfig(..),
   dNormalFormConf
  )
-import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade)
+import LogicTasks.Semantics.Fill (verifyQuiz, genFillInst, verifyStatic, partialGrade, completeGrade, description)
 import Data.Maybe (isJust, fromMaybe)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
@@ -96,6 +96,11 @@ spec = do
     it "validBoundsFill should generate a valid config" $
       forAll validBoundsFill $ \fillConfig ->
         isJust $ runIdentity $ evalLangM (verifyQuiz fillConfig :: LangM Maybe)
+  describe "description" $ do
+    it "should not reject" $
+      forAll validBoundsFill $ \fillConfig@FillConfig{..} -> do
+        forAll (genFillInst fillConfig) $ \inst ->
+          isJust $ runIdentity $ evalLangM (description False inst :: LangM Maybe)
   describe "genFillInst" $ do
     it "should generate an instance with the right amount of gaps" $
       forAll validBoundsFill $ \fillConfig@FillConfig{..} -> do
