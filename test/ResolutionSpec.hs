@@ -8,7 +8,7 @@ import Formula.Types (Clause(Clause), Literal (..))
 import qualified Data.Set
 import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(solution))
 import Test.QuickCheck (Gen, choose, suchThat, forAll)
-import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade')
+import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)
 import Control.Monad.Identity (Identity(runIdentity))
 import Control.OutputCapable.Blocks.Generic (evalLangM)
@@ -77,11 +77,20 @@ spec = do
     it "validBoundsResolution should generate a valid config" $
       forAll validBoundsResolution $ \resConfig ->
         isJust $ runIdentity $ evalLangM (verifyQuiz resConfig :: LangM Maybe)
+  describe "description" $ do
+    it "should not reject" $
+      forAll validBoundsResolution $ \resConfig ->
+        forAll (genResInst resConfig) $ \resInst ->
+          isJust $ runIdentity $ evalLangM (description False resInst :: LangM Maybe)
   describe "genResInst" $ do
     it "should required at least minSteps amount of steps" $
       forAll validBoundsResolution $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           minSteps resConfig <= length (solution resInst)
+    it "should pass verifyStatic" $
+      forAll validBoundsResolution $ \resConfig ->
+        forAll (genResInst resConfig) $ \resInst ->
+          isJust (runIdentity $ evalLangM (verifyStatic resInst :: LangM Maybe))
     it "should generate the correct solution" $
       forAll validBoundsResolution $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
