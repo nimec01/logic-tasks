@@ -6,7 +6,7 @@ import Data.Either (isLeft, isRight)
 import Data.List ((\\))
 import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, within)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, within, ioProperty)
 
 import Tasks.LegalProposition.Config (
   LegalPropositionConfig (..),
@@ -21,11 +21,12 @@ import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
 import SynTreeSpec (validBoundsSynTree)
 import Trees.Print (display)
-import TestHelpers (deleteBrackets, deleteSpaces, doesNotRefuse)
+import TestHelpers (deleteBrackets, deleteSpaces, doesNotRefuse, doesNotRefuseIO)
 import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isNothing)
 import Tasks.LegalProposition.Helpers (formulaAmount)
-import LogicTasks.Syntax.IllegalFormulas (description, partialGrade, verifyInst)
+import LogicTasks.Syntax.IllegalFormulas (description, partialGrade, verifyInst, completeGrade)
+import System.IO.Temp (withSystemTempDirectory)
 
 validBoundsLegalProposition :: Gen LegalPropositionConfig
 validBoundsLegalProposition = do
@@ -109,5 +110,8 @@ spec = do
             within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \inst ->
                    doesNotRefuse (partialGrade inst [index | (index,(_, Just _)) <- zip [1..] $ pseudoFormulas inst] :: LangM Maybe)
-                  -- MonadIO problem as well
-                  --  && doesNotRefuse (completeGrade inst (changed inst) :: Rated Maybe)
+        it "the generateLegalPropositionInst should pass grading" $
+          within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
+            forAll (generateLegalPropositionInst config) $ \inst -> ioProperty $
+              withSystemTempDirectory "logic-tasks" $ \path ->
+                doesNotRefuseIO (completeGrade path inst [index | (index,(_, Just _)) <- zip [1..] $ pseudoFormulas inst])
