@@ -15,7 +15,12 @@ import Text.ParserCombinators.Parsec (ParseError, parse)
 import Config (NormalFormConfig(..), BaseConfig(..))
 import Trees.Types (SynTree(..), BinOp(..))
 import Trees.Helpers (cnfToSynTree, dnfToSynTree)
-import Tasks.LegalNormalForm.Config (LegalNormalFormConfig(..), LegalNormalFormInst(..), checkLegalNormalFormConfig, defaultLegalNormalFormConfig)
+import Tasks.LegalNormalForm.Config (
+  LegalNormalFormConfig(..),
+  LegalNormalFormInst(..),
+  checkLegalNormalFormConfig,
+  defaultLegalNormalFormConfig
+  )
 import Tasks.LegalNormalForm.GenerateIllegal (genIllegalCnfSynTree, genIllegalDnfSynTree, )
 import Tasks.LegalNormalForm.Quiz (generateLegalCNFInst, generateLegalDNFInst)
 import Control.OutputCapable.Blocks (Language(German), LangM, Rated)
