@@ -128,6 +128,7 @@ test-suite src-test
       SynTreeSpec
       TableSpec
       TestHelpers
+      TreeToFormulaSpec
       Paths_logic_tasks
   hs-source-dirs:
       test
