@@ -33,7 +33,7 @@ import Formula.Parsing (Parse(..))
 
 
 genMaxInst :: MinMaxConfig -> Gen MaxInst
-genMaxInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
+genMaxInst MinMaxConfig {normalFormConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
     cnf <- cnfInRange
     pure $ MaxInst {
       cnf
@@ -96,7 +96,7 @@ verifyStatic MaxInst{..}
 verifyQuiz :: OutputCapable m => MinMaxConfig -> LangM m
 verifyQuiz MinMaxConfig{..} = do
   checkTruthValueRange (low,high)
-  checkNormalFormConfig cnfConf
+  checkNormalFormConfig normalFormConf
   pure ()
   where
     (low,high) = fromMaybe (0,100) percentTrueEntries

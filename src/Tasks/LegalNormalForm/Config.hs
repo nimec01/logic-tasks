@@ -61,7 +61,7 @@ defaultLegalNormalFormConfig =
 
 
 checkLegalNormalFormConfig :: OutputCapable m => LegalNormalFormConfig -> LangM m
-checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@NormalFormConfig {baseConf = BaseConfig{..}, ..}, ..}
+checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = normalFormConf@NormalFormConfig {baseConf = BaseConfig{..}, ..}, ..}
     | not (all isLetter usedAtoms) = reject $ do
         english "Only letters are allowed as atomic formulas."
         german "Nur Buchstaben können atomare Formeln sein."
@@ -102,7 +102,7 @@ checkLegalNormalFormConfig LegalNormalFormConfig{normalFormConfig = cnfConf@Norm
     | maxStringSize > maxClauseAmount * (maxClauseLength * 6 + 5) = reject $ do
         english "Cannot generate string with given maxStringSize."
         german "String kann mit gegebenem maxStringSize nicht generiert werden."
-    | otherwise = checkNormalFormConfig cnfConf
+    | otherwise = checkNormalFormConfig normalFormConf
   where
     negArgs = any (<1) [minClauseAmount, minClauseLength, minStringSize, formulas]
     boundsError = any (\(a,b) -> b < a)
