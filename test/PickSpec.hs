@@ -27,6 +27,7 @@ validBoundsPick = do
     "Dnf" -> FormulaDnf <$> validBoundsCnf
     _ -> FormulaArbitrary <$> validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
             amountOfOptions <= 4*2^ length availableAtoms &&
+            minAmountOfUniqueAtoms >= 2 &&
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
             maxNodes <= 40
 
