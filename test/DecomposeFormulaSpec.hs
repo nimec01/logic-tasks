@@ -10,15 +10,17 @@ import Tasks.DecomposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (fromJust)
+import Control.OutputCapable.Blocks (LangM, Language (English))
+import Data.Maybe (fromJust, isJust)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
-import Trees.Helpers (bothKids, binOp)
+import Trees.Helpers (bothKids, binOp, swapKids)
 import Trees.Types (SynTree(..), BinOp(..), TreeFormulaAnswer (TreeFormulaAnswer))
 import Trees.Print (display)
 import qualified Data.Map as Map (fromList)
-import LogicTasks.Syntax.DecomposeFormula (verifyInst, description, partialGrade')
+import LogicTasks.Syntax.DecomposeFormula (verifyInst, description, partialGrade', completeGrade')
 import TestHelpers (doesNotRefuse)
+import System.IO.Temp (withSystemTempDirectory)
+import Control.OutputCapable.Blocks.Debug (run)
 
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
@@ -58,12 +60,16 @@ spec = do
       forAll validBoundsDecomposeFormula $ \config -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (verifyInst inst :: LangM Maybe)
-    it "should pass grading with correct answer" $
+    it "should pass partialGrade with correct answer" $
       forAll validBoundsDecomposeFormula $ \config@DecomposeFormulaConfig{..} -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
-          doesNotRefuse (partialGrade' inst (TreeFormulaAnswer $ Just $ tree inst) :: LangM Maybe)
-          -- doesNotRefuse/evalLangM does not satisfy MonadIO constraint
-          -- && doesNotRefuse (completeGrade' inst (TreeFormulaAnswer $ Just $ tree inst) :: LangM Maybe)
+          doesNotRefuse (partialGrade' inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst) :: LangM Maybe)
+    it "should pass completeGrade with correct answer" $
+      forAll validBoundsDecomposeFormula $ \config@DecomposeFormulaConfig{..} -> do
+        forAll (generateDecomposeFormulaInst config) $ \inst ->
+          ioProperty $
+            withSystemTempDirectory "logic-tasks" $ \path ->
+              isJust <$> run English (completeGrade' path inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst))
     it "should generate an instance with different subtrees" $
       forAll validBoundsDecomposeFormula $ \decomposeFormulaConfig ->
         forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->
