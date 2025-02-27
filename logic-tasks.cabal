@@ -124,6 +124,7 @@ test-suite src-test
       PickSpec
       PrologSpec
       ResolutionSpec
+      StepSpec
       SubTreeSpec
       SuperfluousBracketsSpec
       SynTreeSpec
