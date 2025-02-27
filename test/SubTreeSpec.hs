@@ -2,7 +2,7 @@
 module SubTreeSpec (spec) where
 
 import Test.Hspec (describe, it, xit, Spec)
-import Test.QuickCheck (Gen, choose, forAll, elements, suchThat)
+import Test.QuickCheck (Gen, choose, forAll, elements, suchThat, ioProperty)
 import Text.Parsec (parse)
 import Data.Either.Extra (fromRight')
 import Data.List.Extra (isInfixOf )
@@ -13,14 +13,15 @@ import Tasks.SubTree.Config (SubTreeConfig(..), SubTreeInst(..), checkSubTreeCon
 import Tasks.SubTree.Quiz (generateSubTreeInst)
 import Trees.Helpers (allNotLeafSubTrees, maxLeavesForNodes)
 import Tasks.SynTree.Config (SynTreeConfig(..),)
-import TestHelpers (deleteSpaces, doesNotRefuse)
+import TestHelpers (deleteSpaces, doesNotRefuse, doesNotRefuseIO)
 import Trees.Print (display)
 import Trees.Parsing ()
 import Trees.Types (SynTree, BinOp, PropFormula, FormulaAnswer (FormulaAnswer))
 import SynTreeSpec (validBoundsSynTree)
 import Formula.Parsing (Parse(parser))
 import Control.OutputCapable.Blocks (LangM)
-import LogicTasks.Syntax.SubTreeSet (description, verifyInst, partialGrade')
+import LogicTasks.Syntax.SubTreeSet (description, verifyInst, partialGrade', completeGrade')
+import System.IO.Temp (withSystemTempDirectory)
 
 validBoundsSubTree :: Gen SubTreeConfig
 validBoundsSubTree = do
@@ -36,6 +37,11 @@ validBoundsSubTree = do
       , printSolution = False
       , offerUnicodeInput = False
       }
+
+computeSolution :: Integer -> [SynTree BinOp Char] -> [FormulaAnswer]
+computeSolution n trees =
+  take (fromIntegral n)
+  $ map (FormulaAnswer . Just . fromRight' . parse parser "Input" . display) trees
 
 spec :: Spec
 spec = do
@@ -102,10 +108,12 @@ spec = do
       forAll validBoundsSubTree $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \inst ->
           doesNotRefuse (verifyInst inst :: LangM Maybe)
-    it "should pass grading" $
+    it "should pass partialGrade" $
       forAll validBoundsSubTree $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \inst@SubTreeInst{..} ->
-          doesNotRefuse (partialGrade' inst (take (fromIntegral inputTreeAmount)
-            $ map (FormulaAnswer . Just . fromRight' . parse parser "Input" . show) $ toList correctTrees) :: LangM Maybe)
-          -- MonadIO issue
-          --  && doesNotRefuse (completeGrade inst (changed inst) :: Rated Maybe)
+          doesNotRefuse (partialGrade' inst (computeSolution inputTreeAmount $ toList correctTrees) :: LangM Maybe)
+    it "should pass completeGrade" $
+      forAll validBoundsSubTree $ \subTreeConfig ->
+        forAll (generateSubTreeInst subTreeConfig) $ \inst@SubTreeInst{..} -> ioProperty $
+            withSystemTempDirectory "logic-tasks" $ \path ->
+              doesNotRefuseIO (completeGrade' path inst (computeSolution inputTreeAmount $ toList correctTrees))
