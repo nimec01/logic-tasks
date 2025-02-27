@@ -85,7 +85,7 @@ data MaxInst = MaxInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
@@ -104,7 +104,7 @@ data MinInst = MinInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
@@ -324,7 +324,7 @@ data MinMaxConfig = MinMaxConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic)
+    deriving (Show, Typeable, Generic)
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
