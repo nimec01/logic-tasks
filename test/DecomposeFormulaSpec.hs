@@ -10,17 +10,16 @@ import Tasks.DecomposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.OutputCapable.Blocks (LangM, Language (English))
-import Data.Maybe (fromJust, isJust)
+import Control.OutputCapable.Blocks (LangM)
+import Data.Maybe (fromJust)
 import Tasks.DecomposeFormula.Quiz (generateDecomposeFormulaInst)
 import Trees.Helpers (bothKids, binOp, swapKids)
 import Trees.Types (SynTree(..), BinOp(..), TreeFormulaAnswer (TreeFormulaAnswer))
 import Trees.Print (display)
 import qualified Data.Map as Map (fromList)
 import LogicTasks.Syntax.DecomposeFormula (verifyInst, description, partialGrade', completeGrade')
-import TestHelpers (doesNotRefuse)
+import TestHelpers (doesNotRefuse, doesNotRefuseIO)
 import System.IO.Temp (withSystemTempDirectory)
-import Control.OutputCapable.Blocks.Debug (run)
 
 validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
 validBoundsDecomposeFormula = do
@@ -69,7 +68,7 @@ spec = do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           ioProperty $
             withSystemTempDirectory "logic-tasks" $ \path ->
-              isJust <$> run English (completeGrade' path inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst))
+              doesNotRefuseIO (completeGrade' path inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst))
     it "should generate an instance with different subtrees" $
       forAll validBoundsDecomposeFormula $ \decomposeFormulaConfig ->
         forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->

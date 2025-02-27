@@ -12,13 +12,12 @@ import Tasks.ComposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTree)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.OutputCapable.Blocks (LangM, Language (English))
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Tasks.ComposeFormula.Quiz (generateComposeFormulaInst)
 import Trees.Types (SynTree(Binary), TreeFormulaAnswer (TreeFormulaAnswer))
 import LogicTasks.Syntax.ComposeFormula (partialGrade', description, completeGrade', verifyInst)
-import TestHelpers (doesNotRefuse)
-import Control.OutputCapable.Blocks.Debug (run)
+import TestHelpers (doesNotRefuse, doesNotRefuseIO)
 import System.IO.Temp (withSystemTempDirectory)
 
 validBoundsComposeFormula :: Gen ComposeFormulaConfig
@@ -49,7 +48,7 @@ spec = do
       forAll validBoundsComposeFormula $ \config ->
         forAll (generateComposeFormulaInst config) $ \inst -> ioProperty $
           withSystemTempDirectory "logic-tasks" $ \path ->
-            isJust <$> run English (description False path inst)
+            doesNotRefuseIO (description False path inst)
   describe "generateComposeFormulaInst" $ do
     it "should pass verifyInst" $
       forAll validBoundsComposeFormula $ \composeFormulaConfig ->
@@ -70,7 +69,7 @@ spec = do
               rlTree = Binary operator rightTree leftTree
           in ioProperty $
             withSystemTempDirectory "logic-tasks" $ \path ->
-              isJust <$> run English (completeGrade' path inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)])
+              doesNotRefuseIO (completeGrade' path inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)])
     it "leftTreeImage and rightTreeImage has the right value" $
       forAll validBoundsComposeFormula $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
