@@ -363,7 +363,7 @@ dDecideConf = DecideConfig
     { formulaConfig = FormulaCnf dNormalFormConf
     , percentageOfChanged = 40
     , percentTrueEntries = Just (30,70)
-    , printSolution = True
+    , printSolution = False
     , extraText = Nothing
     }
 
