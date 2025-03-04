@@ -3,9 +3,9 @@ name: Haskell CI
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
-    branches: ['**']
+    branches: ["**"]
 
 jobs:
   build_and_test:
@@ -13,14 +13,22 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         plan:
-          - {build: stack}
+          - build: stack
 
     runs-on: ${{ matrix.os }}
 
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: teatimeguest/setup-texlive-action@v3
+        with:
+          packages: |
+            scheme-basic
+            forest
+            preview
+            dvisvgm
 
       - name: Cache Stack
         id: cache-stack-unix
