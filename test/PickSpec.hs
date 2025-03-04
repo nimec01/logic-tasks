@@ -7,25 +7,25 @@ import Config (dPickConf, PickConfig (..), PickInst (..), FormulaConfig(..), Num
 import LogicTasks.Semantics.Pick (verifyQuiz, genPickInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
 import Test.QuickCheck (Gen, choose, forAll, suchThat, elements)
-import SynTreeSpec (validBoundsSynTree)
+import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Formula.Util (isSemanticEqual)
 import Data.List.Extra (nubOrd, nubSort, nubBy)
 import Util (withRatio)
 import Formula.Types(atomics)
-import FillSpec (validBoundsCnf)
+import FillSpec (validBoundsNormalFormConfig)
 import LogicTasks.Util (formulaDependsOnAllAtoms)
 import TestHelpers (doesNotRefuse)
 
-validBoundsPick :: Gen PickConfig
-validBoundsPick = do
+validBoundsPickConfig :: Gen PickConfig
+validBoundsPickConfig = do
   amountOfOptions <- choose (2, 5)
   -- formulaType <- elements ["Cnf", "Dnf", "Arbitrary"]
   let formulaType = "Arbitrary"
   formulaConfig <- case formulaType of
-    "Cnf" -> FormulaCnf <$> validBoundsCnf
-    "Dnf" -> FormulaDnf <$> validBoundsCnf
-    _ -> FormulaArbitrary <$> validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+    "Cnf" -> FormulaCnf <$> validBoundsNormalFormConfig
+    "Dnf" -> FormulaDnf <$> validBoundsNormalFormConfig
+    _ -> FormulaArbitrary <$> validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
             amountOfOptions <= 4*2^ length availableAtoms &&
             minAmountOfUniqueAtoms >= 2 &&
             minAmountOfUniqueAtoms == fromIntegral (length availableAtoms) &&
@@ -52,37 +52,37 @@ spec = do
   describe "config" $ do
     it "default config should pass config check" $
       doesNotRefuse (verifyQuiz dPickConf :: LangM Maybe)
-    it "validBoundsPick should generate a valid config" $
-      forAll validBoundsPick $ \pickConfig ->
+    it "validBoundsPickConfig should generate a valid config" $
+      forAll validBoundsPickConfig $ \pickConfig ->
         doesNotRefuse (verifyQuiz pickConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+      forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \inst ->
           doesNotRefuse (description False inst :: LangM Maybe)
   describe "genPickInst" $ do
     it "generated formulas should not be semantically equivalent" $
-      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+      forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           length (nubBy isSemanticEqual formulas) == amountOfOptions
     it "generated formulas should only consist of the same atomics" $
-      forAll validBoundsPick $ \pickConfig ->
+      forAll validBoundsPickConfig $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           length (nubOrd (map (nubSort . atomics) formulas)) == 1
     it "generated formulas should depend on all atomics" $
-      forAll validBoundsPick $ \pickConfig ->
+      forAll validBoundsPickConfig $ \pickConfig ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           all formulaDependsOnAllAtoms formulas
     it "the generated instance should pass verifyStatic" $
-      forAll validBoundsPick $ \pickConfig -> do
+      forAll validBoundsPickConfig $ \pickConfig -> do
         forAll (genPickInst pickConfig) $ \pickInst ->
           doesNotRefuse (verifyStatic pickInst :: LangM Maybe)
     it "should respect percentTrueEntries" $
-      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+      forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \PickInst{..} ->
           all (withRatio (fromMaybe (0, 100) percentTrueEntries)) formulas
     it "the generated solution should pass grading" $
-      forAll validBoundsPick $ \pickConfig@PickConfig{..} ->
+      forAll validBoundsPickConfig $ \pickConfig@PickConfig{..} ->
         forAll (genPickInst pickConfig) $ \inst ->
           doesNotRefuse (partialGrade inst (Number $ Just $ correct inst)  :: LangM Maybe) &&
           doesNotRefuse (completeGrade inst (Number $ Just $ correct inst)  :: LangM Maybe)

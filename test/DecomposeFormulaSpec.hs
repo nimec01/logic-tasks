@@ -8,7 +8,7 @@ import Tasks.DecomposeFormula.Config (
   defaultDecomposeFormulaConfig,
   DecomposeFormulaInst(..))
 import Test.QuickCheck
-import SynTreeSpec (validBoundsSynTree)
+import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (fromJust)
@@ -21,9 +21,9 @@ import LogicTasks.Syntax.DecomposeFormula (verifyInst, description, partialGrade
 import TestHelpers (doesNotRefuse, doesNotRefuseIO)
 import System.IO.Temp (withSystemTempDirectory)
 
-validBoundsDecomposeFormula :: Gen DecomposeFormulaConfig
-validBoundsDecomposeFormula = do
-  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+validBoundsDecomposeFormulaConfig :: Gen DecomposeFormulaConfig
+validBoundsDecomposeFormulaConfig = do
+  syntaxTreeConfig <- validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
     minUniqueBinOperators >= 1 && minUniqueBinOperators < 4 && minNodes > 6
   return DecomposeFormulaConfig {
     syntaxTreeConfig = syntaxTreeConfig {
@@ -46,31 +46,31 @@ spec = do
   describe "config" $ do
     it "default config should pass config check" $
       doesNotRefuse (checkDecomposeFormulaConfig defaultDecomposeFormulaConfig :: LangM Maybe)
-    it "validBoundsDecomposeFormula should generate a valid config" $
-      forAll validBoundsDecomposeFormula $ \decomposeFormulaConfig ->
+    it "validBoundsDecomposeFormulaConfig should generate a valid config" $
+      forAll validBoundsDecomposeFormulaConfig $ \decomposeFormulaConfig ->
         doesNotRefuse (checkDecomposeFormulaConfig decomposeFormulaConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsDecomposeFormula $ \config -> do
+      forAll validBoundsDecomposeFormulaConfig $ \config -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (description inst :: LangM Maybe)
   describe "generateDecomposeFormulaInst" $ do
     it "the generated instance should pass verifyInst" $
-      forAll validBoundsDecomposeFormula $ \config -> do
+      forAll validBoundsDecomposeFormulaConfig $ \config -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (verifyInst inst :: LangM Maybe)
     it "should pass partialGrade with correct answer" $
-      forAll validBoundsDecomposeFormula $ \config@DecomposeFormulaConfig{..} -> do
+      forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           doesNotRefuse (partialGrade' inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst) :: LangM Maybe)
     it "should pass completeGrade with correct answer" $
-      forAll validBoundsDecomposeFormula $ \config@DecomposeFormulaConfig{..} -> do
+      forAll validBoundsDecomposeFormulaConfig $ \config@DecomposeFormulaConfig{..} -> do
         forAll (generateDecomposeFormulaInst config) $ \inst ->
           ioProperty $
             withSystemTempDirectory "logic-tasks" $ \path ->
               doesNotRefuseIO (completeGrade' path inst (TreeFormulaAnswer $ Just $ swapKids $ tree inst))
     it "should generate an instance with different subtrees" $
-      forAll validBoundsDecomposeFormula $ \decomposeFormulaConfig ->
+      forAll validBoundsDecomposeFormulaConfig $ \decomposeFormulaConfig ->
         forAll (generateDecomposeFormulaInst decomposeFormulaConfig) $ \DecomposeFormulaInst{..} ->
           let (lk,rk) = bothKids tree
               rootOp = fromJust $ binOp tree

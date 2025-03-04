@@ -10,7 +10,7 @@ import Tasks.ComposeFormula.Config (
   defaultComposeFormulaConfig,
   ComposeFormulaInst(..))
 import Test.QuickCheck
-import SynTreeSpec (validBoundsSynTree)
+import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
@@ -20,9 +20,9 @@ import LogicTasks.Syntax.ComposeFormula (partialGrade', description, completeGra
 import TestHelpers (doesNotRefuse, doesNotRefuseIO)
 import System.IO.Temp (withSystemTempDirectory)
 
-validBoundsComposeFormula :: Gen ComposeFormulaConfig
-validBoundsComposeFormula = do
-  syntaxTreeConfig <- validBoundsSynTree `suchThat` \SynTreeConfig{..} ->
+validBoundsComposeFormulaConfig :: Gen ComposeFormulaConfig
+validBoundsComposeFormulaConfig = do
+  syntaxTreeConfig <- validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} ->
     minUniqueBinOperators >= 1 && minNodes > 6
   displayModeL <- elements [minBound..maxBound :: TreeDisplayMode]
   displayModeR <- elements [minBound..maxBound :: TreeDisplayMode]
@@ -40,30 +40,30 @@ spec = do
   describe "config" $ do
     it "default config should pass config check" $
       doesNotRefuse (checkComposeFormulaConfig defaultComposeFormulaConfig :: LangM Maybe)
-    it "validBoundsComposeFormula should generate a valid config" $
-      forAll validBoundsComposeFormula $ \composeFormulaConfig ->
+    it "validBoundsComposeFormulaConfig should generate a valid config" $
+      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         doesNotRefuse (checkComposeFormulaConfig composeFormulaConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsComposeFormula $ \config ->
+      forAll validBoundsComposeFormulaConfig $ \config ->
         forAll (generateComposeFormulaInst config) $ \inst -> ioProperty $
           withSystemTempDirectory "logic-tasks" $ \path ->
             doesNotRefuseIO (description False path inst)
   describe "generateComposeFormulaInst" $ do
     it "should pass verifyInst" $
-      forAll validBoundsComposeFormula $ \composeFormulaConfig ->
+      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst ->
           doesNotRefuse
             (verifyInst inst :: LangM Maybe)
     it "possible solution passes partialGrade" $
-      forAll validBoundsComposeFormula $ \composeFormulaConfig ->
+      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
           in doesNotRefuse
             (partialGrade' inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)] :: LangM Maybe)
     it "possible solution passes completeGrade" $
-      forAll validBoundsComposeFormula $ \composeFormulaConfig ->
+      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \inst@ComposeFormulaInst{..} ->
           let lrTree = Binary operator leftTree rightTree
               rlTree = Binary operator rightTree leftTree
@@ -71,7 +71,7 @@ spec = do
             withSystemTempDirectory "logic-tasks" $ \path ->
               doesNotRefuseIO (completeGrade' path inst [TreeFormulaAnswer (Just lrTree), TreeFormulaAnswer (Just rlTree)])
     it "leftTreeImage and rightTreeImage has the right value" $
-      forAll validBoundsComposeFormula $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
+      forAll validBoundsComposeFormulaConfig $ \composeFormulaConfig@ComposeFormulaConfig{..} ->
         forAll (generateComposeFormulaInst composeFormulaConfig) $ \ComposeFormulaInst{..} ->
           fst treeDisplayModes == FormulaDisplay || isJust leftTreeImage &&
           snd treeDisplayModes == FormulaDisplay || isJust rightTreeImage

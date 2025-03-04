@@ -10,7 +10,7 @@ import Config (ResolutionConfig (..), BaseConfig (..), dResConf, ResolutionInst(
 import Test.QuickCheck (Gen, choose, suchThat, forAll)
 import LogicTasks.Semantics.Resolve (verifyQuiz, genResInst, completeGrade', partialGrade', description, verifyStatic)
 import Control.OutputCapable.Blocks (LangM)
-import FillSpec (validBoundsBase)
+import FillSpec (validBoundsBaseConfig)
 import TestHelpers (doesNotRefuse)
 
 justA :: Clause
@@ -31,9 +31,9 @@ justB = Clause (Data.Set.fromList [Positive 'B'])
 emptyClause :: Clause
 emptyClause = Clause Data.Set.empty
 
-validBoundsResolution :: Gen ResolutionConfig
-validBoundsResolution = do
-  baseConf <- validBoundsBase
+validBoundsResolutionConfig :: Gen ResolutionConfig
+validBoundsResolutionConfig = do
+  baseConf <- validBoundsBaseConfig
   minSteps <- choose (1,10) `suchThat` \ms ->
     (maxClauseLength baseConf > 1 || ms == 1) && ms <= 2 * length (usedAtoms baseConf)
   pure $ ResolutionConfig {
@@ -73,25 +73,25 @@ spec = do
   describe "config" $ do
     it "default config should pass config check" $
       doesNotRefuse (verifyQuiz dResConf :: LangM Maybe)
-    it "validBoundsResolution should generate a valid config" $
-      forAll validBoundsResolution $ \resConfig ->
+    it "validBoundsResolutionConfig should generate a valid config" $
+      forAll validBoundsResolutionConfig $ \resConfig ->
         doesNotRefuse (verifyQuiz resConfig :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
-      forAll validBoundsResolution $ \resConfig ->
+      forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (description False resInst :: LangM Maybe)
   describe "genResInst" $ do
     it "should required at least minSteps amount of steps" $
-      forAll validBoundsResolution $ \resConfig ->
+      forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           minSteps resConfig <= length (solution resInst)
     it "should pass verifyStatic" $
-      forAll validBoundsResolution $ \resConfig ->
+      forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (verifyStatic resInst :: LangM Maybe)
     it "should generate the correct solution" $
-      forAll validBoundsResolution $ \resConfig ->
+      forAll validBoundsResolutionConfig $ \resConfig ->
         forAll (genResInst resConfig) $ \resInst ->
           doesNotRefuse (partialGrade' resInst (solution resInst) :: LangM Maybe) &&
           doesNotRefuse (completeGrade' resInst (solution resInst) :: LangM Maybe)

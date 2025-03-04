@@ -17,16 +17,16 @@ import TestHelpers (deleteSpaces, doesNotRefuse, doesNotRefuseIO)
 import Trees.Print (display)
 import Trees.Parsing ()
 import Trees.Types (SynTree, BinOp, PropFormula, FormulaAnswer (FormulaAnswer))
-import SynTreeSpec (validBoundsSynTree)
+import SynTreeSpec (validBoundsSynTreeConfig)
 import Formula.Parsing (Parse(parser))
 import Control.OutputCapable.Blocks (LangM)
 import LogicTasks.Syntax.SubTreeSet (description, verifyInst, partialGrade', completeGrade')
 import System.IO.Temp (withSystemTempDirectory)
 
-validBoundsSubTree :: Gen SubTreeConfig
-validBoundsSubTree = do
+validBoundsSubTreeConfig :: Gen SubTreeConfig
+validBoundsSubTreeConfig = do
     allowSameSubTree <- elements [True,False]
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTree `suchThat` ((4<=) . minNodes)
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig `suchThat` ((4<=) . minNodes)
     subTreeAmount <- choose (2, minNodes - maxLeavesForNodes minNodes)
     return $ SubTreeConfig
       {
@@ -48,42 +48,42 @@ spec = do
   describe "config" $ do
       it "default config should pass config check" $
         doesNotRefuse (checkSubTreeConfig defaultSubTreeConfig :: LangM Maybe)
-      it "validBoundsSubTree should generate a valid config" $
-        forAll validBoundsSubTree $ \subTreeConfig ->
+      it "validBoundsSubTreeConfig should generate a valid config" $
+        forAll validBoundsSubTreeConfig $ \subTreeConfig ->
           doesNotRefuse (checkSubTreeConfig subTreeConfig :: LangM Maybe)
   describe "description" $ do
       it "should not reject" $
-       forAll validBoundsSubTree $ \config ->
+       forAll validBoundsSubTreeConfig $ \config ->
         forAll (generateSubTreeInst config) $ \inst ->
             doesNotRefuse (description False inst :: LangM Maybe)
   describe "generateSubTreeInst" $ do
     it "parse should works well" $
-      forAll validBoundsSubTree $ \subTreeConfig ->
+      forAll validBoundsSubTreeConfig $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
           let
             correctTrees = allNotLeafSubTrees tree
           in
             all (\tree -> parse (parser @(SynTree BinOp Char)) "" (display tree) == Right tree) correctTrees
     it "correct formulas are stored" $
-      forAll validBoundsSubTree $ \subTreeConfig ->
+      forAll validBoundsSubTreeConfig $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \SubTreeInst{..} ->
           let
             correctTrees' = allNotLeafSubTrees tree
           in
             correctTrees == correctTrees'
     it "it should generate not less Syntax Sub tree number it required as excepted" $
-      forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
+      forAll validBoundsSubTreeConfig $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           fromIntegral (size correctTrees) >= subTreeAmount
     it "all subformulas are the sublist of the formula" $
-      forAll validBoundsSubTree $ \config@SubTreeConfig {..} ->
+      forAll validBoundsSubTreeConfig $ \config@SubTreeConfig {..} ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
             correctFormulas = Data.Set.map display correctTrees
           in
             all (`isInfixOf` display tree) correctFormulas
     it "Converting correct subformulas Strings into formulas and parsing them again should yield the original" $
-      forAll validBoundsSubTree $ \config ->
+      forAll validBoundsSubTreeConfig $ \config ->
           forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
             let
               correctFormulas = Data.Set.map display correctTrees
@@ -94,7 +94,7 @@ spec = do
             in
               inputSet == correctFormulas
     xit "The above should be true even when deleting spaces in the input" $
-      forAll validBoundsSubTree $ \config ->
+      forAll validBoundsSubTreeConfig $ \config ->
         forAll (generateSubTreeInst config) $ \SubTreeInst{..} ->
           let
             correctFormulas = Data.Set.map display correctTrees
@@ -105,15 +105,15 @@ spec = do
           in
             inputSet == correctFormulas
     it "should pass verifyInst" $
-      forAll validBoundsSubTree $ \subTreeConfig ->
+      forAll validBoundsSubTreeConfig $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \inst ->
           doesNotRefuse (verifyInst inst :: LangM Maybe)
     it "should pass partialGrade" $
-      forAll validBoundsSubTree $ \subTreeConfig ->
+      forAll validBoundsSubTreeConfig $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \inst@SubTreeInst{..} ->
           doesNotRefuse (partialGrade' inst (computeSolution inputTreeAmount $ toList correctTrees) :: LangM Maybe)
     it "should pass completeGrade" $
-      forAll validBoundsSubTree $ \subTreeConfig ->
+      forAll validBoundsSubTreeConfig $ \subTreeConfig ->
         forAll (generateSubTreeInst subTreeConfig) $ \inst@SubTreeInst{..} -> ioProperty $
             withSystemTempDirectory "logic-tasks" $ \path ->
               doesNotRefuseIO (completeGrade' path inst (computeSolution inputTreeAmount $ toList correctTrees))

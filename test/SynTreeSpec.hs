@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeApplications #-}
 
-module SynTreeSpec (spec, validBoundsSynTree) where
+module SynTreeSpec (spec, validBoundsSynTreeConfig) where
 
 import Test.Hspec (Spec, describe, it, xit)
 import Test.QuickCheck (Gen, choose, elements, forAll, sublistOf, suchThat)
@@ -51,8 +51,8 @@ opFrequenciesNoArrows = Map.fromList
   , (Equi, 0)
   ]
 
-validBoundsSynTree :: Gen SynTreeConfig
-validBoundsSynTree = do
+validBoundsSynTreeConfig :: Gen SynTreeConfig
+validBoundsSynTreeConfig = do
   binOpFrequencies <- elements [opFrequencies, opFrequenciesNoArrows]
   maxConsecutiveNegations <- choose (0, 3)
   availableAtoms <- sublistOf ['A' .. 'Z'] `suchThat` (not . null)
@@ -85,12 +85,12 @@ spec = do
   describe "config" $ do
     it "default config should pass config check" $
       doesNotRefuse (checkSynTreeConfig defaultSynTreeConfig :: LangM Maybe)
-    it "validBoundsSynTree should generate a valid config" $
-      forAll validBoundsSynTree $ \synTreeConfig ->
+    it "validBoundsSynTreeConfig should generate a valid config" $
+      forAll validBoundsSynTreeConfig $ \synTreeConfig ->
         doesNotRefuse (checkSynTreeConfig synTreeConfig :: LangM Maybe)
   describe "feedback" $
     it "rejects nonsense" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (tail (display tree)) /= Right tree
   describe "numOfUniqueBinOpsInSynTree" $ do
         it "should return 0 if there is only a leaf" $
@@ -104,35 +104,35 @@ spec = do
             numOfUniqueBinOpsInSynTree (Binary Or (Leaf 'a') (Not (subtree (subtree (Leaf 'c'))))) == 2
   describe "genSynTree" $ do
     it "should generate a random SyntaxTree that satisfies the required amount of unique binary operators" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \synTree -> numOfUniqueBinOpsInSynTree synTree >= minUniqueBinOperators
   describe "genSyntaxTree" $ do
     it "should generate a random SyntaxTree from the given parament and can be parsed by formulaParse" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (display tree) == Right tree
     xit ("should generate a random SyntaxTree from the given parament and can be parsed by formulaParse, " ++
         "even without spaces") $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> formulaParse (deleteSpaces (display tree)) == Right tree
     it "should generate a random SyntaxTree from the given parament and in the node area" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> treeNodes tree >= minNodes && treeNodes tree <= maxNodes
     it "should generate a random SyntaxTree from the given parament and not deeper than the maxDepth" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> treeDepth tree <= maxDepth
     it "should generate a random SyntaxTree from the given parament and use as many chars as it must use" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> fromIntegral (length (nubOrd (collectLeaves tree))) >= minAmountOfUniqueAtoms
     it "should generate a random SyntaxTree with limited ConsecutiveNegations" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> not (replicate (fromIntegral maxConsecutiveNegations + 1) '~'
                     `isInfixOf` deleteSpaces (display tree))
     it "should generate a random SyntaxTree with fixed nodes and depth" $
-      forAll (validBoundsSynTree `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
+      forAll (validBoundsSynTreeConfig `suchThat` \cfg -> minNodes cfg == maxNodes cfg && minDepth cfg == maxDepth cfg) $
         \synTreeConfig@SynTreeConfig {..} -> forAll (genSynTree synTreeConfig) $ \synTree ->
             treeDepth synTree == maxDepth && treeNodes synTree == maxNodes
     it "should respect operator frequencies" $
-       forAll (validBoundsSynTree `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
+       forAll (validBoundsSynTreeConfig `suchThat` ((== opFrequenciesNoArrows) . binOpFrequencies)) $ \synTreeConfig ->
         forAll (genSynTree synTreeConfig) $ \tree ->
           any  (`notElem` collectUniqueBinOpsInSynTree tree) [Impl, BackImpl, Equi]
 
@@ -154,7 +154,7 @@ spec = do
 
   describe "semantic equivalence of syntax trees (isSemanticEqual)" $  do
     it "a syntax tree's formula is semantically equivalent to itself" $
-      forAll validBoundsSynTree $ \synTreeConfig@SynTreeConfig {..} ->
+      forAll validBoundsSynTreeConfig $ \synTreeConfig@SynTreeConfig {..} ->
         forAll (genSynTree synTreeConfig) $ \tree -> isSemanticEqual tree tree
     it "a syntax tree's formula is semantically equivalent to itself with associativity applied" $ do
       isSemanticEqual
