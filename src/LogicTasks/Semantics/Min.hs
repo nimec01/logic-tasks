@@ -32,7 +32,7 @@ import Formula.Parsing (Parse(..))
 
 
 genMinInst :: MinMaxConfig -> Gen MinInst
-genMinInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
+genMinInst MinMaxConfig {normalFormConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
     dnf <- dnfInRange
     pure $ MinInst {
       dnf
