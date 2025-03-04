@@ -1,6 +1,6 @@
 module MinMaxSpec where
 
-import Test.Hspec (Spec, describe, it, xit)
+import Test.Hspec (Spec, describe, it)
 import Control.OutputCapable.Blocks (LangM)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck (forAll)
@@ -32,19 +32,19 @@ spec = do
       forAll (Min.genMinInst dMinMaxConf) $ \inst ->
         doesNotRefuse
           (Min.verifyStatic inst :: LangM Maybe)
-    xit "possible solution passes partialGrade - Max" $
+    it "possible solution passes partialGrade - Max" $
       forAll (Max.genMaxInst dMinMaxConf) $ \inst ->
         doesNotRefuse
           (Max.partialGrade' inst $ cnf inst :: LangM Maybe)
-    xit "possible solution passes partialGrade - Min" $
+    it "possible solution passes partialGrade - Min" $
       forAll (Min.genMinInst dMinMaxConf) $ \inst ->
         doesNotRefuse
           (Min.partialGrade' inst $ dnf inst :: LangM Maybe)
-    xit "possible solution passes completeGrade - Max" $
+    it "possible solution passes completeGrade - Max" $
       forAll (Max.genMaxInst dMinMaxConf) $ \inst ->
         doesNotRefuse
           (Max.completeGrade' inst $ cnf inst :: LangM Maybe)
-    xit "possible solution passes completeGrade - Min" $
+    it "possible solution passes completeGrade - Min" $
       forAll (Min.genMinInst dMinMaxConf) $ \inst ->
         doesNotRefuse
           (Min.completeGrade' inst $ dnf inst :: LangM Maybe)
