@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         plan:
-          - { build: stack }
+          - build: stack
 
     runs-on: ${{ matrix.os }}
 
