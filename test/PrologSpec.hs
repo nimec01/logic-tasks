@@ -15,8 +15,6 @@ spec = do
   describe "config" $ do
     it "default config should pass config check" $
       doesNotRefuse (verifyQuiz dPrologConf :: LangM Maybe)
-    it "validBoundsProlog should generate a valid config" $
-      doesNotRefuse (verifyQuiz dPrologConf :: LangM Maybe)
   describe "description" $ do
     it "should not reject" $
       forAll (genPrologInst dPrologConf) $ \inst ->
