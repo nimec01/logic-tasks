@@ -32,7 +32,8 @@ import LogicTasks.Syntax.SimplestFormula (description, partialGrade', completeGr
 
 validBoundsSuperfluousBracketsConfig :: Gen SuperfluousBracketsConfig
 validBoundsSuperfluousBracketsConfig = do
-    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig `suchThat` \SynTreeConfig{..} -> 2 * minUniqueBinOperators + 2 < minNodes
+    syntaxTreeConfig@SynTreeConfig {..} <- validBoundsSynTreeConfig
+      `suchThat` \SynTreeConfig{..} -> 2 * minUniqueBinOperators + 2 < minNodes
     superfluousBracketPairs <- choose (1, minNodes `div` 2)
     return $ SuperfluousBracketsConfig
         {
