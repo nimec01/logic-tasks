@@ -43,6 +43,7 @@ import UniversalParser
 import Trees.Types (SynTree, BinOp)
 import Formula.Parsing.Type (Parse(..))
 import Trees.Parsing ()
+import Control.OutputCapable.Blocks (Language (..))
 
 resStepsParser :: Parser Clause -> Parser [ResStep]
 resStepsParser parseClause = (lexeme (listParse (resStepParser parseClause)) <?> "List")
@@ -393,3 +394,21 @@ instance Parse FormulaInst where
         f <- (parser :: Parser (SynTree BinOp Char))
         tokenSymbol "}"
         pure $ InstArbitrary f
+
+instance Parse DecideChoice where
+  parser = lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
+    where
+      caseInsensitiveString = between (tokenSymbol "\"") (tokenSymbol "\"") . caseInsensitive
+
+      parseCorrect = Correct <$
+          ( try (caseInsensitiveString (showChoice German Correct))
+        <|> caseInsensitiveString (showChoice English Correct)
+          )
+      parseWrong = Wrong <$
+          ( try (caseInsensitiveString (showChoice German Wrong))
+        <|> caseInsensitiveString (showChoice English Wrong)
+          )
+      parseNoAnswer = NoAnswer <$
+          ( try (caseInsensitiveString (showChoice German NoAnswer))
+        <|> caseInsensitiveString (showChoice English NoAnswer)
+          )
