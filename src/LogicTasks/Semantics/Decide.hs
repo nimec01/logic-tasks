@@ -121,8 +121,8 @@ description withDropdowns DecideInst{..} = do
           german "Das n-te Listenelement entspricht der n-ten Zeile. "
           german "Ein Lösungsversuch für eine Tabelle mit vier Zeilen könnte so aussehen: "
         translatedCode $ flip localise $ translations $ do
-          english $ intercalate ", " $ map (showChoice English) [Correct,Correct,Wrong,NoAnswer]
-          german $ intercalate ", " $ map (showChoice German) [Correct,Correct,Wrong,NoAnswer]
+          english $ show $ map (showChoice English) [Correct,Correct,Wrong,NoAnswer]
+          german $ show $ map (showChoice German) [Correct,Correct,Wrong,NoAnswer]
 
         pure ()
 
