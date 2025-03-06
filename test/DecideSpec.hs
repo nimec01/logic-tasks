@@ -7,7 +7,7 @@ import Test.Hspec
 import Test.QuickCheck (forAll, Gen, choose, suchThat, elements)
 import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideChoice (..))
-import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade', completeGrade')
+import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import Data.Maybe (fromMaybe)
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Formula.Types (Table(getEntries), getTable)
@@ -64,12 +64,12 @@ spec = do
       forAll validBoundsDecideConfig $ \decideConfig@DecideConfig{..} -> do
         forAll (genDecideInst decideConfig) $ \inst ->
           doesNotRefuse
-            (partialGrade'
+            (partialGrade
               inst
                 [ if i `elem` changed inst then Wrong else Correct
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: LangM Maybe) &&
           doesNotRefuse
-            (completeGrade'
+            (completeGrade
               inst
                 [ if i `elem` changed inst then Wrong else Correct
                 | i <- [1.. length $ getEntries $ getTable $ formula inst]] :: Rated Maybe)
