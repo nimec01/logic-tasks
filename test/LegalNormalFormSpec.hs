@@ -189,8 +189,15 @@ spec = do
         it "should pass grading with correct answer" $
           within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
             forAll (generateLegalCNFInst config) $ \inst@LegalNormalFormInst{..} ->
-              doesNotRefuse (IllegalCnfs.partialGrade inst ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info]) :: LangM Maybe) &&
-              doesNotRefuse (IllegalCnfs.completeGrade inst ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info]) :: Rated Maybe)
+              doesNotRefuse (
+                IllegalCnfs.partialGrade
+                  inst
+                  ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info])
+                :: LangM Maybe) &&
+              doesNotRefuse (
+                IllegalCnfs.completeGrade
+                  inst ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info])
+                :: Rated Maybe)
     describe "generateLegalDNFInst" $ do
         it "all of the formulas in the wrong serial should not be Dnf" $
             within timeout $ forAll validBoundsLegalNormalFormConfig $ \config ->
@@ -211,8 +218,16 @@ spec = do
         it "should pass grading with correct answer" $
           within timeout $ forAll validBoundsLegalNormalFormConfig $ \config@LegalNormalFormConfig{..} ->
             forAll (generateLegalDNFInst config) $ \inst@LegalNormalFormInst{..} ->
-              doesNotRefuse (IllegalDnfs.partialGrade inst ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info]) :: LangM Maybe) &&
-              doesNotRefuse (IllegalDnfs.completeGrade inst ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info]) :: Rated Maybe)
+              doesNotRefuse (
+                IllegalDnfs.partialGrade
+                  inst
+                  ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info])
+                :: LangM Maybe) &&
+              doesNotRefuse (
+                IllegalDnfs.completeGrade
+                  inst
+                  ([i | (i, info,_) <- formulaInfos, not $ treeIsErroneous info])
+                :: Rated Maybe)
 
 judgeCnfSynTree :: SynTree BinOp a -> Bool
 judgeCnfSynTree (Binary And a b) = judgeCnfSynTree a && judgeCnfSynTree b
