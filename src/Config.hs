@@ -330,7 +330,7 @@ dFillConf = FillConfig
 
 
 data MinMaxConfig = MinMaxConfig {
-      cnfConf :: NormalFormConfig
+      normalFormConf :: NormalFormConfig
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
@@ -340,7 +340,7 @@ data MinMaxConfig = MinMaxConfig {
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
-    { cnfConf = dNormalFormConf
+    { normalFormConf = dNormalFormConf
     , percentTrueEntries = Just (50,70)
     , printSolution = False
     , extraText = Nothing
