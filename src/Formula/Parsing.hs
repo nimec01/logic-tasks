@@ -398,14 +398,14 @@ instance Parse DecideChoice where
   parser = lexeme (try parseCorrect <|> try parseWrong <|> parseNoAnswer)
     where
       parseCorrect = Correct <$
-          ( try (caseInsensitive "Richtig")
+          ( try (caseInsensitive "Richtig") -- no-spell-check
         <|> caseInsensitive "Correct"
           )
       parseWrong = Wrong <$
-          ( try (caseInsensitive "Fehlerhaft")
+          ( try (caseInsensitive "Fehlerhaft") -- no-spell-check
         <|> caseInsensitive "Wrong"
           )
       parseNoAnswer = NoAnswer <$
-          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort")
+          ( try (lexeme (caseInsensitive "Keine") <* caseInsensitive "Antwort") -- no-spell-check
         <|> (lexeme (caseInsensitive "No") <* caseInsensitive "answer")
           )
