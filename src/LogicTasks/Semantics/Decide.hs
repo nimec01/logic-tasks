@@ -40,8 +40,6 @@ import Data.Maybe (fromMaybe)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 import Control.Applicative (Alternative)
 import GHC.Real ((%))
-import Formula.Parsing (Parse(..))
-import Formula.Parsing.Delayed (Delayed, complainAboutWrongNotation, withDelayed, withDelayedSucceeding)
 
 
 
@@ -121,8 +119,8 @@ description withDropdowns DecideInst{..} = do
           german "Das n-te Listenelement entspricht der n-ten Zeile. "
           german "Ein Lösungsversuch für eine Tabelle mit vier Zeilen könnte so aussehen: "
         translatedCode $ flip localise $ translations $ do
-          english $ show $ map (showChoice English) [Correct,Correct,Wrong,NoAnswer]
-          german $ show $ map (showChoice German) [Correct,Correct,Wrong,NoAnswer]
+          english $ "[" ++ intercalate ", " (map (showChoice English) [Correct,Correct,Wrong,NoAnswer]) ++ "]"
+          german $ "[" ++ intercalate ", " (map (showChoice German) [Correct,Correct,Wrong,NoAnswer]) ++ "]"
 
         pure ()
 
@@ -175,11 +173,8 @@ verifyQuiz DecideConfig{..}
 start :: [DecideChoice]
 start = replicate 4 NoAnswer
 
-partialGrade :: OutputCapable m => DecideInst -> Delayed [DecideChoice] -> LangM m
-partialGrade inst = (partialGrade' inst `withDelayed` parser) (const complainAboutWrongNotation)
-
-partialGrade' :: OutputCapable m =>  DecideInst -> [DecideChoice] -> LangM m
-partialGrade' inst sol
+partialGrade :: OutputCapable m =>  DecideInst -> [DecideChoice] -> LangM m
+partialGrade inst sol
   | lengthDiff > 0 = reject $ do
       german "Die Anzahl der Listenelemente stimmt nicht mit der Anzahl an Zeilen überein. "
       german $ "Fügen Sie " ++ show lengthDiff ++ " weitere Listeneinträge hinzu."
@@ -191,15 +186,12 @@ partialGrade' inst sol
     lengthDiff = tableLen - length sol
 
 
-completeGrade :: (OutputCapable m,Alternative m, Monad m) => DecideInst -> Delayed [DecideChoice] -> Rated m
-completeGrade inst = completeGrade' inst `withDelayedSucceeding` parser
-
-completeGrade'
+completeGrade
   :: (OutputCapable m,Alternative m, Monad m)
   => DecideInst
   -> [DecideChoice]
   -> Rated m
-completeGrade' DecideInst{..} sol = reRefuse
+completeGrade DecideInst{..} sol = reRefuse
   (withExtendedMultipleChoice
     (fromIntegral tableLen)
     tableLen
@@ -214,8 +206,10 @@ completeGrade' DecideInst{..} sol = reRefuse
           english "The correct solution is:"
           german "Die korrekte Lösung ist:"
         translatedCode $ flip localise $ translations $ do
-          english $ show $ map (\i -> showChoice English $ if i `elem` changed then Wrong else Correct) [1..tableLen]
-          german $ show $ map (\i -> showChoice German $ if i `elem` changed then Wrong else Correct) [1..tableLen]
+          english $
+            "[" ++ intercalate ", " (map (\i -> showChoice English $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
+          german $
+            "[" ++ intercalate ", " (map (\i -> showChoice German $ if i `elem` changed then Wrong else Correct) [1..tableLen]) ++ "]"
         pure ()
 
       paragraph $ translate $ do
