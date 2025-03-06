@@ -24,7 +24,7 @@ data TreeToFormulaConfig = TreeToFormulaConfig {
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic)
+    deriving (Show, Typeable, Generic)
 
 defaultTreeToFormulaConfig :: TreeToFormulaConfig
 defaultTreeToFormulaConfig = TreeToFormulaConfig

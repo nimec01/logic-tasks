@@ -46,7 +46,7 @@ import Data.List(intercalate, delete, nub, transpose, (\\))
 import Data.Set (Set,empty)
 import Data.Typeable
 import GHC.Generics
-import Test.QuickCheck
+import Test.QuickCheck hiding (Positive,Negative)
 import Numeric.SpecFunctions as Math (choose)
 
 newtype ResStep = Res {trip :: (Either Clause Int, Either Clause Int, (Clause, Maybe Int))} deriving Show
@@ -58,7 +58,7 @@ newtype TruthValue = TruthValue {truth :: Bool}
 
 class Formula a where
     literals :: a -> [Literal]
-    atomics :: a -> [Literal]
+    atomics :: a -> [Char]
     amount :: a -> Int
     evaluate :: Allocation -> a -> Maybe Bool
 
@@ -82,8 +82,8 @@ queryClause = HornClause Query
 
 -- | A datatype representing a literal
 data Literal
-    = Literal { letter :: Char} -- ^ positive sign
-    | Not { letter :: Char} -- ^ negative sign
+    = Positive { letter :: Char} -- ^ positive sign
+    | Negative { letter :: Char} -- ^ negative sign
     deriving
       ( Eq -- ^ derived
       , Typeable -- ^ derived
@@ -93,37 +93,37 @@ data Literal
 
 -- | order literals alphabetically first, then prefer a positive sign
 instance Ord Literal where
-   compare (Not x) (Literal y) = if x == y then LT else compare x y
-   compare (Literal x) (Not y) = if x == y then GT else compare x y
+   compare (Negative x) (Positive y) = if x == y then LT else compare x y
+   compare (Positive x) (Negative y) = if x == y then GT else compare x y
    compare l1 l2 = compare (letter l1) (letter l2)
 
 
 -- | '¬' denotes a negative sign
 instance Show Literal where
-   show (Literal x) = [x]
-   show (Not x) = ['¬', x]
+   show (Positive x) = [x]
+   show (Negative x) = ['¬', x]
 
 
 instance Read Literal where
-   readsPrec _ ('¬':x:rest) = [(Not x, rest) | x `elem` ['A' .. 'Z']]
-   readsPrec _ (x:rest) = [(Literal x, rest) | x `elem` ['A' .. 'Z']]
+   readsPrec _ ('¬':x:rest) = [(Negative x, rest) | x `elem` ['A' .. 'Z']]
+   readsPrec _ (x:rest) = [(Positive x, rest) | x `elem` ['A' .. 'Z']]
    readsPrec _ _ = []
 
 
 instance Formula Literal where
    literals lit = [lit]
 
-   atomics (Not x) = [Literal x]
-   atomics lit = [lit]
+   atomics (Positive x) = [x]
+   atomics (Negative x) = [x]
 
    amount _ = 1
 
-   evaluate xs (Not y) = not <$> evaluate xs (Literal y)
-   evaluate xs z = lookup z xs
+   evaluate xs (Negative y) = not <$> evaluate xs (Positive y)
+   evaluate xs (Positive c) = lookup c xs
 
 instance ToSAT Literal where
-  convert (Literal c) = Sat.Var c
-  convert (Not c) = Sat.Not (Sat.Var c)
+  convert (Positive c) = Sat.Var c
+  convert (Negative c) = Sat.Not (Sat.Var c)
 
 instance Arbitrary Literal where
    arbitrary = genLiteral ['A'..'Z']
@@ -133,15 +133,15 @@ instance Arbitrary Literal where
 --   throws an error if called with the empty list.
 genLiteral :: [Char] -> Gen Literal
 genLiteral [] = error "Cannot construct literal from empty list."
-genLiteral lits = do
-   rChar <- elements lits
-   elements [Literal rChar, Not rChar]
+genLiteral atoms = do
+   rChar <- elements atoms
+   elements [Positive rChar, Negative rChar]
 
 
 -- | Reverses the sign of the literal
 opposite :: Literal -> Literal
-opposite (Literal l) = Not l
-opposite (Not l) = Literal l
+opposite (Positive l) = Negative l
+opposite (Negative l) = Positive l
 
 
 ------------------------------------------------------------
@@ -177,9 +177,9 @@ instance Formula Clause where
 
    amount (Clause set) = Set.size set
 
-   evaluate xs ys = or <$> sequence lits
+   evaluate xs ys = or <$> sequence litResults
      where
-       lits = map (evaluate xs) (literals ys)
+       litResults = map (evaluate xs) (literals ys)
 
 instance ToSAT Clause where
   convert (Clause set)
@@ -197,14 +197,14 @@ instance Arbitrary Clause where
 -- | Generates a random clause. The length of the generated clause lies in the given length bounds.
 --   The used atomic formulas are drawn from the list of chars.
 genClause :: (Int,Int) -> [Char] -> Gen Clause
-genClause (minLength,maxLength) lits = do
-    genLits <- genForBasic (minLength,maxLength) lits
+genClause (minLength,maxLength) atoms = do
+    genLits <- genForBasic (minLength,maxLength) atoms
     pure (Clause genLits)
 
 
 
 -- | A shorthand representing an allocation.
-type Allocation = [(Literal, Bool)]
+type Allocation = [(Char, Bool)]
 
 
 --------------------------------------------------------------
@@ -264,9 +264,9 @@ instance Arbitrary Cnf where
         cnf n = do
             minLen <- chooseInt (1,n)
             let
-              lits = take n ['A'..'Z']
-              maxLen = length lits
-            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits True
+              atoms = take n ['A'..'Z']
+              maxLen = length atoms
+            genCnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) atoms True
 
 
 
@@ -275,18 +275,18 @@ instance Arbitrary Cnf where
 --   for the amount and the length of the contained clauses.
 --   The used atomic formulas are drawn from the list of chars.
 genCnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Cnf
-genCnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
-    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    cnf <- generateClauses nLits empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+genCnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+    (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
+    cnf <- generateClauses nAtoms empty num
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
     pure (Cnf cnf)
   where
     generateClauses :: [Char] -> Set Clause -> Int -> Gen (Set Clause)
-    generateClauses usedLits set num
+    generateClauses usedAtoms set num
         | Set.size set == num = pure set
         | otherwise = do
-            clause <- genClause (minLen,maxLen) usedLits
-            generateClauses usedLits (Set.insert clause set) num
+            clause <- genClause (minLen,maxLen) usedAtoms
+            generateClauses usedAtoms (Set.insert clause set) num
 
 
 
@@ -327,9 +327,9 @@ instance Formula Con where
 
    amount (Con set) = Set.size set
 
-   evaluate xs ys = and <$> sequence lits
+   evaluate xs ys = and <$> sequence litResults
      where
-       lits = map (evaluate xs) (literals ys)
+       litResults = map (evaluate xs) (literals ys)
 
 instance ToSAT Con where
   convert (Con set)
@@ -347,8 +347,8 @@ instance Arbitrary Con where
 -- | Generates a random conjunction. The length of the generated conjunction lies in the given length bounds.
 --   The used atomic formulas are drawn from the list of chars.
 genCon :: (Int,Int) -> [Char] -> Gen Con
-genCon (minLength,maxLength) lits = do
-    genLits <- genForBasic (minLength,maxLength) lits
+genCon (minLength,maxLength) atoms = do
+    genLits <- genForBasic (minLength,maxLength) atoms
     pure (Con genLits)
 
 
@@ -410,9 +410,9 @@ instance Arbitrary Dnf where
         dnf n = do
             minLen <- chooseInt (1,n)
             let
-              lits = take n ['A'..'Z']
-              maxLen = length lits
-            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) lits True
+              atoms = take n ['A'..'Z']
+              maxLen = length atoms
+            genDnf (1, maxLen ^ (2 :: Int)) (minLen, maxLen) atoms True
 
 
 
@@ -421,25 +421,25 @@ instance Arbitrary Dnf where
 --   for the amount and the length of the contained conjunctions.
 --   The used atomic formulas are drawn from the list of chars.
 genDnf :: (Int,Int) -> (Int,Int) -> [Char] -> Bool -> Gen Dnf
-genDnf (minNum,maxNum) (minLen,maxLen) lits enforceUsingAllLiterals = do
-    (num, nLits) <- genForNF (minNum,maxNum) (minLen,maxLen) lits
-    dnf <- generateCons nLits empty num
-      `suchThat` \xs -> not enforceUsingAllLiterals || all ((`elem` concatMap atomics (Set.toList xs)) . Literal) nLits
+genDnf (minNum,maxNum) (minLen,maxLen) atoms enforceUsingAllLiterals = do
+    (num, nAtoms) <- genForNF (minNum,maxNum) (minLen,maxLen) atoms
+    dnf <- generateCons nAtoms empty num
+      `suchThat` \xs -> not enforceUsingAllLiterals || all (`elem` concatMap atomics (Set.toList xs)) nAtoms
     pure (Dnf dnf)
   where
     generateCons :: [Char] -> Set Con -> Int -> Gen (Set Con)
-    generateCons usedLits set num
+    generateCons usedAtoms set num
         | Set.size set == num = pure set
         | otherwise = do
-            con <- genCon (minLen,maxLen) usedLits
-            generateCons usedLits (Set.insert con set) num
+            con <- genCon (minLen,maxLen) usedAtoms
+            generateCons usedAtoms (Set.insert con set) num
 
 
 ------------------------------------------------------------
 
 -- | A datatype representing a truth table
 data Table = Table
-    { getLiterals :: [Literal]
+    { getAtomics :: [Char]
     , getEntries :: [Maybe Bool]
     } deriving (Ord,Typeable,Generic)
 
@@ -457,18 +457,18 @@ instance Show Table where
                      ]
       where
         hLine = map (\c -> if c /= '|' then '-' else c) header
-        lits = getLiterals t
+        atoms = getAtomics t
 
         formatLine :: Show a => [a] -> Maybe Bool -> String
         formatLine [] _ = []
         formatLine x y =
             foldr ((\a b -> a ++ " | " ++ b) . show) (maybe "-" (show . fromEnum) y) x ++ "\n"
 
-        header = concat [show x ++ " | " | x <- lits] ++ [availableLetter $ getLiterals t]
+        header = concat [x : " | " | x <- atoms] ++ [availableLetter atoms]
         rows = concat [formatLine x y | (x,y) <- unformattedRows]
           where
 
-            unformattedRows = zip (transpose $ comb (length lits) 1) $ getEntries t
+            unformattedRows = zip (transpose $ comb (length atoms) 1) $ getEntries t
               where
                 comb :: Int -> Int -> [[Int]]
                 comb 0 _ = []
@@ -492,31 +492,31 @@ instance Arbitrary Table where
             pure (getTable (cnf :: Cnf))
 
 
--- | Returns all possible allocations for the list of literals.
-possibleAllocations :: [Literal] -> [Allocation]
-possibleAllocations lits = transpose (allCombinations lits 1)
+-- | Returns all possible allocations for the list of atomics.
+possibleAllocations :: [Char] -> [Allocation]
+possibleAllocations atoms = transpose (allCombinations atoms 1)
   where
-    allCombinations :: [Literal] -> Int ->  [Allocation]
+    allCombinations :: [Char] -> Int ->  [Allocation]
     allCombinations [] _ = []
     allCombinations (x:xs) n =
       concat (replicate n $ pairs False ++ pairs True) : allCombinations xs (n*2)
       where
         num = 2^ length xs
-        pairs :: a -> [(Literal,a)]
+        pairs :: a -> [(Char,a)]
         pairs a = replicate num (x,a)
 
 
 
 -- | Constructs a truth table for the given formula
 getTable :: Formula a => a -> Table
-getTable f = Table lits values
+getTable f = Table atoms values
   where
-    lits = atomics f
-    values = map (`evaluate` f) $ possibleAllocations lits
+    atoms = atomics f
+    values = map (`evaluate` f) $ possibleAllocations atoms
 
 
-availableLetter :: [Literal] -> Char
-availableLetter xs = head $ (['F'..'Z'] ++ "*") \\ map letter xs
+availableLetter :: [Char] -> Char
+availableLetter xs = head $ (['F'..'Z'] ++ "*") \\ xs
 
 
 -------------------------------------------------------------------
@@ -572,39 +572,39 @@ terms (PrologClause set) = Set.toList set
 -- Helpers to reduce duplicate code
 
 genForBasic :: (Int,Int) -> [Char] -> Gen (Set Literal)
-genForBasic (minLength,maxLength) lits
-    | null lits || minLength > length nLits || invalidLen = pure empty
+genForBasic (minLength,maxLength) atoms
+    | null atoms || minLength > length nAtoms || invalidLen = pure empty
     | otherwise = do
-        chosenLength <- chooseInt (minLength, min (length nLits) maxLength)
-        generateLiterals nLits empty chosenLength
+        chosenLength <- chooseInt (minLength, min (length nAtoms) maxLength)
+        generateLiterals nAtoms empty chosenLength
   where
-    nLits = nub lits
+    nAtoms = nub atoms
     invalidLen = minLength > maxLength || minLength <= 0
 
     generateLiterals :: [Char] -> Set Literal -> Int -> Gen (Set Literal)
-    generateLiterals usedLits xs n
+    generateLiterals usedAtoms xs n
         | Set.size xs == n = pure xs
         | otherwise = do
-            literal <- genLiteral usedLits
+            literal <- genLiteral usedAtoms
             let
-              restLits = delete (letter literal) usedLits
+              restAtoms = delete (letter literal) usedAtoms
               newSet = Set.insert literal xs
-            generateLiterals restLits newSet n
+            generateLiterals restAtoms newSet n
 
 
 
 
 genForNF :: (Int,Int) -> (Int,Int) -> [Char] -> Gen (Int, [Char])
-genForNF (minNum,maxNum) (minLen,maxLen) lits
-    | null nLits || invalidLen || invalidNum = pure (0, [])
+genForNF (minNum,maxNum) (minLen,maxLen) atoms
+    | null nAtoms || invalidLen || invalidNum = pure (0, [])
     | otherwise = do
       num <- chooseInt (minNum, min maxNum upperBound)
-      pure (num, nLits)
+      pure (num, nAtoms)
   where
-    nLits = nub lits
-    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nLits
+    nAtoms = nub atoms
+    invalidLen = minLen <= 0 || minLen > maxLen || minLen > length nAtoms
     invalidNum = minNum <= 0 || minNum > maxNum || minNum > upperBound
-    upperBound = lengthBound (length nLits) maxLen
+    upperBound = lengthBound (length nAtoms) maxLen
 
 
 

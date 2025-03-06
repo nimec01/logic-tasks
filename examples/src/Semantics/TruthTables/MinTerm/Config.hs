@@ -14,7 +14,7 @@ import Control.OutputCapable.Blocks (Language(German))
 -- Type: Min
 unused03 :: MinMaxConfig
 unused03 = MinMaxConfig
-  { cnfConf = NormalFormConfig
+  { normalFormConf = NormalFormConfig
     { baseConf = BaseConfig
       { minClauseLength = 2
       , maxClauseLength = 3
@@ -31,4 +31,4 @@ unused03 = MinMaxConfig
 
 spec :: Spec
 spec = do
-  describe "unused03" $ verifyConfig German (cnfConf unused03) checkNormalFormConfig
+  describe "unused03" $ verifyConfig German (normalFormConf unused03) checkNormalFormConfig

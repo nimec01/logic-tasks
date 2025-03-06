@@ -24,14 +24,13 @@ import Test.QuickCheck (Gen, suchThat, elements)
 
 import Config (Number(..), PickConfig(..), PickInst(..), FormulaConfig (..), FormulaInst (..), BaseConfig (..), NormalFormConfig(..))
 import Formula.Util (isSemanticEqual)
-import Formula.Types (availableLetter, getTable, literals)
+import Formula.Types (availableLetter, getTable, Formula (atomics))
 import Formula.Printing (showIndexedList)
 import LogicTasks.Helpers (extra)
 import Data.Maybe (fromJust, fromMaybe)
 import Trees.Generate (genSynTree)
 import Tasks.SynTree.Config (SynTreeConfig (..))
-import Trees.Formula ()
-import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf)
+import Util (withRatio, vectorOfUniqueBy, checkTruthValueRangeAndFormulaConf, formulaDependsOnAllAtoms)
 import LogicTasks.Util (genCnf', genDnf', displayFormula, usesAllAtoms, isEmptyFormula)
 
 
@@ -41,7 +40,7 @@ genPickInst PickConfig{..} = do
   formulas <- vectorOfUniqueBy
     amountOfOptions
     isSemanticEqual
-    $ case formulaConfig of
+    $ flip suchThat formulaDependsOnAllAtoms $ case formulaConfig of
         (FormulaArbitrary syntaxTreeConfig) ->
           InstArbitrary <$> genSynTree syntaxTreeConfig `suchThat` withRatio percentTrueEntries'
         (FormulaCnf cnfCfg) ->
@@ -67,7 +66,7 @@ description inputHelp PickInst{..} = do
       translate $ do
         german "Betrachten Sie die folgende Formel:"
         english "Consider the following formula:"
-      indent $ code $ availableLetter (literals correctFormula) : " = " ++ displayFormula correctFormula
+      indent $ code $ availableLetter (atomics correctFormula) : " = " ++ displayFormula correctFormula
       pure ()
     paragraph $ do
       translate $ do

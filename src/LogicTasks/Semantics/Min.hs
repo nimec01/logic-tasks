@@ -32,7 +32,7 @@ import Formula.Parsing (Parse(..))
 
 
 genMinInst :: MinMaxConfig -> Gen MinInst
-genMinInst MinMaxConfig {cnfConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
+genMinInst MinMaxConfig {normalFormConf = NormalFormConfig {baseConf = BaseConfig{..},..},..} = do
     dnf <- dnfInRange
     pure $ MinInst {
       dnf
@@ -62,7 +62,7 @@ description MinInst{..} = do
 
   paragraph $ indent $ do
     translate $ do
-      let formulaStr = show $ mkDnf [mkCon [Literal 'A', Not 'B'], mkCon [Not 'C', Not 'D']]
+      let formulaStr = show $ mkDnf [mkCon [Positive 'A', Negative 'B'], mkCon [Negative 'C', Negative 'D']]
       german $ unwords ["Ein Lösungsversuch für Formel", formulaStr, "könnte beispielsweise so aussehen: "]
       english $ unwords ["A solution attempt for the formula", formulaStr, "could look like this: "]
     translatedCode $ flip localise $ translations exampleCode
@@ -96,16 +96,16 @@ verifyQuiz = Max.verifyQuiz
 
 
 start :: Dnf
-start = mkDnf [mkCon [Literal 'A']]
+start = mkDnf [mkCon [Positive 'A']]
 
 partialGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m
 partialGrade inst = (partialGrade' inst `withDelayed` parser) displayParseError
 
 partialGrade' :: OutputCapable m => MinInst -> Dnf -> LangM m
-partialGrade' MinInst{..} sol = Max.partialMinMax corLits dnf sol allMinTerms False
+partialGrade' MinInst{..} sol = Max.partialMinMax correctAtoms dnf sol allMinTerms False
   where
-    corLits = atomics dnf
-    allMinTerms = not $ all (\c -> amount c == length corLits) $ getConjunctions sol
+    correctAtoms = atomics dnf
+    allMinTerms = not $ all (\c -> amount c == length correctAtoms) $ getConjunctions sol
 
 
 completeGrade :: OutputCapable m => MinInst -> Delayed Dnf -> LangM m

@@ -51,8 +51,8 @@ instance Pretty ResStep where
 
 
 instance Pretty Literal where
-   pretty (Literal x) = char x
-   pretty (Not x) = myText ['¬', x]
+   pretty (Positive x) = char x
+   pretty (Negative x) = myText ['¬', x]
 
 
 

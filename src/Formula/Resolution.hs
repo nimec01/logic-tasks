@@ -53,7 +53,7 @@ resolvableWith c1 c2
     | length possible == 1 = Just (head possible)
     | otherwise = Nothing
   where
-    lits = atomics c1
+    lits = map Positive $ atomics c1 -- TODO: Should `literals` be used here?
     possible = filter (isJust . resolve c1 c2) lits
 
 
@@ -84,8 +84,8 @@ applySteps xs (y:ys) = applyStep xs y >>= flip applySteps ys
 
 
 genRes :: (Int,Int) -> Int -> [Char] -> Gen ([Clause], [ResStep])
-genRes (minLen,maxLen) steps lits = do
-    (clauses,rSteps) <- buildClauses lits (empty, []) 0
+genRes (minLen,maxLen) steps atoms = do
+    (clauses,rSteps) <- buildClauses atoms (empty, []) 0
     shuffled <- shuffle (Set.toList clauses)
     pure (map Clause shuffled, rSteps)
   where
@@ -100,8 +100,8 @@ genRes (minLen,maxLen) steps lits = do
               then do
                 chosenChar <- elements xs
                 let
-                  pos = Set.singleton $ Literal chosenChar
-                  neg = Set.singleton $ Not chosenChar
+                  pos = Set.singleton $ Positive chosenChar
+                  neg = Set.singleton $ Negative chosenChar
                   startSet = Set.fromList [pos,neg]
                 buildClauses xs (startSet,[Res (Left (toClause pos),Left (toClause neg), (toClause empty,Nothing))]) 0
               else do
@@ -110,9 +110,9 @@ genRes (minLen,maxLen) steps lits = do
                   underMax = Set.filter (\clause -> Set.size clause <= maxLen) ys
                 chosenClause <- setElements (if Set.null underMin then underMax else underMin)
                 let
-                  chooseableLits = filter (\lit ->
-                    Literal lit `Set.notMember` chosenClause && Not lit `Set.notMember` chosenClause) xs
-                if null chooseableLits
+                  chooseableAtoms = filter (\atom ->
+                    Positive atom `Set.notMember` chosenClause && Negative atom `Set.notMember` chosenClause) xs
+                if null chooseableAtoms
                     then buildClauses xs (ys,rs) (runs+1)
                     else do
                       let clauseSize = Set.size chosenClause
@@ -122,12 +122,12 @@ genRes (minLen,maxLen) steps lits = do
                               if clauseSize == maxLen
                                 then return 2
                                 else choose (1,2)
-                      chosenChar <- elements chooseableLits
+                      chosenChar <- elements chooseableAtoms
                       if choice == 1
-                        then checkValidAndInsert (Literal chosenChar) chosenClause rs clauseSize 0
+                        then checkValidAndInsert (Positive chosenChar) chosenClause rs clauseSize 0
                         else do
                           firstAmount <- choose (1, clauseSize-1)
-                          chosenSign <- elements [Literal chosenChar, Not chosenChar]
+                          chosenSign <- elements [Positive chosenChar, Negative chosenChar]
                           checkValidAndInsert chosenSign chosenClause rs firstAmount firstAmount
       where
         checkValidAndInsert :: Literal -> Set Literal -> [ResStep] -> Int -> Int -> Gen (Set (Set Literal),[ResStep])

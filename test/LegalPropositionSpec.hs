@@ -6,7 +6,7 @@ import Data.Either (isLeft, isRight)
 import Data.List ((\\))
 import Data.Char (isLetter)
 import Test.Hspec (Spec, describe, it)
-import Test.QuickCheck (Gen, choose, forAll, suchThat, within)
+import Test.QuickCheck (Gen, choose, forAll, suchThat, within, ioProperty)
 import Data.Tuple.Extra (thd3)
 
 import Tasks.LegalProposition.Config (
@@ -21,19 +21,18 @@ import Tasks.LegalProposition.Quiz (generateLegalPropositionInst)
 import Tasks.SynTree.Config (SynTreeConfig(..))
 import Trees.Parsing (formulaParse)
 import Trees.Generate (genSynTree)
-import SynTreeSpec (validBoundsSynTree)
+import SynTreeSpec (validBoundsSynTreeConfig)
 import Trees.Print (display)
-import TestHelpers (deleteBrackets, deleteSpaces)
+import TestHelpers (deleteBrackets, deleteSpaces, doesNotRefuse, doesNotRefuseIO)
 import Control.OutputCapable.Blocks (LangM)
-import Data.Maybe (isJust)
-import Control.Monad.Identity (Identity(runIdentity))
-import Control.OutputCapable.Blocks.Generic (evalLangM)
 import Tasks.LegalProposition.Helpers (formulaAmount)
+import LogicTasks.Syntax.IllegalFormulas (description, partialGrade, verifyInst, completeGrade)
+import System.IO.Temp (withSystemTempDirectory)
 
-validBoundsLegalProposition :: Gen LegalPropositionConfig
-validBoundsLegalProposition = do
+validBoundsLegalPropositionConfig :: Gen LegalPropositionConfig
+validBoundsLegalPropositionConfig = do
     formulas <- choose (1, 15)
-    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTree
+    syntaxTreeConfig@SynTreeConfig {..}  <- validBoundsSynTreeConfig
       `suchThat` \cfg -> formulaAmount cfg >= formulas
     illegals <- choose (0, formulas)
     bracketFormulas <- choose (0, formulas - illegals)
@@ -54,48 +53,66 @@ spec :: Spec
 spec = do
     describe "config" $ do
       it "default config should pass config check" $
-        isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig defaultLegalPropositionConfig :: LangM Maybe)
-      it "validBoundsLegalProposition should generate a valid config" $
-        forAll validBoundsLegalProposition $ \legalPropConfig ->
-          isJust $ runIdentity $ evalLangM (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
+        doesNotRefuse (checkLegalPropositionConfig defaultLegalPropositionConfig :: LangM Maybe)
+      it "validBoundsLegalPropositionConfig should generate a valid config" $
+        forAll validBoundsLegalPropositionConfig $ \legalPropConfig ->
+          doesNotRefuse (checkLegalPropositionConfig legalPropConfig :: LangM Maybe)
+    describe "description" $ do
+      it "should not reject" $
+        within timeout $ forAll validBoundsLegalPropositionConfig $ \config ->
+          forAll (generateLegalPropositionInst config) $ \inst ->
+            doesNotRefuse (description False inst :: LangM Maybe)
     describe "illegalDisplay" $ do
         it "at least creates actual formula symbols" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
+            within timeout $ forAll validBoundsSynTreeConfig $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (deleteSpaces . fst <$> illegalDisplay synTree) $
                       all (\c -> c `elem` "()∧∨¬<=>" || isLetter c)
         it "the string after illegalDisplay cannot be parsed" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
+            within timeout $ forAll validBoundsSynTreeConfig $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (fst <$> illegalDisplay synTree) $ \str -> isLeft (formulaParse str)
     describe "bracket display" $ do
         it "the String after bracketDisplay just add a bracket " $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
+            within timeout $ forAll validBoundsSynTreeConfig $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> length str == length (display synTree) + 2
         it "the String can be parsed by formulaParse" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
+            within timeout $ forAll validBoundsSynTreeConfig $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> formulaParse str == Right synTree
         it "the String remove all brackets should same with display remove all brackets" $
-            within timeout $ forAll validBoundsSynTree $ \synTreeConfig ->
+            within timeout $ forAll validBoundsSynTreeConfig $ \synTreeConfig ->
                 forAll
                   (genSynTree synTreeConfig) $ \synTree ->
                       forAll (bracketDisplay synTree) $ \str -> deleteBrackets str == deleteBrackets (display synTree)
     describe "generateLegalPropositionInst" $ do
         it "the generateLegalPropositionInst should generate expected illegal number" $
-            within timeout $ forAll validBoundsLegalProposition $ \config ->
+            within timeout $ forAll validBoundsLegalPropositionConfig $ \config ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   let serialsOfWrong = [i | (i,info,_) <- formulaInfos, propFormulaIsErroneous info] in
                     all (\x -> isLeft (formulaParse (thd3 (formulaInfos !! (x - 1))))) serialsOfWrong
         it "the generateLegalPropositionInst should generate expected legal number" $
-            within timeout $ forAll validBoundsLegalProposition $ \config@LegalPropositionConfig{..} ->
+            within timeout $ forAll validBoundsLegalPropositionConfig $ \config@LegalPropositionConfig{..} ->
                 forAll (generateLegalPropositionInst config) $ \LegalPropositionInst{..} ->
                   let serialsOfWrong = [i | (i,info,_) <- formulaInfos, propFormulaIsErroneous info] in
                     all
                     (\x -> isRight (formulaParse (thd3 (formulaInfos !! (x - 1)))))
                     ([1 .. fromIntegral formulas] \\ serialsOfWrong)
+        it "the generateLegalPropositionInst should pass verifyStatic" $
+            within timeout $ forAll validBoundsLegalPropositionConfig $ \config@LegalPropositionConfig{..} ->
+                forAll (generateLegalPropositionInst config) $ \inst ->
+                   doesNotRefuse (verifyInst inst :: LangM Maybe)
+        it "the generateLegalPropositionInst should pass grading" $
+            within timeout $ forAll validBoundsLegalPropositionConfig $ \config@LegalPropositionConfig{..} ->
+                forAll (generateLegalPropositionInst config) $ \inst ->
+                   doesNotRefuse (partialGrade inst [i | (i,info,_) <- formulaInfos inst, not $ propFormulaIsErroneous info] :: LangM Maybe)
+        it "the generateLegalPropositionInst should pass grading" $
+          within timeout $ forAll validBoundsLegalPropositionConfig $ \config@LegalPropositionConfig{..} ->
+            forAll (generateLegalPropositionInst config) $ \inst -> ioProperty $
+              withSystemTempDirectory "logic-tasks" $ \path ->
+                doesNotRefuseIO (completeGrade path inst [i | (i,info,_) <- formulaInfos inst, not $ propFormulaIsErroneous info])

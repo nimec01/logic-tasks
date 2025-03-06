@@ -71,7 +71,7 @@ data PickInst = PickInst {
 
 dPickInst :: PickInst
 dPickInst =  PickInst
-          { formulas = [InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']], InstCnf $ mkCnf [mkClause [Not 'A', Literal 'B']]]
+          { formulas = [InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']], InstCnf $ mkCnf [mkClause [Negative 'A', Positive 'B']]]
           , correct = 1
           , showSolution = False
           , addText = Nothing
@@ -85,11 +85,11 @@ data MaxInst = MaxInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 dMaxInst :: MaxInst
 dMaxInst =  MaxInst
-          { cnf = mkCnf [mkClause [Literal 'A', Not 'B']]
+          { cnf = mkCnf [mkClause [Positive 'A', Negative 'B']]
           , showSolution = False
           , addText = Nothing
           , unicodeAllowed = False
@@ -104,11 +104,11 @@ data MinInst = MinInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 dMinInst :: MinInst
 dMinInst =  MinInst
-          { dnf = mkDnf [mkCon [Literal 'A', Not 'B']]
+          { dnf = mkDnf [mkCon [Positive 'A', Negative 'B']]
           , showSolution = False
           , addText = Nothing
           , unicodeAllowed = False
@@ -127,7 +127,7 @@ data FillInst = FillInst {
 
 dFillInst :: FillInst
 dFillInst =  FillInst
-          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
+          { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , missing = [1,4]
           , missingValues = [True, True]
           , showSolution = False
@@ -146,7 +146,7 @@ data DecideInst = DecideInst {
 
 dDecideInst :: DecideInst
 dDecideInst =  DecideInst
-          { formula = InstCnf $ mkCnf [mkClause [Literal 'A', Not 'B']]
+          { formula = InstCnf $ mkCnf [mkClause [Positive 'A', Negative 'B']]
           , changed = [1,4]
           , showSolution = False
           , addText = Nothing
@@ -163,13 +163,13 @@ data StepInst = StepInst {
                , addText :: Maybe (Map Language String)
                , unicodeAllowed :: Bool
                }
-               deriving (Typeable, Generic)
+               deriving (Show, Typeable, Generic)
 
 dStepInst :: StepInst
 dStepInst =  StepInst
-          { clause1 = mkClause [Not 'A', Not 'C', Literal 'B']
-          , clause2 = mkClause [Literal 'A', Not 'C']
-          , solution = (Literal 'A', mkClause [Not 'C', Literal 'B'])
+          { clause1 = mkClause [Negative 'A', Negative 'C', Positive 'B']
+          , clause2 = mkClause [Positive 'A', Negative 'C']
+          , solution = (Positive 'A', mkClause [Negative 'C', Positive 'B'])
           , usesSetNotation = False
           , showSolution = False
           , addText = Nothing
@@ -191,13 +191,13 @@ data ResolutionInst = ResolutionInst {
 
 dResInst :: ResolutionInst
 dResInst = let
-            nAnCpB = mkClause [Not 'A', Not 'C', Literal 'B']
-            pAnC = mkClause [Literal 'A', Not 'C']
-            pC = mkClause [Literal 'C']
-            nB = mkClause [Not 'B']
-            pA = mkClause [Literal 'A']
-            nC = mkClause [Not 'C']
-            nCpB = mkClause [Not 'C', Literal 'B']
+            nAnCpB = mkClause [Negative 'A', Negative 'C', Positive 'B']
+            pAnC = mkClause [Positive 'A', Negative 'C']
+            pC = mkClause [Positive 'C']
+            nB = mkClause [Negative 'B']
+            pA = mkClause [Positive 'A']
+            nC = mkClause [Negative 'C']
+            nCpB = mkClause [Negative 'C', Positive 'B']
               in ResolutionInst
                 { clauses =
                     [ nAnCpB
@@ -318,17 +318,17 @@ dFillConf = FillConfig
 
 
 data MinMaxConfig = MinMaxConfig {
-      cnfConf :: NormalFormConfig
+      normalFormConf :: NormalFormConfig
     , percentTrueEntries :: Maybe (Int,Int)
     , printSolution :: Bool
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic)
+    deriving (Show, Typeable, Generic)
 
 dMinMaxConf :: MinMaxConfig
 dMinMaxConf = MinMaxConfig
-    { cnfConf = dNormalFormConf
+    { normalFormConf = dNormalFormConf
     , percentTrueEntries = Just (50,70)
     , printSolution = False
     , extraText = Nothing
@@ -364,7 +364,7 @@ data StepConfig = StepConfig {
     , extraText :: Maybe (Map Language String)
     , offerUnicodeInput :: Bool
     }
-    deriving (Typeable, Generic)
+    deriving (Show, Typeable, Generic)
 
 dStepConf :: StepConfig
 dStepConf = StepConfig
