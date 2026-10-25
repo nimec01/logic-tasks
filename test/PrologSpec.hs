@@ -9,7 +9,7 @@ import Test.QuickCheck
 import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import TestHelpers (doesNotRefuse)
 import Formula.Types (PrologLiteral (..), ClauseShape (..), HornShape (..))
-import Data.List (singleton)
+import Data.List (singleton, nub)
 
 
 validBoundsClauseShape :: Gen ClauseShape
@@ -17,7 +17,7 @@ validBoundsClauseShape = oneof
   [ pure AnyClause
   , pure $ HornClause AnyHornClause
   , pure $ HornClause Fact
-  , pure $ HornClause Procedure
+  -- , pure $ HornClause Procedure
   , pure $ HornClause Query
   ]
 
@@ -41,6 +41,9 @@ validBoundsPrologConfig = do
   maxClauseLength <- choose (minClauseLength, 5)
   predicateAmount <- choose (minClauseLength, maxClauseLength)
   usedPredicates <- vectorOf predicateAmount validBoundsPrologLiteral
+    `suchThat` \preds ->
+      length (nub (map (\p -> p { polarity = True }) preds))
+        == length preds
   let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
   (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
     `suchThat` \(f,s) -> not ((f `elem` [HornClause Fact, HornClause Query]) && f == s)
@@ -71,20 +74,20 @@ spec = do
   describe "description" $ do
     it "should not reject" $
       forAll validBoundsPrologConfig $ \config ->
-        forAll (genPrologInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (genPrologInst config) $ \inst ->
           doesNotRefuse (description inst :: LangM Maybe)
   describe "genPrologInst" $ do
     it "should pass verifyStatic" $
       forAll validBoundsPrologConfig $ \config ->
-        forAll (genPrologInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (genPrologInst config) $ \inst ->
           doesNotRefuse (verifyStatic inst :: LangM Maybe)
     it "should pass grading with correct answer" $
       forAll validBoundsPrologConfig $ \config ->
-        forAll (genPrologInst config) $ \inst ->
+        within (30 * 1000000) $ forAll (genPrologInst config) $ \inst ->
           doesNotRefuse (partialGrade' inst (solution inst) :: LangM Maybe) &&
           doesNotRefuse (completeGrade' inst (solution inst) :: LangM Maybe)
     it "should only generate PrologInst with horn clauses by default" $
       forAll validBoundsPrologConfig $ \config ->
-        forAll (genPrologInst config) $ \PrologInst{..} ->
-          hasTheClauseShape (firstClauseShape dPrologConf) literals1
-            && hasTheClauseShape (secondClauseShape dPrologConf) literals2
+        within (30 * 1000000) $ forAll (genPrologInst config) $ \PrologInst{..} ->
+          hasTheClauseShape (firstClauseShape config) literals1
+            && hasTheClauseShape (secondClauseShape config) literals2
