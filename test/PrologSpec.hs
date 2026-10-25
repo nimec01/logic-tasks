@@ -41,8 +41,8 @@ validBoundsPrologConfig = do
   maxClauseLength <- choose (minClauseLength, 5)
   predicateAmount <- choose (minClauseLength, maxClauseLength)
   usedPredicates <- vectorOf predicateAmount validBoundsPrologLiteral
-    `suchThat` \preds ->
-      length (nub (map (\p -> p { polarity = True }) preds))
+    `suchThat` \predicates ->
+      length (nub (map (\p -> p { polarity = True }) predicates))
         == length preds
   let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
   (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
