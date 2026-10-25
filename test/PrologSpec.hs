@@ -43,7 +43,7 @@ validBoundsPrologConfig = do
   usedPredicates <- vectorOf predicateAmount validBoundsPrologLiteral
     `suchThat` \predicates ->
       length (nub (map (\p -> p { polarity = True }) predicates))
-        == length preds
+        == length predicates
   let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
   (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
     `suchThat` \(f,s) -> not ((f `elem` [HornClause Fact, HornClause Query]) && f == s)
