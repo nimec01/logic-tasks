@@ -6,7 +6,7 @@ import LogicTasks.Semantics.Prolog (genPrologInst, verifyQuiz, description, veri
 import Config (dPrologConf, PrologInst (..), PrologConfig (..))
 import Formula.Helpers (hasTheClauseShape)
 import Test.QuickCheck
-import Control.OutputCapable.Blocks (LangM)
+import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import TestHelpers (doesNotRefuse)
 import Formula.Types (PrologLiteral (..), ClauseShape (..), HornShape (..))
 import Data.List (singleton)
@@ -49,7 +49,7 @@ validBoundsPrologConfig = do
     { minClauseLength
     , maxClauseLength
     , usedPredicates
-    , extraText = Nothing
+    , extraText = NoExtraText
     , printSolution = True
     , firstClauseShape
     , secondClauseShape
