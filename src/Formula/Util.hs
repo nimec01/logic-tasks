@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 
 module Formula.Util
        (
@@ -30,6 +31,7 @@ module Formula.Util
 import qualified Data.Set as Set
 import qualified SAT.MiniSat as Sat
 
+import GHC.Generics (Generic)
 import Data.Maybe(fromJust)
 
 import Formula.Types
@@ -172,7 +174,7 @@ transformProlog pc mapping = mkClause $ map (fromJust . (`lookup` mapping)) lits
 
 ----------------------------------------------------------------------------------------------------------
 
-data PercentRangeMode = TrueEntries (Int, Int) | PosLiterals (Int, Int) deriving (Show)
+data PercentRangeMode = TrueEntries (Int, Int) | PosLiterals (Int, Int) deriving (Generic, Show)
 
 withPercentRange :: Formula a => PercentRangeMode -> a -> Bool
 withPercentRange mode form = isFullRange mode || withPercentRange' range count total
