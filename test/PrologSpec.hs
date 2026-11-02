@@ -87,7 +87,6 @@ spec = do
           doesNotRefuse (partialGrade' inst (solution inst) :: LangM Maybe) &&
           doesNotRefuse (completeGrade' inst (solution inst) :: LangM Maybe)
     it "should only generate PrologInst with horn clauses by default" $
-      forAll validBoundsPrologConfig $ \config ->
-        within (30 * 1000000) $ forAll (genPrologInst config) $ \PrologInst{..} ->
-          hasTheClauseShape (firstClauseShape config) literals1
-            && hasTheClauseShape (secondClauseShape config) literals2
+      within (30 * 1000000) $ forAll (genPrologInst dPrologConf) $ \PrologInst {..} ->
+        hasTheClauseShape (firstClauseShape dPrologConf) literals1
+          && hasTheClauseShape (secondClauseShape dPrologConf) literals2
