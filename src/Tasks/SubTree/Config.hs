@@ -11,7 +11,7 @@ module Tasks.SubTree.Config (
     ) where
 
 
-import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText)
 import Data.Set (Set)
 import GHC.Generics (Generic)
 
@@ -29,7 +29,7 @@ data SubTreeConfig =
       syntaxTreeConfig :: SynTreeConfig
     , allowSameSubTree :: Bool
     , subTreeAmount :: Integer
-    , extraText :: ExtraText
+    , extraText :: [ExtraText]
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     } deriving (Show,Generic)
@@ -42,7 +42,7 @@ defaultSubTreeConfig =
     { syntaxTreeConfig = defaultSynTreeConfig
     , allowSameSubTree = True
     , subTreeAmount = 3
-    , extraText = NoExtraText
+    , extraText = []
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -80,6 +80,6 @@ data SubTreeInst =
     , inputTreeAmount :: Integer
     , arrowOperatorsToShow :: [BinOp]
     , showSolution :: Bool
-    , addText :: ExtraText
+    , addText :: [ExtraText]
     , unicodeAllowed :: Bool
     } deriving (Show,Generic)

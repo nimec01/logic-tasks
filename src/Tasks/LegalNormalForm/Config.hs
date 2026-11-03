@@ -15,7 +15,7 @@ module Tasks.LegalNormalForm.Config (
     ) where
 
 
-import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText)
 import Data.Char (isLetter)
 import GHC.Generics (Generic)
 
@@ -39,7 +39,7 @@ data LegalNormalFormConfig =
     , minStringSize :: Int
     , allowArrowOperators :: Bool
     , printDetailedSolution :: Maybe Bool
-    , extraText :: ExtraText
+    , extraText :: [ExtraText]
   } deriving (Show,Generic)
 
 
@@ -57,7 +57,7 @@ defaultLegalNormalFormConfig =
   , minStringSize = 12
   , allowArrowOperators = True
   , printDetailedSolution = Nothing
-  , extraText = NoExtraText
+  , extraText = []
   }
 
 
@@ -139,5 +139,5 @@ data LegalNormalFormInst =
     {
       formulaInfos :: [(Int, TreeInfo, String)]
       , showSolution :: Maybe Bool
-      , addText :: ExtraText
+      , addText :: [ExtraText]
     } deriving (Show,Generic)

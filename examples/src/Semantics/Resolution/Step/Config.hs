@@ -7,7 +7,7 @@ import LogicTasks.Config (
 import LogicTasks.Util (checkBaseConf)
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
+import Control.OutputCapable.Blocks (Language(German))
 
 -- 2025: Weight 0.1
 task15 :: StepConfig
@@ -20,7 +20,7 @@ task15 =
       }
     , useSetNotation = True
     , printSolution = True
-    , extraText = NoExtraText
+    , extraText = []
     , offerUnicodeInput = True
     }
 
@@ -33,7 +33,7 @@ task13 = StepConfig
       , usedAtoms = "ABCD"
       }
     , useSetNotation = False
-    , extraText = NoExtraText
+    , extraText = []
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -49,7 +49,7 @@ task16 =
       }
     , useSetNotation = True
     , printSolution = True
-    , extraText = NoExtraText
+    , extraText = []
     , offerUnicodeInput = True
     }
 

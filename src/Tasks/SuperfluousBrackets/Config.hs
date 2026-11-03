@@ -11,7 +11,7 @@ module Tasks.SuperfluousBrackets.Config (
     )where
 
 
-import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText)
 import GHC.Generics (Generic)
 
 import LogicTasks.Helpers (reject)
@@ -26,7 +26,7 @@ data SuperfluousBracketsConfig =
     {
       syntaxTreeConfig :: SynTreeConfig
     , superfluousBracketPairs :: Integer
-    , extraText :: ExtraText
+    , extraText :: [ExtraText]
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     } deriving (Show,Generic)
@@ -48,7 +48,7 @@ defaultSuperfluousBracketsConfig =
       , minUniqueBinOperators = 2
       }
     , superfluousBracketPairs = 2
-    , extraText = NoExtraText
+    , extraText = []
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -87,6 +87,6 @@ data SuperfluousBracketsInst =
     , simplestString :: String
     , arrowOperatorsToShow :: [BinOp]
     , showSolution :: Bool
-    , addText :: ExtraText
+    , addText :: [ExtraText]
     , unicodeAllowed :: Bool
     } deriving (Show,Generic)
