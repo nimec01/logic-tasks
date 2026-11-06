@@ -9,7 +9,8 @@ import Test.QuickCheck
 import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
 import TestHelpers (doesNotRefuse)
 import Formula.Types (PrologLiteral (..), ClauseShape (..), HornShape (..))
-import Data.List (singleton, nub)
+import Data.List (singleton)
+import Data.Containers.ListUtils (nubOrd)
 
 
 validBoundsClauseShape :: Gen ClauseShape
@@ -42,7 +43,7 @@ validBoundsPrologConfig = do
   predicateAmount <- choose (minClauseLength, maxClauseLength)
   usedPredicates <- vectorOf predicateAmount validBoundsPrologLiteral
     `suchThat` \predicates ->
-      length (nub (map (\p -> p { polarity = True }) predicates))
+      length (nubOrd (map (\p -> p { polarity = True }) predicates))
         == length predicates
   let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
   (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
