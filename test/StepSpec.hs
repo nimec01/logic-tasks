@@ -2,7 +2,7 @@
 module StepSpec where
 
 import Test.Hspec (Spec, describe, it)
-import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
+import Control.OutputCapable.Blocks (LangM)
 import TestHelpers (doesNotRefuse)
 import Test.QuickCheck (forAll, Gen, within)
 import Config (StepInst(solution), dStepConf, StepAnswer (StepAnswer), StepConfig (..))
@@ -17,7 +17,7 @@ validBoundsStepConfig = do
     { baseConf
     , useSetNotation = False
     , printSolution = False
-    , extraText = NoExtraText
+    , extraText = []
     , offerUnicodeInput = False
     }
 
