@@ -13,12 +13,12 @@ import Tasks.SynTree.Config (SynTreeConfig(..), defaultSynTreeConfig, checkSynTr
 import qualified Data.Map as Map (fromList, findWithDefault)
 import Trees.Types (SynTree(..), BinOp(..))
 import GHC.Generics
-import Control.OutputCapable.Blocks (LangM, OutputCapable, german, english, ExtraText (NoExtraText))
+import Control.OutputCapable.Blocks (LangM, OutputCapable, german, english, ExtraText)
 import LogicTasks.Helpers (reject)
 
 data DecomposeFormulaConfig = DecomposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
-    , extraText :: ExtraText
+    , extraText :: [ExtraText]
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
@@ -35,7 +35,7 @@ defaultDecomposeFormulaConfig = DecomposeFormulaConfig
         , (Equi, 1)
         ]
       }
-    , extraText = NoExtraText
+    , extraText = []
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -65,7 +65,7 @@ checkAdditionalConfig DecomposeFormulaConfig {syntaxTreeConfig=SynTreeConfig {..
 
 data DecomposeFormulaInst = DecomposeFormulaInst
                { tree :: SynTree BinOp Char
-               , addText :: ExtraText
+               , addText :: [ExtraText]
                , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool

@@ -4,7 +4,7 @@ module TreeToFormulaSpec where
 import Capabilities.Cache.IO ()
 import Capabilities.LatexSvg.IO ()
 import Test.Hspec (Spec, describe, it)
-import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
+import Control.OutputCapable.Blocks (LangM)
 import TestHelpers (doesNotRefuse, doesNotRefuseIO)
 import Tasks.TreeToFormula.Config (checkTreeToFormulaConfig, defaultTreeToFormulaConfig, TreeToFormulaInst (tree), TreeToFormulaConfig (..))
 import LogicTasks.Syntax.TreeToFormula (description, verifyInst, partialGrade', completeGrade')
@@ -22,7 +22,7 @@ validBoundsTreeToFormulaConfig = do
   syntaxTreeConfig <- validBoundsSynTreeConfig
   pure $ TreeToFormulaConfig
     { syntaxTreeConfig
-    , extraText = NoExtraText
+    , extraText = []
     , printSolution = False
     , offerUnicodeInput = False
     }

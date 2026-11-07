@@ -10,7 +10,6 @@ import LogicTasks.Config (
 import Test.Hspec
 import Util.VerifyConfig
 import Formula.Util (PercentRangeMode(TrueEntries))
-import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 -- 2023: Weight 0.33
 task08 :: PickConfig
@@ -27,7 +26,7 @@ task08 = PickConfig
                   })
   , amountOfOptions = 3
   , percentRangeMode = TrueEntries (0, 100)
-  , extraText = NoExtraText
+  , extraText = []
   , printSolution = True
   }
 
@@ -47,7 +46,7 @@ task12 = PickConfig
   , amountOfOptions = 4
   , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
-  , extraText = NoExtraText
+  , extraText = []
   }
 
 spec :: Spec

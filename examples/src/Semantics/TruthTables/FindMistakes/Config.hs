@@ -15,7 +15,6 @@ import Util.VerifyConfig
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 import Formula.Util (PercentRangeMode(TrueEntries))
-import Control.OutputCapable.Blocks (ExtraText(NoExtraText))
 
 listToFM :: Ord k => [(k, a)] -> Map k a
 listToFM = Map.fromList
@@ -36,7 +35,7 @@ task11 = DecideConfig
   , percentageOfChanged = 40
   , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
-  , extraText = NoExtraText
+  , extraText = []
   }
 
 -- 2025: Weight 0.3
@@ -64,7 +63,7 @@ task13 = DecideConfig
   , percentageOfChanged = 30
   , percentRangeMode = TrueEntries (30, 70)
   , printSolution = True
-  , extraText = NoExtraText
+  , extraText = []
   }
 
 spec :: Spec

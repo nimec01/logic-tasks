@@ -17,7 +17,7 @@ import Data.Data (Data)
 import qualified Data.Map as Map (fromList)
 import Trees.Types (SynTree(..), BinOp(..))
 import GHC.Generics
-import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText (NoExtraText))
+import Control.OutputCapable.Blocks (LangM, OutputCapable, english, german, ExtraText)
 import LogicTasks.Helpers (reject)
 -- jscpd:ignore-end
 
@@ -26,7 +26,7 @@ data TreeDisplayMode = FormulaDisplay | TreeDisplay deriving (Show,Eq, Enum, Bou
 data ComposeFormulaConfig = ComposeFormulaConfig {
       syntaxTreeConfig :: SynTreeConfig
     , treeDisplayModes :: (TreeDisplayMode, TreeDisplayMode)
-    , extraText :: ExtraText
+    , extraText :: [ExtraText]
     , printSolution :: Bool
     , offerUnicodeInput :: Bool
     }
@@ -44,7 +44,7 @@ defaultComposeFormulaConfig = ComposeFormulaConfig
         ]
       }
     , treeDisplayModes = (TreeDisplay, TreeDisplay)
-    , extraText = NoExtraText
+    , extraText = []
     , printSolution = True
     , offerUnicodeInput = False
     }
@@ -75,7 +75,7 @@ data ComposeFormulaInst = ComposeFormulaInst
                , rightTree :: SynTree BinOp Char
                , leftTreeImage :: Maybe String
                , rightTreeImage :: Maybe String
-               , addText :: ExtraText
+               , addText :: [ExtraText]
                , arrowOperatorsToShow :: [BinOp]
                , showSolution :: Bool
                , unicodeAllowed :: Bool
