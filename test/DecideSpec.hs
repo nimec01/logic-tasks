@@ -7,7 +7,7 @@ import Prelude hiding (Right)
 -- jscpd:ignore-start
 import Test.Hspec
 import Test.QuickCheck (forAll, Gen, chooseInt, suchThat)
-import Control.OutputCapable.Blocks (LangM, Rated, ExtraText(NoExtraText))
+import Control.OutputCapable.Blocks (LangM, Rated)
 import Config (dDecideConf, DecideConfig (..), DecideInst (..), FormulaConfig(..), DecideAnswer(..), DecideChoice (..))
 import LogicTasks.Semantics.Decide (verifyQuiz, genDecideInst, verifyStatic, description, partialGrade, completeGrade)
 import SynTreeSpec (validBoundsSynTreeConfig')
@@ -38,7 +38,7 @@ validBoundsDecideConfig = do
     , percentageOfChanged
     , percentRangeMode
     , printSolution = False
-    , extraText = NoExtraText
+    , extraText = []
     }
 
 spec :: Spec

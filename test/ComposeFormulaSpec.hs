@@ -14,7 +14,7 @@ import Tasks.ComposeFormula.Config (
 import Test.QuickCheck
 import SynTreeSpec (validBoundsSynTreeConfig)
 import Tasks.SynTree.Config (SynTreeConfig(..))
-import Control.OutputCapable.Blocks (LangM, ExtraText(NoExtraText))
+import Control.OutputCapable.Blocks (LangM)
 import Data.Maybe (isJust)
 import Tasks.ComposeFormula.Quiz (generateComposeFormulaInst)
 import Trees.Types (SynTree(Binary), TreeFormulaAnswer (TreeFormulaAnswer))
@@ -31,7 +31,7 @@ validBoundsComposeFormulaConfig = do
   return ComposeFormulaConfig {
     syntaxTreeConfig,
     treeDisplayModes = (displayModeL, displayModeR),
-    extraText = NoExtraText,
+    extraText = [],
     printSolution = False,
     offerUnicodeInput = False
   }

@@ -9,7 +9,7 @@ import Tasks.SynTree.Config (
 import Trees.Types (BinOp(..))
 import Test.Hspec
 import Util.VerifyConfig
-import Control.OutputCapable.Blocks (Language(German), ExtraText(NoExtraText))
+import Control.OutputCapable.Blocks (Language(German))
 import qualified Data.Map as Map (fromList)
 import Data.Map (Map)
 
@@ -40,7 +40,7 @@ task01 = LegalPropositionConfig
   , formulas = 7
   , illegals = 3
   , bracketFormulas = 0
-  , extraText = NoExtraText
+  , extraText = []
   , printDetailedSolution = Just True
   }
 
@@ -68,7 +68,7 @@ task17 = LegalPropositionConfig
   , formulas = 8
   , illegals = 3
   , bracketFormulas = 1
-  , extraText = NoExtraText
+  , extraText = []
   , printDetailedSolution = Just True
   }
 
