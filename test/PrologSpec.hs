@@ -18,7 +18,7 @@ validBoundsClauseShape = oneof
   [ pure AnyClause
   , pure $ HornClause AnyHornClause
   , pure $ HornClause Fact
-  -- , pure $ HornClause Procedure
+  , pure $ HornClause Procedure
   , pure $ HornClause Query
   ]
 
@@ -40,14 +40,28 @@ validBoundsPrologConfig :: Gen PrologConfig
 validBoundsPrologConfig = do
   minClauseLength <- choose (1, 5)
   maxClauseLength <- choose (minClauseLength, 5)
-  predicateAmount <- choose (minClauseLength, maxClauseLength)
+  let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
+  (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
+    `suchThat` \(f,s) -> not ((f `elem` [HornClause Fact, HornClause Query]) && f == s)
+  let minPredicateAmount =
+        case (firstClauseShape, secondClauseShape) of
+          (HornClause Procedure, HornClause Procedure) ->
+            max 2 minClauseLength + 1
+
+          (HornClause Procedure, _) ->
+            max 2 minClauseLength
+
+          (_, HornClause Procedure) ->
+            max 2 minClauseLength
+
+          _ ->
+            minClauseLength
+
+  predicateAmount <- choose (minPredicateAmount, max minPredicateAmount maxClauseLength)
   usedPredicates <- vectorOf predicateAmount validBoundsPrologLiteral
     `suchThat` \predicates ->
       length (nubOrd (map (\p -> p { polarity = True }) predicates))
         == length predicates
-  let clauseShape = validBoundsClauseShape `suchThat` shapeSuitsClauseBounds (minClauseLength, maxClauseLength)
-  (firstClauseShape, secondClauseShape) <- ((,) <$> clauseShape <*> clauseShape)
-    `suchThat` \(f,s) -> not ((f `elem` [HornClause Fact, HornClause Query]) && f == s)
 
   return $ PrologConfig
     { minClauseLength

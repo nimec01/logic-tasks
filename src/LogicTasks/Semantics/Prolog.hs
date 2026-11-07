@@ -35,6 +35,7 @@ import Formula.Parsing (Parse(..), prologClauseSetParser)
 import Data.List (intercalate)
 import ParsingHelpers (tokenSymbol)
 import Text.ParserCombinators.Parsec (Parser)
+import Data.Containers.ListUtils (nubOrd)
 
 genPrologInst :: PrologConfig -> Gen PrologInst
 genPrologInst PrologConfig{..} = (do
@@ -148,6 +149,12 @@ verifyQuiz PrologConfig{..}
           german "Es wurden keine Literale angegeben."
           english "You did not specify which literals should be used."
 
+    | length (nubOrd (map (\p -> p { polarity = True }) usedPredicates))
+        /= length usedPredicates =
+        refuse $ indent $ translate $ do
+          german "Die angegebenen Literale müssen unabhängig von ihrer Polarität eindeutig sein."
+          english "The specified literals must be unique regardless of their polarity."
+
     | factClause `elem` [firstClauseShape, secondClauseShape] && minClauseLength > 1 =
          refuse $ indent $ translate $ do
            german "Die Klauselform 'Fakt' hat immer Länge 1. "
@@ -161,6 +168,13 @@ verifyQuiz PrologConfig{..}
            english "A 'procedure' clause always has at least length 2. "
            english "Adjust the 'maxClauseLength' parameter accordingly."
 
+      | all (== procedureClause) [firstClauseShape, secondClauseShape]
+        && length usedPredicates < max 2 minClauseLength + 1 =
+          refuse $ indent $ translate $ do
+            german "Für zwei Klauseln der Form 'Regel' stehen zu wenige unterschiedliche Literale zur Verfügung. "
+            german "Erhöhen Sie die Anzahl der Literale."
+            english "There are not enough distinct literals available for two 'procedure' clauses. "
+            english "Increase the number of literals."
     | (firstClauseShape `elem` [HornClause Fact, HornClause Query]) && firstClauseShape == secondClauseShape =
         refuse $ indent $ translate $ do
           german "Mit diesen Klauselformen ist keine Resolution möglich."
